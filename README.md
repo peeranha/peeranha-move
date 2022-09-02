@@ -1,14 +1,11 @@
 
-Error code:
+            Error code:
 
-
-User
+    User
 
 10 - user does not exist
 
-
-
-Community
+    Community
 
 20 - Require at least 5 tags
 
@@ -24,12 +21,10 @@ Community
 
 26 - At least one tag is required.
 
-
-Common
+    Common
 
 30 - Invalid_ipfsHash
 
-
-Post
+    Post
 
 41 - Users can not publish 2 replies for expert and common posts.
