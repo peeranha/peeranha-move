@@ -1,9 +1,9 @@
 
-            Error code:
+Error code:
 
     User
 
-10 - user does not exist
+    10 - user does not exist
 
     Community
 
