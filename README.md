@@ -1,7 +1,19 @@
-# Basics
 
-Very basic examples to illustrate the nuts and bolts of programming in Sui.
+Error code:
+User
+10 - user does not exist
 
-* Object: a heavily commented example of a custom object.
-* Sandwich: example of object exchange logic--combining ham and bread objects to produce a sandwich.
-* Lock: example of a shared object which can be accessed if someone has a key.
+Community
+20 - Require at least 5 tags
+21 - Require tags with unique names
+22 - Community does not exist
+23 - Community is frozen
+24 - Wrong tag id
+25 - The community does not have tag with 0 id.
+26 - At least one tag is required.
+
+Common
+30 - Invalid_ipfsHash
+
+Post
+41 - Users can not publish 2 replies for expert and common posts.
