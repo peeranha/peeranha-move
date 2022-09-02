@@ -1,5 +1,5 @@
 
-Error code:
+Error code: /n
 User
 10 - user does not exist
 
