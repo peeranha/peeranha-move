@@ -34,7 +34,7 @@ module basics::communityLib {
         })
     }
 
-    public entry fun createCommunity(communityCollection: &mut CommunityCollection, owner: address, ipfsHash: vector<u8>, tags: vector<Tag>) {
+    public entry fun createCommunity(communityCollection: &mut CommunityCollection, owner: address, ipfsHash: vector<u8>, tags: vector<vector<u8>>) {
         // check role
 
         assert!(vector::length(&mut tags) >= 5, 20);
@@ -44,7 +44,7 @@ module basics::communityLib {
 
             while(j < vector::length(&mut tags)) {
                 if (i != j) {
-                    assert!(commonLib::getIpfsHash(vector::borrow(&mut tags, i).ipfsDoc) != commonLib::getIpfsHash(vector::borrow(&mut tags, j).ipfsDoc), 21);
+                    assert!(vector::borrow(&mut tags, i) != vector::borrow(&mut tags, j), 21);
                 };
                 j = j + 5;
             };
@@ -56,8 +56,18 @@ module basics::communityLib {
             tagsCount: vector::length(&mut tags),
             timeCreate: 0,                           // get time
             isFrozen: false,
-            tags: tags
+            tags: vector::empty<Tag>()
         });
+
+        let communityId = vector::length(&mut communityCollection.communities);
+        let community = getMutableCommunity(communityCollection, communityId);
+        let tagId = 0;
+        while(tagId < vector::length(&mut tags)) {
+            vector::push_back(&mut community.tags, Tag {
+                ipfsDoc: commonLib::getIpfsDoc(*vector::borrow(&mut tags, tagId), vector::empty<u8>())
+            });
+            tagId = tagId +1;
+        };
     }
 
     public entry fun updateCommunity(communityCollection: &mut CommunityCollection, communityId: u64, owner: address, ipfsHash: vector<u8>) {
