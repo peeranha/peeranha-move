@@ -34,6 +34,11 @@ module basics::communityLib {
         })
     }
 
+    ///
+    // tags: vector<Tag> -> tags: vector<vector<u8>>.
+    // error "Expected primitive or object type. Got: vector<0x0::communityLib::Tag>"
+    // commit - fixed sui move build  (c888fd5b339665abff8e76275866b1fcfb640540)
+    ///
     public entry fun createCommunity(communityCollection: &mut CommunityCollection, owner: address, ipfsHash: vector<u8>, tags: vector<vector<u8>>) {
         // check role
 
