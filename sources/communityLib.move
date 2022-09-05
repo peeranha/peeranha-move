@@ -16,7 +16,6 @@ module basics::communityLib {
 
     struct Community has store, drop {
         ipfsDoc: commonLib::IpfsHash,
-        tagsCount: u64,         //u8? convert type (createCommunity -> tagsCount: vector::length(&mut tags) u8 and u64)
         timeCreate: u64,
         isFrozen: bool,
         tags: vector<Tag>
@@ -58,7 +57,6 @@ module basics::communityLib {
 
         vector::push_back(&mut communityCollection.communities, Community {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            tagsCount: vector::length(&mut tags),
             timeCreate: 0,                           // get time
             isFrozen: false,
             tags: vector::empty<Tag>()
@@ -95,7 +93,6 @@ module basics::communityLib {
         vector::push_back(&mut community.tags, Tag {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>())
         });
-        community.tagsCount = community.tagsCount + 1;
     }
 
     public entry fun updateTag(communityCollection: &mut CommunityCollection, tagId: u64, communityId: u64, owner: address, ipfsHash: vector<u8>) {
@@ -134,8 +131,9 @@ module basics::communityLib {
         let community = getCommunity(communityCollection, communityId);
 
         let i = 0;
+        let communityTagsCount = vector::length(&community.tags);
         while(i < vector::length(&mut tags)) {
-            assert!(community.tagsCount >= *vector::borrow(&mut tags, i), 24);
+            assert!(communityTagsCount >= *vector::borrow(&tags, i), 24);
             assert!(*vector::borrow(&mut tags, i) != 0, 25);
             i = i +1;
         };
