@@ -138,7 +138,7 @@ module basics::postLib {
 
 
         if (true) {     //postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost
-            let countReplies = vector::length(&mut post.replies);
+            let countReplies = vector::length(&post.replies);
 
             let replyId = 0;
             while (replyId < countReplies) {
@@ -247,26 +247,115 @@ module basics::postLib {
         // emit CommentCreated(userAddr, postId, parentReplyId, commentId);
     }
 
+    public entry fun editPost(
+        postCollection: &mut PostCollection,
+        communityCollection: &mut communityLib::CommunityCollection,
+        userAddr: address,
+        postId: u64,
+        ipfsHash: vector<u8>, 
+        tags: vector<u64>
+    ) {
+        let post = getMutablePost(postCollection, postId);
+        communityLib::checkTags(communityCollection, post.communityId, tags);
+
+        //check role
+        
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
+        assert!(userAddr == post.author /*|| postContainer.info.postType == PostType.Documentation*/, 42);
+
+        if(!commonLib::isEmptyIpfs(ipfsHash) && commonLib::getIpfsHash(post.ipfsDoc) != ipfsHash)
+            post.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
+        if (vector::length(&tags) > 0)
+            post.tags = tags;
+
+        // emit PostEdited(userAddr, postId);
+    }
+
+    public entry fun editReply(
+        postCollection: &mut PostCollection,
+        userAddr: address,
+        postId: u64,
+        replyId: u64,
+        ipfsHash: vector<u8>, 
+        isOfficialReply: bool
+    ) {
+        let post = getMutablePost(postCollection, postId);
+        let reply = getMutableReply(post, replyId);
+
+        //check role
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
+        assert!(userAddr == reply.author, 43);
+
+        if (commonLib::getIpfsHash(reply.ipfsDoc) != ipfsHash)
+            reply.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
+
+        if (isOfficialReply) {
+            post.officialReply = replyId;
+        } else if (post.officialReply == replyId)
+            post.officialReply = 0;
+
+        // emit ReplyEdited(userAddr, postId, replyId);
+    }
+
+    public entry fun editComment(
+        postCollection: &mut PostCollection,
+        userAddr: address,
+        postId: u64,
+        parentReplyId: u64,
+        commentId: u64,
+        ipfsHash: vector<u8>, 
+    ) {
+        let post = getMutablePost(postCollection, postId);
+        let comment = getMutableComment (post, parentReplyId, commentId);
+
+        //check role
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
+        assert!(userAddr == comment.author, 44);
+
+        if (commonLib::getIpfsHash(comment.ipfsDoc) != ipfsHash)
+            comment.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
+
+        // emit CommentEdited(userAddr, postId, parentReplyId, commentId);
+    }
+
 
     public fun getMutablePost(postCollection: &mut PostCollection, postId: u64): &mut Post {
-        let post = vector::borrow_mut(&mut postCollection.posts, postId);
-        post
+        vector::borrow_mut(&mut postCollection.posts, postId)
     }
 
     public fun getPost(postCollection: &mut PostCollection, postId: u64): &Post {
-        let post = vector::borrow(&mut postCollection.posts, postId);
-        post
+        vector::borrow(&mut postCollection.posts, postId)
     }
 
     public fun getReply(post: &mut Post, replyId: u64): &Reply {
-        let reply = vector::borrow(&mut post.replies, replyId);
-        reply
+        vector::borrow(&mut post.replies, replyId)
     }
 
     public fun getMutableReply(post: &mut Post, replyId: u64): &mut Reply {
-        let reply = vector::borrow_mut(&mut post.replies, replyId);
-        reply
+        vector::borrow_mut(&mut post.replies, replyId)
     }
+
+    public fun getMutableComment (post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
+        if (parentReplyId == 0) {
+            vector::borrow_mut(&mut post.comments, commentId)
+        } else {
+            let reply = getMutableReply(post, parentReplyId);
+            vector::borrow_mut(&mut reply.comments, commentId)
+        }
+        // require(!CommonLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment_not_exist.");
+
+    }
+
+    // function getCommentContainerSafe(
+    //     PostContainer storage postContainer,
+    //     uint16 parentReplyId,
+    //     uint8 commentId
+    // ) public view returns (CommentContainer storage) {
+    //     CommentContainer storage commentContainer = getCommentContainer(postContainer, parentReplyId, commentId);
+
+    //     require(!commentContainer.info.isDeleted, "Comment_deleted.");
+    //     return commentContainer;
+    // }
 
 }
 

@@ -21,7 +21,7 @@ module basics::commonLib {
         ipfsHash.hash
     }
 
-    public fun setIpfsDoc(hash: vector<u8>, hash2: vector<u8>, ipfsHash2: vector<u8>): IpfsHash {
+    public fun setIpfsDoc(hash: vector<u8>, hash2: vector<u8>, ipfsHash2: vector<u8>): IpfsHash {   // need? we have getIpfsDoc()
         IpfsHash { hash: hash, hash2: hash2  }
     }
 }
