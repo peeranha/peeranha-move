@@ -4,6 +4,8 @@ Error code:
     User
 
 10 - user does not exist
+11 - already_followed
+12 - comm_not_followed
 
     Community
 
@@ -28,6 +30,9 @@ Error code:
     Post
 
 41 - Users can not publish 2 replies for expert and common posts.
+
 42 - You can not edit this post. It is not your.
+
 43 - You can not edit this Reply. It is not your.
+
 44 - You can not edit this comment. It is not your.
