@@ -55,21 +55,6 @@ module basics::userLib {
         1000
     }
 
-    public entry fun printUserCollection(userCollection: &mut UserCollection) {
-        debug::print(userCollection);
-    }
-
-    public entry fun printUser(userCollection: &mut UserCollection, owner: address) {
-        let (isExist, position) = vector::index_of(&mut userCollection.userAddress, &owner);
-        debug::print(&isExist);
-        debug::print(&position);
-
-        if (isExist) {
-            let user = vector::borrow(&mut userCollection.users, position);
-            debug::print(user);
-        }
-    }
-
     public fun getUser(userCollection: &mut UserCollection, owner: address): &User {
         let (isExist, position) = vector::index_of(&mut userCollection.userAddress, &owner);
         if (!isExist) abort 10;
@@ -86,9 +71,8 @@ module basics::userLib {
         user
     }
 
-    public entry fun set_value(ctx: &mut TxContext) {
+    public entry fun set_value(ctx: &mut TxContext) {       // do something with tx_context
         assert!(tx_context::sender(ctx) == tx_context::sender(ctx), 0);
-        // let creation_date = tx_context::epoch();
     }
     // public entry fun mass_mint(recipients: vector<address>, ctx: &mut TxContext) {
     //     assert!(tx_context::sender(ctx) == CREATOR, EAuthFail);
@@ -100,6 +84,26 @@ module basics::userLib {
     //         transfer(CoolAsset { id, creation_date }, recipient)
     //     }
     // }
+
+    public entry fun printUserCollection(userCollection: &mut UserCollection) {
+        debug::print(userCollection);
+    }
+
+    public entry fun printUser(userCollection: &mut UserCollection, owner: address) {
+        let (isExist, position) = vector::index_of(&mut userCollection.userAddress, &owner);
+        debug::print(&isExist);
+        debug::print(&position);
+
+        if (isExist) {
+            let user = vector::borrow(&mut userCollection.users, position);
+            debug::print(user);
+        }
+    }
+
+    public fun getUserData(userCollection: &mut UserCollection, owner: address): (vector<u8>, address, u64, u64, vector<u64>) {
+        let user = getUser(userCollection, owner);
+        (user.ipfsDoc, user.owner, user.energy, user.lastUpdatePeriod, user.followedCommunities)
+    }
 }
 
 #[test_only]
@@ -111,9 +115,7 @@ module basics::userLib_test {
     fun test_user() {
         let owner = @0xC0FFEE;
         let user1 = @0xA1;
-        let user2 = @0xA2;
-        let user3 = @0xA3;
-        // let user4 = @0xA4;
+
 
         let scenario = &mut test_scenario::begin(&user1);
 
@@ -122,64 +124,46 @@ module basics::userLib_test {
             userLib::initUserCollection(test_scenario::ctx(scenario));
         };
 
+        // create user
         test_scenario::next_tx(scenario, &user1);
         {
             let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
             let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
 
-            userLib::createUser(userCollection, user3, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1");
-            userLib::createUser(userCollection, user1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
-            userLib::createUser(userCollection, user2, x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6");
-            userLib::printUser(userCollection, user3);
+            userLib::createUser(userCollection, user1, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1");
 
-
-            // userCollection::printUserCollection(userCollection);
-
-            // assert!(user::owner(user) == owner, 0);
-            // assert!(user::energy(user) == 0, 1);
-
-            // user::increment(user);
-            // user::increment(user);
-            // user::increment(user);
-
-            // user::printUser(user);
-            // user::pushCommunity(user, 5);
-            // user::printUser(user);
-            // user::pushCommunity(user, 2);
-            // user::printUser(user);
-
+            let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(userCollection, user1);
+            assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
+            assert!(owner == @0xA1, 2);
+            assert!(energy == 1000, 3);
+            assert!(lastUpdatePeriod == 0, 4);
+            assert!(followedCommunities == vector<u64>[], 5);
 
             test_scenario::return_shared(scenario, user_wrapper);
         };
 
-        // test_scenario::next_tx(scenario, &owner);
-        // {
-        //     let user_wrapper = test_scenario::take_shared<user::User>(scenario);
-        //     let user = test_scenario::borrow_mut(&mut user_wrapper);
+        // update user ipfs
+        test_scenario::next_tx(scenario, &user1);
+        {
+            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+            
+            userLib::updateUser(userCollection, user1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
+            
+            let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(userCollection, user1);
+            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+            assert!(owner == @0xA1, 2);
+            assert!(energy == 1000, 3);
+            assert!(lastUpdatePeriod == 0, 4);
+            assert!(followedCommunities == vector<u64>[], 5);
 
-        //     assert!(user::owner(user) == owner, 0);
-        //     assert!(user::energy(user) == 3, 1);
-
-        //     user::set_value(user, 100, test_scenario::ctx(scenario));
-        //     user::printUser(user);
+            test_scenario::return_shared(scenario, user_wrapper);
+        };
 
 
-        //     test_scenario::return_shared(scenario, user_wrapper);
-        // };
-
-        // test_scenario::next_tx(scenario, &user1);
-        // {
-        //     let user_wrapper = test_scenario::take_shared<user::User>(scenario);
-        //     let user = test_scenario::borrow_mut(&mut user_wrapper);
-
-        //     assert!(user::owner(user) == owner, 0);
-        //     assert!(user::energy(user) == 100, 1);
-
-        //     user::increment(user);
-
-        //     assert!(user::energy(user) == 101, 2);
-
-        //     test_scenario::return_shared(scenario, user_wrapper);
-        // };
+        // x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"
+        // x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"
+        // x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
+        // userLib::printUser(userCollection, user1);
     }
 }

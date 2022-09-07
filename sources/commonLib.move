@@ -1,6 +1,6 @@
 module basics::commonLib {
     use std::vector;
-    friend basics::communityLib;
+    // friend basics::communityLib;
 
 
     struct IpfsHash has store, copy, drop {
@@ -21,7 +21,7 @@ module basics::commonLib {
         ipfsHash.hash
     }
 
-    public fun setIpfsDoc(hash: vector<u8>, hash2: vector<u8>, ipfsHash2: vector<u8>): IpfsHash {   // need? we have getIpfsDoc()
-        IpfsHash { hash: hash, hash2: hash2  }
-    }
+    // public fun setIpfsDoc(hash: vector<u8>, hash2: vector<u8>, ipfsHash2: vector<u8>): IpfsHash {   // need? we have getIpfsDoc()
+    //     IpfsHash { hash: hash, hash2: hash2  }
+    // }
 }
