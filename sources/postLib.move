@@ -3,11 +3,9 @@ module basics::postLib {
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
-    use std::debug;
     use basics::communityLib;
     use basics::commonLib;
 
-    /// A shared user.
     struct PostCollection has key {
         id: UID,
         posts: vector<Post>,
@@ -15,7 +13,7 @@ module basics::postLib {
     }
 
     struct Post has store, drop {
-        // PostType postType;
+        // TODO: add PostType postType;
         ipfsDoc: commonLib::IpfsHash,
         postTime: u64,
         author: address,
@@ -41,7 +39,7 @@ module basics::postLib {
         postTime: u64,
         author: address,
         rating: u64,
-        parentReplyId: u64,         //uint16?
+        parentReplyId: u64,
         
         isFirstReply: bool,
         isQuickReply: bool,
@@ -80,18 +78,18 @@ module basics::postLib {
         userAddr: address,
         communityId: u64,
         ipfsHash: vector<u8>, 
-        /*PostType postType,*/
+        /* // TODO: add PostType postType,*/
         tags: vector<u64>
     ) {
         communityLib::onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
         communityLib::checkTags(communityCollection, communityId, tags);
-        //check role
+        // TODO: add check role
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
 
         vector::push_back(&mut postCollection.posts, Post {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            postTime: 0,            //get time
-            author: userAddr,                           // get time
+            postTime: 0,            // TODO: add get time
+            author: userAddr,
             rating: 0,
             communityId: communityId,
             officialReply: 0,
@@ -106,14 +104,14 @@ module basics::postLib {
             votedUsers: vector::empty<address>(),
         });
         
-        if (true) {       //postType != PostType.Documentation
+        if (true) {       // TODO: add postType != PostType.Documentation
             assert!(vector::length(&mut tags) > 0, 26);
             let postId = vector::length(&mut postCollection.posts) - 1;
             let post = getMutablePost(postCollection, postId);
             post.tags = tags;
         };
 
-        // emit PostCreated(userAddr, communityId, self.postCount);
+        // TODO: add emit PostCreated(userAddr, communityId, self.postCount);
     }
 
     public entry fun createReply(
@@ -125,6 +123,7 @@ module basics::postLib {
         isOfficialReply: bool
     ) {
         let post = getMutablePost(postCollection, postId);
+        // TODO: add
         // require(postContainer.info.postType != PostType.Tutorial && postContainer.info.postType != PostType.Documentation, 
     //         "You can not publish replies in tutorial or Documentation.");
     // require(
@@ -133,11 +132,11 @@ module basics::postLib {
     //         "User is forbidden to reply on reply for Expert and Common type of posts"
     //     );
 
-        //check role
+        // TODO: add check role
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
 
 
-        if (true) {     //postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost
+        if (true) {     // TODO: add postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost
             let countReplies = vector::length(&post.replies);
 
             let replyId = 0;
@@ -147,6 +146,7 @@ module basics::postLib {
             };
         };
 
+        // TODO: add
         // if (parentReplyId == 0) {
     //         if (isOfficialReply) {
     //             postContainer.info.officialReply = postContainer.info.replyCount;
@@ -169,8 +169,8 @@ module basics::postLib {
 
         vector::push_back(&mut post.replies, Reply {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            postTime: 0,            //get time
-            author: userAddr,                           // get time
+            postTime: 0,            // TODO: add get time
+            author: userAddr,
             rating: 0,
             parentReplyId: parentReplyId,
             
@@ -184,7 +184,7 @@ module basics::postLib {
             votedUsers: vector::empty<address>(),
         });
 
-        // emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
+        // TODO: add emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);
     }
 
     public entry fun createComment(
@@ -195,9 +195,10 @@ module basics::postLib {
         ipfsHash: vector<u8>, 
     ) {
         let post = getMutablePost(postCollection, postId);
-        // require(postContainer.info.postType != PostType.Documentation, "You can not publish comments in Documentation.");
+        // TODO: add require(postContainer.info.postType != PostType.Documentation, "You can not publish comments in Documentation.");
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
         
+        // TODO: add
         // Comment storage comment;
         // uint8 commentId;            // struct? gas
         // address author;
@@ -216,13 +217,13 @@ module basics::postLib {
         //         author = replyContainer.info.author;
         // }
 
-        //check role
+        // TODO: add check role
 
         if (parentReplyId == 0) {
             vector::push_back(&mut post.comments, Comment {
                 ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-                postTime: 0,            //get time
-                author: userAddr,                           // get time
+                postTime: 0,            // TODO: add get time
+                author: userAddr,
                 rating: 0,
                 isDeleted: false,
 
@@ -234,8 +235,8 @@ module basics::postLib {
             let reply = getMutableReply(post, parentReplyId);
             vector::push_back(&mut reply.comments, Comment {
                 ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-                postTime: 0,            //get time
-                author: userAddr,                           // get time
+                postTime: 0,            // TODO: add get time
+                author: userAddr,
                 rating: 0,
                 isDeleted: false,
 
@@ -244,7 +245,7 @@ module basics::postLib {
                 votedUsers: vector::empty<address>(),
             });
         }
-        // emit CommentCreated(userAddr, postId, parentReplyId, commentId);
+        // TODO: add emit CommentCreated(userAddr, postId, parentReplyId, commentId);
     }
 
     public entry fun editPost(
@@ -258,17 +259,17 @@ module basics::postLib {
         let post = getMutablePost(postCollection, postId);
         communityLib::checkTags(communityCollection, post.communityId, tags);
 
-        //check role
+        // TODO: add check role
         
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
-        assert!(userAddr == post.author /*|| postContainer.info.postType == PostType.Documentation*/, 42);
+        assert!(userAddr == post.author /* // TODO: add || postContainer.info.postType == PostType.Documentation*/, 42);
 
         if(!commonLib::isEmptyIpfs(ipfsHash) && commonLib::getIpfsHash(post.ipfsDoc) != ipfsHash)
             post.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
         if (vector::length(&tags) > 0)
             post.tags = tags;
 
-        // emit PostEdited(userAddr, postId);
+        // TODO: add emit PostEdited(userAddr, postId);
     }
 
     public entry fun editReply(
@@ -282,7 +283,7 @@ module basics::postLib {
         let post = getMutablePost(postCollection, postId);
         let reply = getMutableReply(post, replyId);
 
-        //check role
+        // TODO: add check role
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
         assert!(userAddr == reply.author, 43);
 
@@ -294,7 +295,7 @@ module basics::postLib {
         } else if (post.officialReply == replyId)
             post.officialReply = 0;
 
-        // emit ReplyEdited(userAddr, postId, replyId);
+        // TODO: add emit ReplyEdited(userAddr, postId, replyId);
     }
 
     public entry fun editComment(
@@ -308,14 +309,14 @@ module basics::postLib {
         let post = getMutablePost(postCollection, postId);
         let comment = getMutableComment (post, parentReplyId, commentId);
 
-        //check role
+        // TODO: add check role
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
         assert!(userAddr == comment.author, 44);
 
         if (commonLib::getIpfsHash(comment.ipfsDoc) != ipfsHash)
             comment.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
 
-        // emit CommentEdited(userAddr, postId, parentReplyId, commentId);
+        // TODO: add emit CommentEdited(userAddr, postId, parentReplyId, commentId);
     }
 
 
@@ -357,6 +358,9 @@ module basics::postLib {
     //     return commentContainer;
     // }
 
+    public entry fun set_value(ctx: &mut TxContext) {       // do something with tx_context
+        assert!(tx_context::sender(ctx) == tx_context::sender(ctx), 0);
+    }
 }
 
 // #[test_only]

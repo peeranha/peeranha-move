@@ -38,7 +38,7 @@ module basics::communityLib {
     // commit - fixed sui move build  (c888fd5b339665abff8e76275866b1fcfb640540)
     ///
     public entry fun createCommunity(communityCollection: &mut CommunityCollection, _owner: address, ipfsHash: vector<u8>, tags: vector<vector<u8>>) {
-        // check role
+        // TODO: add check role
 
         assert!(vector::length(&mut tags) >= 5, 20);
         let i = 0;
@@ -73,14 +73,14 @@ module basics::communityLib {
     }
 
     public entry fun updateCommunity(communityCollection: &mut CommunityCollection, communityId: u64, _owner: address, ipfsHash: vector<u8>) {
-        // check role
+        // TODO: add check role
 
         let community = getMutableCommunity(communityCollection, communityId);
         community.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
     }
 
     public entry fun createTag(communityCollection: &mut CommunityCollection, communityId: u64, _owner: address, ipfsHash: vector<u8>) {
-        // check role
+        // TODO: add check role
 
         let i = 0;
         let community = getMutableCommunity(communityCollection, communityId);
@@ -95,7 +95,7 @@ module basics::communityLib {
     }
 
     public entry fun updateTag(communityCollection: &mut CommunityCollection, communityId: u64, tagId: u64, _owner: address, ipfsHash: vector<u8>) {
-        // check role
+        // TODO: add check role
 
         let community = getMutableCommunity(communityCollection, communityId);
         let tag = vector::borrow_mut(&mut community.tags, tagId);
@@ -103,12 +103,12 @@ module basics::communityLib {
     }
 
     public entry fun freezeCommunity(communityCollection: &mut CommunityCollection, communityId: u64, _owner: address) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
-        // check role
+        // TODO: add check role
 
         let community = getMutableCommunity(communityCollection, communityId);
         community.isFrozen = true;
 
-        // emit CommunityFrozen(msg.sender, communityId);
+        // TODO: add emit CommunityFrozen(msg.sender, communityId);
     }
 
     public entry fun unfreezeCommmunity(communityCollection: &mut CommunityCollection, communityId: u64, _owner: address) {
@@ -117,7 +117,7 @@ module basics::communityLib {
         assert!(commonLib::getIpfsHash(community.ipfsDoc) != vector::empty<u8>(), 22);
         community.isFrozen = false;
 
-        // emit CommunityUnfrozen(msg.sender, communityId);
+        // TODO: add emit CommunityUnfrozen(msg.sender, communityId);
     }
 
     public entry fun onlyExistingAndNotFrozenCommunity(communityCollection: &mut CommunityCollection, communityId: u64) {
@@ -163,12 +163,6 @@ module basics::communityLib {
         let community = vector::borrow(&mut communityCollection.communities, communityId);
         (commonLib::getIpfsHash(community.ipfsDoc), community.timeCreate, community.isFrozen, community.tags)
     }
-
-
-    // for UnitTest
-    // public fun getTestCom(testTest: u64): TestCom {
-    //     TestCom{ testTest: testTest }
-    // }
 
     // for UnitTest 5 Tag
     public fun unitTestGetCommunityTags(ipfsHash1: vector<u8>, ipfsHash2: vector<u8>, ipfsHash3: vector<u8>, ipfsHash4: vector<u8>, ipfsHash5: vector<u8>): vector<Tag> {

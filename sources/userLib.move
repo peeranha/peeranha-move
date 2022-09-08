@@ -19,7 +19,7 @@ module basics::userLib {
         energy: u64,
         lastUpdatePeriod: u64,
         followedCommunities: vector<u64>
-        // roles
+        // TODO: add roles
     }
 
     public entry fun initUserCollection(ctx: &mut TxContext) {
@@ -35,7 +35,7 @@ module basics::userLib {
             ipfsDoc: ipfsDoc,
             owner: owner,
             energy: getStatusEnergy(),
-            lastUpdatePeriod: 0,                     // getPeriod()
+            lastUpdatePeriod: 0,                     // TODO: add getPeriod()
             followedCommunities: vector::empty<u64>()
         });
 
