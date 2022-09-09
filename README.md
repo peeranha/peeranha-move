@@ -36,3 +36,5 @@ Error code:
 43 - You can not edit this Reply. It is not your.
 
 44 - You can not edit this comment. It is not your.
+
+45 - You can not delete the best reply.

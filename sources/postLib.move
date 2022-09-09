@@ -120,7 +120,7 @@ module basics::postLib {
         postId: u64,
         parentReplyId: u64,
         ipfsHash: vector<u8>,
-        isOfficialReply: bool
+        isOfficialReply: bool      // TODO: add
     ) {
         let post = getMutablePost(postCollection, postId);
         // TODO: add
@@ -146,26 +146,25 @@ module basics::postLib {
             };
         };
 
-        // TODO: add
-        // if (parentReplyId == 0) {
-    //         if (isOfficialReply) {
-    //             postContainer.info.officialReply = postContainer.info.replyCount;
-    //         }
+        if (parentReplyId == 0) {
+            if (isOfficialReply) {
+                post.officialReply = vector::length(&mut post.replies);
+            };
 
-    //         if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
-    //             if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
-    //                 replyContainer.info.isFirstReply = true;
-    //                 self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
-    //             }
-    //             if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
-    //                 replyContainer.info.isQuickReply = true;
-    //                 self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply), postContainer.info.communityId);
-    //             }
-    //         }
-    //     } else {
-    //       getReplyContainerSafe(postContainer, parentReplyId);
-    //       replyContainer.info.parentReplyId = parentReplyId;  
-    //     }
+            // TODO: add
+            // if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
+            //     if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
+            //         replyContainer.info.isFirstReply = true;
+            //         self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
+            //     }
+            //     if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
+            //         replyContainer.info.isQuickReply = true;
+            //         self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply), postContainer.info.communityId);
+            //     }
+            // }
+        } else {
+          //getReplyContainerSafe(postContainer, parentReplyId);    // TODO: add parentReplyId is exist
+        };
 
         vector::push_back(&mut post.replies, Reply {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
@@ -317,6 +316,122 @@ module basics::postLib {
             comment.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
 
         // TODO: add emit CommentEdited(userAddr, postId, parentReplyId, commentId);
+    }
+
+    public entry fun deletePost(
+        postCollection: &mut PostCollection,
+        _userAddr: address,
+        postId: u64,
+    ) {
+        let post = getMutablePost(postCollection, postId);
+
+        // TODO: add check role
+        
+        // TODO: add
+        // if (postContainer.info.postType != PostType.Documentation) {
+        //     uint256 time = CommonLib.getTimestamp();
+        //     if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
+        //         VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
+        //         (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
+
+        //         int32 changeUserRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
+        //         if (changeUserRating > 0) {
+        //             self.peeranhaUser.updateUserRating(
+        //                 postContainer.info.author,
+        //                 -changeUserRating,
+        //                 postContainer.info.communityId
+        //             );
+        //         }
+        //     }
+        //     if (postContainer.info.bestReply != 0) {
+        //         self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
+        //     }
+
+        //     if (time - postContainer.info.postTime < DELETE_TIME) {
+        //         for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
+        //             deductReplyRating(self, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i, postContainer.info.communityId);
+        //         }
+        //     }
+
+        //     if (userAddr == postContainer.info.author)
+        //         self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
+        //     else
+        //         self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
+        // }
+
+        post.isDeleted = true;
+        // TODO: add emit PostDeleted(userAddr, postId);
+    }
+
+    public entry fun deleteReply(
+        postCollection: &mut PostCollection,
+        _userAddr: address,
+        postId: u64,
+        replyId: u64,
+    ) {
+        let post = getMutablePost(postCollection, postId);
+        let reply = getMutableReply(post, replyId);
+
+        // TODO: add check role
+
+        //
+        // bug
+        // checkActionRole has check "require(actionCaller == dataUser, "not_allowed_delete");"
+        // behind this check is "if actionCaller == moderator -> return"
+        // in this step can be only a moderator or reply's owner
+        // a reply owner can not delete best reply, but a moderator can
+        // next require check that reply's owner can not delete best reply
+        // bug if reply's owner is moderator any way error
+        //
+        
+        // assert!(userAddr != reply.author || post.bestReply != replyId, 45);      // error Invalid immutable borrow at field 'bestReply'.?
+
+        // TODO: add
+        // uint256 time = CommonLib.getTimestamp();
+        // if (time - replyContainer.info.postTime < DELETE_TIME || userAddr == replyContainer.info.author) {
+        //     deductReplyRating(
+        //         self,
+        //         postContainer.info.postType,
+        //         replyContainer,
+        //         replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId,
+        //         postContainer.info.communityId
+        //     );
+        // }
+        // if (userAddr == replyContainer.info.author)
+        //     self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.DeleteOwnReply, postContainer.info.communityId);
+        // else
+        //     self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.ModeratorDeleteReply, postContainer.info.communityId);
+
+        reply.isDeleted = true;
+        post.deletedReplyCount = post.deletedReplyCount + 1;
+        if (post.bestReply == replyId)
+            post.bestReply = 0;
+
+        if (post.officialReply == replyId)
+            post.officialReply = 0;
+
+        // TODO: add emit ReplyDeleted(userAddr, postId, replyId);
+    }
+
+    public entry fun deleteComment(
+        postCollection: &mut PostCollection,
+        userAddr: address,
+        postId: u64,
+        parentReplyId: u64,
+        commentId: u64,
+    ) {
+        let post = getMutablePost(postCollection, postId);
+        let comment = getMutableComment (post, parentReplyId, commentId);
+
+        // TODO: add check role
+
+        if (userAddr != comment.author) {
+            // TODO: add
+            // self.peeranhaUser.updateUserRating(commentContainer.info.author, VoteLib.ModeratorDeleteComment, postContainer.info.communityId);
+        };
+
+        comment.isDeleted = true;
+        // TODO: add emit CommentDeleted(userAddr, postId, parentReplyId, commentId);
     }
 
 
