@@ -473,15 +473,108 @@ module basics::postLib {
     //     return commentContainer;
     // }
 
+    // for unitTests
+    public fun getPostDataFirst(postCollection: &mut PostCollection, postId: u64): (vector<u8>, u64, address, u64, u64, u64, u64, u8, bool, vector<u64>,   vector<u8>, vector<u128>, vector<address>) {
+        let post = vector::borrow(&mut postCollection.posts, postId);
+        (
+            commonLib::getIpfsHash(post.ipfsDoc),
+            post.postTime,
+            post.author,
+            post.rating,
+            post.communityId,
+            post.officialReply,
+            post.bestReply,
+            post.deletedReplyCount,
+            post.isDeleted,
+            post.tags,
+            post.properties,
+            post.historyVotes,
+            post.votedUsers
+        )
+    }
+
+    // tags: vector<u64>,
+    // replies: vector<Reply>,  // add
+    // comments: vector<Comment>,   //add
+    // properties: vector<u8>,
+
     public entry fun set_value(ctx: &mut TxContext) {       // do something with tx_context
         assert!(tx_context::sender(ctx) == tx_context::sender(ctx), 0);
     }
 }
 
-// #[test_only]
-// module basics::communityLib_test {
-//     use sui::test_scenario;
-//     use basics::userCollection;
+#[test_only]
+module basics::postLib_test {
+    use sui::test_scenario;
+    // use basics::userLib;
+    use basics::communityLib;
+    use basics::postLib;
 
-    
-// }
+    #[test]
+    fun test_user() {
+        let owner = @0xC0FFEE;
+        let user1 = @0xA1;
+
+        let scenario = &mut test_scenario::begin(&user1);
+
+        test_scenario::next_tx(scenario, &owner);
+        {
+            // userLib::initUserCollection(test_scenario::ctx(scenario));
+            communityLib::initCommunityCollection(test_scenario::ctx(scenario));
+            postLib::initPostCollection(test_scenario::ctx(scenario));
+        };
+
+        // create post
+        test_scenario::next_tx(scenario, &user1);
+        {
+            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+            let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+            let post_wrapper = test_scenario::take_shared<postLib::PostCollection>(scenario);
+            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+
+            communityLib::createCommunity(
+                communityCollection,
+                user1,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                vector<vector<u8>>[
+                    x"0000000000000000000000000000000000000000000000000000000000000001",
+                    x"0000000000000000000000000000000000000000000000000000000000000002",
+                    x"0000000000000000000000000000000000000000000000000000000000000003",
+                    x"0000000000000000000000000000000000000000000000000000000000000004",
+                    x"0000000000000000000000000000000000000000000000000000000000000005"
+                ]
+            );
+
+            postLib::createPost(
+                postCollection,
+                communityCollection,
+                user1,
+                0,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                vector<u64>[1, 2]
+            );
+
+
+// let (ipfsDoc, timeCreate, isFrozen, tags) = communityLib::getCommunityData(communityCollection, 1);
+//             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+//             assert!(timeCreate == 0, 2);
+//             assert!(isFrozen == false, 3);
+//             assert!(tags == communityLib::unitTestGetCommunityTags(
+//                 x"0000000000000000000000000000000000000000000000000000000000000010",
+//                 x"0000000000000000000000000000000000000000000000000000000000000011",
+//                 x"0000000000000000000000000000000000000000000000000000000000000012",
+//                 x"0000000000000000000000000000000000000000000000000000000000000013",
+//                 x"0000000000000000000000000000000000000000000000000000000000000014"
+//             ), 5);
+
+
+            test_scenario::return_shared(scenario, community_wrapper);
+            test_scenario::return_shared(scenario, post_wrapper);
+        };
+
+        // x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"
+        // x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"
+        // x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
+        // userLib::printUser(userCollection, user1);
+    }
+}
