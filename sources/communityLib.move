@@ -3,7 +3,7 @@ module basics::communityLib {
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
-    use std::debug;
+    // use std::debug;
     use basics::commonLib;
     // friend basics::commonLib;
     // use basics::commonLib::{Self, IpfsHash};
@@ -25,7 +25,7 @@ module basics::communityLib {
     }
 
    
-    public entry fun initCommunityCollection(ctx: &mut TxContext) {
+    fun init(ctx: &mut TxContext) {                  // public?
         transfer::share_object(CommunityCollection {
             id: object::new(ctx),
             communities: vector::empty<Community>()
@@ -154,10 +154,10 @@ module basics::communityLib {
         assert!(tx_context::sender(ctx) == tx_context::sender(ctx), 0);
     }
 
-    public entry fun printCommunity(communityCollection: &mut CommunityCollection, communityId: u64) {
-        let community = vector::borrow(&communityCollection.communities, communityId);
-        debug::print(community);
-    }
+    // public entry fun printCommunity(communityCollection: &mut CommunityCollection, communityId: u64) {
+    //     let community = vector::borrow(&communityCollection.communities, communityId);
+    //     debug::print(community);
+    // }
 
     // for unitTests
     public fun getCommunityData(communityCollection: &mut CommunityCollection, communityId: u64): (vector<u8>, u64, bool, vector<Tag>,) {
@@ -188,37 +188,31 @@ module basics::communityLib {
         ]
     }
 
-}
 
-#[test_only]
-module basics::communityLib_test {
-    use sui::test_scenario;
-    // use basics::userLib;
-    use basics::communityLib;
-
-    struct TestCom has store, drop {
-        testTest: u64,
-    }
 
     #[test]
     fun test_community() {
-        let owner = @0xC0FFEE;
+        use sui::test_scenario;
+        // let owner = @0xC0FFEE;
         let user1 = @0xA1;
 
         let scenario = &mut test_scenario::begin(&user1);
-
-        test_scenario::next_tx(scenario, &owner);
         {
-            communityLib::initCommunityCollection(test_scenario::ctx(scenario));
+            init(test_scenario::ctx(scenario));
         };
+        
+        // test_scenario::next_tx(scenario, &owner);
+        // {
+        //     communityLib::init(test_scenario::ctx(scenario));
+        // };
 
         // create community
         test_scenario::next_tx(scenario, &user1);
         {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+            let community_wrapper = test_scenario::take_shared<CommunityCollection>(scenario);
             let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-            communityLib::createCommunity(
+            createCommunity(
                 communityCollection,
                 user1,
                 x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
@@ -231,11 +225,11 @@ module basics::communityLib_test {
                 ]
             );
 
-            let (ipfsDoc, timeCreate, isFrozen, tags) = communityLib::getCommunityData(communityCollection, 0);
+            let (ipfsDoc, timeCreate, isFrozen, tags) = getCommunityData(communityCollection, 0);
             assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
             assert!(timeCreate == 0, 2);
             assert!(isFrozen == false, 3);
-            assert!(tags == communityLib::unitTestGetCommunityTags(
+            assert!(tags == unitTestGetCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000001",
                 x"0000000000000000000000000000000000000000000000000000000000000002",
                 x"0000000000000000000000000000000000000000000000000000000000000003",
@@ -249,21 +243,21 @@ module basics::communityLib_test {
         // update community ipfs
         test_scenario::next_tx(scenario, &user1);
         {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+            let community_wrapper = test_scenario::take_shared<CommunityCollection>(scenario);
             let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-            communityLib::updateCommunity(
+            updateCommunity(
                 communityCollection,
                 0,
                 user1,
                 x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
             );
 
-            let (ipfsDoc, timeCreate, isFrozen, tags) = communityLib::getCommunityData(communityCollection, 0);
+            let (ipfsDoc, timeCreate, isFrozen, tags) = getCommunityData(communityCollection, 0);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(timeCreate == 0, 2);
             assert!(isFrozen == false, 3);
-            assert!(tags == communityLib::unitTestGetCommunityTags(
+            assert!(tags == unitTestGetCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000001",
                 x"0000000000000000000000000000000000000000000000000000000000000002",
                 x"0000000000000000000000000000000000000000000000000000000000000003",
@@ -277,21 +271,21 @@ module basics::communityLib_test {
         //create tag
         test_scenario::next_tx(scenario, &user1);
         {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+            let community_wrapper = test_scenario::take_shared<CommunityCollection>(scenario);
             let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-            communityLib::createTag(
+            createTag(
                 communityCollection,
                 0,
                 user1,
                 x"0000000000000000000000000000000000000000000000000000000000000006",
             );
 
-            let (ipfsDoc, timeCreate, isFrozen, tags) = communityLib::getCommunityData(communityCollection, 0);
+            let (ipfsDoc, timeCreate, isFrozen, tags) = getCommunityData(communityCollection, 0);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(timeCreate == 0, 2);
             assert!(isFrozen == false, 3);
-            assert!(tags == communityLib::unitTestGetMoreCommunityTags(
+            assert!(tags == unitTestGetMoreCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000001",
                 x"0000000000000000000000000000000000000000000000000000000000000002",
                 x"0000000000000000000000000000000000000000000000000000000000000003",
@@ -306,10 +300,10 @@ module basics::communityLib_test {
         //edit tag
         test_scenario::next_tx(scenario, &user1);
         {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+            let community_wrapper = test_scenario::take_shared<CommunityCollection>(scenario);
             let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-            communityLib::updateTag(
+            updateTag(
                 communityCollection,
                 0,
                 2,
@@ -317,11 +311,11 @@ module basics::communityLib_test {
                 x"0000000000000000000000000000000000000000000000000000000000000007",
             );
 
-            let (ipfsDoc, timeCreate, isFrozen, tags) = communityLib::getCommunityData(communityCollection, 0);
+            let (ipfsDoc, timeCreate, isFrozen, tags) = getCommunityData(communityCollection, 0);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(timeCreate == 0, 2);
             assert!(isFrozen == false, 3);
-            assert!(tags == communityLib::unitTestGetMoreCommunityTags(
+            assert!(tags == unitTestGetMoreCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000001",
                 x"0000000000000000000000000000000000000000000000000000000000000002",
                 x"0000000000000000000000000000000000000000000000000000000000000007",
@@ -336,20 +330,20 @@ module basics::communityLib_test {
         // freeze community
         test_scenario::next_tx(scenario, &user1);
         {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+            let community_wrapper = test_scenario::take_shared<CommunityCollection>(scenario);
             let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-            communityLib::freezeCommunity(
+            freezeCommunity(
                 communityCollection,
                 0,
                 user1
             );
 
-            let (ipfsDoc, timeCreate, isFrozen, tags) = communityLib::getCommunityData(communityCollection, 0);
+            let (ipfsDoc, timeCreate, isFrozen, tags) = getCommunityData(communityCollection, 0);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(timeCreate == 0, 2);
             assert!(isFrozen == true, 3);
-            assert!(tags == communityLib::unitTestGetMoreCommunityTags(
+            assert!(tags == unitTestGetMoreCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000001",
                 x"0000000000000000000000000000000000000000000000000000000000000002",
                 x"0000000000000000000000000000000000000000000000000000000000000007",
@@ -364,20 +358,20 @@ module basics::communityLib_test {
         // unfreeze community
         test_scenario::next_tx(scenario, &user1);
         {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+            let community_wrapper = test_scenario::take_shared<CommunityCollection>(scenario);
             let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-            communityLib::unfreezeCommmunity(
+            unfreezeCommmunity(
                 communityCollection,
                 0,
                 user1
             );
 
-            let (ipfsDoc, timeCreate, isFrozen, tags) = communityLib::getCommunityData(communityCollection, 0);
+            let (ipfsDoc, timeCreate, isFrozen, tags) = getCommunityData(communityCollection, 0);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(timeCreate == 0, 2);
             assert!(isFrozen == false, 3);
-            assert!(tags == communityLib::unitTestGetMoreCommunityTags(
+            assert!(tags == unitTestGetMoreCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000001",
                 x"0000000000000000000000000000000000000000000000000000000000000002",
                 x"0000000000000000000000000000000000000000000000000000000000000007",
@@ -392,10 +386,10 @@ module basics::communityLib_test {
         // create second community
         test_scenario::next_tx(scenario, &user1);
         {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+            let community_wrapper = test_scenario::take_shared<CommunityCollection>(scenario);
             let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-            communityLib::createCommunity(
+            createCommunity(
                 communityCollection,
                 user1,
                 x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
@@ -408,11 +402,11 @@ module basics::communityLib_test {
                 ]
             );
 
-            let (ipfsDoc, timeCreate, isFrozen, tags) = communityLib::getCommunityData(communityCollection, 0);
+            let (ipfsDoc, timeCreate, isFrozen, tags) = getCommunityData(communityCollection, 0);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(timeCreate == 0, 2);
             assert!(isFrozen == false, 3);
-            assert!(tags == communityLib::unitTestGetMoreCommunityTags(
+            assert!(tags == unitTestGetMoreCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000001",
                 x"0000000000000000000000000000000000000000000000000000000000000002",
                 x"0000000000000000000000000000000000000000000000000000000000000007",
@@ -421,11 +415,11 @@ module basics::communityLib_test {
                 x"0000000000000000000000000000000000000000000000000000000000000006"
             ), 5);
 
-            let (ipfsDoc, timeCreate, isFrozen, tags) = communityLib::getCommunityData(communityCollection, 1);
+            let (ipfsDoc, timeCreate, isFrozen, tags) = getCommunityData(communityCollection, 1);
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
             assert!(timeCreate == 0, 2);
             assert!(isFrozen == false, 3);
-            assert!(tags == communityLib::unitTestGetCommunityTags(
+            assert!(tags == unitTestGetCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000010",
                 x"0000000000000000000000000000000000000000000000000000000000000011",
                 x"0000000000000000000000000000000000000000000000000000000000000012",
@@ -442,4 +436,14 @@ module basics::communityLib_test {
         // x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"
         // x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
     }
+
 }
+
+// #[test_only]
+// module basics::communityLib_test {
+//     use sui::test_scenario;
+//     // use basics::userLib;
+//     use basics::communityLib;
+
+    
+// }

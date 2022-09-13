@@ -3,7 +3,7 @@ module basics::userLib {
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
-    use std::debug;
+    // use std::debug;
     use basics::communityLib;
 
     /// A shared user.
@@ -22,12 +22,12 @@ module basics::userLib {
         // TODO: add roles
     }
 
-    public entry fun initUserCollection(ctx: &mut TxContext) {
+    fun init(ctx: &mut TxContext) {
         transfer::share_object(UserCollection {
             id: object::new(ctx),
             users: vector::empty<User>(),
             userAddress: vector::empty<address>()
-        })
+        });
     }
 
     public entry fun createUser(userCollection: &mut UserCollection, owner: address, ipfsDoc: vector<u8>) {
@@ -111,142 +111,136 @@ module basics::userLib {
     //     }
     // }
 
-    public entry fun printUserCollection(userCollection: &mut UserCollection) {
-        debug::print(userCollection);
-    }
+    // public entry fun printUserCollection(userCollection: &mut UserCollection) {
+    //     debug::print(userCollection);
+    // }
 
-    public entry fun printUser(userCollection: &mut UserCollection, owner: address) {
-        let (isExist, position) = vector::index_of(&mut userCollection.userAddress, &owner);
-        debug::print(&isExist);
-        debug::print(&position);
+    // public entry fun printUser(userCollection: &mut UserCollection, owner: address) {
+    //     let (isExist, position) = vector::index_of(&mut userCollection.userAddress, &owner);
+    //     debug::print(&isExist);
+    //     debug::print(&position);
 
-        if (isExist) {
-            let user = vector::borrow(&mut userCollection.users, position);
-            debug::print(user);
-        }
-    }
+    //     if (isExist) {
+    //         let user = vector::borrow(&mut userCollection.users, position);
+    //         debug::print(user);
+    //     }
+    // }
 
     // for unitTests
     public fun getUserData(userCollection: &mut UserCollection, owner: address): (vector<u8>, address, u64, u64, vector<u64>) {
         let user = getUser(userCollection, owner);
         (user.ipfsDoc, user.owner, user.energy, user.lastUpdatePeriod, user.followedCommunities)
     }
-}
 
-#[test_only]
-module basics::userLib_test {
-    use sui::test_scenario;
-    use basics::userLib;
-    use basics::communityLib;
 
-    #[test]
-    fun test_user() {
-        let owner = @0xC0FFEE;
-        let user1 = @0xA1;
+    // #[test]
+    // fun test_user() {
+    //     use sui::test_scenario;
+    //     use basics::communityLib;
 
-        let scenario = &mut test_scenario::begin(&user1);
+    //     // let owner = @0xC0FFEE;
+    //     let user1 = @0xA1;
 
-        test_scenario::next_tx(scenario, &owner);
-        {
-            userLib::initUserCollection(test_scenario::ctx(scenario));
-            communityLib::initCommunityCollection(test_scenario::ctx(scenario));
-        };
+    //     let scenario = &mut test_scenario::begin(&user1);
+    //     {
+    //         init(test_scenario::ctx(scenario));
+    //         communityLib::init(test_scenario::ctx(scenario));
+    //     };
 
-        // create user
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // create user
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
 
-            userLib::createUser(userCollection, user1, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1");
+    //         createUser(userCollection, user1, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1");
 
-            let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(userCollection, user1);
-            assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
-            assert!(owner == @0xA1, 2);
-            assert!(energy == 1000, 3);
-            assert!(lastUpdatePeriod == 0, 4);
-            assert!(followedCommunities == vector<u64>[], 5);
+    //         let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
+    //         assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
+    //         assert!(owner == @0xA1, 2);
+    //         assert!(energy == 1000, 3);
+    //         assert!(lastUpdatePeriod == 0, 4);
+    //         assert!(followedCommunities == vector<u64>[], 5);
 
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // update user ipfs
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // update user ipfs
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            userLib::updateUser(userCollection, user1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
+    //         updateUser(userCollection, user1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
             
-            let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(userCollection, user1);
-            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
-            assert!(owner == @0xA1, 2);
-            assert!(energy == 1000, 3);
-            assert!(lastUpdatePeriod == 0, 4);
-            assert!(followedCommunities == vector<u64>[], 5);
+    //         let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
+    //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+    //         assert!(owner == @0xA1, 2);
+    //         assert!(energy == 1000, 3);
+    //         assert!(lastUpdatePeriod == 0, 4);
+    //         assert!(followedCommunities == vector<u64>[], 5);
 
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // followCommunity
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+    //     // followCommunity
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+    //         let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-            communityLib::createCommunity(
-                communityCollection,
-                user1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<vector<u8>>[
-                    x"0000000000000000000000000000000000000000000000000000000000000001",
-                    x"0000000000000000000000000000000000000000000000000000000000000002",
-                    x"0000000000000000000000000000000000000000000000000000000000000003",
-                    x"0000000000000000000000000000000000000000000000000000000000000004",
-                    x"0000000000000000000000000000000000000000000000000000000000000005"
-                ]
-            );
+    //         communityLib::createCommunity(
+    //             communityCollection,
+    //             user1,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             vector<vector<u8>>[
+    //                 x"0000000000000000000000000000000000000000000000000000000000000001",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000002",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000003",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000004",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000005"
+    //             ]
+    //         );
 
-            userLib::followCommunity(communityCollection, userCollection, user1, 0);
+    //         followCommunity(communityCollection, userCollection, user1, 0);
             
-            let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(userCollection, user1);
-            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
-            assert!(owner == @0xA1, 2);
-            assert!(energy == 1000, 3);
-            assert!(lastUpdatePeriod == 0, 4);
-            assert!(followedCommunities == vector<u64>[0], 5);
+    //         let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
+    //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+    //         assert!(owner == @0xA1, 2);
+    //         assert!(energy == 1000, 3);
+    //         assert!(lastUpdatePeriod == 0, 4);
+    //         assert!(followedCommunities == vector<u64>[0], 5);
 
-            test_scenario::return_shared(scenario, user_wrapper);
-            test_scenario::return_shared(scenario, community_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //         test_scenario::return_shared(scenario, community_wrapper);
+    //     };
 
-        // unfollowCommunity
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+    //     // unfollowCommunity
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+    //         let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-            userLib::unfollowCommunity(communityCollection, userCollection, user1, 0);
+    //         unfollowCommunity(communityCollection, userCollection, user1, 0);
             
-            let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(userCollection, user1);
-            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
-            assert!(owner == @0xA1, 2);
-            assert!(energy == 1000, 3);
-            assert!(lastUpdatePeriod == 0, 4);
-            assert!(followedCommunities == vector<u64>[], 5);
+    //         let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
+    //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+    //         assert!(owner == @0xA1, 2);
+    //         assert!(energy == 1000, 3);
+    //         assert!(lastUpdatePeriod == 0, 4);
+    //         assert!(followedCommunities == vector<u64>[], 5);
 
-            test_scenario::return_shared(scenario, user_wrapper);
-            test_scenario::return_shared(scenario, community_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //         test_scenario::return_shared(scenario, community_wrapper);
+    //     };
 
 
-        // x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"
-        // x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"
-        // x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
-        // userLib::printUser(userCollection, user1);
-    }
+    //     // x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"
+    //     // x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"
+    //     // x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
+    // }
 }
