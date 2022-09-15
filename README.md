@@ -39,6 +39,7 @@ Error code:
 
 45 - You can not delete the best reply.
 
+owner - 0x62a5541796a4fa35229543da71df4f570f7cbe02
 package object ID - 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0
 user object - 0x94e98b7c4f229e5011fffbb1778e2a03003aac5f
 community - 0xf67fdeab0355f72438df93c11bff68eb3c538e43
@@ -70,28 +71,7 @@ editPost - sui client call --function editPost --module postLib --package 0x53e6
 
 
 
-y fun editPost(
-        postCollection: &mut PostCollection,
-        communityCollection: &mut communityLib::CommunityCollection,
-        userAddr: address,
-        postId: u64,
-        ipfsHash: vector<u8>, 
-        tags: vector<u64>
-    )
-
-createPost(
-        postCollection: &mut PostCollection,
-        communityCollection: &mut communityLib::CommunityCollection,
-        userAddr: address,
-        communityId: u64,
-        ipfsHash: vector<u8>, 
-        /* // TODO: add PostType postType,*/
-        tags: vector<u64>
-    )
 
 
-
-
-
-deletePost - sui client call --function deletePost --module postLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xb5d76295c7010d60f9a50c18a965a2cf586f29ff\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" 1 --gas-budget 30000
+<!-- deletePost - sui client call --function deletePost --module postLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xb5d76295c7010d60f9a50c18a965a2cf586f29ff\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" 1 --gas-budget 30000 -->
 
