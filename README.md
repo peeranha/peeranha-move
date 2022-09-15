@@ -38,3 +38,60 @@ Error code:
 44 - You can not edit this comment. It is not your.
 
 45 - You can not delete the best reply.
+
+package object ID - 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0
+user object - 0x94e98b7c4f229e5011fffbb1778e2a03003aac5f
+community - 0xf67fdeab0355f72438df93c11bff68eb3c538e43
+post - 0xb5d76295c7010d60f9a50c18a965a2cf586f29ff
+
+
+sui client publish --path ./ --gas-budget 30000
+
+createUser - sui client call --function createUser --module userLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0x94e98b7c4f229e5011fffbb1778e2a03003aac5f\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" \"x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"\" --gas-budget 30000
+
+updateUser - sui client call --function updateUser --module userLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0x94e98b7c4f229e5011fffbb1778e2a03003aac5f\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" \"x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"\" --gas-budget 30000
+
+createCommunity - sui client call --function createCommunity --module communityLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" \"x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"\" \[\"0x0000000000000000000000000000000000000000000000000000000000000001\",\"0x0000000000000000000000000000000000000000000000000000000000000002\",\"0x0000000000000000000000000000000000000000000000000000000000000003\",\"0x0000000000000000000000000000000000000000000000000000000000000004\",\"0x0000000000000000000000000000000000000000000000000000000000000005\"\] --gas-budget 30000
+
+updateCommunity - sui client call --function updateCommunity --module communityLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" 0 \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" \"x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"\" --gas-budget 30000
+
+createTag - sui client call --function createTag --module communityLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" 0 \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" \"x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"\" --gas-budget 30000
+
+updateTag - sui client call --function updateTag --module communityLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" 0 2 \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" \"x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"\" --gas-budget 30000
+
+freezeCommunity - sui client call --function freezeCommunity --module communityLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" 0 \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" --gas-budget 30000
+
+unfreezeCommmunity - sui client call --function unfreezeCommmunity --module communityLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" 0 \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" --gas-budget 30000
+
+createPost - sui client call --function createPost --module postLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xb5d76295c7010d60f9a50c18a965a2cf586f29ff\" \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" 0 \"x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc"\" \[1,3\] --gas-budget 30000
+
+editPost - sui client call --function editPost --module postLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xb5d76295c7010d60f9a50c18a965a2cf586f29ff\" \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" 1 \"x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"\" \[1,4\] --gas-budget 30000
+
+
+
+
+y fun editPost(
+        postCollection: &mut PostCollection,
+        communityCollection: &mut communityLib::CommunityCollection,
+        userAddr: address,
+        postId: u64,
+        ipfsHash: vector<u8>, 
+        tags: vector<u64>
+    )
+
+createPost(
+        postCollection: &mut PostCollection,
+        communityCollection: &mut communityLib::CommunityCollection,
+        userAddr: address,
+        communityId: u64,
+        ipfsHash: vector<u8>, 
+        /* // TODO: add PostType postType,*/
+        tags: vector<u64>
+    )
+
+
+
+
+
+deletePost - sui client call --function deletePost --module postLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xb5d76295c7010d60f9a50c18a965a2cf586f29ff\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" 1 --gas-budget 30000
+
