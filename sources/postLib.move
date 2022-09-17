@@ -432,23 +432,32 @@ module basics::postLib {
         // TODO: add emit CommentDeleted(userAddr, postId, parentReplyId, commentId);
     }
 
-
+    public fun getPost(postCollection: &mut PostCollection, postId: u64): &Post {
+        vector::borrow(&postCollection.posts, postId)
+    }
+    
     public fun getMutablePost(postCollection: &mut PostCollection, postId: u64): &mut Post {
         vector::borrow_mut(&mut postCollection.posts, postId)
     }
 
-    public fun getPost(postCollection: &mut PostCollection, postId: u64): &Post {
-        vector::borrow(&mut postCollection.posts, postId)
-    }
-
-    public fun getReply(post: &mut Post, replyId: u64): &Reply {
-        vector::borrow(&mut post.replies, replyId)
+    public fun getReply(post: &Post, replyId: u64): &Reply {
+        vector::borrow(&post.replies, replyId)
     }
 
     public fun getMutableReply(post: &mut Post, replyId: u64): &mut Reply {
         vector::borrow_mut(&mut post.replies, replyId)
     }
 
+    public fun getComment(post: &Post, parentReplyId: u64, commentId: u64): &Comment {
+        if (parentReplyId == 0) {
+            vector::borrow(&post.comments, commentId)
+        } else {
+            let reply = getReply(post, parentReplyId);
+            vector::borrow(&reply.comments, commentId)
+        }
+        // require(!CommonLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment_not_exist.");
+    }
+    
     public fun getMutableComment (post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
         if (parentReplyId == 0) {
             vector::borrow_mut(&mut post.comments, commentId)
@@ -457,7 +466,6 @@ module basics::postLib {
             vector::borrow_mut(&mut reply.comments, commentId)
         }
         // require(!CommonLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment_not_exist.");
-
     }
 
     // function getCommentContainerSafe(
@@ -472,8 +480,8 @@ module basics::postLib {
     // }
 
     // for unitTests
-    public fun getPostData(postCollection: &mut PostCollection, postId: u64): (vector<u8>, u64, address, u64, u64, u64, u64, u8, bool, vector<u64>,   vector<u8>, vector<u128>, vector<address>) {
-        let post = vector::borrow(&mut postCollection.posts, postId);
+    public fun getPostData(postCollection: &mut PostCollection, postId: u64): (vector<u8>, u64, address, u64, u64, u64, u64, u8, bool, vector<u64>, vector<u8>, vector<u128>, vector<address>) {
+        let post = getPost(postCollection, postId);
         (
             commonLib::getIpfsHash(post.ipfsDoc),
             post.postTime,
@@ -489,111 +497,463 @@ module basics::postLib {
             post.historyVotes,
             post.votedUsers
         )
+        // replies: vector<Reply>,  // TODO: add
+        // comments: vector<Comment>,   // TODO: add
     }
 
-    // tags: vector<u64>,
-    // replies: vector<Reply>,  // add
-    // comments: vector<Comment>,   //add
-    // properties: vector<u8>,
+    // for unitTests
+    public fun getReplyData(postCollection: &mut PostCollection, postId: u64, replyId: u64): (vector<u8>, u64, address, u64, u64, bool, bool, bool, vector<u8>, vector<u128>, vector<address>) {
+        let post = getPost(postCollection, postId);
+        let reply = getReply(post, replyId);
+
+        (
+            commonLib::getIpfsHash(reply.ipfsDoc),
+            reply.postTime,
+            reply.author,
+            reply.rating,
+            reply.parentReplyId,
+            reply.isFirstReply,
+            reply.isQuickReply,
+            reply.isDeleted,
+            reply.properties,
+            reply.historyVotes,
+            reply.votedUsers
+        )
+        // comments: vector<Comment>, // TODO: add
+    }
+
+    // for unitTests
+    public fun getCommentData(postCollection: &mut PostCollection, postId: u64, parentReplyId: u64, commentId: u64): (vector<u8>, u64, address, u64, bool, vector<u8>, vector<u128>, vector<address>) {
+        let post = getPost(postCollection, postId);
+        let comment = getComment(post, parentReplyId, commentId);
+        
+        (
+            commonLib::getIpfsHash(comment.ipfsDoc),
+            comment.postTime,
+            comment.author,
+            comment.rating,
+
+            comment.isDeleted,
+            comment.properties,
+            comment.historyVotes,
+            comment.votedUsers
+        )
+    }
+
+
 
     public entry fun set_value(ctx: &mut TxContext) {       // do something with tx_context
         assert!(tx_context::sender(ctx) == tx_context::sender(ctx), 0);
     }
 
-//     #[test]
-//     fun test_post() {
-//         use sui::test_scenario;
+    // #[test]
+    // fun test_post() {
+    //     use sui::test_scenario;
 
-//         // let owner = @0xC0FFEE;
-//         let user1 = @0xA1;
+    //     // let owner = @0xC0FFEE;
+    //     let user1 = @0xA1;
 
-//         let scenario = &mut test_scenario::begin(&user1);
-//         {
-//             // userLib::initUserCollection(test_scenario::ctx(scenario));
-//             communityLib::init(test_scenario::ctx(scenario));
-//             init(test_scenario::ctx(scenario));
-//         };
+    //     let scenario = &mut test_scenario::begin(&user1);
+    //     {
+    //         // userLib::initUserCollection(test_scenario::ctx(scenario));
+    //         communityLib::initCommunity(test_scenario::ctx(scenario));
+    //         init(test_scenario::ctx(scenario));
+    //     };
 
-//         // create post
-//         test_scenario::next_tx(scenario, &user1);
-//         {
-//             let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-//             let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
-//             let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-//             let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     // create post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+    //         let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
 
-//             communityLib::createCommunity(
-//                 communityCollection,
-//                 user1,
-//                 x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-//                 vector<vector<u8>>[
-//                     x"0000000000000000000000000000000000000000000000000000000000000001",
-//                     x"0000000000000000000000000000000000000000000000000000000000000002",
-//                     x"0000000000000000000000000000000000000000000000000000000000000003",
-//                     x"0000000000000000000000000000000000000000000000000000000000000004",
-//                     x"0000000000000000000000000000000000000000000000000000000000000005"
-//                 ]
-//             );
+    //         communityLib::createCommunity(
+    //             communityCollection,
+    //             user1,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             vector<vector<u8>>[
+    //                 x"0000000000000000000000000000000000000000000000000000000000000001",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000002",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000003",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000004",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000005"
+    //             ]
+    //         );
 
-//             createPost(
-//                 postCollection,
-//                 communityCollection,
-//                 user1,
-//                 0,
-//                 x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-//                 vector<u64>[1, 2]
-//             );
+    //         createPost(
+    //             postCollection,
+    //             communityCollection,
+    //             user1,
+    //             0,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             vector<u64>[1, 2]
+    //         );
+
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             communityId,
+    //             officialReply,
+    //             bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             tags,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 0);
+
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == 0, 4);
+    //         assert!(communityId == 0, 5);
+    //         assert!(officialReply == 0, 6);
+    //         assert!(bestReply == 0, 7);
+    //         assert!(deletedReplyCount == 0, 8);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(tags == vector<u64>[1, 2], 10);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
+
+    //         test_scenario::return_shared(scenario, community_wrapper);
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+    //     // edit post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+    //         let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+
+    //         editPost(
+    //             postCollection,
+    //             communityCollection,
+    //             user1,
+    //             0,
+    //             x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc",
+    //             vector<u64>[2]
+    //         );
+
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             communityId,
+    //             officialReply,
+    //             bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             tags,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 0);
+
+    //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == 0, 4);
+    //         assert!(communityId == 0, 5);
+    //         assert!(officialReply == 0, 6);
+    //         assert!(bestReply == 0, 7);
+    //         assert!(deletedReplyCount == 0, 8);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(tags == vector<u64>[2], 10);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
+
+    //         test_scenario::return_shared(scenario, community_wrapper);
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+    //     //create reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+  
+    //         createReply(
+    //             postCollection,
+    //             user1,
+    //             0,
+    //             0,
+    //             x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
+    //             false
+    //         );
+
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             parentReplyId,
+    //             isFirstReply,
+    //             isQuickReply,
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getReplyData(postCollection, 0, 0);
+
+    //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == 0, 4);
+    //         assert!(parentReplyId == 0, 5);
+    //         assert!(isFirstReply == false, 6);
+    //         assert!(isQuickReply == false, 7);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
+
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+    //     //edit reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+  
+    //         editReply(
+    //             postCollection,
+    //             user1,
+    //             0,
+    //             0,
+    //             x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
+    //             false
+    //         );
+
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             parentReplyId,
+    //             isFirstReply,
+    //             isQuickReply,
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getReplyData(postCollection, 0, 0);
+
+    //         assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == 0, 4);
+    //         assert!(parentReplyId == 0, 5);
+    //         assert!(isFirstReply == false, 6);
+    //         assert!(isQuickReply == false, 7);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
+
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+    //     //create comment
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+  
+    //         createComment(
+    //             postCollection,
+    //             user1,
+    //             0,
+    //             0,
+    //             x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc"
+    //         );
+
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,                
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getCommentData(postCollection, 0, 0, 0);
+
+    //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == 0, 4);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
+
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
 
-//             // let (
-//             //     ipfsDoc,
-//             //     postTime,
-//             //     author,
-//             //     rating,
-//             //     communityId,
-//             //     officialReply,
-//             //     bestReply,
-//             //     deletedReplyCount, isDeleted, tags, properties, historyVotes, votedUsers) = getPostData(postCollection, 0);
-// // (vector<u8>, u64, address, u64, u64, u64, u64, u8, bool, vector<u64>,   vector<u8>, vector<u128>, vector<address>)
+    //     //edit comment
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+  
+    //         editComment(
+    //             postCollection,
+    //             user1,
+    //             0,
+    //             0,
+    //             0,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
+    //         );
 
-//         //     (
-//         //     commonLib::getIpfsHash(post.ipfsDoc),
-//         //     post.postTime,
-//         //     post.author,
-//         //     post.rating,
-//         //     post.communityId,
-//         //     post.officialReply,
-//         //     post.bestReply,
-//         //     post.deletedReplyCount,
-//         //     post.isDeleted,
-//         //     post.tags,
-//         //     post.properties,
-//         //     post.historyVotes,
-//         //     post.votedUsers
-//         // )
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,                
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getCommentData(postCollection, 0, 0, 0);
 
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == 0, 4);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
 
-//             // assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
-//             // assert!(timeCreate == 0, 2);
-//             // assert!(isFrozen == false, 3);
-//             // assert!(tags == unitTestGetMoreCommunityTags(
-//             //     x"0000000000000000000000000000000000000000000000000000000000000001",
-//             //     x"0000000000000000000000000000000000000000000000000000000000000002",
-//             //     x"0000000000000000000000000000000000000000000000000000000000000003",
-//             //     x"0000000000000000000000000000000000000000000000000000000000000004",
-//             //     x"0000000000000000000000000000000000000000000000000000000000000005",
-//             //     x"0000000000000000000000000000000000000000000000000000000000000006"
-//             // ), 5);
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-//             test_scenario::return_shared(scenario, community_wrapper);
-//             test_scenario::return_shared(scenario, post_wrapper);
-//         };
+    //     //delete comment
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+  
+    //         deleteComment(
+    //             postCollection,
+    //             user1,
+    //             0,
+    //             0,
+    //             0
+    //         );
 
-//         // x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"
-//         // x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"
-//         // x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
-//         // userLib::printUser(userCollection, user1);
-//     }
+    //         let (
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,                
+    //             isDeleted,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getCommentData(postCollection, 0, 0, 0);
+
+    //         assert!(isDeleted == true, 1);
+
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+    //     //delete reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+  
+    //         deleteReply(
+    //             postCollection,
+    //             user1,
+    //             0,
+    //             0,
+    //         );
+
+    //         let (
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _parentReplyId,
+    //             _isFirstReply,
+    //             _isQuickReply,
+    //             isDeleted,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getReplyData(postCollection, 0, 0);
+
+    //         assert!(isDeleted == true, 0);
+
+    //         let (
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             _tags,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getPostData(postCollection, 0);
+
+    //         assert!(deletedReplyCount == 1, 1);
+    //         assert!(isDeleted == false, 2);
+
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+    //     // delete post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+
+    //         deletePost(
+    //             postCollection,
+    //             user1,
+    //             0,
+    //         );
+
+    //         let (
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             isDeleted,
+    //             _tags,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getPostData(postCollection, 0);
+
+    //         assert!(isDeleted == true, 1);
+
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+        
+    // }
 }
 
 // #[test_only]
