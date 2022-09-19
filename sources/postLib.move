@@ -4,7 +4,15 @@ module basics::postLib {
     use sui::tx_context::{Self, TxContext};
     use std::vector;
     use basics::communityLib;
+    // use basics::voteLib;
     use basics::commonLib;
+
+    // TODO: add enum PostType
+    const EXPERT_POST: u8 = 0;
+    const COMMON_POST: u8 = 1;
+    const TYTORIAL: u8 = 2;
+    const DOCUMENTATION: u8 = 3;
+    const START_RATING: u64 = 100000;
 
     struct PostCollection has key {
         id: UID,
@@ -12,7 +20,7 @@ module basics::postLib {
     }
 
     struct Post has store, drop {
-        // TODO: add PostType postType;
+        postType: u8,
         ipfsDoc: commonLib::IpfsHash,
         postTime: u64,
         author: address,
@@ -21,7 +29,7 @@ module basics::postLib {
 
         officialReply: u64,
         bestReply: u64,
-        deletedReplyCount: u8,  // uint16
+        deletedReplyCount: u64,
         isDeleted: bool,
 
         tags: vector<u64>,
@@ -29,7 +37,7 @@ module basics::postLib {
         comments: vector<Comment>,
         properties: vector<u8>,
 
-        historyVotes: vector<u128>,                 // to u8?
+        historyVotes: vector<u8>,                 // to u128?   // 1 - negative, 2 - positive
         votedUsers: vector<address>
     }
 
@@ -46,7 +54,7 @@ module basics::postLib {
 
         comments: vector<Comment>,
         properties: vector<u8>,
-        historyVotes: vector<u128>,                 // to u8?
+        historyVotes: vector<u8>,                 // to u128?   // 1 - negative, 2 - positive
         votedUsers: vector<address>
     }
 
@@ -59,7 +67,7 @@ module basics::postLib {
         isDeleted: bool,
 
         properties: vector<u8>,
-        historyVotes: vector<u128>,                 // to u8?
+        historyVotes: vector<u8>,                 // to u128?   // 1 - negative, 2 - positive
         votedUsers: vector<address>
     }
    
@@ -76,7 +84,7 @@ module basics::postLib {
         userAddr: address,
         communityId: u64,
         ipfsHash: vector<u8>, 
-        /* // TODO: add PostType postType,*/
+        postType: u8,
         tags: vector<u64>
     ) {
         communityLib::onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
@@ -85,6 +93,7 @@ module basics::postLib {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
 
         vector::push_back(&mut postCollection.posts, Post {
+            postType: postType,
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
             postTime: 0,            // TODO: add get time
             author: userAddr,
@@ -98,11 +107,11 @@ module basics::postLib {
             replies: vector::empty<Reply>(),
             comments: vector::empty<Comment>(),
             properties: vector::empty<u8>(),
-            historyVotes: vector::empty<u128>(),
+            historyVotes: vector::empty<u8>(),
             votedUsers: vector::empty<address>(),
         });
         
-        if (true) {       // TODO: add postType != PostType.Documentation
+        if (postType != DOCUMENTATION) {
             assert!(vector::length(&mut tags) > 0, 26);
             let postId = vector::length(&mut postCollection.posts) - 1;
             let post = getMutablePost(postCollection, postId);
@@ -118,23 +127,17 @@ module basics::postLib {
         postId: u64,
         parentReplyId: u64,
         ipfsHash: vector<u8>,
-        isOfficialReply: bool      // TODO: add
+        isOfficialReply: bool
     ) {
         let post = getMutablePost(postCollection, postId);
-        // TODO: add
-        // require(postContainer.info.postType != PostType.Tutorial && postContainer.info.postType != PostType.Documentation, 
-    //         "You can not publish replies in tutorial or Documentation.");
-    // require(
-    //         parentReplyId == 0 || 
-    //         (postContainer.info.postType != PostType.ExpertPost && postContainer.info.postType != PostType.CommonPost), 
-    //         "User is forbidden to reply on reply for Expert and Common type of posts"
-    //     );
+        assert!(post.postType != TYTORIAL && post.postType != DOCUMENTATION, 46);
+        assert!(parentReplyId == 0 || (post.postType != EXPERT_POST && post.postType != COMMON_POST), 47);
 
         // TODO: add check role
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
 
 
-        if (true) {     // TODO: add postContainer.info.postType == PostType.ExpertPost || postContainer.info.postType == PostType.CommonPost
+        if (post.postType == EXPERT_POST || post.postType == COMMON_POST) {
             let countReplies = vector::length(&post.replies);
 
             let replyId = 0;
@@ -144,22 +147,24 @@ module basics::postLib {
             };
         };
 
+        let isFirstReply = false;
         if (parentReplyId == 0) {
             if (isOfficialReply) {
                 post.officialReply = vector::length(&mut post.replies);
             };
 
-            // TODO: add
-            // if (postContainer.info.postType != PostType.Tutorial && postContainer.info.author != userAddr) {
-            //     if (postContainer.info.replyCount - postContainer.info.deletedReplyCount == 1) {    // unit test
-            //         replyContainer.info.isFirstReply = true;
-            //         self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
-            //     }
+            if (post.postType != TYTORIAL && post.author != userAddr) {
+                if (vector::length(&mut post.replies) - post.deletedReplyCount == 0) {    // unit test
+                    isFirstReply = true;
+                    // TODO: add
+                    // self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
+                };
+                // TODO: add
             //     if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
             //         replyContainer.info.isQuickReply = true;
             //         self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply), postContainer.info.communityId);
-            //     }
-            // }
+                // }
+            };
         } else {
           //getReplyContainerSafe(postContainer, parentReplyId);    // TODO: add parentReplyId is exist
         };
@@ -171,13 +176,13 @@ module basics::postLib {
             rating: 0,
             parentReplyId: parentReplyId,
             
-            isFirstReply: false,
+            isFirstReply: isFirstReply,
             isQuickReply: false,
             isDeleted: false,
 
             comments: vector::empty<Comment>(),
             properties: vector::empty<u8>(),
-            historyVotes: vector::empty<u128>(),
+            historyVotes: vector::empty<u8>(),
             votedUsers: vector::empty<address>(),
         });
 
@@ -192,7 +197,7 @@ module basics::postLib {
         ipfsHash: vector<u8>, 
     ) {
         let post = getMutablePost(postCollection, postId);
-        // TODO: add require(postContainer.info.postType != PostType.Documentation, "You can not publish comments in Documentation.");
+        assert!(post.postType != DOCUMENTATION, 48);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
         
         // TODO: add
@@ -225,7 +230,7 @@ module basics::postLib {
                 isDeleted: false,
 
                 properties: vector::empty<u8>(),
-                historyVotes: vector::empty<u128>(),
+                historyVotes: vector::empty<u8>(),
                 votedUsers: vector::empty<address>(),
             });
         } else {
@@ -238,7 +243,7 @@ module basics::postLib {
                 isDeleted: false,
 
                 properties: vector::empty<u8>(),
-                historyVotes: vector::empty<u128>(),
+                historyVotes: vector::empty<u8>(),
                 votedUsers: vector::empty<address>(),
             });
         }
@@ -259,7 +264,7 @@ module basics::postLib {
         // TODO: add check role
         
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
-        assert!(userAddr == post.author /* // TODO: add || postContainer.info.postType == PostType.Documentation*/, 42);
+        assert!(userAddr == post.author || post.postType == DOCUMENTATION, 42);
 
         if(!commonLib::isEmptyIpfs(ipfsHash) && commonLib::getIpfsHash(post.ipfsDoc) != ipfsHash)
             post.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -318,7 +323,7 @@ module basics::postLib {
 
     public entry fun deletePost(
         postCollection: &mut PostCollection,
-        _userAddr: address,
+        userAddr: address,
         postId: u64,
     ) {
         let post = getMutablePost(postCollection, postId);
@@ -326,7 +331,7 @@ module basics::postLib {
         // TODO: add check role
         
         // TODO: add
-        // if (postContainer.info.postType != PostType.Documentation) {
+        if (post.postType != DOCUMENTATION) {
         //     uint256 time = CommonLib.getTimestamp();
         //     if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
         //         VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
@@ -341,9 +346,9 @@ module basics::postLib {
         //             );
         //         }
         //     }
-        //     if (postContainer.info.bestReply != 0) {
+            if (post.bestReply != 0) {
         //         self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
-        //     }
+            };
 
         //     if (time - postContainer.info.postTime < DELETE_TIME) {
         //         for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
@@ -351,11 +356,12 @@ module basics::postLib {
         //         }
         //     }
 
-        //     if (userAddr == postContainer.info.author)
-        //         self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
-        //     else
-        //         self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
-        // }
+            if (userAddr == post.author) {
+        //      self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
+            } else {
+        //      self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
+            };
+        };
 
         post.isDeleted = true;
         // TODO: add emit PostDeleted(userAddr, postId);
@@ -363,7 +369,7 @@ module basics::postLib {
 
     public entry fun deleteReply(
         postCollection: &mut PostCollection,
-        _userAddr: address,
+        userAddr: address,
         postId: u64,
         replyId: u64,
     ) {
@@ -382,7 +388,7 @@ module basics::postLib {
         // bug if reply's owner is moderator any way error
         //
         
-        // assert!(userAddr != reply.author || post.bestReply != replyId, 45);      // error Invalid immutable borrow at field 'bestReply'.?
+        // assert!(userAddr != reply.author || post.bestReply != replyId, 45);      // TODO: add  error Invalid immutable borrow at field 'bestReply'.?
 
         // TODO: add
         // uint256 time = CommonLib.getTimestamp();
@@ -395,10 +401,12 @@ module basics::postLib {
         //         postContainer.info.communityId
         //     );
         // }
-        // if (userAddr == replyContainer.info.author)
+
+        if (userAddr == reply.author) {
         //     self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.DeleteOwnReply, postContainer.info.communityId);
-        // else
+        } else {
         //     self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.ModeratorDeleteReply, postContainer.info.communityId);
+        };
 
         reply.isDeleted = true;
         post.deletedReplyCount = post.deletedReplyCount + 1;
@@ -430,6 +438,109 @@ module basics::postLib {
 
         comment.isDeleted = true;
         // TODO: add emit CommentDeleted(userAddr, postId, parentReplyId, commentId);
+    }
+
+    public entry fun changePostType(    // TODO: add tests
+        postCollection: &mut PostCollection,
+        _userAddr: address,
+        postId: u64,
+        newPostType: u8
+    ) {
+        let post = getMutablePost(postCollection, postId);
+
+        // TODO: add check role
+
+        let oldPostType = post.postType;
+        assert!(newPostType != oldPostType, 49);
+        assert!(
+            oldPostType != DOCUMENTATION &&
+            oldPostType != TYTORIAL &&
+            newPostType != DOCUMENTATION &&
+            newPostType != TYTORIAL,
+                50
+        );
+        
+        let oldTypeRating: StructRating = getTypesRating(oldPostType);
+        let newTypeRating: StructRating = getTypesRating(newPostType);
+
+        let positive = 0;
+        let negative = 0;
+
+        let i = 0;
+        while(i < vector::length(&post.votedUsers)) {
+            if (vector::borrow(&post.historyVotes, i) == &1) {
+                positive = positive + 1;
+            } else if (vector::borrow(&post.historyVotes, i) == &2) {
+                negative = negative + 1;
+            };
+            i = i +1;
+        };
+
+        let _changeUserRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
+                                (newTypeRating.downvotedPost - oldTypeRating.downvotedPost) * negative;
+        // TODO: add
+        // self.peeranhaUser.updateUserRating(postContainer.info.author, changeUserRating, postContainer.info.communityId);
+
+        let replyId = 0;    // value means replyPosition not replyId
+        while(replyId < vector::length(&post.replies)) {
+            let reply = getReply(post, replyId);
+
+            positive = 0;
+            negative = 0;
+            i = 0;
+            while(i < vector::length(&reply.votedUsers)) {
+                if (vector::borrow(&reply.historyVotes, i) == &1) {
+                    positive = positive + 1;
+                } else if (vector::borrow(&reply.historyVotes, i) == &2) {
+                    negative = negative + 1;
+                };
+                i = i +1;
+            };
+
+
+            _changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
+                                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
+
+            if (reply.rating >= START_RATING) {
+                if (reply.isFirstReply) {   // todo !!!math
+                    _changeUserRating = _changeUserRating + (newTypeRating.firstReply - oldTypeRating.firstReply);
+                };
+                if (reply.isQuickReply) {
+                    _changeUserRating = _changeUserRating + (newTypeRating.quickReply - oldTypeRating.quickReply);
+                };
+            };
+            // TODO: add
+            // self.peeranhaUser.updateUserRating(replyContainer.info.author, changeUserRating, postContainer.info.communityId);
+            replyId = replyId + 1;
+        };
+
+        if (post.bestReply != 0) {
+            // TODO: add
+        //     self.peeranhaUser.updateUserRating(postContainer.info.author, newTypeRating.acceptedReply - oldTypeRating.acceptedReply, postContainer.info.communityId);
+        //     self.peeranhaUser.updateUserRating(
+        //         getReplyContainerSafe(postContainer, postContainer.info.bestReply).info.author,
+        //         newTypeRating.acceptReply - oldTypeRating.acceptReply,
+        //         postContainer.info.communityId
+        //     );
+        };
+
+        post.postType = newPostType;
+        // TODO: add
+        // emit ChangePostType(userAddr, postId, newPostType);
+    }
+
+    fun getTypesRating(        //name?
+        postType: u8
+    ): StructRating {
+        if (postType == EXPERT_POST) {
+            getExpertRating()
+        } else if (postType == COMMON_POST) {
+            getCommonRating()
+        } else if (postType == TYTORIAL) {
+            getTutorialRating()
+        } else {
+            abort 42
+        }
     }
 
     public fun getPost(postCollection: &mut PostCollection, postId: u64): &Post {
@@ -480,9 +591,10 @@ module basics::postLib {
     // }
 
     // for unitTests
-    public fun getPostData(postCollection: &mut PostCollection, postId: u64): (vector<u8>, u64, address, u64, u64, u64, u64, u8, bool, vector<u64>, vector<u8>, vector<u128>, vector<address>) {
+    public fun getPostData(postCollection: &mut PostCollection, postId: u64): (u8, vector<u8>, u64, address, u64, u64, u64, u64, u64, bool, vector<u64>, vector<u8>, vector<u8>, vector<address>) {
         let post = getPost(postCollection, postId);
         (
+            post.postType,
             commonLib::getIpfsHash(post.ipfsDoc),
             post.postTime,
             post.author,
@@ -502,7 +614,7 @@ module basics::postLib {
     }
 
     // for unitTests
-    public fun getReplyData(postCollection: &mut PostCollection, postId: u64, replyId: u64): (vector<u8>, u64, address, u64, u64, bool, bool, bool, vector<u8>, vector<u128>, vector<address>) {
+    public fun getReplyData(postCollection: &mut PostCollection, postId: u64, replyId: u64): (vector<u8>, u64, address, u64, u64, bool, bool, bool, vector<u8>, vector<u8>, vector<address>) {
         let post = getPost(postCollection, postId);
         let reply = getReply(post, replyId);
 
@@ -523,7 +635,7 @@ module basics::postLib {
     }
 
     // for unitTests
-    public fun getCommentData(postCollection: &mut PostCollection, postId: u64, parentReplyId: u64, commentId: u64): (vector<u8>, u64, address, u64, bool, vector<u8>, vector<u128>, vector<address>) {
+    public fun getCommentData(postCollection: &mut PostCollection, postId: u64, parentReplyId: u64, commentId: u64): (vector<u8>, u64, address, u64, bool, vector<u8>, vector<u8>, vector<address>) {
         let post = getPost(postCollection, postId);
         let comment = getComment(post, parentReplyId, commentId);
         
@@ -560,7 +672,7 @@ module basics::postLib {
     //         init(test_scenario::ctx(scenario));
     //     };
 
-    //     // create post
+    //     // create common post
     //     test_scenario::next_tx(scenario, &user1);
     //     {
     //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
@@ -587,10 +699,12 @@ module basics::postLib {
     //             user1,
     //             0,
     //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             EXPERT_POST,
     //             vector<u64>[1, 2]
     //         );
 
     //         let (
+    //             postType,
     //             ipfsDoc,
     //             postTime,
     //             author,
@@ -606,19 +720,20 @@ module basics::postLib {
     //             votedUsers
     //         ) = getPostData(postCollection, 0);
 
-    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
-    //         assert!(postTime == 0, 2);
-    //         assert!(author == user1, 3);
-    //         assert!(rating == 0, 4);
-    //         assert!(communityId == 0, 5);
-    //         assert!(officialReply == 0, 6);
-    //         assert!(bestReply == 0, 7);
-    //         assert!(deletedReplyCount == 0, 8);
-    //         assert!(isDeleted == false, 9);
-    //         assert!(tags == vector<u64>[1, 2], 10);
-    //         assert!(properties == vector<u8>[], 11);
-    //         assert!(historyVotes == vector<u128>[], 12);
-    //         assert!(votedUsers == vector<address>[], 13);
+    //         assert!(postType == 0, 1);
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
+    //         assert!(postTime == 0, 3);
+    //         assert!(author == user1, 4);
+    //         assert!(rating == 0, 5);
+    //         assert!(communityId == 0, 6);
+    //         assert!(officialReply == 0, 7);
+    //         assert!(bestReply == 0, 8);
+    //         assert!(deletedReplyCount == 0, 9);
+    //         assert!(isDeleted == false, 10);
+    //         assert!(tags == vector<u64>[1, 2], 11);
+    //         assert!(properties == vector<u8>[], 12);
+    //         assert!(historyVotes == vector<u8>[], 13);
+    //         assert!(votedUsers == vector<address>[], 14);
 
     //         test_scenario::return_shared(scenario, community_wrapper);
     //         test_scenario::return_shared(scenario, post_wrapper);
@@ -642,6 +757,7 @@ module basics::postLib {
     //         );
 
     //         let (
+    //             postType,
     //             ipfsDoc,
     //             postTime,
     //             author,
@@ -657,19 +773,20 @@ module basics::postLib {
     //             votedUsers
     //         ) = getPostData(postCollection, 0);
 
-    //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 1);
-    //         assert!(postTime == 0, 2);
-    //         assert!(author == user1, 3);
-    //         assert!(rating == 0, 4);
-    //         assert!(communityId == 0, 5);
-    //         assert!(officialReply == 0, 6);
-    //         assert!(bestReply == 0, 7);
-    //         assert!(deletedReplyCount == 0, 8);
-    //         assert!(isDeleted == false, 9);
-    //         assert!(tags == vector<u64>[2], 10);
-    //         assert!(properties == vector<u8>[], 11);
-    //         assert!(historyVotes == vector<u128>[], 12);
-    //         assert!(votedUsers == vector<address>[], 13);
+    //         assert!(postType == 0, 1);
+    //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 2);
+    //         assert!(postTime == 0, 3);
+    //         assert!(author == user1, 4);
+    //         assert!(rating == 0, 5);
+    //         assert!(communityId == 0, 6);
+    //         assert!(officialReply == 0, 7);
+    //         assert!(bestReply == 0, 8);
+    //         assert!(deletedReplyCount == 0, 9);
+    //         assert!(isDeleted == false, 10);
+    //         assert!(tags == vector<u64>[2], 11);
+    //         assert!(properties == vector<u8>[], 12);
+    //         assert!(historyVotes == vector<u8>[], 13);
+    //         assert!(votedUsers == vector<address>[], 14);
 
     //         test_scenario::return_shared(scenario, community_wrapper);
     //         test_scenario::return_shared(scenario, post_wrapper);
@@ -713,7 +830,7 @@ module basics::postLib {
     //         assert!(isQuickReply == false, 7);
     //         assert!(isDeleted == false, 9);
     //         assert!(properties == vector<u8>[], 11);
-    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(historyVotes == vector<u8>[], 12);
     //         assert!(votedUsers == vector<address>[], 13);
 
     //         test_scenario::return_shared(scenario, post_wrapper);
@@ -757,7 +874,7 @@ module basics::postLib {
     //         assert!(isQuickReply == false, 7);
     //         assert!(isDeleted == false, 9);
     //         assert!(properties == vector<u8>[], 11);
-    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(historyVotes == vector<u8>[], 12);
     //         assert!(votedUsers == vector<address>[], 13);
 
     //         test_scenario::return_shared(scenario, post_wrapper);
@@ -794,7 +911,7 @@ module basics::postLib {
     //         assert!(rating == 0, 4);
     //         assert!(isDeleted == false, 9);
     //         assert!(properties == vector<u8>[], 11);
-    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(historyVotes == vector<u8>[], 12);
     //         assert!(votedUsers == vector<address>[], 13);
 
     //         test_scenario::return_shared(scenario, post_wrapper);
@@ -833,7 +950,7 @@ module basics::postLib {
     //         assert!(rating == 0, 4);
     //         assert!(isDeleted == false, 9);
     //         assert!(properties == vector<u8>[], 11);
-    //         assert!(historyVotes == vector<u128>[], 12);
+    //         assert!(historyVotes == vector<u8>[], 12);
     //         assert!(votedUsers == vector<address>[], 13);
 
     //         test_scenario::return_shared(scenario, post_wrapper);
@@ -899,6 +1016,7 @@ module basics::postLib {
     //         assert!(isDeleted == true, 0);
 
     //         let (
+    //             _postType,
     //             _ipfsDoc,
     //             _postTime,
     //             _author,
@@ -933,6 +1051,7 @@ module basics::postLib {
     //         );
 
     //         let (
+    //             _postType,
     //             _ipfsDoc,
     //             _postTime,
     //             _author,
@@ -954,6 +1073,110 @@ module basics::postLib {
     //     };
         
     // }
+
+
+    ///
+    //voteLib
+    ///
+    struct StructRating has drop {  // TODO: add drop?
+        upvotedPost: u64,
+        downvotedPost: u64,
+
+        upvotedReply: u64,
+        downvotedReply: u64,
+        firstReply: u64,
+        quickReply: u64,
+        acceptReply: u64,
+        acceptedReply: u64
+    }
+
+    public fun getExpertRating(): StructRating {
+        StructRating {
+            upvotedPost: UPVOTED_EXPERT_POST,
+            downvotedPost: DOWNVOTED_EXPERT_POST,
+
+            upvotedReply: UPVOTED_EXPERT_REPLY,
+            downvotedReply: DOWNVOTED_EXPERT_REPLY,
+            firstReply: FIRST_EXPERT_REPLY,
+            quickReply: QUICK_EXPERT_REPLY,
+            acceptReply: ACCEPT_EXPERT_REPLY,
+            acceptedReply: ACCEPTED_EXPERT_REPLY
+        }
+    }
+
+    public fun getCommonRating(): StructRating {
+        StructRating {
+            upvotedPost: UPVOTED_COMMON_POST,
+            downvotedPost: DOWNVOTED_COMMON_POST,
+
+            upvotedReply: UPVOTED_COMMON_REPLY,
+            downvotedReply: DOWNVOTED_COMMON_REPLY,
+            firstReply: FIRST_COMMON_REPLY,
+            quickReply: QUICK_COMMON_REPLY,
+            acceptReply: ACCEPT_COMMON_REPLY,
+            acceptedReply: ACCEPTED_COMMON_REPLY
+        }
+    }
+
+    public fun getTutorialRating(): StructRating {
+        StructRating {
+            upvotedPost: UPVOTED_TUTORIAL,
+            downvotedPost: DOWNVOTED_TUTORIAL,
+
+            upvotedReply: 0,
+            downvotedReply: 0,
+            firstReply: 0,
+            quickReply: 0,
+            acceptReply: 0,
+            acceptedReply: 0
+        }
+    }
+
+
+    //expert post
+    const DOWNVOT_EXPERT_POST: u64 = 100000 - 1;
+    const UPVOTED_EXPERT_POST: u64 = 100000 + 5;
+    const DOWNVOTED_EXPERT_POST: u64 = 100000 - 2;
+
+    //common post 
+    const DOWNVOTE_COMMON_POST: u64 = 100000 - 1;
+    const UPVOTED_COMMON_POST: u64 = 100000 + 1;
+    const DOWNVOTED_COMMON_POST: u64 = 100000 - 1;
+
+    //tutorial 
+    const DOWNVOTE_TUTORIAL: u64 = 100000 - 1;
+    const UPVOTED_TUTORIAL: u64 = 100000 + 5;
+    const DOWNVOTED_TUTORIAL: u64 = 100000 - 2;
+
+    const DELETE_OWN_POST: u64 = 100000 - 1;
+    const MODERATOR_DELETE_POST: u64 = 100000 - 2;
+
+/////////////////////////////////////////////////////////////////////////////
+
+    //expert reply
+    const DOWNVOTE_EXPERT_REPLY: u64 = 100000 - 1;
+    const UPVOTED_EXPERT_REPLY: u64 = 100000 + 10;
+    const DOWNVOTED_EXPERT_REPLY: u64 = 100000 - 2;
+    const ACCEPT_EXPERT_REPLY: u64 = 100000 + 15;
+    const ACCEPTED_EXPERT_REPLY: u64 = 100000 + 2;
+    const FIRST_EXPERT_REPLY: u64 = 100000 + 5;
+    const QUICK_EXPERT_REPLY: u64 = 100000 + 5;
+
+    //common reply 
+    const DOWNVOTE_COMMON_REPLY: u64 = 100000 - 1;
+    const UPVOTED_COMMON_REPLY: u64 = 100000 + 1;
+    const DOWNVOTED_COMMON_REPLY: u64 = 100000- 1;
+    const ACCEPT_COMMON_REPLY: u64 = 100000 + 3;
+    const ACCEPTED_COMMON_REPLY: u64 = 100000 + 1;
+    const FIRST_COMMON_REPLY: u64 = 100000 + 1;
+    const QUICK_COMMON_REPLY: u64 = 100000 + 1;
+    
+    const DELETE_OWN_REPLY: u64 = 100000 - 1;
+    const MODERATOR_DELETE_REPLY: u64 = 100000 - 2;            // to do
+
+/////////////////////////////////////////////////////////////////////////////////
+
+    const MODERATOR_DELETE_COMMENT: u64 = 100000 - 1;
 }
 
 // #[test_only]

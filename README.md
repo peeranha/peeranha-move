@@ -39,6 +39,16 @@ Error code:
 
 45 - You can not delete the best reply.
 
+46 - You can not publish replies in tutorial or Documentation.
+
+47 - User is forbidden to reply on reply for Expert and Common type of posts
+
+48 - You can not publish comments in Documentation.
+
+49 - This post type is already set.
+
+50 - Error_postType
+
 owner - 0x62a5541796a4fa35229543da71df4f570f7cbe02
 package object ID - 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0
 user object - 0x94e98b7c4f229e5011fffbb1778e2a03003aac5f
