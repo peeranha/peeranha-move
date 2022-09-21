@@ -1,4 +1,4 @@
-module basics::postLib {
+module basics::postLib {    
     use sui::transfer;
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
@@ -6,13 +6,13 @@ module basics::postLib {
     use basics::communityLib;
     // use basics::voteLib;
     use basics::commonLib;
+    use basics::i64Lib;
 
     // TODO: add enum PostType
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
     const TYTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
-    const START_RATING: u64 = 100000;
 
     struct PostCollection has key {
         id: UID,
@@ -24,7 +24,7 @@ module basics::postLib {
         ipfsDoc: commonLib::IpfsHash,
         postTime: u64,
         author: address,
-        rating: u64,
+        rating: i64Lib::I64,
         communityId: u64,
 
         officialReply: u64,
@@ -45,7 +45,7 @@ module basics::postLib {
         ipfsDoc: commonLib::IpfsHash,
         postTime: u64,
         author: address,
-        rating: u64,
+        rating: i64Lib::I64,
         parentReplyId: u64,
         
         isFirstReply: bool,
@@ -62,10 +62,9 @@ module basics::postLib {
         ipfsDoc: commonLib::IpfsHash,
         postTime: u64,
         author: address,
-        rating: u64,
+        rating: i64Lib::I64,
 
         isDeleted: bool,
-
         properties: vector<u8>,
         historyVotes: vector<u8>,                 // to u128?   // 1 - negative, 2 - positive
         votedUsers: vector<address>
@@ -97,7 +96,7 @@ module basics::postLib {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
             postTime: 0,            // TODO: add get time
             author: userAddr,
-            rating: 0,
+            rating: i64Lib::zero(),
             communityId: communityId,
             officialReply: 0,
             bestReply: 0,
@@ -173,7 +172,7 @@ module basics::postLib {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
             postTime: 0,            // TODO: add get time
             author: userAddr,
-            rating: 0,
+            rating: i64Lib::zero(),
             parentReplyId: parentReplyId,
             
             isFirstReply: isFirstReply,
@@ -226,7 +225,7 @@ module basics::postLib {
                 ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
                 postTime: 0,            // TODO: add get time
                 author: userAddr,
-                rating: 0,
+                rating: i64Lib::zero(),
                 isDeleted: false,
 
                 properties: vector::empty<u8>(),
@@ -239,7 +238,7 @@ module basics::postLib {
                 ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
                 postTime: 0,            // TODO: add get time
                 author: userAddr,
-                rating: 0,
+                rating: i64Lib::zero(),
                 isDeleted: false,
 
                 properties: vector::empty<u8>(),
@@ -476,8 +475,10 @@ module basics::postLib {
             i = i +1;
         };
 
-        let _changeUserRating = (newTypeRating.upvotedPost - oldTypeRating.upvotedPost) * positive +
-                                (newTypeRating.downvotedPost - oldTypeRating.downvotedPost) * negative;
+        let positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedPost, &oldTypeRating.upvotedPost), &i64Lib::from(positive));
+        let negativeRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.downvotedPost, &oldTypeRating.downvotedPost), &i64Lib::from(negative));
+        let _changeUserRating = i64Lib::add(&positiveRating, &negativeRating);
+
         // TODO: add
         // self.peeranhaUser.updateUserRating(postContainer.info.author, changeUserRating, postContainer.info.communityId);
 
@@ -497,16 +498,17 @@ module basics::postLib {
                 i = i +1;
             };
 
+            positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedReply, &oldTypeRating.upvotedReply), &i64Lib::from(positive));
+            negativeRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.downvotedReply, &oldTypeRating.downvotedReply), &i64Lib::from(negative));
+            _changeUserRating = i64Lib::add(&positiveRating, &negativeRating);
 
-            _changeUserRating = (newTypeRating.upvotedReply - oldTypeRating.upvotedReply) * positive +
-                                (newTypeRating.downvotedReply - oldTypeRating.downvotedReply) * negative;
-
-            if (reply.rating >= START_RATING) {
-                if (reply.isFirstReply) {   // todo !!!math
-                    _changeUserRating = _changeUserRating + (newTypeRating.firstReply - oldTypeRating.firstReply);
+            if (i64Lib::compare(&reply.rating, &i64Lib::zero()) == i64Lib::getGreaterThan() 
+                || i64Lib::compare(&reply.rating, &i64Lib::zero()) == i64Lib::getEual()) {
+                if (reply.isFirstReply) {
+                    _changeUserRating = i64Lib::add(&_changeUserRating, &i64Lib::sub(&newTypeRating.firstReply, &oldTypeRating.firstReply));
                 };
                 if (reply.isQuickReply) {
-                    _changeUserRating = _changeUserRating + (newTypeRating.quickReply - oldTypeRating.quickReply);
+                    _changeUserRating = i64Lib::add(&_changeUserRating, &i64Lib::sub(&newTypeRating.quickReply, &oldTypeRating.quickReply));
                 };
             };
             // TODO: add
@@ -591,7 +593,7 @@ module basics::postLib {
     // }
 
     // for unitTests
-    public fun getPostData(postCollection: &mut PostCollection, postId: u64): (u8, vector<u8>, u64, address, u64, u64, u64, u64, u64, bool, vector<u64>, vector<u8>, vector<u8>, vector<address>) {
+    public fun getPostData(postCollection: &mut PostCollection, postId: u64): (u8, vector<u8>, u64, address, i64Lib::I64, u64, u64, u64, u64, bool, vector<u64>, vector<u8>, vector<u8>, vector<address>) {
         let post = getPost(postCollection, postId);
         (
             post.postType,
@@ -614,7 +616,7 @@ module basics::postLib {
     }
 
     // for unitTests
-    public fun getReplyData(postCollection: &mut PostCollection, postId: u64, replyId: u64): (vector<u8>, u64, address, u64, u64, bool, bool, bool, vector<u8>, vector<u8>, vector<address>) {
+    public fun getReplyData(postCollection: &mut PostCollection, postId: u64, replyId: u64): (vector<u8>, u64, address, i64Lib::I64, u64, bool, bool, bool, vector<u8>, vector<u8>, vector<address>) {
         let post = getPost(postCollection, postId);
         let reply = getReply(post, replyId);
 
@@ -635,7 +637,7 @@ module basics::postLib {
     }
 
     // for unitTests
-    public fun getCommentData(postCollection: &mut PostCollection, postId: u64, parentReplyId: u64, commentId: u64): (vector<u8>, u64, address, u64, bool, vector<u8>, vector<u8>, vector<address>) {
+    public fun getCommentData(postCollection: &mut PostCollection, postId: u64, parentReplyId: u64, commentId: u64): (vector<u8>, u64, address, i64Lib::I64, bool, vector<u8>, vector<u8>, vector<address>) {
         let post = getPost(postCollection, postId);
         let comment = getComment(post, parentReplyId, commentId);
         
@@ -672,7 +674,7 @@ module basics::postLib {
     //         init(test_scenario::ctx(scenario));
     //     };
 
-    //     // create common post
+    //     // create expert post
     //     test_scenario::next_tx(scenario, &user1);
     //     {
     //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
@@ -720,11 +722,11 @@ module basics::postLib {
     //             votedUsers
     //         ) = getPostData(postCollection, 0);
 
-    //         assert!(postType == 0, 1);
+    //         assert!(postType == EXPERT_POST, 1);
     //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
     //         assert!(postTime == 0, 3);
     //         assert!(author == user1, 4);
-    //         assert!(rating == 0, 5);
+    //         assert!(rating == i64Lib::zero(), 5);
     //         assert!(communityId == 0, 6);
     //         assert!(officialReply == 0, 7);
     //         assert!(bestReply == 0, 8);
@@ -736,6 +738,65 @@ module basics::postLib {
     //         assert!(votedUsers == vector<address>[], 14);
 
     //         test_scenario::return_shared(scenario, community_wrapper);
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+    //     // change post type expert -> common
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+            
+    //         changePostType(
+    //             postCollection,
+    //             user1,
+    //             0,
+    //             COMMON_POST,
+    //         );
+
+    //         let (
+    //             postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             _isDeleted,
+    //             _tags,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getPostData(postCollection, 0);
+    //         assert!(postType == COMMON_POST, 1);
+
+    //         changePostType(
+    //             postCollection,
+    //             user1,
+    //             0,
+    //             EXPERT_POST,
+    //         );
+
+    //         let (
+    //             postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             _isDeleted,
+    //             _tags,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getPostData(postCollection, 0);
+    //         assert!(postType == EXPERT_POST, 1);
+
     //         test_scenario::return_shared(scenario, post_wrapper);
     //     };
 
@@ -777,7 +838,7 @@ module basics::postLib {
     //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 2);
     //         assert!(postTime == 0, 3);
     //         assert!(author == user1, 4);
-    //         assert!(rating == 0, 5);
+    //         assert!(rating == i64Lib::zero(), 5);
     //         assert!(communityId == 0, 6);
     //         assert!(officialReply == 0, 7);
     //         assert!(bestReply == 0, 8);
@@ -824,7 +885,7 @@ module basics::postLib {
     //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
     //         assert!(postTime == 0, 2);
     //         assert!(author == user1, 3);
-    //         assert!(rating == 0, 4);
+    //         assert!(rating == i64Lib::zero(), 4);
     //         assert!(parentReplyId == 0, 5);
     //         assert!(isFirstReply == false, 6);
     //         assert!(isQuickReply == false, 7);
@@ -868,7 +929,7 @@ module basics::postLib {
     //         assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
     //         assert!(postTime == 0, 2);
     //         assert!(author == user1, 3);
-    //         assert!(rating == 0, 4);
+    //         assert!(rating == i64Lib::zero(), 4);
     //         assert!(parentReplyId == 0, 5);
     //         assert!(isFirstReply == false, 6);
     //         assert!(isQuickReply == false, 7);
@@ -908,7 +969,7 @@ module basics::postLib {
     //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 1);
     //         assert!(postTime == 0, 2);
     //         assert!(author == user1, 3);
-    //         assert!(rating == 0, 4);
+    //         assert!(rating == i64Lib::zero(), 4);
     //         assert!(isDeleted == false, 9);
     //         assert!(properties == vector<u8>[], 11);
     //         assert!(historyVotes == vector<u8>[], 12);
@@ -947,7 +1008,7 @@ module basics::postLib {
     //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
     //         assert!(postTime == 0, 2);
     //         assert!(author == user1, 3);
-    //         assert!(rating == 0, 4);
+    //         assert!(rating == i64Lib::zero(), 4);
     //         assert!(isDeleted == false, 9);
     //         assert!(properties == vector<u8>[], 11);
     //         assert!(historyVotes == vector<u8>[], 12);
@@ -1071,7 +1132,6 @@ module basics::postLib {
 
     //         test_scenario::return_shared(scenario, post_wrapper);
     //     };
-        
     // }
 
 
@@ -1079,104 +1139,104 @@ module basics::postLib {
     //voteLib
     ///
     struct StructRating has drop {  // TODO: add drop?
-        upvotedPost: u64,
-        downvotedPost: u64,
+        upvotedPost: i64Lib::I64,
+        downvotedPost: i64Lib::I64,
 
-        upvotedReply: u64,
-        downvotedReply: u64,
-        firstReply: u64,
-        quickReply: u64,
-        acceptReply: u64,
-        acceptedReply: u64
+        upvotedReply: i64Lib::I64,
+        downvotedReply: i64Lib::I64,
+        firstReply: i64Lib::I64,
+        quickReply: i64Lib::I64,
+        acceptReply: i64Lib::I64,
+        acceptedReply: i64Lib::I64
     }
 
     public fun getExpertRating(): StructRating {
         StructRating {
-            upvotedPost: UPVOTED_EXPERT_POST,
-            downvotedPost: DOWNVOTED_EXPERT_POST,
+            upvotedPost: i64Lib::from(UPVOTED_EXPERT_POST),
+            downvotedPost: i64Lib::neg_from(DOWNVOTED_EXPERT_POST),
 
-            upvotedReply: UPVOTED_EXPERT_REPLY,
-            downvotedReply: DOWNVOTED_EXPERT_REPLY,
-            firstReply: FIRST_EXPERT_REPLY,
-            quickReply: QUICK_EXPERT_REPLY,
-            acceptReply: ACCEPT_EXPERT_REPLY,
-            acceptedReply: ACCEPTED_EXPERT_REPLY
+            upvotedReply: i64Lib::from(UPVOTED_EXPERT_REPLY),
+            downvotedReply: i64Lib::neg_from(DOWNVOTED_EXPERT_REPLY),
+            firstReply: i64Lib::from(FIRST_EXPERT_REPLY),
+            quickReply: i64Lib::from(QUICK_EXPERT_REPLY),
+            acceptReply: i64Lib::from(ACCEPT_EXPERT_REPLY),
+            acceptedReply: i64Lib::from(ACCEPTED_EXPERT_REPLY)
         }
     }
 
     public fun getCommonRating(): StructRating {
         StructRating {
-            upvotedPost: UPVOTED_COMMON_POST,
-            downvotedPost: DOWNVOTED_COMMON_POST,
+            upvotedPost: i64Lib::from(UPVOTED_COMMON_POST),
+            downvotedPost: i64Lib::neg_from(DOWNVOTED_COMMON_POST),
 
-            upvotedReply: UPVOTED_COMMON_REPLY,
-            downvotedReply: DOWNVOTED_COMMON_REPLY,
-            firstReply: FIRST_COMMON_REPLY,
-            quickReply: QUICK_COMMON_REPLY,
-            acceptReply: ACCEPT_COMMON_REPLY,
-            acceptedReply: ACCEPTED_COMMON_REPLY
+            upvotedReply: i64Lib::from(UPVOTED_COMMON_REPLY),
+            downvotedReply: i64Lib::neg_from(DOWNVOTED_COMMON_REPLY),
+            firstReply: i64Lib::from(FIRST_COMMON_REPLY),
+            quickReply: i64Lib::from(QUICK_COMMON_REPLY),
+            acceptReply: i64Lib::from(ACCEPT_COMMON_REPLY),
+            acceptedReply: i64Lib::from(ACCEPTED_COMMON_REPLY)
         }
     }
 
     public fun getTutorialRating(): StructRating {
         StructRating {
-            upvotedPost: UPVOTED_TUTORIAL,
-            downvotedPost: DOWNVOTED_TUTORIAL,
+            upvotedPost: i64Lib::from(UPVOTED_TUTORIAL),
+            downvotedPost: i64Lib::neg_from(DOWNVOTED_TUTORIAL),
 
-            upvotedReply: 0,
-            downvotedReply: 0,
-            firstReply: 0,
-            quickReply: 0,
-            acceptReply: 0,
-            acceptedReply: 0
+            upvotedReply: i64Lib::zero(),
+            downvotedReply: i64Lib::zero(),
+            firstReply: i64Lib::zero(),
+            quickReply: i64Lib::zero(),
+            acceptReply: i64Lib::zero(),
+            acceptedReply: i64Lib::zero()
         }
     }
 
 
     //expert post
-    const DOWNVOT_EXPERT_POST: u64 = 100000 - 1;
-    const UPVOTED_EXPERT_POST: u64 = 100000 + 5;
-    const DOWNVOTED_EXPERT_POST: u64 = 100000 - 2;
+    const DOWNVOT_EXPERT_POST: u64 = 1;         // negative
+    const UPVOTED_EXPERT_POST: u64 = 5;
+    const DOWNVOTED_EXPERT_POST: u64 = 2;       // negative
 
     //common post 
-    const DOWNVOTE_COMMON_POST: u64 = 100000 - 1;
-    const UPVOTED_COMMON_POST: u64 = 100000 + 1;
-    const DOWNVOTED_COMMON_POST: u64 = 100000 - 1;
+    const DOWNVOTE_COMMON_POST: u64 = 1;        // negative
+    const UPVOTED_COMMON_POST: u64 = 1;
+    const DOWNVOTED_COMMON_POST: u64 = 1;       // negative
 
     //tutorial 
-    const DOWNVOTE_TUTORIAL: u64 = 100000 - 1;
-    const UPVOTED_TUTORIAL: u64 = 100000 + 5;
-    const DOWNVOTED_TUTORIAL: u64 = 100000 - 2;
+    const DOWNVOTE_TUTORIAL: u64 = 1;           // negative
+    const UPVOTED_TUTORIAL: u64 = 5;
+    const DOWNVOTED_TUTORIAL: u64 = 2;          // negative
 
-    const DELETE_OWN_POST: u64 = 100000 - 1;
-    const MODERATOR_DELETE_POST: u64 = 100000 - 2;
+    const DELETE_OWN_POST: u64 = 1;             // negative
+    const MODERATOR_DELETE_POST: u64 = 2;       // negative
 
 /////////////////////////////////////////////////////////////////////////////
 
     //expert reply
-    const DOWNVOTE_EXPERT_REPLY: u64 = 100000 - 1;
-    const UPVOTED_EXPERT_REPLY: u64 = 100000 + 10;
-    const DOWNVOTED_EXPERT_REPLY: u64 = 100000 - 2;
-    const ACCEPT_EXPERT_REPLY: u64 = 100000 + 15;
-    const ACCEPTED_EXPERT_REPLY: u64 = 100000 + 2;
-    const FIRST_EXPERT_REPLY: u64 = 100000 + 5;
-    const QUICK_EXPERT_REPLY: u64 = 100000 + 5;
+    const DOWNVOTE_EXPERT_REPLY: u64 = 1;       // negative
+    const UPVOTED_EXPERT_REPLY: u64 = 10;
+    const DOWNVOTED_EXPERT_REPLY: u64 = 2;      // negative
+    const ACCEPT_EXPERT_REPLY: u64 = 15;
+    const ACCEPTED_EXPERT_REPLY: u64 = 2;
+    const FIRST_EXPERT_REPLY: u64 = 5;
+    const QUICK_EXPERT_REPLY: u64 = 5;
 
     //common reply 
-    const DOWNVOTE_COMMON_REPLY: u64 = 100000 - 1;
-    const UPVOTED_COMMON_REPLY: u64 = 100000 + 1;
-    const DOWNVOTED_COMMON_REPLY: u64 = 100000- 1;
-    const ACCEPT_COMMON_REPLY: u64 = 100000 + 3;
-    const ACCEPTED_COMMON_REPLY: u64 = 100000 + 1;
-    const FIRST_COMMON_REPLY: u64 = 100000 + 1;
-    const QUICK_COMMON_REPLY: u64 = 100000 + 1;
+    const DOWNVOTE_COMMON_REPLY: u64 = 1;       // negative
+    const UPVOTED_COMMON_REPLY: u64 = 1;
+    const DOWNVOTED_COMMON_REPLY: u64 = 1;      // negative
+    const ACCEPT_COMMON_REPLY: u64 = 3;
+    const ACCEPTED_COMMON_REPLY: u64 = 1;
+    const FIRST_COMMON_REPLY: u64 = 1;
+    const QUICK_COMMON_REPLY: u64 = 1;
     
-    const DELETE_OWN_REPLY: u64 = 100000 - 1;
-    const MODERATOR_DELETE_REPLY: u64 = 100000 - 2;            // to do
+    const DELETE_OWN_REPLY: u64 = 1;            // negative
+    const MODERATOR_DELETE_REPLY: u64 = 2;      // negative     // to do
 
 /////////////////////////////////////////////////////////////////////////////////
 
-    const MODERATOR_DELETE_COMMENT: u64 = 100000 - 1;
+    const MODERATOR_DELETE_COMMENT: u64 = 1;    // negative
 }
 
 // #[test_only]
