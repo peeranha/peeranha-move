@@ -5,6 +5,7 @@ module basics::postLib {
     use std::vector;
     use basics::communityLib;
     use basics::commonLib;
+    use basics::userLib;
     use basics::i64Lib;
 
     // TODO: add enum PostType
@@ -455,6 +456,7 @@ module basics::postLib {
 
     public entry fun voteForumItem(
         postCollection: &mut PostCollection,
+        userCollection: &mut userLib::UserCollection,
         userAddr: address,
         postId: u64,
         replyId: u64,
@@ -464,16 +466,16 @@ module basics::postLib {
         let _voteDirection: u8 = 0;
         if (commentId != 0) {
             // TODO: add
-            _voteDirection = voteComment(postCollection, postId, replyId, commentId, userAddr, isUpvote);
+            _voteDirection = voteComment(postCollection, userCollection, postId, replyId, commentId, userAddr, isUpvote);
         } else if (replyId != 0) {
             // TODO: add
             // Invalid immutable borrow at field 'communityId'.
             // postLib.move(474, 25): It is still being mutably borrowed by this reference  // reply, post.communityId
-            _voteDirection = voteReply(postCollection, postId, replyId, userAddr, isUpvote, );
+            _voteDirection = voteReply(postCollection, userCollection, postId, replyId, userAddr, isUpvote, );
         } else {
             // TODO: add 
             // Invalid usage of reference as function argument. Cannot transfer a mutable reference that is being borrowed  // double ref "postCollection, post"
-            _voteDirection = votePost(postCollection, postId, userAddr, isUpvote);
+            _voteDirection = votePost(postCollection, userCollection, postId, userAddr, isUpvote);
         };
 
         // TODO: add
@@ -491,6 +493,7 @@ module basics::postLib {
     ///
     fun votePost(
         postCollection: &mut PostCollection,
+        _userCollection: &mut userLib::UserCollection,
         postId: u64,
         votedUser: address,
         isUpvote: bool
@@ -506,7 +509,7 @@ module basics::postLib {
         // TODO: add
         // Invalid usage of reference as function argument. Cannot transfer a mutable reference that is being borrowed
         // postLib.move(506, 20): It is still being mutably borrowed by this reference
-        // vote(postCollection, post.author, votedUser, postType, isUpvote, ratingChange, TYPE_CONTENT_POST, post.communityId);
+        // vote(userCollection, post.author, votedUser, postType, isUpvote, ratingChange, TYPE_CONTENT_POST, post.communityId);
         post.rating = i64Lib::add(&post.rating, &ratingChange);
 
         if (isCancel) {
@@ -526,6 +529,7 @@ module basics::postLib {
 
     fun voteReply(
         postCollection: &mut PostCollection,
+        _userCollection: &mut userLib::UserCollection,
         postId: u64,
         replyId: u64,
         votedUser: address,
@@ -539,7 +543,7 @@ module basics::postLib {
 
         // TODO: add check role
 
-        // vote(postCollection, reply.author, votedUser, postType, isUpvote, ratingChange, TYPE_CONTENT_REPLY, communityId);
+        // vote(userCollection, reply.author, votedUser, post.postType, isUpvote, ratingChange, TYPE_CONTENT_REPLY, post.communityId);
         let oldRating: i64Lib::I64 = reply.rating;
         reply.rating = i64Lib::add(&reply.rating, &ratingChange);
         let newRating: i64Lib::I64 = reply.rating;
@@ -582,6 +586,7 @@ module basics::postLib {
 
     fun voteComment(
         postCollection: &mut PostCollection,
+        _userCollection: &mut userLib::UserCollection,
         postId: u64,
         replyId: u64,
         commentId: u64,
@@ -613,7 +618,7 @@ module basics::postLib {
     }
 
     fun vote(
-        _postCollection: &mut PostCollection,
+        _userCollection: &mut userLib::UserCollection,
         author: address,
         votedUser: address,
         postType: u8,
