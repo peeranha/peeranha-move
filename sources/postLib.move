@@ -4,7 +4,6 @@ module basics::postLib {
     use sui::tx_context::{Self, TxContext};
     use std::vector;
     use basics::communityLib;
-    // use basics::voteLib;
     use basics::commonLib;
     use basics::i64Lib;
 
@@ -13,6 +12,16 @@ module basics::postLib {
     const COMMON_POST: u8 = 1;
     const TYTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
+
+    const DIRECTION_DOWNVOTE: u8 = 4;
+    const DIRECTION_CANCEL_DOWNVOTE: u8 = 0;
+    const DIRECTION_UPVOTE: u8 = 3;
+    const DIRECTION_CANCEL_UPVOTE: u8 = 1;
+
+    // TODO: add enum TypeContent
+    const TYPE_CONTENT_POST: u8 = 0;
+    const TYPE_CONTENT_REPLY: u8 = 1;
+    const TYPE_CONTENT_COMMENT: u8 = 2;
 
     struct PostCollection has key {
         id: UID,
@@ -68,6 +77,11 @@ module basics::postLib {
         properties: vector<u8>,
         historyVotes: vector<u8>,                 // to u128?   // 1 - negative, 2 - positive
         votedUsers: vector<address>
+    }
+
+    struct UserRatingChange has drop {
+        user: address,
+        rating: i64Lib::I64
     }
    
     fun init(ctx: &mut TxContext) {
@@ -439,6 +453,209 @@ module basics::postLib {
         // TODO: add emit CommentDeleted(userAddr, postId, parentReplyId, commentId);
     }
 
+    public entry fun voteForumItem(
+        postCollection: &mut PostCollection,
+        userAddr: address,
+        postId: u64,
+        replyId: u64,
+        commentId: u64,
+        isUpvote: bool
+    ) {
+        let _voteDirection: u8 = 0;
+        if (commentId != 0) {
+            // TODO: add
+            _voteDirection = voteComment(postCollection, postId, replyId, commentId, userAddr, isUpvote);
+        } else if (replyId != 0) {
+            // TODO: add
+            // Invalid immutable borrow at field 'communityId'.
+            // postLib.move(474, 25): It is still being mutably borrowed by this reference  // reply, post.communityId
+            _voteDirection = voteReply(postCollection, postId, replyId, userAddr, isUpvote, );
+        } else {
+            // TODO: add 
+            // Invalid usage of reference as function argument. Cannot transfer a mutable reference that is being borrowed  // double ref "postCollection, post"
+            _voteDirection = votePost(postCollection, postId, userAddr, isUpvote);
+        };
+
+        // TODO: add
+        // emit ForumItemVoted(userAddr, postId, replyId, commentId, voteDirection);
+    }
+
+    ///
+    // double ref:
+    // postCollection: &mut PostCollection,
+    // post: &mut Post,
+    //
+    // ERROR: 
+    // Invalid usage of reference as function argument. Cannot transfer a mutable reference that is being borrowed
+    // postLib.move(455, 20): It is still being mutably borrowed by this reference
+    ///
+    fun votePost(
+        postCollection: &mut PostCollection,
+        postId: u64,
+        votedUser: address,
+        isUpvote: bool
+    ): u8 {
+        let post = getMutablePost(postCollection, postId);
+        let postType = post.postType;
+        assert!(postType != DOCUMENTATION, 54);
+        assert!(votedUser != post.author, 53);
+        
+        let (ratingChange, isCancel) = getForumItemRatingChange(votedUser, &mut post.historyVotes, isUpvote, &mut post.votedUsers);
+        // TODO: add check role
+
+        // TODO: add
+        // Invalid usage of reference as function argument. Cannot transfer a mutable reference that is being borrowed
+        // postLib.move(506, 20): It is still being mutably borrowed by this reference
+        // vote(postCollection, post.author, votedUser, postType, isUpvote, ratingChange, TYPE_CONTENT_POST, post.communityId);
+        post.rating = i64Lib::add(&post.rating, &ratingChange);
+
+        if (isCancel) {
+            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+                DIRECTION_CANCEL_DOWNVOTE
+            } else {
+                DIRECTION_CANCEL_UPVOTE
+            }
+        } else {
+            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+                DIRECTION_UPVOTE
+            } else {
+                DIRECTION_DOWNVOTE
+            }
+        }
+    }
+
+    fun voteReply(
+        postCollection: &mut PostCollection,
+        postId: u64,
+        replyId: u64,
+        votedUser: address,
+        isUpvote: bool
+    ): u8 {
+        let post = getMutablePost(postCollection, postId);
+        let reply = getMutableReply(post, replyId);
+        assert!(votedUser != reply.author, 52);
+
+        let (ratingChange, isCancel) = getForumItemRatingChange(votedUser, &mut reply.historyVotes, isUpvote, &mut reply.votedUsers);
+
+        // TODO: add check role
+
+        // vote(postCollection, reply.author, votedUser, postType, isUpvote, ratingChange, TYPE_CONTENT_REPLY, communityId);
+        let oldRating: i64Lib::I64 = reply.rating;
+        reply.rating = i64Lib::add(&reply.rating, &ratingChange);
+        let newRating: i64Lib::I64 = reply.rating;
+
+        if (reply.isFirstReply) {  // oldRating < 0 && newRating >= 0
+            if (i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getLessThan() && (i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getEual())) {
+                // TODO: add
+                // self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
+            } else if ((i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getEual()) && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getLessThan()) { // (oldRating >= 0 && newRating < 0)
+                // TODO: add
+                // self.peeranhaUser.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.FirstReply), communityId);
+            };
+        };
+
+        if (reply.isQuickReply) { //oldRating < 0 && newRating >= 0
+            if (i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getLessThan() && (i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getEual())) {
+                // TODO: add check role
+                // self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), communityId);
+            } else if ((i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getEual()) && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getLessThan()) { // oldRating >= 0 && newRating < 0
+                // TODO: add check role
+                // self.peeranhaUser.updateUserRating(replyContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postType, VoteLib.ResourceAction.QuickReply), communityId);
+            };
+        };
+        
+        
+        if (isCancel) {
+            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+                DIRECTION_CANCEL_DOWNVOTE
+            } else {
+                DIRECTION_CANCEL_UPVOTE
+            }
+        } else {
+            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+                DIRECTION_UPVOTE
+            } else {
+                DIRECTION_DOWNVOTE
+            }
+        }
+    }
+
+    fun voteComment(
+        postCollection: &mut PostCollection,
+        postId: u64,
+        replyId: u64,
+        commentId: u64,
+        votedUser: address,
+        isUpvote: bool
+    ): u8 {
+        let post = getMutablePost(postCollection, postId);
+        let comment = getMutableComment (post, replyId, commentId);
+        assert!(votedUser != comment.author, 51);
+        
+        let (ratingChange, isCancel) = getForumItemRatingChange(votedUser, &mut comment.historyVotes, isUpvote, &mut comment.votedUsers);
+        // TODO: add check role
+
+        comment.rating = i64Lib::add(&comment.rating, &ratingChange);
+
+        if (isCancel) {
+            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+                DIRECTION_CANCEL_DOWNVOTE
+            } else {
+                DIRECTION_CANCEL_UPVOTE
+            }
+        } else {
+            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+                DIRECTION_UPVOTE
+            } else {
+                DIRECTION_DOWNVOTE
+            }
+        }
+    }
+
+    fun vote(
+        _postCollection: &mut PostCollection,
+        author: address,
+        votedUser: address,
+        postType: u8,
+        isUpvote: bool,
+        ratingChanged: i64Lib::I64,
+        typeContent: u8,
+        _communityId: u64
+    ) {
+        // TODO: add Unused assignment or binding for local '_authorRating'. Consider removing, replacing with '_', or prefixing with '_'
+        let _authorRating = i64Lib::zero();      // usersRating[0]
+        let votedUserRating = i64Lib::zero();   // usersRating[1]
+
+        if (isUpvote) {
+            _authorRating = getUserRatingChange(postType, RESOURCE_ACTION_UPVOTED, typeContent);
+
+            if (i64Lib::compare(&ratingChanged, &i64Lib::from(2)) == i64Lib::getEual()) {
+                _authorRating = i64Lib::add(&_authorRating, &i64Lib::mul(&getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTED, typeContent), &i64Lib::neg_from(1)));
+                votedUserRating = i64Lib::mul(&getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTE, typeContent), &i64Lib::neg_from(1)); 
+            };
+
+            if (i64Lib::compare(&ratingChanged, &i64Lib::zero()) == i64Lib::getLessThan()) {
+                _authorRating = i64Lib::mul(&_authorRating, &i64Lib::neg_from(1));
+                votedUserRating = i64Lib::mul(&votedUserRating, &i64Lib::neg_from(1));
+            };
+        } else {
+            _authorRating = getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTED, typeContent);
+            votedUserRating = getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTE, typeContent);
+
+            if (i64Lib::compare(&ratingChanged, &i64Lib::neg_from(2)) == i64Lib::getEual()) {
+                _authorRating = i64Lib::add(&_authorRating, &i64Lib::mul(&getUserRatingChange(postType, RESOURCE_ACTION_UPVOTED, typeContent), &i64Lib::neg_from(1)));
+            };
+
+            if (i64Lib::compare(&ratingChanged, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+                _authorRating = i64Lib::mul(&_authorRating, &i64Lib::neg_from(1));
+                votedUserRating = i64Lib::mul(&votedUserRating, &i64Lib::neg_from(2));  
+            };
+        };
+
+        let _usersRating: vector<UserRatingChange> = vector<UserRatingChange>[UserRatingChange{ user: author, rating: _authorRating }, UserRatingChange{ user: votedUser, rating: votedUserRating }];
+        // self.peeranhaUser.updateUsersRating(usersRating, communityId);
+    }
+
     public entry fun changePostType(    // TODO: add tests
         postCollection: &mut PostCollection,
         _userAddr: address,
@@ -458,7 +675,7 @@ module basics::postLib {
             newPostType != TYTORIAL,
                 50
         );
-        
+
         let oldTypeRating: StructRating = getTypesRating(oldPostType);
         let newTypeRating: StructRating = getTypesRating(newPostType);
 
@@ -1150,51 +1367,16 @@ module basics::postLib {
         acceptedReply: i64Lib::I64
     }
 
-    public fun getExpertRating(): StructRating {
-        StructRating {
-            upvotedPost: i64Lib::from(UPVOTED_EXPERT_POST),
-            downvotedPost: i64Lib::neg_from(DOWNVOTED_EXPERT_POST),
-
-            upvotedReply: i64Lib::from(UPVOTED_EXPERT_REPLY),
-            downvotedReply: i64Lib::neg_from(DOWNVOTED_EXPERT_REPLY),
-            firstReply: i64Lib::from(FIRST_EXPERT_REPLY),
-            quickReply: i64Lib::from(QUICK_EXPERT_REPLY),
-            acceptReply: i64Lib::from(ACCEPT_EXPERT_REPLY),
-            acceptedReply: i64Lib::from(ACCEPTED_EXPERT_REPLY)
-        }
-    }
-
-    public fun getCommonRating(): StructRating {
-        StructRating {
-            upvotedPost: i64Lib::from(UPVOTED_COMMON_POST),
-            downvotedPost: i64Lib::neg_from(DOWNVOTED_COMMON_POST),
-
-            upvotedReply: i64Lib::from(UPVOTED_COMMON_REPLY),
-            downvotedReply: i64Lib::neg_from(DOWNVOTED_COMMON_REPLY),
-            firstReply: i64Lib::from(FIRST_COMMON_REPLY),
-            quickReply: i64Lib::from(QUICK_COMMON_REPLY),
-            acceptReply: i64Lib::from(ACCEPT_COMMON_REPLY),
-            acceptedReply: i64Lib::from(ACCEPTED_COMMON_REPLY)
-        }
-    }
-
-    public fun getTutorialRating(): StructRating {
-        StructRating {
-            upvotedPost: i64Lib::from(UPVOTED_TUTORIAL),
-            downvotedPost: i64Lib::neg_from(DOWNVOTED_TUTORIAL),
-
-            upvotedReply: i64Lib::zero(),
-            downvotedReply: i64Lib::zero(),
-            firstReply: i64Lib::zero(),
-            quickReply: i64Lib::zero(),
-            acceptReply: i64Lib::zero(),
-            acceptedReply: i64Lib::zero()
-        }
-    }
-
+    const RESOURCE_ACTION_DOWNVOTE: u8 = 0;
+    const RESOURCE_ACTION_UPVOTED: u8 = 1;
+    const RESOURCE_ACTION_DOWNVOTED: u8 = 2;
+    const RESOURCE_ACTION_ACCEPT_REPLY: u8 = 3;
+    const RESOURCE_ACTION_ACCEPTED_REPLY: u8 = 4;
+    const RESOURCE_ACTION_FIRST_REPLY: u8 = 5;
+    const RESOURCE_ACTION_QUICK_REPLY: u8 = 6;
 
     //expert post
-    const DOWNVOT_EXPERT_POST: u64 = 1;         // negative
+    const DOWNVOTE_EXPERT_POST: u64 = 1;         // negative
     const UPVOTED_EXPERT_POST: u64 = 5;
     const DOWNVOTED_EXPERT_POST: u64 = 2;       // negative
 
@@ -1237,6 +1419,196 @@ module basics::postLib {
 /////////////////////////////////////////////////////////////////////////////////
 
     const MODERATOR_DELETE_COMMENT: u64 = 1;    // negative
+
+        public fun getExpertRating(): StructRating {
+        StructRating {
+            upvotedPost: i64Lib::from(UPVOTED_EXPERT_POST),
+            downvotedPost: i64Lib::neg_from(DOWNVOTED_EXPERT_POST),
+
+            upvotedReply: i64Lib::from(UPVOTED_EXPERT_REPLY),
+            downvotedReply: i64Lib::neg_from(DOWNVOTED_EXPERT_REPLY),
+            firstReply: i64Lib::from(FIRST_EXPERT_REPLY),
+            quickReply: i64Lib::from(QUICK_EXPERT_REPLY),
+            acceptReply: i64Lib::from(ACCEPT_EXPERT_REPLY),
+            acceptedReply: i64Lib::from(ACCEPTED_EXPERT_REPLY)
+        }
+    }
+
+    public fun getCommonRating(): StructRating {
+        StructRating {
+            upvotedPost: i64Lib::from(UPVOTED_COMMON_POST),
+            downvotedPost: i64Lib::neg_from(DOWNVOTED_COMMON_POST),
+
+            upvotedReply: i64Lib::from(UPVOTED_COMMON_REPLY),
+            downvotedReply: i64Lib::neg_from(DOWNVOTED_COMMON_REPLY),
+            firstReply: i64Lib::from(FIRST_COMMON_REPLY),
+            quickReply: i64Lib::from(QUICK_COMMON_REPLY),
+            acceptReply: i64Lib::from(ACCEPT_COMMON_REPLY),
+            acceptedReply: i64Lib::from(ACCEPTED_COMMON_REPLY)
+        }
+    }
+
+    public fun getTutorialRating(): StructRating {
+        StructRating {
+            upvotedPost: i64Lib::from(UPVOTED_TUTORIAL),
+            downvotedPost: i64Lib::neg_from(DOWNVOTED_TUTORIAL),
+
+            upvotedReply: i64Lib::zero(),
+            downvotedReply: i64Lib::zero(),
+            firstReply: i64Lib::zero(),
+            quickReply: i64Lib::zero(),
+            acceptReply: i64Lib::zero(),
+            acceptedReply: i64Lib::zero()
+        }
+    }
+
+    public fun getUserRatingChangeForPostAction(
+        postType: u8,
+        resourceAction: u8
+    ): i64Lib::I64 {
+        if (postType == EXPERT_POST) {
+            if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_EXPERT_POST)
+            else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_EXPERT_POST)
+            else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_EXPERT_POST)
+            else abort 31
+
+        } else if (postType == COMMON_POST) {
+            if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_COMMON_POST)
+            else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_COMMON_POST)
+            else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_COMMON_POST)
+            else abort 31
+
+        } else if (postType == TYTORIAL) {
+            if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_TUTORIAL)
+            else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_TUTORIAL)
+            else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_TUTORIAL)
+            else abort 31
+
+        } else {
+            abort 31
+        }
+    }
+
+    public fun getUserRatingChangeForReplyAction(
+        postType: u8,
+        resourceAction: u8
+    ): i64Lib::I64 {
+        if (postType == EXPERT_POST) {
+            if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_EXPERT_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_EXPERT_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_EXPERT_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_ACCEPT_REPLY) i64Lib::from(ACCEPT_EXPERT_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_ACCEPTED_REPLY) i64Lib::from(ACCEPTED_EXPERT_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_FIRST_REPLY) i64Lib::from(FIRST_EXPERT_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_QUICK_REPLY) i64Lib::from(QUICK_EXPERT_REPLY)
+            else abort 32
+
+        } else if (postType == COMMON_POST) {
+            if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_COMMON_POST)
+            else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_COMMON_POST)
+            else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_COMMON_POST)
+            else if (resourceAction == RESOURCE_ACTION_ACCEPT_REPLY) i64Lib::from(ACCEPT_COMMON_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_ACCEPTED_REPLY) i64Lib::from(ACCEPTED_COMMON_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_FIRST_REPLY) i64Lib::from(FIRST_COMMON_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_QUICK_REPLY) i64Lib::from(QUICK_COMMON_REPLY)
+            else abort 32
+
+        } else if (postType == TYTORIAL) {
+            i64Lib::zero()
+
+        } else {
+            abort 32
+        }
+    }
+
+    public fun getUserRatingChange(
+        postType: u8,
+        resourceAction: u8,
+        typeContent: u8 
+    ): i64Lib::I64 {
+        if (typeContent == TYPE_CONTENT_POST) {
+            getUserRatingChangeForPostAction(postType, resourceAction)
+        } else if (typeContent == TYPE_CONTENT_REPLY) {
+            getUserRatingChangeForReplyAction(postType, resourceAction)
+        } else {
+            i64Lib::zero()            
+        }
+    }
+    
+    public fun getForumItemRatingChange(
+        actionAddress: address,
+        historyVotes: &mut vector<u8>,
+        isUpvote: bool,
+        votedUsers: &mut vector<address>
+    ): (i64Lib::I64, bool) {
+        let (history, userPosition, isExistVote) = getHistoryVote(actionAddress, *historyVotes, *votedUsers);
+        // int history = getHistoryVote(actionAddress, historyVotes);
+        let ratingChange: i64Lib::I64;
+        let isCancel: bool = false;
+        
+        if (isUpvote) {
+            if (history == 1) {
+                let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
+                *userHistoryVote = 3;
+                ratingChange = i64Lib::from(2);
+            } else if (history == 2) {
+                if (isExistVote) {
+                   let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
+                    *userHistoryVote = 3;
+                } else {
+                    vector::push_back(votedUsers, actionAddress);
+                    vector::push_back(historyVotes, 3);
+                };
+                ratingChange = i64Lib::from(1);
+            } else {
+                let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
+                *userHistoryVote = 2;
+                ratingChange = i64Lib::neg_from(1);
+                isCancel = true;
+            };
+        } else {
+            if (history == 1) {
+                let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
+                *userHistoryVote = 2;
+                ratingChange = i64Lib::from(1);
+                isCancel = true;
+            } else if (history == 2) {
+                if (isExistVote) {
+                    let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
+                    *userHistoryVote = 1;
+                } else {
+                    vector::push_back(votedUsers, actionAddress);
+                    vector::push_back(historyVotes, 1);
+                };
+                ratingChange = i64Lib::neg_from(1);
+            } else {
+                let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
+                *userHistoryVote = 1;
+                ratingChange = i64Lib::neg_from(2);
+            }
+        };
+        
+        (ratingChange, isCancel)
+    }  
+
+    // return value:
+    // downVote = 1
+    // NONE = 2
+    // upVote = 3
+    public fun getHistoryVote(
+        user: address,
+        historyVotes: vector<u8>,
+        votedUsers: vector<address>
+    ): (u8, u64, bool) { // (status vote, isExistVote)
+        let (isExist, position) = vector::index_of(&mut votedUsers, &user);
+
+        if (isExist) {
+            let voteVolue = vector::borrow(&mut historyVotes, position);
+            (*voteVolue, position, true)
+        } else {
+            (2, 0, false)
+        }
+    }
 }
 
 // #[test_only]

@@ -27,6 +27,10 @@ Error code:
 
 30 - Invalid_ipfsHash
 
+31 - Invalid_post_type
+
+32 - invalid_resource_type
+
     Post
 
 41 - Users can not publish 2 replies for expert and common posts.
@@ -48,6 +52,14 @@ Error code:
 49 - This post type is already set.
 
 50 - Error_postType
+
+51 - error_vote_comment
+
+52 - error_vote_reply
+
+53 - error_vote_post
+
+54 - You can not vote to Documentation.
 
 owner - 0x62a5541796a4fa35229543da71df4f570f7cbe02
 package object ID - 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0
