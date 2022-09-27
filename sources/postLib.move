@@ -117,7 +117,7 @@ module basics::postLib {
             bestReply: 0,
             deletedReplyCount: 0,
             isDeleted: false,
-            tags: tags,
+            tags: vector::empty<u64>(),
             replies: vector::empty<Reply>(),
             comments: vector::empty<Comment>(),
             properties: vector::empty<u8>(),
@@ -127,7 +127,7 @@ module basics::postLib {
         
         if (postType != DOCUMENTATION) {
             assert!(vector::length(&mut tags) > 0, 26);
-            let postId = vector::length(&mut postCollection.posts) - 1;
+            let postId = vector::length(&mut postCollection.posts);
             let post = getMutablePost(postCollection, postId);
             post.tags = tags;
         };
@@ -768,37 +768,43 @@ module basics::postLib {
     }
 
     public fun getPost(postCollection: &mut PostCollection, postId: u64): &Post {
-        vector::borrow(&postCollection.posts, postId)
+        assert!(postId > 0, 40);
+        vector::borrow(&postCollection.posts, postId - 1)
     }
     
     public fun getMutablePost(postCollection: &mut PostCollection, postId: u64): &mut Post {
-        vector::borrow_mut(&mut postCollection.posts, postId)
+        assert!(postId > 0, 40);
+        vector::borrow_mut(&mut postCollection.posts, postId - 1)
     }
 
     public fun getReply(post: &Post, replyId: u64): &Reply {
-        vector::borrow(&post.replies, replyId)
+        assert!(replyId > 0, 40);
+        vector::borrow(&post.replies, replyId - 1)
     }
 
     public fun getMutableReply(post: &mut Post, replyId: u64): &mut Reply {
-        vector::borrow_mut(&mut post.replies, replyId)
+        assert!(replyId > 0, 40);
+        vector::borrow_mut(&mut post.replies, replyId - 1)
     }
 
     public fun getComment(post: &Post, parentReplyId: u64, commentId: u64): &Comment {
+        assert!(commentId > 0, 40);
         if (parentReplyId == 0) {
-            vector::borrow(&post.comments, commentId)
+            vector::borrow(&post.comments, commentId - 1)
         } else {
             let reply = getReply(post, parentReplyId);
-            vector::borrow(&reply.comments, commentId)
+            vector::borrow(&reply.comments, commentId - 1)
         }
         // require(!CommonLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment_not_exist.");
     }
     
     public fun getMutableComment (post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
+        assert!(commentId > 0, 40);
         if (parentReplyId == 0) {
-            vector::borrow_mut(&mut post.comments, commentId)
+            vector::borrow_mut(&mut post.comments, commentId - 1)
         } else {
             let reply = getMutableReply(post, parentReplyId);
-            vector::borrow_mut(&mut reply.comments, commentId)
+            vector::borrow_mut(&mut reply.comments, commentId - 1)
         }
         // require(!CommonLib.isEmptyIpfs(commentContainer.info.ipfsDoc.hash), "Comment_not_exist.");
     }
@@ -882,7 +888,7 @@ module basics::postLib {
         assert!(tx_context::sender(ctx) == tx_context::sender(ctx), 0);
     }
 
-    // create/edit/delete for post/reply/comment
+    // // create/edit/delete for post/reply/comment
     // #[test]
     // fun test_create_post() {
     //     use sui::test_scenario;
@@ -943,7 +949,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(postType == EXPERT_POST, 1);
     //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
@@ -973,7 +979,7 @@ module basics::postLib {
     //         changePostType(
     //             postCollection,
     //             user1,
-    //             0,
+    //             1,
     //             COMMON_POST,
     //         );
 
@@ -992,13 +998,13 @@ module basics::postLib {
     //             _properties,
     //             _historyVotes,
     //             _votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
     //         assert!(postType == COMMON_POST, 1);
 
     //         changePostType(
     //             postCollection,
     //             user1,
-    //             0,
+    //             1,
     //             EXPERT_POST,
     //         );
 
@@ -1017,7 +1023,7 @@ module basics::postLib {
     //             _properties,
     //             _historyVotes,
     //             _votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
     //         assert!(postType == EXPERT_POST, 1);
 
     //         test_scenario::return_shared(scenario, post_wrapper);
@@ -1035,7 +1041,7 @@ module basics::postLib {
     //             postCollection,
     //             communityCollection,
     //             user1,
-    //             0,
+    //             1,
     //             x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc",
     //             vector<u64>[2]
     //         );
@@ -1055,7 +1061,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(postType == 0, 1);
     //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 2);
@@ -1085,7 +1091,7 @@ module basics::postLib {
     //         createReply(
     //             postCollection,
     //             user1,
-    //             0,
+    //             1,
     //             0,
     //             x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
     //             false
@@ -1103,7 +1109,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getReplyData(postCollection, 0, 0);
+    //         ) = getReplyData(postCollection, 1, 1);
 
     //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
     //         assert!(postTime == 0, 2);
@@ -1129,8 +1135,8 @@ module basics::postLib {
     //         editReply(
     //             postCollection,
     //             user1,
-    //             0,
-    //             0,
+    //             1,
+    //             1,
     //             x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
     //             false
     //         );
@@ -1147,7 +1153,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getReplyData(postCollection, 0, 0);
+    //         ) = getReplyData(postCollection, 1, 1);
 
     //         assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
     //         assert!(postTime == 0, 2);
@@ -1164,7 +1170,7 @@ module basics::postLib {
     //         test_scenario::return_shared(scenario, post_wrapper);
     //     };
 
-    //     //create comment
+    //     //create comment to post
     //     test_scenario::next_tx(scenario, &user1);
     //     {
     //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
@@ -1173,7 +1179,7 @@ module basics::postLib {
     //         createComment(
     //             postCollection,
     //             user1,
-    //             0,
+    //             1,
     //             0,
     //             x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc"
     //         );
@@ -1187,7 +1193,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getCommentData(postCollection, 0, 0, 0);
+    //         ) = getCommentData(postCollection, 1, 0, 1);
 
     //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 1);
     //         assert!(postTime == 0, 2);
@@ -1201,8 +1207,45 @@ module basics::postLib {
     //         test_scenario::return_shared(scenario, post_wrapper);
     //     };
 
+    //     //create comment to reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+  
+    //         createComment(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             1,
+    //             x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"
+    //         );
 
-    //     //edit comment
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,                
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getCommentData(postCollection, 1, 1, 1);
+
+    //         assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == i64Lib::zero(), 4);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u8>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
+
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+
+    //     //edit comment to post
     //     test_scenario::next_tx(scenario, &user1);
     //     {
     //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
@@ -1211,9 +1254,47 @@ module basics::postLib {
     //         editComment(
     //             postCollection,
     //             user1,
+    //             1,
     //             0,
-    //             0,
-    //             0,
+    //             1,
+    //             x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"
+    //         );
+
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,                
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getCommentData(postCollection, 1, 0, 1);
+
+    //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == i64Lib::zero(), 4);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u8>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
+
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+    //     //edit comment to reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+  
+    //         editComment(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             1,
+    //             1,
     //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
     //         );
 
@@ -1226,7 +1307,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getCommentData(postCollection, 0, 0, 0);
+    //         ) = getCommentData(postCollection, 1, 1, 1);
 
     //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
     //         assert!(postTime == 0, 2);
@@ -1240,7 +1321,7 @@ module basics::postLib {
     //         test_scenario::return_shared(scenario, post_wrapper);
     //     };
 
-    //     //delete comment
+    //     //delete comment to post
     //     test_scenario::next_tx(scenario, &user1);
     //     {
     //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
@@ -1249,9 +1330,9 @@ module basics::postLib {
     //         deleteComment(
     //             postCollection,
     //             user1,
+    //             1,
     //             0,
-    //             0,
-    //             0
+    //             1
     //         );
 
     //         let (
@@ -1263,7 +1344,37 @@ module basics::postLib {
     //             _properties,
     //             _historyVotes,
     //             _votedUsers
-    //         ) = getCommentData(postCollection, 0, 0, 0);
+    //         ) = getCommentData(postCollection, 1, 0, 1);
+
+    //         assert!(isDeleted == true, 1);
+
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
+
+    //     //delete comment to reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+  
+    //         deleteComment(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             1,
+    //             1
+    //         );
+
+    //         let (
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,                
+    //             isDeleted,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getCommentData(postCollection, 1, 1, 1);
 
     //         assert!(isDeleted == true, 1);
 
@@ -1279,8 +1390,8 @@ module basics::postLib {
     //         deleteReply(
     //             postCollection,
     //             user1,
-    //             0,
-    //             0,
+    //             1,
+    //             1,
     //         );
 
     //         let (
@@ -1295,7 +1406,7 @@ module basics::postLib {
     //             _properties,
     //             _historyVotes,
     //             _votedUsers
-    //         ) = getReplyData(postCollection, 0, 0);
+    //         ) = getReplyData(postCollection, 1, 1);
 
     //         assert!(isDeleted == true, 0);
 
@@ -1314,7 +1425,7 @@ module basics::postLib {
     //             _properties,
     //             _historyVotes,
     //             _votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(deletedReplyCount == 1, 1);
     //         assert!(isDeleted == false, 2);
@@ -1331,7 +1442,7 @@ module basics::postLib {
     //         deletePost(
     //             postCollection,
     //             user1,
-    //             0,
+    //             1,
     //         );
 
     //         let (
@@ -1349,7 +1460,7 @@ module basics::postLib {
     //             _properties,
     //             _historyVotes,
     //             _votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(isDeleted == true, 1);
 
@@ -1421,7 +1532,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             true
@@ -1442,7 +1553,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(postType == EXPERT_POST, 1);
     //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
@@ -1475,7 +1586,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             true
@@ -1496,7 +1607,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(postType == EXPERT_POST, 1);
     //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
@@ -1529,7 +1640,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             true
@@ -1550,7 +1661,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(postType == EXPERT_POST, 1);
     //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
@@ -1583,7 +1694,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             false
@@ -1604,7 +1715,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(postType == EXPERT_POST, 1);
     //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
@@ -1637,7 +1748,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             false
@@ -1646,7 +1757,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             true
@@ -1667,7 +1778,7 @@ module basics::postLib {
     //             properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(postType == EXPERT_POST, 1);
     //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
@@ -1753,7 +1864,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             false
@@ -1774,7 +1885,7 @@ module basics::postLib {
     //             _properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(rating == i64Lib::neg_from(1), 5);
     //         assert!(historyVotes == vector<u8>[1], 13);
@@ -1796,7 +1907,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             false
@@ -1817,7 +1928,7 @@ module basics::postLib {
     //             _properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(rating == i64Lib::from(0), 5);
     //         assert!(historyVotes == vector<u8>[2], 13);
@@ -1839,7 +1950,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             false
@@ -1860,7 +1971,7 @@ module basics::postLib {
     //             _properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(rating == i64Lib::neg_from(1), 5);
     //         assert!(historyVotes == vector<u8>[1], 13);
@@ -1882,7 +1993,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             true
@@ -1903,7 +2014,7 @@ module basics::postLib {
     //             _properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(rating == i64Lib::from(1), 5);
     //         assert!(historyVotes == vector<u8>[3], 13);
@@ -1925,7 +2036,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             true
@@ -1934,7 +2045,7 @@ module basics::postLib {
     //             postCollection,
     //             userCollection,
     //             user2,
-    //             0,
+    //             1,
     //             0,
     //             0,
     //             false
@@ -1955,7 +2066,7 @@ module basics::postLib {
     //             _properties,
     //             historyVotes,
     //             votedUsers
-    //         ) = getPostData(postCollection, 0);
+    //         ) = getPostData(postCollection, 1);
 
     //         assert!(rating == i64Lib::neg_from(1), 5);
     //         assert!(historyVotes == vector<u8>[1], 13);

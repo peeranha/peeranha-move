@@ -32,6 +32,7 @@ Error code:
 32 - invalid_resource_type
 
     Post
+40 - Wrong item ID
 
 41 - Users can not publish 2 replies for expert and common posts.
 
