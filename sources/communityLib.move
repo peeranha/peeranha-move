@@ -61,7 +61,7 @@ module basics::communityLib {
             tags: vector::empty<Tag>(),
         });
 
-        let communityId = vector::length(&mut communityCollection.communities) -1;
+        let communityId = vector::length(&mut communityCollection.communities);
         let community = getMutableCommunity(communityCollection, communityId);
         let tagId = 0;
         while(tagId < vector::length(&mut tags)) {
@@ -98,7 +98,7 @@ module basics::communityLib {
         // TODO: add check role
 
         let community = getMutableCommunity(communityCollection, communityId);
-        let tag = vector::borrow_mut(&mut community.tags, tagId);
+        let tag = vector::borrow_mut(&mut community.tags, tagId - 1);       // TODO: add get tag
         tag.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
     }
 
@@ -121,7 +121,8 @@ module basics::communityLib {
     }
 
     public entry fun onlyExistingAndNotFrozenCommunity(communityCollection: &mut CommunityCollection, communityId: u64) {
-        let community = vector::borrow(&mut communityCollection.communities, communityId);
+        assert!(communityId > 0, 27);
+        let community = vector::borrow(&mut communityCollection.communities, communityId - 1); // TODO: add get community?
         assert!(commonLib::getIpfsHash(community.ipfsDoc) != vector::empty<u8>(), 22);
         assert!(!community.isFrozen, 23);
     }
@@ -132,21 +133,22 @@ module basics::communityLib {
         let i = 0;
         let communityTagsCount = vector::length(&community.tags);
         while(i < vector::length(&mut tags)) {
-            assert!(communityTagsCount >= *vector::borrow(&tags, i), 24);
-            // assert!(*vector::borrow(&mut tags, i) != 0, 25); // TODO: add del?
+            let tagId = *vector::borrow(&tags, i);
+            assert!(tagId > 0, 28);
+            assert!(communityTagsCount >= tagId - 1, 24);
             i = i +1;
         };
     }
 
     public fun getCommunity(communityCollection: &mut CommunityCollection, communityId: u64): &Community {
         onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
-        let community = vector::borrow(&mut communityCollection.communities, communityId);
+        let community = vector::borrow(&mut communityCollection.communities, communityId - 1);
         community
     }
 
     public fun getMutableCommunity(communityCollection: &mut CommunityCollection, communityId: u64): &mut Community {
         onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
-        let community = vector::borrow_mut(&mut communityCollection.communities, communityId);
+        let community = vector::borrow_mut(&mut communityCollection.communities, communityId - 1);
         community
     }
 

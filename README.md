@@ -23,6 +23,10 @@ Error code:
 
 26 - At least one tag is required.
 
+27 - Community id can not to be 0
+
+28 - Tag id can not to be 0
+
     Common
 
 30 - Invalid_ipfsHash
@@ -32,7 +36,8 @@ Error code:
 32 - invalid_resource_type
 
     Post
-40 - Wrong item ID
+
+40 - Item ID can not to be 0
 
 41 - Users can not publish 2 replies for expert and common posts.
 

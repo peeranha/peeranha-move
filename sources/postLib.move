@@ -888,7 +888,7 @@ module basics::postLib {
         assert!(tx_context::sender(ctx) == tx_context::sender(ctx), 0);
     }
 
-    // // create/edit/delete for post/reply/comment
+    // create/edit/delete for post/reply/comment
     // #[test]
     // fun test_create_post() {
     //     use sui::test_scenario;
@@ -928,7 +928,7 @@ module basics::postLib {
     //             postCollection,
     //             communityCollection,
     //             user1,
-    //             0,
+    //             1,
     //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
     //             EXPERT_POST,
     //             vector<u64>[1, 2]
@@ -956,7 +956,7 @@ module basics::postLib {
     //         assert!(postTime == 0, 3);
     //         assert!(author == user1, 4);
     //         assert!(rating == i64Lib::zero(), 5);
-    //         assert!(communityId == 0, 6);
+    //         assert!(communityId == 1, 6);
     //         assert!(officialReply == 0, 7);
     //         assert!(bestReply == 0, 8);
     //         assert!(deletedReplyCount == 0, 9);
@@ -1068,7 +1068,7 @@ module basics::postLib {
     //         assert!(postTime == 0, 3);
     //         assert!(author == user1, 4);
     //         assert!(rating == i64Lib::zero(), 5);
-    //         assert!(communityId == 0, 6);
+    //         assert!(communityId == 1, 6);
     //         assert!(officialReply == 0, 7);
     //         assert!(bestReply == 0, 8);
     //         assert!(deletedReplyCount == 0, 9);
@@ -1510,7 +1510,7 @@ module basics::postLib {
     //             postCollection,
     //             communityCollection,
     //             user1,
-    //             0,
+    //             1,
     //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
     //             EXPERT_POST,
     //             vector<u64>[1, 2]
@@ -1560,7 +1560,7 @@ module basics::postLib {
     //         assert!(postTime == 0, 3);
     //         assert!(author == user1, 4);
     //         assert!(rating == i64Lib::from(1), 5);
-    //         assert!(communityId == 0, 6);
+    //         assert!(communityId == 1, 6);
     //         assert!(officialReply == 0, 7);
     //         assert!(bestReply == 0, 8);
     //         assert!(deletedReplyCount == 0, 9);
@@ -1614,7 +1614,7 @@ module basics::postLib {
     //         assert!(postTime == 0, 3);
     //         assert!(author == user1, 4);
     //         assert!(rating == i64Lib::from(0), 5);
-    //         assert!(communityId == 0, 6);
+    //         assert!(communityId == 1, 6);
     //         assert!(officialReply == 0, 7);
     //         assert!(bestReply == 0, 8);
     //         assert!(deletedReplyCount == 0, 9);
@@ -1668,7 +1668,7 @@ module basics::postLib {
     //         assert!(postTime == 0, 3);
     //         assert!(author == user1, 4);
     //         assert!(rating == i64Lib::from(1), 5);
-    //         assert!(communityId == 0, 6);
+    //         assert!(communityId == 1, 6);
     //         assert!(officialReply == 0, 7);
     //         assert!(bestReply == 0, 8);
     //         assert!(deletedReplyCount == 0, 9);
@@ -1722,7 +1722,7 @@ module basics::postLib {
     //         assert!(postTime == 0, 3);
     //         assert!(author == user1, 4);
     //         assert!(rating == i64Lib::neg_from(1), 5);
-    //         assert!(communityId == 0, 6);
+    //         assert!(communityId == 1, 6);
     //         assert!(officialReply == 0, 7);
     //         assert!(bestReply == 0, 8);
     //         assert!(deletedReplyCount == 0, 9);
@@ -1785,7 +1785,7 @@ module basics::postLib {
     //         assert!(postTime == 0, 3);
     //         assert!(author == user1, 4);
     //         assert!(rating == i64Lib::from(1), 5);
-    //         assert!(communityId == 0, 6);
+    //         assert!(communityId == 1, 6);
     //         assert!(officialReply == 0, 7);
     //         assert!(bestReply == 0, 8);
     //         assert!(deletedReplyCount == 0, 9);
@@ -1842,7 +1842,7 @@ module basics::postLib {
     //             postCollection,
     //             communityCollection,
     //             user1,
-    //             0,
+    //             1,
     //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
     //             EXPERT_POST,
     //             vector<u64>[1, 2]

@@ -22,7 +22,7 @@ module basics::userLib {
         // TODO: add roles
     }
 
-    fun init(ctx: &mut TxContext) {
+    public entry fun initUser(ctx: &mut TxContext) {
         transfer::share_object(UserCollection {
             id: object::new(ctx),
             users: vector::empty<User>(),
