@@ -56,7 +56,7 @@ module basics::communityLib {
 
         vector::push_back(&mut communityCollection.communities, Community {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            timeCreate: 0,                           // get time
+            timeCreate: 0,                           // // TODO: add get time
             isFrozen: false,
             tags: vector::empty<Tag>(),
         });
@@ -97,8 +97,7 @@ module basics::communityLib {
     public entry fun updateTag(communityCollection: &mut CommunityCollection, communityId: u64, tagId: u64, _owner: address, ipfsHash: vector<u8>) {
         // TODO: add check role
 
-        let community = getMutableCommunity(communityCollection, communityId);
-        let tag = vector::borrow_mut(&mut community.tags, tagId - 1);       // TODO: add get tag
+        let tag = getMutableTag(communityCollection, communityId, tagId);
         tag.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
     }
 
@@ -140,16 +139,30 @@ module basics::communityLib {
         };
     }
 
-    public fun getCommunity(communityCollection: &mut CommunityCollection, communityId: u64): &Community {
-        onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
-        let community = vector::borrow(&mut communityCollection.communities, communityId - 1);
-        community
-    }
-
     public fun getMutableCommunity(communityCollection: &mut CommunityCollection, communityId: u64): &mut Community {
         onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
         let community = vector::borrow_mut(&mut communityCollection.communities, communityId - 1);
         community
+    }
+
+    public fun getCommunity(communityCollection: &mut CommunityCollection, communityId: u64): &Community {
+        onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
+        let community = vector::borrow(& communityCollection.communities, communityId - 1);
+        community
+    }
+
+    public fun getMutableTag(communityCollection: &mut CommunityCollection, communityId: u64, tagId: u64): &mut Tag {
+        let community = getMutableCommunity(communityCollection, communityId);
+        assert!(tagId > 0, 28);
+        let tag = vector::borrow_mut(&mut community.tags, tagId - 1);
+        tag
+    }
+    
+    public fun getTag(communityCollection: &mut CommunityCollection, communityId: u64, tagId: u64): &Tag {
+        let community = getCommunity(communityCollection, communityId);
+        assert!(tagId > 0, 28);
+        let tag = vector::borrow(&community.tags, tagId - 1);
+        tag
     }
 
     public entry fun set_value(ctx: &mut TxContext) {       // do something with tx_context
