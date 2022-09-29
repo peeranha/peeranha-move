@@ -8,6 +8,9 @@ module basics::postLib {
     use basics::userLib;
     use basics::i64Lib;
 
+    const QUICK_REPLY_TIME_SECONDS: u64 = 900; // 6
+    const DELETE_TIME: u64 = 604800;    //7 days
+
     // TODO: add enum PostType
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
@@ -109,7 +112,7 @@ module basics::postLib {
         vector::push_back(&mut postCollection.posts, Post {
             postType: postType,
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            postTime: 0,            // TODO: add get time
+            postTime: commonLib::getTimestamp(),
             author: userAddr,
             rating: i64Lib::zero(),
             communityId: communityId,
@@ -162,6 +165,8 @@ module basics::postLib {
         };
 
         let isFirstReply = false;
+        let isQuickReply = false;
+        let timestamp: u64 = commonLib::getTimestamp();
         if (parentReplyId == 0) {
             if (isOfficialReply) {
                 post.officialReply = vector::length(&mut post.replies);
@@ -173,25 +178,26 @@ module basics::postLib {
                     // TODO: add
                     // self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.FirstReply), postContainer.info.communityId);
                 };
-                // TODO: add
-            //     if (timestamp - postContainer.info.postTime < CommonLib.QUICK_REPLY_TIME_SECONDS) {
-            //         replyContainer.info.isQuickReply = true;
-            //         self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply), postContainer.info.communityId);
-                // }
+
+                if (timestamp - post.postTime < QUICK_REPLY_TIME_SECONDS) {
+                    isQuickReply = true;   
+                    // TODO: add
+                    // self.peeranhaUser.updateUserRating(userAddr, VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.QuickReply), postContainer.info.communityId);
+                }
             };
         } else {
-          //getReplyContainerSafe(postContainer, parentReplyId);    // TODO: add parentReplyId is exist
+            //getReplyContainerSafe(postContainer, parentReplyId);    // TODO: add check parentReplyId is exist
         };
 
         vector::push_back(&mut post.replies, Reply {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            postTime: 0,            // TODO: add get time
+            postTime: timestamp,
             author: userAddr,
             rating: i64Lib::zero(),
             parentReplyId: parentReplyId,
             
             isFirstReply: isFirstReply,
-            isQuickReply: false,
+            isQuickReply: isQuickReply,
             isDeleted: false,
 
             comments: vector::empty<Comment>(),
@@ -337,52 +343,67 @@ module basics::postLib {
 
     public entry fun deletePost(
         postCollection: &mut PostCollection,
+        userCollection: &mut userLib::UserCollection,
         userAddr: address,
         postId: u64,
     ) {
         let post = getMutablePost(postCollection, postId);
 
         // TODO: add check role
-        
-        // TODO: add
-        if (post.postType != DOCUMENTATION) {
-        //     uint256 time = CommonLib.getTimestamp();
-        //     if (time - postContainer.info.postTime < DELETE_TIME || userAddr == postContainer.info.author) {
-        //         VoteLib.StructRating memory typeRating = getTypesRating(postContainer.info.postType);
-        //         (int32 positive, int32 negative) = getHistoryInformations(postContainer.historyVotes, postContainer.votedUsers);
-
-        //         int32 changeUserRating = typeRating.upvotedPost * positive + typeRating.downvotedPost * negative;
-        //         if (changeUserRating > 0) {
-        //             self.peeranhaUser.updateUserRating(
-        //                 postContainer.info.author,
-        //                 -changeUserRating,
-        //                 postContainer.info.communityId
-        //             );
-        //         }
-        //     }
-            if (post.bestReply != 0) {
-        //         self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
-            };
-
-        //     if (time - postContainer.info.postTime < DELETE_TIME) {
-        //         for (uint16 i = 1; i <= postContainer.info.replyCount; i++) {
-        //             deductReplyRating(self, postContainer.info.postType, postContainer.replies[i], postContainer.info.bestReply == i, postContainer.info.communityId);
-        //         }
-        //     }
-
-            if (userAddr == post.author) {
-        //      self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
-            } else {
-        //      self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
-            };
-        };
 
         post.isDeleted = true;
         // TODO: add emit PostDeleted(userAddr, postId);
+
+        if (post.postType != DOCUMENTATION) {
+            let time: u64 = commonLib::getTimestamp();
+            if (time - post.postTime < DELETE_TIME || userAddr == post.author) {
+                // TODO: add
+                let typeRating: StructRating = getTypesRating(post.postType);
+                let (positive, negative) = getHistoryInformations(post.historyVotes, post.votedUsers);
+
+                let changeUserRating: i64Lib::I64 = i64Lib::add(&i64Lib::mul(&typeRating.upvotedPost, &i64Lib::from(positive)), &i64Lib::mul(&typeRating.downvotedPost, &i64Lib::from(negative)));
+                if (i64Lib::compare(&changeUserRating, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+                    // TODO: add
+                    // self.peeranhaUser.updateUserRating(
+                    //     postContainer.info.author,
+                    //     -changeUserRating,
+                    //     postContainer.info.communityId
+                    // );
+                };
+            };
+            if (post.bestReply != 0) {
+                // TODO: add
+                // self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
+            };
+
+            let postAuthor = post.author;
+            if (time - post.postTime < DELETE_TIME) {
+                let replyCount = vector::length(&post.replies);
+                let replyId = 0;
+                while (replyId < replyCount) {
+                    deductReplyRating(
+                        postCollection,
+                        userCollection,
+                        postId,
+                        replyId + 1
+                    );
+                    replyId = replyId + 1;
+                }
+            };
+
+            if (userAddr == postAuthor) {
+                // TODO: add 
+                // self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
+            } else {
+                // TODO: add 
+                // self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
+            };
+        };
     }
 
     public entry fun deleteReply(
         postCollection: &mut PostCollection,
+        userCollection: &mut userLib::UserCollection,
         userAddr: address,
         postId: u64,
         replyId: u64,
@@ -391,46 +412,91 @@ module basics::postLib {
         let reply = getMutableReply(post, replyId);
 
         // TODO: add check role
-
-        //
-        // bug
-        // checkActionRole has check "require(actionCaller == dataUser, "not_allowed_delete");"
-        // behind this check is "if actionCaller == moderator -> return"
-        // in this step can be only a moderator or reply's owner
-        // a reply owner can not delete best reply, but a moderator can
-        // next require check that reply's owner can not delete best reply
-        // bug if reply's owner is moderator any way error
-        //
         
         // assert!(userAddr != reply.author || post.bestReply != replyId, 45);      // TODO: add  error Invalid immutable borrow at field 'bestReply'.?
 
-        // TODO: add
-        // uint256 time = CommonLib.getTimestamp();
-        // if (time - replyContainer.info.postTime < DELETE_TIME || userAddr == replyContainer.info.author) {
-        //     deductReplyRating(
-        //         self,
-        //         postContainer.info.postType,
-        //         replyContainer,
-        //         replyContainer.info.parentReplyId == 0 && postContainer.info.bestReply == replyId,
-        //         postContainer.info.communityId
-        //     );
-        // }
-
+        
+        let time: u64 = commonLib::getTimestamp();
+        let isDeductReplyRating = time - reply.postTime < DELETE_TIME || userAddr == reply.author; // TODO: add ???
         if (userAddr == reply.author) {
-        //     self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.DeleteOwnReply, postContainer.info.communityId);
+            // TODO: add
+            // self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.DeleteOwnReply, postContainer.info.communityId);
         } else {
-        //     self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.ModeratorDeleteReply, postContainer.info.communityId);
+            // TODO: add
+            // self.peeranhaUser.updateUserRating(replyContainer.info.author, VoteLib.ModeratorDeleteReply, postContainer.info.communityId);
         };
-
+        
         reply.isDeleted = true;
         post.deletedReplyCount = post.deletedReplyCount + 1;
+
         if (post.bestReply == replyId)
             post.bestReply = 0;
 
         if (post.officialReply == replyId)
             post.officialReply = 0;
 
+        if (isDeductReplyRating) {
+            deductReplyRating(
+                postCollection,
+                userCollection,
+                postId,
+                replyId
+            );
+        };
+
         // TODO: add emit ReplyDeleted(userAddr, postId, replyId);
+    }
+
+
+    fun deductReplyRating(
+        postCollection: &mut PostCollection,
+        _userCollection: &mut userLib::UserCollection,
+        postId: u64,
+        replyId: u64,
+    ) {
+        let post = getPost(postCollection, postId);
+        let reply = getReply(post, replyId);
+
+        let postType = post.postType;
+        let isBestReply = reply.parentReplyId == 0 && post.bestReply == replyId;
+        let _communityId = post.communityId;
+
+        // TODO: add
+        // if (CommonLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
+            // return;
+        
+        let changeReplyAuthorRating: i64Lib::I64 = i64Lib::zero();
+        if (i64Lib::compare(&reply.rating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&reply.rating, &i64Lib::zero()) == i64Lib::getEual()) {  //reply.rating >= 0
+            if (reply.isFirstReply) {// -=?
+                changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_FIRST_REPLY));
+            };
+            if (reply.isQuickReply) {// -=?
+                changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_QUICK_REPLY));
+            };
+            if (isBestReply && postType != TYTORIAL) {// -=?
+                changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY));
+            };
+        };
+
+        // change user rating considering reply rating
+        let typeRating: StructRating = getTypesRating(postType);
+        let (positive, negative) = getHistoryInformations(reply.historyVotes, reply.votedUsers);
+        
+        // typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
+        let changeUserRating: i64Lib::I64 = i64Lib::add(&i64Lib::mul(&typeRating.upvotedReply, &i64Lib::from(positive)), &i64Lib::mul(&typeRating.downvotedReply, &i64Lib::from(negative)));
+        
+        if (i64Lib::compare(&changeUserRating, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+            changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &changeUserRating); // -=?
+        };
+
+        if (i64Lib::compare(&changeReplyAuthorRating, &i64Lib::zero()) != i64Lib::getEual()) {
+            // TODO: add
+            // self.peeranhaUser.updateUserRating(
+            //     replyContainer.info.author, 
+            //     changeReplyAuthorRating,
+            //     communityId
+            // );
+        };
     }
 
     public entry fun deleteComment(
@@ -684,18 +750,7 @@ module basics::postLib {
         let oldTypeRating: StructRating = getTypesRating(oldPostType);
         let newTypeRating: StructRating = getTypesRating(newPostType);
 
-        let positive = 0;
-        let negative = 0;
-
-        let i = 0;
-        while(i < vector::length(&post.votedUsers)) {
-            if (vector::borrow(&post.historyVotes, i) == &1) {
-                positive = positive + 1;
-            } else if (vector::borrow(&post.historyVotes, i) == &2) {
-                negative = negative + 1;
-            };
-            i = i +1;
-        };
+        let (positive, negative) = getHistoryInformations(post.historyVotes, post.votedUsers);
 
         let positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedPost, &oldTypeRating.upvotedPost), &i64Lib::from(positive));
         let negativeRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.downvotedPost, &oldTypeRating.downvotedPost), &i64Lib::from(negative));
@@ -707,18 +762,7 @@ module basics::postLib {
         let replyId = 0;    // value means replyPosition not replyId
         while(replyId < vector::length(&post.replies)) {
             let reply = getReply(post, replyId);
-
-            positive = 0;
-            negative = 0;
-            i = 0;
-            while(i < vector::length(&reply.votedUsers)) {
-                if (vector::borrow(&reply.historyVotes, i) == &1) {
-                    positive = positive + 1;
-                } else if (vector::borrow(&reply.historyVotes, i) == &2) {
-                    negative = negative + 1;
-                };
-                i = i +1;
-            };
+            let (positive, negative) = getHistoryInformations(reply.historyVotes, reply.votedUsers);
 
             positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedReply, &oldTypeRating.upvotedReply), &i64Lib::from(positive));
             negativeRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.downvotedReply, &oldTypeRating.downvotedReply), &i64Lib::from(negative));
@@ -767,7 +811,25 @@ module basics::postLib {
         }
     }
 
-    public fun getPost(postCollection: &mut PostCollection, postId: u64): &Post {
+    fun getHistoryInformations(        //name?
+        historyVotes: vector<u8>,
+        votedUsers: vector<address>
+    ): (u64, u64) {
+        let i = 0;
+        let positive = 0;
+        let negative = 0;
+        while(i < vector::length(&votedUsers)) {
+            if (vector::borrow(&historyVotes, i) == &1) {
+                positive = positive + 1;
+            } else if (vector::borrow(&historyVotes, i) == &2) {
+                negative = negative + 1;
+            };
+            i = i +1;
+        };
+        (positive, negative)
+    }
+
+    public fun getPost(postCollection: &PostCollection, postId: u64): &Post {
         assert!(postId > 0, 40);
         vector::borrow(&postCollection.posts, postId - 1)
     }
@@ -900,6 +962,7 @@ module basics::postLib {
         {
             // userLib::initUserCollection(test_scenario::ctx(scenario));
             communityLib::initCommunity(test_scenario::ctx(scenario));
+            userLib::initUser(test_scenario::ctx(scenario));
             init(test_scenario::ctx(scenario));
         };
 
@@ -1381,14 +1444,17 @@ module basics::postLib {
             test_scenario::return_shared(scenario, post_wrapper);
         };
 
-        //delete reply
+        // delete reply
         test_scenario::next_tx(scenario, &user1);
         {
             let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
             let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
   
             deleteReply(
                 postCollection,
+                userCollection,
                 user1,
                 1,
                 1,
@@ -1431,6 +1497,7 @@ module basics::postLib {
             assert!(isDeleted == false, 2);
 
             test_scenario::return_shared(scenario, post_wrapper);
+            test_scenario::return_shared(scenario, user_wrapper);
         };
 
         // delete post
@@ -1438,9 +1505,12 @@ module basics::postLib {
         {
             let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
             let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
 
             deletePost(
                 postCollection,
+                userCollection,
                 user1,
                 1,
             );
@@ -1465,6 +1535,7 @@ module basics::postLib {
             assert!(isDeleted == true, 1);
 
             test_scenario::return_shared(scenario, post_wrapper);
+            test_scenario::return_shared(scenario, user_wrapper);
         };
     }
 
