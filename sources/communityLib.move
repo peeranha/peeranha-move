@@ -25,7 +25,7 @@ module basics::communityLib {
     }
 
    
-    public entry fun initCommunity(ctx: &mut TxContext) {                  // public?
+    fun init(ctx: &mut TxContext) {                  // public?
         transfer::share_object(CommunityCollection {
             id: object::new(ctx),
             communities: vector::empty<Community>()

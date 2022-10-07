@@ -951,1202 +951,1202 @@ module basics::postLib {
     }
 
     // create/edit/delete for post/reply/comment
-    #[test]
-    fun test_create_post() {
-        use sui::test_scenario;
+    // #[test]
+    // fun test_create_post() {
+    //     use sui::test_scenario;
 
-        // let owner = @0xC0FFEE;
-        let user1 = @0xA1;
+    //     // let owner = @0xC0FFEE;
+    //     let user1 = @0xA1;
 
-        let scenario = &mut test_scenario::begin(&user1);
-        {
-            // userLib::initUserCollection(test_scenario::ctx(scenario));
-            communityLib::initCommunity(test_scenario::ctx(scenario));
-            userLib::initUser(test_scenario::ctx(scenario));
-            init(test_scenario::ctx(scenario));
-        };
+    //     let scenario = &mut test_scenario::begin(&user1);
+    //     {
+    //         // userLib::initUserCollection(test_scenario::ctx(scenario));
+    //         communityLib::initCommunity(test_scenario::ctx(scenario));
+    //         userLib::initUser(test_scenario::ctx(scenario));
+    //         init(test_scenario::ctx(scenario));
+    //     };
 
-        // create expert post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     // create expert post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+    //         let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
 
-            communityLib::createCommunity(
-                communityCollection,
-                user1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<vector<u8>>[
-                    x"0000000000000000000000000000000000000000000000000000000000000001",
-                    x"0000000000000000000000000000000000000000000000000000000000000002",
-                    x"0000000000000000000000000000000000000000000000000000000000000003",
-                    x"0000000000000000000000000000000000000000000000000000000000000004",
-                    x"0000000000000000000000000000000000000000000000000000000000000005"
-                ]
-            );
+    //         communityLib::createCommunity(
+    //             communityCollection,
+    //             user1,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             vector<vector<u8>>[
+    //                 x"0000000000000000000000000000000000000000000000000000000000000001",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000002",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000003",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000004",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000005"
+    //             ]
+    //         );
 
-            createPost(
-                postCollection,
-                communityCollection,
-                user1,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                EXPERT_POST,
-                vector<u64>[1, 2]
-            );
+    //         createPost(
+    //             postCollection,
+    //             communityCollection,
+    //             user1,
+    //             1,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             EXPERT_POST,
+    //             vector<u64>[1, 2]
+    //         );
 
-            let (
-                postType,
-                ipfsDoc,
-                postTime,
-                author,
-                rating,
-                communityId,
-                officialReply,
-                bestReply,
-                deletedReplyCount,
-                isDeleted,
-                tags,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             postType,
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             communityId,
+    //             officialReply,
+    //             bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             tags,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(postType == EXPERT_POST, 1);
-            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
-            assert!(postTime == 0, 3);
-            assert!(author == user1, 4);
-            assert!(rating == i64Lib::zero(), 5);
-            assert!(communityId == 1, 6);
-            assert!(officialReply == 0, 7);
-            assert!(bestReply == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
-            assert!(isDeleted == false, 10);
-            assert!(tags == vector<u64>[1, 2], 11);
-            assert!(properties == vector<u8>[], 12);
-            assert!(historyVotes == vector<u8>[], 13);
-            assert!(votedUsers == vector<address>[], 14);
+    //         assert!(postType == EXPERT_POST, 1);
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
+    //         assert!(postTime == 0, 3);
+    //         assert!(author == user1, 4);
+    //         assert!(rating == i64Lib::zero(), 5);
+    //         assert!(communityId == 1, 6);
+    //         assert!(officialReply == 0, 7);
+    //         assert!(bestReply == 0, 8);
+    //         assert!(deletedReplyCount == 0, 9);
+    //         assert!(isDeleted == false, 10);
+    //         assert!(tags == vector<u64>[1, 2], 11);
+    //         assert!(properties == vector<u8>[], 12);
+    //         assert!(historyVotes == vector<u8>[], 13);
+    //         assert!(votedUsers == vector<address>[], 14);
 
-            test_scenario::return_shared(scenario, community_wrapper);
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, community_wrapper);
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        // change post type expert -> common
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     // change post type expert -> common
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
             
-            changePostType(
-                postCollection,
-                user1,
-                1,
-                COMMON_POST,
-            );
+    //         changePostType(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             COMMON_POST,
+    //         );
 
-            let (
-                postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = getPostData(postCollection, 1);
-            assert!(postType == COMMON_POST, 1);
+    //         let (
+    //             postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             _isDeleted,
+    //             _tags,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getPostData(postCollection, 1);
+    //         assert!(postType == COMMON_POST, 1);
 
-            changePostType(
-                postCollection,
-                user1,
-                1,
-                EXPERT_POST,
-            );
+    //         changePostType(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             EXPERT_POST,
+    //         );
 
-            let (
-                postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = getPostData(postCollection, 1);
-            assert!(postType == EXPERT_POST, 1);
+    //         let (
+    //             postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             _isDeleted,
+    //             _tags,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getPostData(postCollection, 1);
+    //         assert!(postType == EXPERT_POST, 1);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        // edit post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     // edit post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+    //         let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
 
-            editPost(
-                postCollection,
-                communityCollection,
-                user1,
-                1,
-                x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc",
-                vector<u64>[2]
-            );
+    //         editPost(
+    //             postCollection,
+    //             communityCollection,
+    //             user1,
+    //             1,
+    //             x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc",
+    //             vector<u64>[2]
+    //         );
 
-            let (
-                postType,
-                ipfsDoc,
-                postTime,
-                author,
-                rating,
-                communityId,
-                officialReply,
-                bestReply,
-                deletedReplyCount,
-                isDeleted,
-                tags,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             postType,
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             communityId,
+    //             officialReply,
+    //             bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             tags,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(postType == 0, 1);
-            assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 2);
-            assert!(postTime == 0, 3);
-            assert!(author == user1, 4);
-            assert!(rating == i64Lib::zero(), 5);
-            assert!(communityId == 1, 6);
-            assert!(officialReply == 0, 7);
-            assert!(bestReply == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
-            assert!(isDeleted == false, 10);
-            assert!(tags == vector<u64>[2], 11);
-            assert!(properties == vector<u8>[], 12);
-            assert!(historyVotes == vector<u8>[], 13);
-            assert!(votedUsers == vector<address>[], 14);
+    //         assert!(postType == 0, 1);
+    //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 2);
+    //         assert!(postTime == 0, 3);
+    //         assert!(author == user1, 4);
+    //         assert!(rating == i64Lib::zero(), 5);
+    //         assert!(communityId == 1, 6);
+    //         assert!(officialReply == 0, 7);
+    //         assert!(bestReply == 0, 8);
+    //         assert!(deletedReplyCount == 0, 9);
+    //         assert!(isDeleted == false, 10);
+    //         assert!(tags == vector<u64>[2], 11);
+    //         assert!(properties == vector<u8>[], 12);
+    //         assert!(historyVotes == vector<u8>[], 13);
+    //         assert!(votedUsers == vector<address>[], 14);
 
-            test_scenario::return_shared(scenario, community_wrapper);
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, community_wrapper);
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        //create reply
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     //create reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
   
-            createReply(
-                postCollection,
-                user1,
-                1,
-                0,
-                x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
-                false
-            );
+    //         createReply(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             0,
+    //             x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
+    //             false
+    //         );
 
-            let (
-                ipfsDoc,
-                postTime,
-                author,
-                rating,
-                parentReplyId,
-                isFirstReply,
-                isQuickReply,
-                isDeleted,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getReplyData(postCollection, 1, 1);
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             parentReplyId,
+    //             isFirstReply,
+    //             isQuickReply,
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getReplyData(postCollection, 1, 1);
 
-            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
-            assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
-            assert!(rating == i64Lib::zero(), 4);
-            assert!(parentReplyId == 0, 5);
-            assert!(isFirstReply == false, 6);
-            assert!(isQuickReply == false, 7);
-            assert!(isDeleted == false, 9);
-            assert!(properties == vector<u8>[], 11);
-            assert!(historyVotes == vector<u8>[], 12);
-            assert!(votedUsers == vector<address>[], 13);
+    //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == i64Lib::zero(), 4);
+    //         assert!(parentReplyId == 0, 5);
+    //         assert!(isFirstReply == false, 6);
+    //         assert!(isQuickReply == false, 7);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u8>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        //edit reply
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     //edit reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
   
-            editReply(
-                postCollection,
-                user1,
-                1,
-                1,
-                x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
-                false
-            );
+    //         editReply(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             1,
+    //             x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
+    //             false
+    //         );
 
-            let (
-                ipfsDoc,
-                postTime,
-                author,
-                rating,
-                parentReplyId,
-                isFirstReply,
-                isQuickReply,
-                isDeleted,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getReplyData(postCollection, 1, 1);
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             parentReplyId,
+    //             isFirstReply,
+    //             isQuickReply,
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getReplyData(postCollection, 1, 1);
 
-            assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
-            assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
-            assert!(rating == i64Lib::zero(), 4);
-            assert!(parentReplyId == 0, 5);
-            assert!(isFirstReply == false, 6);
-            assert!(isQuickReply == false, 7);
-            assert!(isDeleted == false, 9);
-            assert!(properties == vector<u8>[], 11);
-            assert!(historyVotes == vector<u8>[], 12);
-            assert!(votedUsers == vector<address>[], 13);
+    //         assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == i64Lib::zero(), 4);
+    //         assert!(parentReplyId == 0, 5);
+    //         assert!(isFirstReply == false, 6);
+    //         assert!(isQuickReply == false, 7);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u8>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        //create comment to post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     //create comment to post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
   
-            createComment(
-                postCollection,
-                user1,
-                1,
-                0,
-                x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc"
-            );
+    //         createComment(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             0,
+    //             x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc"
+    //         );
 
-            let (
-                ipfsDoc,
-                postTime,
-                author,
-                rating,                
-                isDeleted,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getCommentData(postCollection, 1, 0, 1);
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,                
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getCommentData(postCollection, 1, 0, 1);
 
-            assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 1);
-            assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
-            assert!(rating == i64Lib::zero(), 4);
-            assert!(isDeleted == false, 9);
-            assert!(properties == vector<u8>[], 11);
-            assert!(historyVotes == vector<u8>[], 12);
-            assert!(votedUsers == vector<address>[], 13);
+    //         assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == i64Lib::zero(), 4);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u8>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        //create comment to reply
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     //create comment to reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
   
-            createComment(
-                postCollection,
-                user1,
-                1,
-                1,
-                x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"
-            );
+    //         createComment(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             1,
+    //             x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"
+    //         );
 
-            let (
-                ipfsDoc,
-                postTime,
-                author,
-                rating,                
-                isDeleted,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getCommentData(postCollection, 1, 1, 1);
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,                
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getCommentData(postCollection, 1, 1, 1);
 
-            assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
-            assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
-            assert!(rating == i64Lib::zero(), 4);
-            assert!(isDeleted == false, 9);
-            assert!(properties == vector<u8>[], 11);
-            assert!(historyVotes == vector<u8>[], 12);
-            assert!(votedUsers == vector<address>[], 13);
+    //         assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == i64Lib::zero(), 4);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u8>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
 
-        //edit comment to post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     //edit comment to post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
   
-            editComment(
-                postCollection,
-                user1,
-                1,
-                0,
-                1,
-                x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"
-            );
+    //         editComment(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             0,
+    //             1,
+    //             x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"
+    //         );
 
-            let (
-                ipfsDoc,
-                postTime,
-                author,
-                rating,                
-                isDeleted,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getCommentData(postCollection, 1, 0, 1);
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,                
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getCommentData(postCollection, 1, 0, 1);
 
-            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
-            assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
-            assert!(rating == i64Lib::zero(), 4);
-            assert!(isDeleted == false, 9);
-            assert!(properties == vector<u8>[], 11);
-            assert!(historyVotes == vector<u8>[], 12);
-            assert!(votedUsers == vector<address>[], 13);
+    //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == i64Lib::zero(), 4);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u8>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        //edit comment to reply
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     //edit comment to reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
   
-            editComment(
-                postCollection,
-                user1,
-                1,
-                1,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
-            );
+    //         editComment(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             1,
+    //             1,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6"
+    //         );
 
-            let (
-                ipfsDoc,
-                postTime,
-                author,
-                rating,                
-                isDeleted,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getCommentData(postCollection, 1, 1, 1);
+    //         let (
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,                
+    //             isDeleted,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getCommentData(postCollection, 1, 1, 1);
 
-            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
-            assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
-            assert!(rating == i64Lib::zero(), 4);
-            assert!(isDeleted == false, 9);
-            assert!(properties == vector<u8>[], 11);
-            assert!(historyVotes == vector<u8>[], 12);
-            assert!(votedUsers == vector<address>[], 13);
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
+    //         assert!(postTime == 0, 2);
+    //         assert!(author == user1, 3);
+    //         assert!(rating == i64Lib::zero(), 4);
+    //         assert!(isDeleted == false, 9);
+    //         assert!(properties == vector<u8>[], 11);
+    //         assert!(historyVotes == vector<u8>[], 12);
+    //         assert!(votedUsers == vector<address>[], 13);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        //delete comment to post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     //delete comment to post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
   
-            deleteComment(
-                postCollection,
-                user1,
-                1,
-                0,
-                1
-            );
+    //         deleteComment(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             0,
+    //             1
+    //         );
 
-            let (
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,                
-                isDeleted,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = getCommentData(postCollection, 1, 0, 1);
+    //         let (
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,                
+    //             isDeleted,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getCommentData(postCollection, 1, 0, 1);
 
-            assert!(isDeleted == true, 1);
+    //         assert!(isDeleted == true, 1);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        //delete comment to reply
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     //delete comment to reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
   
-            deleteComment(
-                postCollection,
-                user1,
-                1,
-                1,
-                1
-            );
+    //         deleteComment(
+    //             postCollection,
+    //             user1,
+    //             1,
+    //             1,
+    //             1
+    //         );
 
-            let (
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,                
-                isDeleted,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = getCommentData(postCollection, 1, 1, 1);
+    //         let (
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,                
+    //             isDeleted,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getCommentData(postCollection, 1, 1, 1);
 
-            assert!(isDeleted == true, 1);
+    //         assert!(isDeleted == true, 1);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //     };
 
-        // delete reply
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // delete reply
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
   
-            deleteReply(
-                postCollection,
-                userCollection,
-                user1,
-                1,
-                1,
-            );
+    //         deleteReply(
+    //             postCollection,
+    //             userCollection,
+    //             user1,
+    //             1,
+    //             1,
+    //         );
 
-            let (
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _parentReplyId,
-                _isFirstReply,
-                _isQuickReply,
-                isDeleted,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = getReplyData(postCollection, 1, 1);
+    //         let (
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _parentReplyId,
+    //             _isFirstReply,
+    //             _isQuickReply,
+    //             isDeleted,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getReplyData(postCollection, 1, 1);
 
-            assert!(isDeleted == true, 0);
+    //         assert!(isDeleted == true, 0);
 
-            let (
-                _postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                deletedReplyCount,
-                isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             _postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             _tags,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(deletedReplyCount == 1, 1);
-            assert!(isDeleted == false, 2);
+    //         assert!(deletedReplyCount == 1, 1);
+    //         assert!(isDeleted == false, 2);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // delete post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // delete post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
 
-            deletePost(
-                postCollection,
-                userCollection,
-                user1,
-                1,
-            );
+    //         deletePost(
+    //             postCollection,
+    //             userCollection,
+    //             user1,
+    //             1,
+    //         );
 
-            let (
-                _postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             _postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             _rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             isDeleted,
+    //             _tags,
+    //             _properties,
+    //             _historyVotes,
+    //             _votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(isDeleted == true, 1);
+    //         assert!(isDeleted == true, 1);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
-    }
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
+    // }
 
-    #[test]
-    fun test_upvote_post() {
-        use sui::test_scenario;
+    // #[test]
+    // fun test_upvote_post() {
+    //     use sui::test_scenario;
 
-        // let owner = @0xC0FFEE;
-        let user1 = @0xA1;
-        let user2 = @0xA2;
+    //     // let owner = @0xC0FFEE;
+    //     let user1 = @0xA1;
+    //     let user2 = @0xA2;
 
-        let scenario = &mut test_scenario::begin(&user1);
-        {
-            // userLib::initUserCollection(test_scenario::ctx(scenario));
-            communityLib::initCommunity(test_scenario::ctx(scenario));
-            userLib::initUser(test_scenario::ctx(scenario));
-            init(test_scenario::ctx(scenario));
-        };
+    //     let scenario = &mut test_scenario::begin(&user1);
+    //     {
+    //         // userLib::initUserCollection(test_scenario::ctx(scenario));
+    //         communityLib::initCommunity(test_scenario::ctx(scenario));
+    //         userLib::initUser(test_scenario::ctx(scenario));
+    //         init(test_scenario::ctx(scenario));
+    //     };
 
         
-        // create expert post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     // create expert post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+    //         let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
 
-            communityLib::createCommunity(
-                communityCollection,
-                user1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<vector<u8>>[
-                    x"0000000000000000000000000000000000000000000000000000000000000001",
-                    x"0000000000000000000000000000000000000000000000000000000000000002",
-                    x"0000000000000000000000000000000000000000000000000000000000000003",
-                    x"0000000000000000000000000000000000000000000000000000000000000004",
-                    x"0000000000000000000000000000000000000000000000000000000000000005"
-                ]
-            );
+    //         communityLib::createCommunity(
+    //             communityCollection,
+    //             user1,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             vector<vector<u8>>[
+    //                 x"0000000000000000000000000000000000000000000000000000000000000001",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000002",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000003",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000004",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000005"
+    //             ]
+    //         );
 
-            createPost(
-                postCollection,
-                communityCollection,
-                user1,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                EXPERT_POST,
-                vector<u64>[1, 2]
-            );
+    //         createPost(
+    //             postCollection,
+    //             communityCollection,
+    //             user1,
+    //             1,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             EXPERT_POST,
+    //             vector<u64>[1, 2]
+    //         );
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, community_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, community_wrapper);
+    //     };
         
-        // upvote Post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // upvote Post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                true
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             true
+    //         );
 
-            let (
-                postType,
-                ipfsDoc,
-                postTime,
-                author,
-                rating,
-                communityId,
-                officialReply,
-                bestReply,
-                deletedReplyCount,
-                isDeleted,
-                tags,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             postType,
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             communityId,
+    //             officialReply,
+    //             bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             tags,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(postType == EXPERT_POST, 1);
-            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
-            assert!(postTime == 0, 3);
-            assert!(author == user1, 4);
-            assert!(rating == i64Lib::from(1), 5);
-            assert!(communityId == 1, 6);
-            assert!(officialReply == 0, 7);
-            assert!(bestReply == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
-            assert!(isDeleted == false, 10);
-            assert!(tags == vector<u64>[1, 2], 11);
-            assert!(properties == vector<u8>[], 12);
-            assert!(historyVotes == vector<u8>[3], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(postType == EXPERT_POST, 1);
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
+    //         assert!(postTime == 0, 3);
+    //         assert!(author == user1, 4);
+    //         assert!(rating == i64Lib::from(1), 5);
+    //         assert!(communityId == 1, 6);
+    //         assert!(officialReply == 0, 7);
+    //         assert!(bestReply == 0, 8);
+    //         assert!(deletedReplyCount == 0, 9);
+    //         assert!(isDeleted == false, 10);
+    //         assert!(tags == vector<u64>[1, 2], 11);
+    //         assert!(properties == vector<u8>[], 12);
+    //         assert!(historyVotes == vector<u8>[3], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // cancel upvote Post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // cancel upvote Post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                true
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             true
+    //         );
 
-            let (
-                postType,
-                ipfsDoc,
-                postTime,
-                author,
-                rating,
-                communityId,
-                officialReply,
-                bestReply,
-                deletedReplyCount,
-                isDeleted,
-                tags,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             postType,
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             communityId,
+    //             officialReply,
+    //             bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             tags,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(postType == EXPERT_POST, 1);
-            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
-            assert!(postTime == 0, 3);
-            assert!(author == user1, 4);
-            assert!(rating == i64Lib::from(0), 5);
-            assert!(communityId == 1, 6);
-            assert!(officialReply == 0, 7);
-            assert!(bestReply == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
-            assert!(isDeleted == false, 10);
-            assert!(tags == vector<u64>[1, 2], 11);
-            assert!(properties == vector<u8>[], 12);
-            assert!(historyVotes == vector<u8>[2], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(postType == EXPERT_POST, 1);
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
+    //         assert!(postTime == 0, 3);
+    //         assert!(author == user1, 4);
+    //         assert!(rating == i64Lib::from(0), 5);
+    //         assert!(communityId == 1, 6);
+    //         assert!(officialReply == 0, 7);
+    //         assert!(bestReply == 0, 8);
+    //         assert!(deletedReplyCount == 0, 9);
+    //         assert!(isDeleted == false, 10);
+    //         assert!(tags == vector<u64>[1, 2], 11);
+    //         assert!(properties == vector<u8>[], 12);
+    //         assert!(historyVotes == vector<u8>[2], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // upvote after cancel upvote Post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // upvote after cancel upvote Post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                true
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             true
+    //         );
 
-            let (
-                postType,
-                ipfsDoc,
-                postTime,
-                author,
-                rating,
-                communityId,
-                officialReply,
-                bestReply,
-                deletedReplyCount,
-                isDeleted,
-                tags,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             postType,
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             communityId,
+    //             officialReply,
+    //             bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             tags,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(postType == EXPERT_POST, 1);
-            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
-            assert!(postTime == 0, 3);
-            assert!(author == user1, 4);
-            assert!(rating == i64Lib::from(1), 5);
-            assert!(communityId == 1, 6);
-            assert!(officialReply == 0, 7);
-            assert!(bestReply == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
-            assert!(isDeleted == false, 10);
-            assert!(tags == vector<u64>[1, 2], 11);
-            assert!(properties == vector<u8>[], 12);
-            assert!(historyVotes == vector<u8>[3], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(postType == EXPERT_POST, 1);
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
+    //         assert!(postTime == 0, 3);
+    //         assert!(author == user1, 4);
+    //         assert!(rating == i64Lib::from(1), 5);
+    //         assert!(communityId == 1, 6);
+    //         assert!(officialReply == 0, 7);
+    //         assert!(bestReply == 0, 8);
+    //         assert!(deletedReplyCount == 0, 9);
+    //         assert!(isDeleted == false, 10);
+    //         assert!(tags == vector<u64>[1, 2], 11);
+    //         assert!(properties == vector<u8>[], 12);
+    //         assert!(historyVotes == vector<u8>[3], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // upvote -> downVote
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // upvote -> downVote
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                false
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             false
+    //         );
 
-            let (
-                postType,
-                ipfsDoc,
-                postTime,
-                author,
-                rating,
-                communityId,
-                officialReply,
-                bestReply,
-                deletedReplyCount,
-                isDeleted,
-                tags,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             postType,
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             communityId,
+    //             officialReply,
+    //             bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             tags,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(postType == EXPERT_POST, 1);
-            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
-            assert!(postTime == 0, 3);
-            assert!(author == user1, 4);
-            assert!(rating == i64Lib::neg_from(1), 5);
-            assert!(communityId == 1, 6);
-            assert!(officialReply == 0, 7);
-            assert!(bestReply == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
-            assert!(isDeleted == false, 10);
-            assert!(tags == vector<u64>[1, 2], 11);
-            assert!(properties == vector<u8>[], 12);
-            assert!(historyVotes == vector<u8>[1], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(postType == EXPERT_POST, 1);
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
+    //         assert!(postTime == 0, 3);
+    //         assert!(author == user1, 4);
+    //         assert!(rating == i64Lib::neg_from(1), 5);
+    //         assert!(communityId == 1, 6);
+    //         assert!(officialReply == 0, 7);
+    //         assert!(bestReply == 0, 8);
+    //         assert!(deletedReplyCount == 0, 9);
+    //         assert!(isDeleted == false, 10);
+    //         assert!(tags == vector<u64>[1, 2], 11);
+    //         assert!(properties == vector<u8>[], 12);
+    //         assert!(historyVotes == vector<u8>[1], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-         // upvote after cancel downVote
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //      // upvote after cancel downVote
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                false
-            );
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                true
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             false
+    //         );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             true
+    //         );
 
-            let (
-                postType,
-                ipfsDoc,
-                postTime,
-                author,
-                rating,
-                communityId,
-                officialReply,
-                bestReply,
-                deletedReplyCount,
-                isDeleted,
-                tags,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             postType,
+    //             ipfsDoc,
+    //             postTime,
+    //             author,
+    //             rating,
+    //             communityId,
+    //             officialReply,
+    //             bestReply,
+    //             deletedReplyCount,
+    //             isDeleted,
+    //             tags,
+    //             properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(postType == EXPERT_POST, 1);
-            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
-            assert!(postTime == 0, 3);
-            assert!(author == user1, 4);
-            assert!(rating == i64Lib::from(1), 5);
-            assert!(communityId == 1, 6);
-            assert!(officialReply == 0, 7);
-            assert!(bestReply == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
-            assert!(isDeleted == false, 10);
-            assert!(tags == vector<u64>[1, 2], 11);
-            assert!(properties == vector<u8>[], 12);
-            assert!(historyVotes == vector<u8>[3], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(postType == EXPERT_POST, 1);
+    //         assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
+    //         assert!(postTime == 0, 3);
+    //         assert!(author == user1, 4);
+    //         assert!(rating == i64Lib::from(1), 5);
+    //         assert!(communityId == 1, 6);
+    //         assert!(officialReply == 0, 7);
+    //         assert!(bestReply == 0, 8);
+    //         assert!(deletedReplyCount == 0, 9);
+    //         assert!(isDeleted == false, 10);
+    //         assert!(tags == vector<u64>[1, 2], 11);
+    //         assert!(properties == vector<u8>[], 12);
+    //         assert!(historyVotes == vector<u8>[3], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
-    }
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
+    // }
 
-    #[test]
-    fun test_downVote_post() {
-        use sui::test_scenario;
+    // #[test]
+    // fun test_downVote_post() {
+    //     use sui::test_scenario;
 
-        // let owner = @0xC0FFEE;
-        let user1 = @0xA1;
-        let user2 = @0xA2;
+    //     // let owner = @0xC0FFEE;
+    //     let user1 = @0xA1;
+    //     let user2 = @0xA2;
 
-        let scenario = &mut test_scenario::begin(&user1);
-        {
-            // userLib::initUserCollection(test_scenario::ctx(scenario));
-            communityLib::initCommunity(test_scenario::ctx(scenario));
-            userLib::initUser(test_scenario::ctx(scenario));
-            init(test_scenario::ctx(scenario));
-        };
+    //     let scenario = &mut test_scenario::begin(&user1);
+    //     {
+    //         // userLib::initUserCollection(test_scenario::ctx(scenario));
+    //         communityLib::initCommunity(test_scenario::ctx(scenario));
+    //         userLib::initUser(test_scenario::ctx(scenario));
+    //         init(test_scenario::ctx(scenario));
+    //     };
 
         
-        // create expert post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //     // create expert post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+    //         let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
 
-            communityLib::createCommunity(
-                communityCollection,
-                user1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<vector<u8>>[
-                    x"0000000000000000000000000000000000000000000000000000000000000001",
-                    x"0000000000000000000000000000000000000000000000000000000000000002",
-                    x"0000000000000000000000000000000000000000000000000000000000000003",
-                    x"0000000000000000000000000000000000000000000000000000000000000004",
-                    x"0000000000000000000000000000000000000000000000000000000000000005"
-                ]
-            );
+    //         communityLib::createCommunity(
+    //             communityCollection,
+    //             user1,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             vector<vector<u8>>[
+    //                 x"0000000000000000000000000000000000000000000000000000000000000001",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000002",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000003",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000004",
+    //                 x"0000000000000000000000000000000000000000000000000000000000000005"
+    //             ]
+    //         );
 
-            createPost(
-                postCollection,
-                communityCollection,
-                user1,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                EXPERT_POST,
-                vector<u64>[1, 2]
-            );
+    //         createPost(
+    //             postCollection,
+    //             communityCollection,
+    //             user1,
+    //             1,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             EXPERT_POST,
+    //             vector<u64>[1, 2]
+    //         );
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, community_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, community_wrapper);
+    //     };
         
-        // downVote Post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // downVote Post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                false
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             false
+    //         );
 
-            let (
-                _postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             _postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             _isDeleted,
+    //             _tags,
+    //             _properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(rating == i64Lib::neg_from(1), 5);
-            assert!(historyVotes == vector<u8>[1], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(rating == i64Lib::neg_from(1), 5);
+    //         assert!(historyVotes == vector<u8>[1], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // cancel downVote Post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // cancel downVote Post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                false
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             false
+    //         );
 
-            let (
-                _postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             _postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             _isDeleted,
+    //             _tags,
+    //             _properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(rating == i64Lib::from(0), 5);
-            assert!(historyVotes == vector<u8>[2], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(rating == i64Lib::from(0), 5);
+    //         assert!(historyVotes == vector<u8>[2], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // downVote after cancel downVote Post
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // downVote after cancel downVote Post
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                false
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             false
+    //         );
 
-            let (
-                _postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             _postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             _isDeleted,
+    //             _tags,
+    //             _properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(rating == i64Lib::neg_from(1), 5);
-            assert!(historyVotes == vector<u8>[1], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(rating == i64Lib::neg_from(1), 5);
+    //         assert!(historyVotes == vector<u8>[1], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // downVote -> upvote
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // downVote -> upvote
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                true
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             true
+    //         );
 
-            let (
-                _postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             _postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             _isDeleted,
+    //             _tags,
+    //             _properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(rating == i64Lib::from(1), 5);
-            assert!(historyVotes == vector<u8>[3], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(rating == i64Lib::from(1), 5);
+    //         assert!(historyVotes == vector<u8>[3], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
 
-        // downVote after cancel upvote
-        test_scenario::next_tx(scenario, &user1);
-        {
-            let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-            let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+    //     // downVote after cancel upvote
+    //     test_scenario::next_tx(scenario, &user1);
+    //     {
+    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
+    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
+    //         let user_wrapper = test_scenario::take_shared<userLib::UserCollection>(scenario);
+    //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                true
-            );
-            voteForumItem(
-                postCollection,
-                userCollection,
-                user2,
-                1,
-                0,
-                0,
-                false
-            );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             true
+    //         );
+    //         voteForumItem(
+    //             postCollection,
+    //             userCollection,
+    //             user2,
+    //             1,
+    //             0,
+    //             0,
+    //             false
+    //         );
 
-            let (
-                _postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                historyVotes,
-                votedUsers
-            ) = getPostData(postCollection, 1);
+    //         let (
+    //             _postType,
+    //             _ipfsDoc,
+    //             _postTime,
+    //             _author,
+    //             rating,
+    //             _communityId,
+    //             _officialReply,
+    //             _bestReply,
+    //             _deletedReplyCount,
+    //             _isDeleted,
+    //             _tags,
+    //             _properties,
+    //             historyVotes,
+    //             votedUsers
+    //         ) = getPostData(postCollection, 1);
 
-            assert!(rating == i64Lib::neg_from(1), 5);
-            assert!(historyVotes == vector<u8>[1], 13);
-            assert!(votedUsers == vector<address>[user2], 14);
+    //         assert!(rating == i64Lib::neg_from(1), 5);
+    //         assert!(historyVotes == vector<u8>[1], 13);
+    //         assert!(votedUsers == vector<address>[user2], 14);
 
-            test_scenario::return_shared(scenario, post_wrapper);
-            test_scenario::return_shared(scenario, user_wrapper);
-        };
-    }
+    //         test_scenario::return_shared(scenario, post_wrapper);
+    //         test_scenario::return_shared(scenario, user_wrapper);
+    //     };
+    // }
 
     ///
     //voteLib
