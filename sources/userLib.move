@@ -400,10 +400,10 @@ module basics::userLib {
             dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(i64Lib::sub(&i64Lib::from(dataUpdateUserRatingCurrentPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingCurrentPeriod.penalty)), i64Lib::add(&i64Lib::sub(&i64Lib::from(dataUpdateUserRatingCurrentPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingCurrentPeriod.penalty)), &dataUpdateUserRatingCurrentPeriod.changeRating));
             if (i64Lib::compare(&dataUpdateUserRatingCurrentPeriod.ratingToRewardChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {    // neg?   i64Lib::compare(&dataUpdateUserRatingCurrentPeriod.ratingToRewardChange, &i64Lib::zero()) == i64Lib::getGreaterThan()  //
                 let periodRewardShares = getMutableTotalRewardShares(userCollection, currentPeriod);
-                periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares + i64Lib::as_u64(&getRewardShare(userAddr, previousPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
+                periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares + i64Lib::as_u64(&getRewardShare(userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
             } else {
-                // let periodRewardShares = getMutableTotalRewardShares(userCollection, currentPeriod);
-                // periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares - i64Lib::as_u64(&i64Lib::mul(&getRewardShare(userAddr, previousPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange), &i64Lib::neg_from(1)));
+                let periodRewardShares = getMutableTotalRewardShares(userCollection, currentPeriod);
+                periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares - i64Lib::as_u64(&i64Lib::mul(&getRewardShare(userAddr, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange), &i64Lib::neg_from(1)));
             };
 
             let _changeRating: i64Lib::I64 = i64Lib::zero();     // TODD: add Unused assignment or binding for local 'changeRating'. Consider removing, replacing with '_', or prefixing with '_' (e.g., '_changeRating')
@@ -442,7 +442,7 @@ module basics::userLib {
     }
 
     fun getRatingToRewardChange(previosRatingToReward: i64Lib::I64, newRatingToReward: i64Lib::I64): i64Lib::I64 {
-        if (i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) == i64Lib::getLessThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) == i64Lib::getLessThan()) i64Lib::sub(&newRatingToReward, &previosRatingToReward)     // previosRatingToReward >= 0 && newRatingToReward >= 0
+        if (i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) != i64Lib::getLessThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) != i64Lib::getLessThan()) i64Lib::sub(&newRatingToReward, &previosRatingToReward)     // previosRatingToReward >= 0 && newRatingToReward >= 0
         else if(i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) == i64Lib::getLessThan()) i64Lib::mul(&previosRatingToReward, &i64Lib::neg_from(1))     // previosRatingToReward > 0 && newRatingToReward < 0
         else if(i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) == i64Lib::getLessThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) == i64Lib::getGreaterThan()) newRatingToReward   // previosRatingToReward < 0 && newRatingToReward > 0
         else i64Lib::zero() // from negative to negative
@@ -489,7 +489,7 @@ module basics::userLib {
     //     use sui::test_scenario;
     //     // use basics::communityLib;
 
-    //     // let owner = @0xC0FFEE;
+    //     let owner = @0xC0FFEE;
     //     let user1 = @0xA1;
 
     //     let scenario = &mut test_scenario::begin(&user1);
@@ -518,94 +518,83 @@ module basics::userLib {
     //         test_scenario::return_shared(scenario, user_wrapper);
     //     };
 
-    // //     // update user ipfs
-    // //     test_scenario::next_tx(scenario, &user1);
-    // //     {
-    // //         let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
-    // //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+        // // update user ipfs
+        // test_scenario::next_tx(scenario, &user1);
+        // {
+        //     let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
+        //     let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
             
-    // //         updateUser(userCollection, user1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
+        //     updateUser(userCollection, user1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
             
-    // //         let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
-    // //         assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
-    // //         assert!(owner == @0xA1, 2);
-    // //         assert!(energy == 1000, 3);
-    // //         assert!(lastUpdatePeriod == 0, 4);
-    // //         assert!(followedCommunities == vector<u64>[], 5);
+        //     let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
+        //     assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+        //     assert!(owner == @0xA1, 2);
+        //     assert!(energy == 1000, 3);
+        //     assert!(lastUpdatePeriod == 0, 4);
+        //     assert!(followedCommunities == vector<u64>[], 5);
 
-    // //         test_scenario::return_shared(scenario, user_wrapper);
-    // //     };
+        //     test_scenario::return_shared(scenario, user_wrapper);
+        // };
 
-    // //     test_scenario::next_tx(scenario, &user1);
-    // //     {
-    // //         let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
-    // //         let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+        // // followCommunity
+        // test_scenario::next_tx(scenario, &user1);
+        // {
+        //     let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
+        //     let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+        //     let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+        //     let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+
+        //     communityLib::createCommunity(
+        //         communityCollection,
+        //         user1,
+        //         x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+        //         vector<vector<u8>>[
+        //             x"0000000000000000000000000000000000000000000000000000000000000001",
+        //             x"0000000000000000000000000000000000000000000000000000000000000002",
+        //             x"0000000000000000000000000000000000000000000000000000000000000003",
+        //             x"0000000000000000000000000000000000000000000000000000000000000004",
+        //             x"0000000000000000000000000000000000000000000000000000000000000005"
+        //         ]
+        //     );
+
+        //     followCommunity(communityCollection, userCollection, user1, 0);
             
-    // //         testError2Fix(userCollection, user1);
+        //     let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
+        //     assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+        //     assert!(owner == @0xA1, 2);
+        //     assert!(energy == 1000, 3);
+        //     assert!(lastUpdatePeriod == 0, 4);
+        //     assert!(followedCommunities == vector<u64>[0], 5);
 
-    // //         printUserCollection(userCollection);
-    // //         test_scenario::return_shared(scenario, user_wrapper);
-    // //     };
+        //     test_scenario::return_shared(scenario, user_wrapper);
+        //     test_scenario::return_shared(scenario, community_wrapper);
+        // };
 
-    //     // // followCommunity
-    //     // test_scenario::next_tx(scenario, &user1);
-    //     // {
-    //     //     let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
-    //     //     let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
-    //     //     let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-    //     //     let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
+        // // unfollowCommunity
+        // test_scenario::next_tx(scenario, &user1);
+        // {
+        //     let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
+        //     let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
+        //     let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
+        //     let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
 
-    //     //     communityLib::createCommunity(
-    //     //         communityCollection,
-    //     //         user1,
-    //     //         x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-    //     //         vector<vector<u8>>[
-    //     //             x"0000000000000000000000000000000000000000000000000000000000000001",
-    //     //             x"0000000000000000000000000000000000000000000000000000000000000002",
-    //     //             x"0000000000000000000000000000000000000000000000000000000000000003",
-    //     //             x"0000000000000000000000000000000000000000000000000000000000000004",
-    //     //             x"0000000000000000000000000000000000000000000000000000000000000005"
-    //     //         ]
-    //     //     );
-
-    //     //     followCommunity(communityCollection, userCollection, user1, 0);
+        //     unfollowCommunity(communityCollection, userCollection, user1, 0);
             
-    //     //     let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
-    //     //     assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
-    //     //     assert!(owner == @0xA1, 2);
-    //     //     assert!(energy == 1000, 3);
-    //     //     assert!(lastUpdatePeriod == 0, 4);
-    //     //     assert!(followedCommunities == vector<u64>[0], 5);
+        //     let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
+        //     assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+        //     assert!(owner == @0xA1, 2);
+        //     assert!(energy == 1000, 3);
+        //     assert!(lastUpdatePeriod == 0, 4);
+        //     assert!(followedCommunities == vector<u64>[], 5);
 
-    //     //     test_scenario::return_shared(scenario, user_wrapper);
-    //     //     test_scenario::return_shared(scenario, community_wrapper);
-    //     // };
-
-    //     // // unfollowCommunity
-    //     // test_scenario::next_tx(scenario, &user1);
-    //     // {
-    //     //     let user_wrapper = test_scenario::take_shared<UserCollection>(scenario);
-    //     //     let userCollection = test_scenario::borrow_mut(&mut user_wrapper);
-    //     //     let community_wrapper = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-    //     //     let communityCollection = test_scenario::borrow_mut(&mut community_wrapper);
-
-    //     //     unfollowCommunity(communityCollection, userCollection, user1, 0);
-            
-    //     //     let (ipfsDoc, owner, energy, lastUpdatePeriod, followedCommunities) = getUserData(userCollection, user1);
-    //     //     assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
-    //     //     assert!(owner == @0xA1, 2);
-    //     //     assert!(energy == 1000, 3);
-    //     //     assert!(lastUpdatePeriod == 0, 4);
-    //     //     assert!(followedCommunities == vector<u64>[], 5);
-
-    //     //     test_scenario::return_shared(scenario, user_wrapper);
-    //     //     test_scenario::return_shared(scenario, community_wrapper);
-    //     // };
+        //     test_scenario::return_shared(scenario, user_wrapper);
+        //     test_scenario::return_shared(scenario, community_wrapper);
+        // };
 
 
-    // //      // x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1" - eGEyNjc1MzBmNDlmODI4MDIwMGVkZjMxM2VlN2FmNmI4MjdmMmE4YmNlMjg5Nzc1MWQwNmE4NDNmNjQ0OTY3YjE
-    // //      // x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82" - eDcwMWI2MTViYmRmYjlkZTY1MjQwYmMyOGJkMjFiYmMwZDk5NjY0NWEzZGQ1N2U3YjEyYmMyYmRmNmYxOTJjODI
-    // //      // x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6" - eDdjODUyMTE4Mjk0ZTUxZTY1MzcxMmE4MWUwNTgwMGY0MTkxNDE3NTFiZTU4ZjYwNWMzNzFlMTUxNDFiMDA3YTY
-    // //      // x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc" - eGMwOWIxOWY2NWFmZDBkZjYxMGM5MGVhMDAxMjBiY2NkMWZjMWI4YzZlN2NkYmU0NDAzNzZlZTEzZTE1NmE1YmM
+         // x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1" - eGEyNjc1MzBmNDlmODI4MDIwMGVkZjMxM2VlN2FmNmI4MjdmMmE4YmNlMjg5Nzc1MWQwNmE4NDNmNjQ0OTY3YjE
+         // x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82" - eDcwMWI2MTViYmRmYjlkZTY1MjQwYmMyOGJkMjFiYmMwZDk5NjY0NWEzZGQ1N2U3YjEyYmMyYmRmNmYxOTJjODI
+         // x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6" - eDdjODUyMTE4Mjk0ZTUxZTY1MzcxMmE4MWUwNTgwMGY0MTkxNDE3NTFiZTU4ZjYwNWMzNzFlMTUxNDFiMDA3YTY
+         // x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc" - eGMwOWIxOWY2NWFmZDBkZjYxMGM5MGVhMDAxMjBiY2NkMWZjMWI4YzZlN2NkYmU0NDAzNzZlZTEzZTE1NmE1YmM
     // }
 }
