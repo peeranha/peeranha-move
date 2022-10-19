@@ -56,7 +56,7 @@ module basics::communityLib {
 
         vector::push_back(&mut communityCollection.communities, Community {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            timeCreate: 0,                           // // TODO: add get time
+            timeCreate: commonLib::getTimestamp(),
             isFrozen: false,
             tags: vector::empty<Tag>(),
         });
