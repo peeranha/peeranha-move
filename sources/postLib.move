@@ -98,6 +98,7 @@ module basics::postLib {
     public entry fun createPost(
         postCollection: &mut PostCollection,
         communityCollection: &mut communityLib::CommunityCollection,
+        userCollection: &mut userLib::UserCollection,
         userAddr: address,
         communityId: u64,
         ipfsHash: vector<u8>, 
@@ -106,7 +107,17 @@ module basics::postLib {
     ) {
         communityLib::onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
         communityLib::checkTags(communityCollection, communityId, tags);
+
         // TODO: add check role
+        userLib::checkActionRole(
+            userCollection,
+            userAddr,
+            userAddr,
+            communityId,
+            1, // userLib::ACTION_PUBLICATION_POST, (import constant)
+            true
+        );
+
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
 
         vector::push_back(&mut postCollection.posts, Post {

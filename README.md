@@ -4,8 +4,32 @@ Error code:
     User
 
 10 - user does not exist
+
 11 - already_followed
+
 12 - comm_not_followed
+
+13 - user_not_found
+
+14 - not_allowed_action
+
+15 - not_allowed_delete
+
+16 - not_allowed_vote_post
+
+17 - not_allowed_vote_reply
+
+18 - not_allowed_vote_comment
+
+19 - not_allowed_vote_post
+
+20 - not_allowed_vote_reply
+
+21 - not_allowed_edit
+
+22 - low_energy
+
+99 - check function getRatingAndEnergyForAction()
 
     Community
 
