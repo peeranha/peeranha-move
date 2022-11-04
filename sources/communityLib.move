@@ -186,7 +186,7 @@ module basics::communityLib {
 
     #[test_only]
     public fun getCommunityData(communityCollection: &mut CommunityCollection, communityId: u64): (vector<u8>, u64, bool, vector<Tag>,) {
-        assert!(vector::length(&communityCollection.communities) >= communityId, 28);
+        assert!(communityId > 0 && vector::length(&communityCollection.communities) >= communityId, 28);
         
         let community = vector::borrow(&mut communityCollection.communities, communityId - 1);
         (commonLib::getIpfsHash(community.ipfsDoc), community.timeCreate, community.isFrozen, community.tags)

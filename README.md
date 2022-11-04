@@ -91,6 +91,19 @@ Error code:
 
 54 - You can not vote to Documentation.
 
+55 - Post_not_exist.
+
+56 - Reply_not_exist.
+
+57 - Comment_not_exist.
+
+58 - Post_deleted.
+
+59 - Reply_deleted.
+
+60 - Comment_deleted.
+
+
 98, 99 - getPeriodRating
 
 owner - 0x62a5541796a4fa35229543da71df4f570f7cbe02

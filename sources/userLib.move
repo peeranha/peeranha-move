@@ -791,10 +791,13 @@ module basics::userLib {
     //     }
     // }
 
-    // for unitTests
     public fun getUserData(userCollection: &mut UserCollection, owner: address): (vector<u8>, address, u64, u64, vector<u64>) {
         let user = getUser(userCollection, owner);
         (commonLib::getIpfsHash(user.ipfsDoc), user.owner, user.energy, user.lastUpdatePeriod, user.followedCommunities)
+    }
+
+    public fun get_user_collection(userCollection: UserCollection): UserCollection {
+        userCollection
     }
     
     
