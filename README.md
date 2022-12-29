@@ -1,3 +1,14 @@
+new version sui:
+- run commands from https://docs.sui.io/devnet/build/install
+if error (Cannot open wallet config file at "/home/freitag/.sui/sui_config/client.yaml")
+    - open /home/freitag/.sui/sui_config/client.yaml file
+    - back to .sui folder
+    - delete folder sui_config
+    run command sui client
+        - y
+        - 0
+if error (Failed to verify the Move module, reason: "Sui framework version mismatch detected.)
+
 
 Error code:
 
@@ -111,9 +122,6 @@ package object ID - 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0
 user object - 0x94e98b7c4f229e5011fffbb1778e2a03003aac5f
 community - 0xf67fdeab0355f72438df93c11bff68eb3c538e43
 post - 0xb5d76295c7010d60f9a50c18a965a2cf586f29ff
-
-
-sui client publish --path ./ --gas-budget 30000
 
 createUser - sui client call --function createUser --module userLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0x94e98b7c4f229e5011fffbb1778e2a03003aac5f\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" \"x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"\" --gas-budget 30000
 

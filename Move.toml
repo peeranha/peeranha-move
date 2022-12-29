@@ -1,9 +1,10 @@
 [package]
 name = "Basics"
 version = "0.0.1"
+license = "Apache-2.0"
 
 [dependencies]
-Sui = { local = "../sui/crates/sui-framework" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework", rev = "devnet" }
 
 [addresses]
 basics = "0x0"
