@@ -54,7 +54,7 @@ module basics::postLib {
         votedUsers: vector<address>
     }
 
-    struct Reply has store, drop {
+    struct Reply has store, drop, copy {
         ipfsDoc: commonLib::IpfsHash,
         postTime: u64,
         author: address,
@@ -71,7 +71,7 @@ module basics::postLib {
         votedUsers: vector<address>
     }
 
-    struct Comment has store, drop {
+    struct Comment has store, drop, copy {
         ipfsDoc: commonLib::IpfsHash,
         postTime: u64,
         author: address,
@@ -149,7 +149,7 @@ module basics::postLib {
         if (postType != DOCUMENTATION) {
             assert!(vector::length(&mut tags) > 0, 26);
             let postId = vector::length(&mut postCollection.posts);
-            let post = getMutablePost(postCollection, postId);
+            let post = getPostContainer(postCollection, postId);
             post.tags = tags;
         };
 
@@ -166,7 +166,7 @@ module basics::postLib {
     ) {
         let userAddr = tx_context::sender(ctx);
 
-        let post = getMutablePost(postCollection, postId);
+        let post = getPostContainer(postCollection, postId);
         assert!(post.postType != TYTORIAL && post.postType != DOCUMENTATION, 46);
         assert!(parentReplyId == 0 || (post.postType != EXPERT_POST && post.postType != COMMON_POST), 47);
 
@@ -179,7 +179,7 @@ module basics::postLib {
 
             let replyId = 0;
             while (replyId < countReplies) {
-                let replyContainer = getReply(post, replyId);
+                let replyContainer = getReplyContainer(post, replyId);
                 assert!(userAddr != replyContainer.author || replyContainer.isDeleted, 41);
             };
         };
@@ -238,7 +238,7 @@ module basics::postLib {
     ) {
         let userAddr = tx_context::sender(ctx);
 
-        let post = getMutablePost(postCollection, postId);
+        let post = getPostContainer(postCollection, postId);
         assert!(post.postType != DOCUMENTATION, 48);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
         
@@ -276,7 +276,7 @@ module basics::postLib {
                 votedUsers: vector::empty<address>(),
             });
         } else {
-            let reply = getMutableReply(post, parentReplyId);
+            let reply = getReplyContainerSafe(post, parentReplyId);
             vector::push_back(&mut reply.comments, Comment {
                 ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
                 postTime: 0,            // TODO: add get time
@@ -302,7 +302,7 @@ module basics::postLib {
     ) {
         let userAddr = tx_context::sender(ctx);
 
-        let post = getMutablePost(postCollection, postId);
+        let post = getPostContainer(postCollection, postId);
         communityLib::checkTags(communityCollection, post.communityId, tags);
 
         // TODO: add check role
@@ -328,8 +328,8 @@ module basics::postLib {
     ) {
         let userAddr = tx_context::sender(ctx);
 
-        let post = getMutablePost(postCollection, postId);
-        let reply = getMutableReply(post, replyId);
+        let post = getPostContainer(postCollection, postId);
+        let reply = getReplyContainerSafe(post, replyId);
 
         // TODO: add check role
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
@@ -356,8 +356,8 @@ module basics::postLib {
     ) {
         let userAddr = tx_context::sender(ctx);
 
-        let post = getMutablePost(postCollection, postId);
-        let comment = getMutableComment (post, parentReplyId, commentId);
+        let post = getPostContainer(postCollection, postId);
+        let comment = getCommentContainerSafe(post, parentReplyId, commentId);
 
         // TODO: add check role
         assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
@@ -377,7 +377,7 @@ module basics::postLib {
     ) {
         let userAddr = tx_context::sender(ctx);
 
-        let post = getMutablePost(postCollection, postId);
+        let post = getPostContainer(postCollection, postId);
 
         // TODO: add check role
 
@@ -440,8 +440,8 @@ module basics::postLib {
     ) {
         let userAddr = tx_context::sender(ctx);
 
-        let post = getMutablePost(postCollection, postId);
-        let reply = getMutableReply(post, replyId);
+        let post = getPostContainer(postCollection, postId);
+        let reply = getReplyContainerSafe(post, replyId);
 
         // TODO: add check role
         
@@ -486,8 +486,8 @@ module basics::postLib {
         postId: u64,
         replyId: u64,
     ) {
-        let post = getPost(postCollection, postId);
-        let reply = getReply(post, replyId);
+        let post = getPostContainer(postCollection, postId);
+        let reply = *getReplyContainer(post, replyId);
 
         let postType = post.postType;
         let isBestReply = reply.parentReplyId == 0 && post.bestReply == replyId;
@@ -540,8 +540,8 @@ module basics::postLib {
     ) {
         let userAddr = tx_context::sender(ctx);
 
-        let post = getMutablePost(postCollection, postId);
-        let comment = getMutableComment (post, parentReplyId, commentId);
+        let post = getPostContainer(postCollection, postId);
+        let comment = getCommentContainerSafe(post, parentReplyId, commentId);
 
         // TODO: add check role
 
@@ -600,7 +600,7 @@ module basics::postLib {
         votedUser: address,
         isUpvote: bool
     ): u8 {
-        let post = getMutablePost(postCollection, postId);
+        let post = getPostContainer(postCollection, postId);
         let postType = post.postType;
         assert!(postType != DOCUMENTATION, 54);
         assert!(votedUser != post.author, 53);
@@ -637,8 +637,8 @@ module basics::postLib {
         votedUser: address,
         isUpvote: bool
     ): u8 {
-        let post = getMutablePost(postCollection, postId);
-        let reply = getMutableReply(post, replyId);
+        let post = getPostContainer(postCollection, postId);
+        let reply = getReplyContainerSafe(post, replyId);
         assert!(votedUser != reply.author, 52);
 
         let (ratingChange, isCancel) = getForumItemRatingChange(votedUser, &mut reply.historyVotes, isUpvote, &mut reply.votedUsers);
@@ -695,8 +695,8 @@ module basics::postLib {
         votedUser: address,
         isUpvote: bool
     ): u8 {
-        let post = getMutablePost(postCollection, postId);
-        let comment = getMutableComment (post, replyId, commentId);
+        let post = getPostContainer(postCollection, postId);
+        let comment = getCommentContainerSafe(post, replyId, commentId);
         assert!(votedUser != comment.author, 51);
         
         let (ratingChange, isCancel) = getForumItemRatingChange(votedUser, &mut comment.historyVotes, isUpvote, &mut comment.votedUsers);
@@ -771,7 +771,7 @@ module basics::postLib {
     ) {
         let _userAddr = tx_context::sender(ctx);
 
-        let post = getMutablePost(postCollection, postId);
+        let post = getPostContainer(postCollection, postId);
 
         // TODO: add check role
 
@@ -799,7 +799,7 @@ module basics::postLib {
 
         let replyId = 0;    // value means replyPosition not replyId
         while(replyId < vector::length(&post.replies)) {
-            let reply = getReply(post, replyId);
+            let reply = getReplyContainer(post, replyId);
             let (positive, negative) = getHistoryInformations(reply.historyVotes, reply.votedUsers);
 
             positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedReply, &oldTypeRating.upvotedReply), &i64Lib::from(positive));
@@ -867,83 +867,105 @@ module basics::postLib {
         (positive, negative)
     }
 
-    public fun getPost(postCollection: &PostCollection, postId: u64): &Post {
-        assert!(postId > 0, 40);
-        assert!(vector::length(&postCollection.posts) >= postId, 55);
-        let post = vector::borrow(&postCollection.posts, postId - 1);
-        assert!(!post.isDeleted, 58);
-        post
-    }
-    
-    public fun getMutablePost(postCollection: &mut PostCollection, postId: u64): &mut Post {
+    public fun getPostContainer(postCollection: &mut PostCollection, postId: u64): &mut Post { // getPostContainer -> getPostContainerSafe in solidity to
         assert!(postId > 0, 40);
         assert!(vector::length(&postCollection.posts) >= postId, 55);
         let post = vector::borrow_mut(&mut postCollection.posts, postId - 1);
         assert!(!post.isDeleted, 58);
         post
     }
+    
+    // public fun getMutablePost(postCollection: &mut PostCollection, postId: u64): &mut Post {
+    //     assert!(postId > 0, 40);
+    //     assert!(vector::length(&postCollection.posts) >= postId, 55);
+    //     let post = vector::borrow_mut(&mut postCollection.posts, postId - 1);
+    //     assert!(!post.isDeleted, 58);
+    //     post
+    // }
 
-    public fun getReply(post: &Post, replyId: u64): &Reply {
-        assert!(replyId > 0, 40);
-        assert!(vector::length(&post.replies) >= replyId, 56);
-        let reply = vector::borrow(&post.replies, replyId - 1);
-        assert!(!reply.isDeleted, 59);
-        reply
-    }
-
-    public fun getMutableReply(post: &mut Post, replyId: u64): &mut Reply {
+    public fun getReplyContainer(post: &mut Post, replyId: u64): &mut Reply {
         assert!(replyId > 0, 40);
         assert!(vector::length(&post.replies) >= replyId, 56);
         let reply = vector::borrow_mut(&mut post.replies, replyId - 1);
+        reply
+    }
+
+    public fun getReplyContainerSafe(post: &mut Post, replyId: u64): &mut Reply {
+        let reply = getReplyContainer(post, replyId);
         assert!(!reply.isDeleted, 59);
         reply
     }
 
-    public fun getComment(post: &Post, parentReplyId: u64, commentId: u64): &Comment {
-        assert!(commentId > 0, 40);
-        if (parentReplyId == 0) {
-            assert!(vector::length(&post.comments) >= commentId, 57);
-            let comment = vector::borrow(&post.comments, commentId - 1);
-            assert!(!comment.isDeleted, 60);
-            comment
+    // public fun getMutableReplyContainer(post: &Post, replyId: u64): &Reply {
+    //     assert!(replyId > 0, 40);
+    //     assert!(vector::length(&post.replies) >= replyId, 56);
+    //     let reply = vector::borrow(&post.replies, replyId - 1);
+    //     assert!(!reply.isDeleted, 59);
+    //     reply
+    // }
 
-        } else {
-            let reply = getReply(post, parentReplyId);
-            assert!(vector::length(&reply.comments) >= commentId, 57);
-            let comment = vector::borrow(&reply.comments, commentId - 1);
-            assert!(!comment.isDeleted, 60);
-            comment
+    // public fun getMutableReply(post: &mut Post, replyId: u64): &mut Reply {
+    //     assert!(replyId > 0, 40);
+    //     assert!(vector::length(&post.replies) >= replyId, 56);
+    //     let reply = vector::borrow_mut(&mut post.replies, replyId - 1);
+    //     assert!(!reply.isDeleted, 59);
+    //     reply
+    // }
 
-        }
-    }
-    
-    public fun getMutableComment (post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
+    public fun getCommentContainer(post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
         assert!(commentId > 0, 40);
         if (parentReplyId == 0) {
             assert!(vector::length(&post.comments) >= commentId, 57);
             let comment = vector::borrow_mut(&mut post.comments, commentId - 1);
-            assert!(!comment.isDeleted, 60);
             comment
 
         } else {
-            let reply = getMutableReply(post, parentReplyId);
+            let reply = getReplyContainerSafe(post, parentReplyId);
             assert!(vector::length(&reply.comments) >= commentId, 57);
             let comment = vector::borrow_mut(&mut reply.comments, commentId - 1);
-            assert!(!comment.isDeleted, 60);
             comment
         }
     }
 
-    // function getCommentContainerSafe(
-    //     PostContainer storage postContainer,
-    //     uint16 parentReplyId,
-    //     uint8 commentId
-    // ) public view returns (CommentContainer storage) {
-    //     CommentContainer storage commentContainer = getCommentContainer(postContainer, parentReplyId, commentId);
+    public fun getCommentContainerSafe(post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
+        let comment = getCommentContainer(post, parentReplyId, commentId);
+        assert!(!comment.isDeleted, 60);
+        comment
+    }
+    
+    // public fun getMutableComment (post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
+    //     assert!(commentId > 0, 40);
+    //     if (parentReplyId == 0) {
+    //         assert!(vector::length(&post.comments) >= commentId, 57);
+    //         let comment = vector::borrow_mut(&mut post.comments, commentId - 1);
+    //         assert!(!comment.isDeleted, 60);
+    //         comment
 
-    //     require(!commentContainer.info.isDeleted, "Comment_deleted.");
-    //     return commentContainer;
+    //     } else {
+    //         let reply = getReplyContainerSafe(post, parentReplyId);
+    //         assert!(vector::length(&reply.comments) >= commentId, 57);
+    //         let comment = vector::borrow_mut(&mut reply.comments, commentId - 1);
+    //         assert!(!comment.isDeleted, 60);
+    //         comment
+    //     }
     // }
+
+    public fun getPost(postCollection: &mut PostCollection, postId: u64): &mut Post {
+        assert!(postId > 0, 40);
+        assert!(vector::length(&postCollection.posts) >= postId, 55);
+        let post = vector::borrow_mut(&mut postCollection.posts, postId - 1);
+        post
+    }
+
+    public fun getReply(postCollection: &mut PostCollection, postId: u64, replyId: u64): &mut Reply {
+        let post = getPost(postCollection, postId);
+        return getReplyContainer(post, replyId)
+    }
+
+    public fun getComment(postCollection: &mut PostCollection, postId: u64, replyId: u64, commentId: u64): &mut Comment {
+        let post = getPost(postCollection, postId);
+        return getCommentContainer(post, replyId, commentId)
+    }
 
     // for unitTests
     public fun getPostData(postCollection: &mut PostCollection, postId: u64): (u8, vector<u8>, u64, address, i64Lib::I64, u64, u64, u64, u64, bool, vector<u64>, vector<u8>, vector<u8>, vector<address>) {
@@ -970,8 +992,7 @@ module basics::postLib {
 
     // for unitTests
     public fun getReplyData(postCollection: &mut PostCollection, postId: u64, replyId: u64): (vector<u8>, u64, address, i64Lib::I64, u64, bool, bool, bool, vector<u8>, vector<u8>, vector<address>) {
-        let post = getPost(postCollection, postId);
-        let reply = getReply(post, replyId);
+        let reply = getReply(postCollection, postId, replyId);
 
         (
             commonLib::getIpfsHash(reply.ipfsDoc),
@@ -991,8 +1012,7 @@ module basics::postLib {
 
     // for unitTests
     public fun getCommentData(postCollection: &mut PostCollection, postId: u64, parentReplyId: u64, commentId: u64): (vector<u8>, u64, address, i64Lib::I64, bool, vector<u8>, vector<u8>, vector<address>) {
-        let post = getPost(postCollection, postId);
-        let comment = getComment(post, parentReplyId, commentId);
+        let comment = getComment(postCollection, postId, parentReplyId, commentId);
         
         (
             commonLib::getIpfsHash(comment.ipfsDoc),

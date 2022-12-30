@@ -546,7 +546,8 @@ module basics::postLib_test
         test_scenario::end(scenario_val);  
     }
 
-    #[test, expected_failure(abort_code = 58)]
+    // #[test, expected_failure(abort_code = 58)]
+    #[test]
     fun test_delete_post() {
         let user1 = @0xA1;
 
@@ -603,7 +604,7 @@ module basics::postLib_test
         test_scenario::end(scenario_val);  
     }
 
-    #[test, expected_failure(abort_code = 59)]
+    #[test]
     fun test_delete_reply() {
         let user1 = @0xA1;
 
@@ -659,7 +660,7 @@ module basics::postLib_test
         test_scenario::end(scenario_val);  
     }
 
-    #[test, expected_failure(abort_code = 60)]
+    #[test]
     fun test_delete_comment_to_post() {
         let user1 = @0xA1;
 
@@ -718,7 +719,7 @@ module basics::postLib_test
         test_scenario::end(scenario_val);  
     }
 
-     #[test, expected_failure(abort_code = 60)]
+    #[test]
     fun test_delete_comment_to_reply() {
         let user1 = @0xA1;
 
