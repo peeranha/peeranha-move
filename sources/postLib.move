@@ -8,6 +8,58 @@ module basics::postLib {
     use basics::userLib;
     use basics::i64Lib;
 
+    /* errors */
+
+    const E_INVALID_POST_TYPE: u64 = 31;
+
+    const E_INVALID_RESOURCE_TYPE: u64 = 32;
+
+    const E_ITEM_ID_CAN_NOT_BE_0: u64 = 40;
+
+    const E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_EXPERT_AND_COMMON_POSTS: u64 = 41;
+
+    const E_YOU_CAN_NOT_EDIT_THIS_POST_IT_IS_NOT_YOUR: u64 = 42;
+
+    const E_YOU_CAN_NOT_EDIT_THIS_REPLY_IT_IS_NOT_YOUR: u64 = 43;
+
+    const E_YOU_CAN_NOT_EDIT_THIS_COMMENT_IT_IS_NOT_YOUR: u64 = 44;
+
+    const E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY: u64 = 45;
+
+    const E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL_OR_DOCUMENTATION: u64 = 46;
+
+    const E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST: u64 = 47;
+
+    const E_YOU_CAN_NOT_PUBLISH_COMMENTS_IN_DOCUMENTATION: u64 = 48;
+
+    const E_THIS_POST_TYPE_IS_ALREADY_SET: u64 = 49;
+
+    const E_ERROR_POST_TYPE: u64 = 50;      ///
+
+    const E_ERROR_VOTE_COMMENT: u64 = 51;
+
+    const E_ERROR_VOTE_REPLY: u64 = 52;
+
+    const E_ERROR_VOTE_POST: u64 = 53;
+
+    const E_YOU_CAN_NOT_VOTE_TO_DOCUMENTATION: u64 = 54;
+
+    const E_POST_NOT_EXIST: u64 = 55;
+
+    const E_REPLY_NOT_EXIST: u64 = 56;
+
+    const E_COMMENT_NOT_EXIST: u64 = 57;
+
+    const E_POST_DELETED: u64 = 58;
+
+    const E_REPLY_DELETED: u64 = 59;
+
+    const E_COMMENT_DELETED: u64 = 60;
+
+    const E_AT_LEAST_ONE_TAG_IS_REQUIRED: u64 = 86;
+
+    // 98, 99 - getPeriodRating  ???
+
     const QUICK_REPLY_TIME_SECONDS: u64 = 900; // 6
     const DELETE_TIME: u64 = 604800;    //7 days
 
@@ -125,7 +177,7 @@ module basics::postLib {
             true
         );
 
-        assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIphsHash());
 
         vector::push_back(&mut postCollection.posts, Post {
             postType: postType,
@@ -147,7 +199,7 @@ module basics::postLib {
         });
         
         if (postType != DOCUMENTATION) {
-            assert!(vector::length(&mut tags) > 0, 26);
+            assert!(vector::length(&mut tags) > 0, E_AT_LEAST_ONE_TAG_IS_REQUIRED);
             let postId = vector::length(&mut postCollection.posts);
             let post = getPostContainer(postCollection, postId);
             post.tags = tags;
@@ -167,11 +219,11 @@ module basics::postLib {
         let userAddr = tx_context::sender(ctx);
 
         let post = getPostContainer(postCollection, postId);
-        assert!(post.postType != TYTORIAL && post.postType != DOCUMENTATION, 46);
-        assert!(parentReplyId == 0 || (post.postType != EXPERT_POST && post.postType != COMMON_POST), 47);
+        assert!(post.postType != TYTORIAL && post.postType != DOCUMENTATION, E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL_OR_DOCUMENTATION);
+        assert!(parentReplyId == 0 || (post.postType != EXPERT_POST && post.postType != COMMON_POST), E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST);
 
         // TODO: add check role
-        assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIphsHash());
 
 
         if (post.postType == EXPERT_POST || post.postType == COMMON_POST) {
@@ -180,7 +232,10 @@ module basics::postLib {
             let replyId = 0;
             while (replyId < countReplies) {
                 let replyContainer = getReplyContainer(post, replyId);
-                assert!(userAddr != replyContainer.author || replyContainer.isDeleted, 41);
+                assert!(
+                    userAddr != replyContainer.author || replyContainer.isDeleted,
+                    E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_EXPERT_AND_COMMON_POSTS
+                );
             };
         };
 
@@ -239,8 +294,8 @@ module basics::postLib {
         let userAddr = tx_context::sender(ctx);
 
         let post = getPostContainer(postCollection, postId);
-        assert!(post.postType != DOCUMENTATION, 48);
-        assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
+        assert!(post.postType != DOCUMENTATION, E_YOU_CAN_NOT_PUBLISH_COMMENTS_IN_DOCUMENTATION);
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIphsHash());
         
         // TODO: add
         // Comment storage comment;
@@ -307,8 +362,8 @@ module basics::postLib {
 
         // TODO: add check role
         
-        assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
-        assert!(userAddr == post.author || post.postType == DOCUMENTATION, 42);
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIphsHash());
+        assert!(userAddr == post.author || post.postType == DOCUMENTATION, E_YOU_CAN_NOT_EDIT_THIS_POST_IT_IS_NOT_YOUR);
 
         if(!commonLib::isEmptyIpfs(ipfsHash) && commonLib::getIpfsHash(post.ipfsDoc) != ipfsHash)
             post.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -332,8 +387,8 @@ module basics::postLib {
         let reply = getReplyContainerSafe(post, replyId);
 
         // TODO: add check role
-        assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
-        assert!(userAddr == reply.author, 43);
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIphsHash());
+        assert!(userAddr == reply.author, E_YOU_CAN_NOT_EDIT_THIS_REPLY_IT_IS_NOT_YOUR);
 
         if (commonLib::getIpfsHash(reply.ipfsDoc) != ipfsHash)
             reply.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -360,8 +415,8 @@ module basics::postLib {
         let comment = getCommentContainerSafe(post, parentReplyId, commentId);
 
         // TODO: add check role
-        assert!(!commonLib::isEmptyIpfs(ipfsHash), 30);
-        assert!(userAddr == comment.author, 44);
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIphsHash());
+        assert!(userAddr == comment.author, E_YOU_CAN_NOT_EDIT_THIS_COMMENT_IT_IS_NOT_YOUR);
 
         if (commonLib::getIpfsHash(comment.ipfsDoc) != ipfsHash)
             comment.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -445,7 +500,7 @@ module basics::postLib {
 
         // TODO: add check role
         
-        // assert!(userAddr != reply.author || post.bestReply != replyId, 45);      // TODO: add  error Invalid immutable borrow at field 'bestReply'.?
+        // assert!(userAddr != reply.author || post.bestReply != replyId, E_CAN_NOT_DELETE_THE_BEST_REPLY);      // TODO: add  error Invalid immutable borrow at field 'bestReply'.?
 
         
         let time: u64 = commonLib::getTimestamp();
@@ -602,8 +657,8 @@ module basics::postLib {
     ): u8 {
         let post = getPostContainer(postCollection, postId);
         let postType = post.postType;
-        assert!(postType != DOCUMENTATION, 54);
-        assert!(votedUser != post.author, 53);
+        assert!(postType != DOCUMENTATION, E_YOU_CAN_NOT_VOTE_TO_DOCUMENTATION);
+        assert!(votedUser != post.author, E_ERROR_VOTE_POST);
         
         let (ratingChange, isCancel) = getForumItemRatingChange(votedUser, &mut post.historyVotes, isUpvote, &mut post.votedUsers);
         // TODO: add check role
@@ -639,7 +694,7 @@ module basics::postLib {
     ): u8 {
         let post = getPostContainer(postCollection, postId);
         let reply = getReplyContainerSafe(post, replyId);
-        assert!(votedUser != reply.author, 52);
+        assert!(votedUser != reply.author, E_ERROR_VOTE_REPLY);
 
         let (ratingChange, isCancel) = getForumItemRatingChange(votedUser, &mut reply.historyVotes, isUpvote, &mut reply.votedUsers);
 
@@ -697,7 +752,7 @@ module basics::postLib {
     ): u8 {
         let post = getPostContainer(postCollection, postId);
         let comment = getCommentContainerSafe(post, replyId, commentId);
-        assert!(votedUser != comment.author, 51);
+        assert!(votedUser != comment.author, E_ERROR_VOTE_COMMENT);
         
         let (ratingChange, isCancel) = getForumItemRatingChange(votedUser, &mut comment.historyVotes, isUpvote, &mut comment.votedUsers);
         // TODO: add check role
@@ -776,7 +831,7 @@ module basics::postLib {
         // TODO: add check role
 
         let oldPostType = post.postType;
-        assert!(newPostType != oldPostType, 49);
+        assert!(newPostType != oldPostType, E_THIS_POST_TYPE_IS_ALREADY_SET);
         assert!(
             oldPostType != DOCUMENTATION &&
             oldPostType != TYTORIAL &&
@@ -845,7 +900,7 @@ module basics::postLib {
         } else if (postType == TYTORIAL) {
             getTutorialRating()
         } else {
-            abort 42
+            abort E_INVALID_POST_TYPE
         }
     }
 
@@ -868,60 +923,60 @@ module basics::postLib {
     }
 
     public fun getPostContainer(postCollection: &mut PostCollection, postId: u64): &mut Post { // getPostContainer -> getPostContainerSafe in solidity to
-        assert!(postId > 0, 40);
-        assert!(vector::length(&postCollection.posts) >= postId, 55);
+        assert!(postId > 0, E_ITEM_ID_CAN_NOT_BE_0);
+        assert!(vector::length(&postCollection.posts) >= postId, E_POST_NOT_EXIST);
         let post = vector::borrow_mut(&mut postCollection.posts, postId - 1);
-        assert!(!post.isDeleted, 58);
+        assert!(!post.isDeleted, E_POST_DELETED);
         post
     }
     
     // public fun getMutablePost(postCollection: &mut PostCollection, postId: u64): &mut Post {
-    //     assert!(postId > 0, 40);
-    //     assert!(vector::length(&postCollection.posts) >= postId, 55);
+    //     assert!(postId > 0, E_ITEM_ID_CAN_NOT_BE_0);
+    //     assert!(vector::length(&postCollection.posts) >= postId, E_POST_NOT_EXIST);
     //     let post = vector::borrow_mut(&mut postCollection.posts, postId - 1);
-    //     assert!(!post.isDeleted, 58);
+    //     assert!(!post.isDeleted, E_POST_DELETED);
     //     post
     // }
 
     public fun getReplyContainer(post: &mut Post, replyId: u64): &mut Reply {
-        assert!(replyId > 0, 40);
-        assert!(vector::length(&post.replies) >= replyId, 56);
+        assert!(replyId > 0, E_ITEM_ID_CAN_NOT_BE_0);
+        assert!(vector::length(&post.replies) >= replyId, E_REPLY_NOT_EXIST);
         let reply = vector::borrow_mut(&mut post.replies, replyId - 1);
         reply
     }
 
     public fun getReplyContainerSafe(post: &mut Post, replyId: u64): &mut Reply {
         let reply = getReplyContainer(post, replyId);
-        assert!(!reply.isDeleted, 59);
+        assert!(!reply.isDeleted, E_REPLY_DELETED);
         reply
     }
 
     // public fun getMutableReplyContainer(post: &Post, replyId: u64): &Reply {
-    //     assert!(replyId > 0, 40);
-    //     assert!(vector::length(&post.replies) >= replyId, 56);
+    //     assert!(replyId > 0, E_ITEM_ID_CAN_NOT_BE_0);
+    //     assert!(vector::length(&post.replies) >= replyId, E_REPLY_NOT_EXIST);
     //     let reply = vector::borrow(&post.replies, replyId - 1);
-    //     assert!(!reply.isDeleted, 59);
+    //     assert!(!reply.isDeleted, E_REPLY_DELETED);
     //     reply
     // }
 
     // public fun getMutableReply(post: &mut Post, replyId: u64): &mut Reply {
-    //     assert!(replyId > 0, 40);
-    //     assert!(vector::length(&post.replies) >= replyId, 56);
+    //     assert!(replyId > 0, E_ITEM_ID_CAN_NOT_BE_0);
+    //     assert!(vector::length(&post.replies) >= replyId, E_REPLY_NOT_EXIST);
     //     let reply = vector::borrow_mut(&mut post.replies, replyId - 1);
-    //     assert!(!reply.isDeleted, 59);
+    //     assert!(!reply.isDeleted, E_REPLY_DELETED);
     //     reply
     // }
 
     public fun getCommentContainer(post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
-        assert!(commentId > 0, 40);
+        assert!(commentId > 0, E_ITEM_ID_CAN_NOT_BE_0);
         if (parentReplyId == 0) {
-            assert!(vector::length(&post.comments) >= commentId, 57);
+            assert!(vector::length(&post.comments) >= commentId, E_COMMENT_NOT_EXIST);
             let comment = vector::borrow_mut(&mut post.comments, commentId - 1);
             comment
 
         } else {
             let reply = getReplyContainerSafe(post, parentReplyId);
-            assert!(vector::length(&reply.comments) >= commentId, 57);
+            assert!(vector::length(&reply.comments) >= commentId, E_COMMENT_NOT_EXIST);
             let comment = vector::borrow_mut(&mut reply.comments, commentId - 1);
             comment
         }
@@ -929,30 +984,30 @@ module basics::postLib {
 
     public fun getCommentContainerSafe(post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
         let comment = getCommentContainer(post, parentReplyId, commentId);
-        assert!(!comment.isDeleted, 60);
+        assert!(!comment.isDeleted, E_COMMENT_DELETED);
         comment
     }
     
     // public fun getMutableComment (post: &mut Post, parentReplyId: u64, commentId: u64): &mut Comment {
-    //     assert!(commentId > 0, 40);
+    //     assert!(commentId > 0, E_ITEM_ID_CAN_NOT_BE_0);
     //     if (parentReplyId == 0) {
-    //         assert!(vector::length(&post.comments) >= commentId, 57);
+    //         assert!(vector::length(&post.comments) >= commentId, E_COMMENT_NOT_EXIST);
     //         let comment = vector::borrow_mut(&mut post.comments, commentId - 1);
-    //         assert!(!comment.isDeleted, 60);
+    //         assert!(!comment.isDeleted, E_COMMENT_DELETED);
     //         comment
 
     //     } else {
     //         let reply = getReplyContainerSafe(post, parentReplyId);
-    //         assert!(vector::length(&reply.comments) >= commentId, 57);
+    //         assert!(vector::length(&reply.comments) >= commentId, E_COMMENT_NOT_EXIST);
     //         let comment = vector::borrow_mut(&mut reply.comments, commentId - 1);
-    //         assert!(!comment.isDeleted, 60);
+    //         assert!(!comment.isDeleted, E_COMMENT_DELETED);
     //         comment
     //     }
     // }
 
     public fun getPost(postCollection: &mut PostCollection, postId: u64): &mut Post {
-        assert!(postId > 0, 40);
-        assert!(vector::length(&postCollection.posts) >= postId, 55);
+        assert!(postId > 0, E_ITEM_ID_CAN_NOT_BE_0);
+        assert!(vector::length(&postCollection.posts) >= postId, E_POST_NOT_EXIST);
         let post = vector::borrow_mut(&mut postCollection.posts, postId - 1);
         post
     }
@@ -1852,22 +1907,22 @@ module basics::postLib {
             if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_EXPERT_POST)
             else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_EXPERT_POST)
             else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_EXPERT_POST)
-            else abort 31
+            else abort E_INVALID_POST_TYPE
 
         } else if (postType == COMMON_POST) {
             if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_COMMON_POST)
             else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_COMMON_POST)
             else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_COMMON_POST)
-            else abort 31
+            else abort E_INVALID_POST_TYPE
 
         } else if (postType == TYTORIAL) {
             if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_TUTORIAL)
             else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_TUTORIAL)
             else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_TUTORIAL)
-            else abort 31
+            else abort E_INVALID_POST_TYPE
 
         } else {
-            abort 31
+            abort E_INVALID_POST_TYPE
         }
     }
 
@@ -1883,7 +1938,7 @@ module basics::postLib {
             else if (resourceAction == RESOURCE_ACTION_ACCEPTED_REPLY) i64Lib::from(ACCEPTED_EXPERT_REPLY)
             else if (resourceAction == RESOURCE_ACTION_FIRST_REPLY) i64Lib::from(FIRST_EXPERT_REPLY)
             else if (resourceAction == RESOURCE_ACTION_QUICK_REPLY) i64Lib::from(QUICK_EXPERT_REPLY)
-            else abort 32
+            else abort E_INVALID_RESOURCE_TYPE
 
         } else if (postType == COMMON_POST) {
             if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_COMMON_POST)
@@ -1893,13 +1948,13 @@ module basics::postLib {
             else if (resourceAction == RESOURCE_ACTION_ACCEPTED_REPLY) i64Lib::from(ACCEPTED_COMMON_REPLY)
             else if (resourceAction == RESOURCE_ACTION_FIRST_REPLY) i64Lib::from(FIRST_COMMON_REPLY)
             else if (resourceAction == RESOURCE_ACTION_QUICK_REPLY) i64Lib::from(QUICK_COMMON_REPLY)
-            else abort 32
+            else abort E_INVALID_RESOURCE_TYPE
 
         } else if (postType == TYTORIAL) {
             i64Lib::zero()
 
         } else {
-            abort 32
+            abort E_INVALID_RESOURCE_TYPE
         }
     }
 

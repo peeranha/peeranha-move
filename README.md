@@ -22,7 +22,7 @@ Error code:
 
 13 - user_not_found
 
-14 - not_allowed_action
+14 - not_allowed_edit
 
 15 - not_allowed_delete
 
@@ -32,35 +32,30 @@ Error code:
 
 18 - not_allowed_vote_comment
 
-19 - not_allowed_vote_post
-
-20 - not_allowed_vote_reply
-
-21 - not_allowed_edit
+21 - not_allowed_action
 
 22 - low_energy
 
 99 - check function getRatingAndEnergyForAction()
 
+100 - check function getMutableTotalRewardShare()
+
+
     Community
 
-20 - Require at least 5 tags
+80 - Require at least 5 tags
 
-21 - Require tags with unique names
+81 - Require tags with unique names
 
-22 - Community does not exist
+82 - Community is frozen
 
-23 - Community is frozen
+83 - Community id can not to be 0
 
-24 - Wrong tag id
+84 - Community does not exist
 
-25 - The community does not have tag with 0 id.
+85 - Tag id can not to be 0
 
-26 - At least one tag is required.
-
-27 - Community id can not to be 0
-
-28 - Tag id can not to be 0
+86 - Tag does not exist
 
     Common
 
@@ -114,8 +109,8 @@ Error code:
 
 60 - Comment_deleted.
 
+86 - At_least_one_tag_is_required
 
-98, 99 - getPeriodRating
 
 owner - 0x62a5541796a4fa35229543da71df4f570f7cbe02
 package object ID - 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0

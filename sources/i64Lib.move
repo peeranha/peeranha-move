@@ -32,7 +32,7 @@ module basics::i64Lib {
 
     /// @notice Casts a `u64` to an `I64`.
     public fun from(x: u64): I64 {
-        assert!(x <= MAX_I64_AS_U64, 1);  // TODO: add log err ECONVERSION_FROM_U64_OVERFLOW
+        assert!(x <= MAX_I64_AS_U64, ECONVERSION_FROM_U64_OVERFLOW);
         I64 { bits: x }
     }
 
@@ -43,7 +43,7 @@ module basics::i64Lib {
 
     /// @notice Casts an `I64` to a `u64`.
     public fun as_u64(x: &I64): u64 {
-        assert!(x.bits < U64_WITH_FIRST_BIT_SET, 2); // TODO: add log err ECONVERSION_TO_U64_UNDERFLOW
+        assert!(x.bits < U64_WITH_FIRST_BIT_SET, ECONVERSION_TO_U64_UNDERFLOW);
         x.bits
     }
 

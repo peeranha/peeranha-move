@@ -10,6 +10,23 @@ module basics::userLib {
     use sui::vec_map::{Self, VecMap};
     use std::option;
 
+    /* errors */
+
+    const E_USER_EXIST: u64 = 9;
+    const E_USER_DOES_NOT_EXIST: u64 = 10;
+    const E_ALREADY_FOLLOWED: u64 = 11;
+    const E_COMMUNITY_NOT_FOLOWED: u64 = 12;
+    const E_USER_NOT_FOUND: u64 = 13;
+    const E_NOT_ALLOWED_EDIT: u64 = 14;
+    const E_NOT_ALLOWED_DELETE: u64 = 15;
+    const E_NOT_ALLOWED_VOTE_POST: u64 = 16;
+    const E_NOT_ALLOWED_VOTE_REPLY: u64 = 17;
+    const E_NOT_ALLOWED_VOTE_COMMENT: u64 = 18;
+    const E_NOT_ALLOWED_ACTION: u64 = 21;
+    const E_LOW_ENERGY: u64 = 22;
+    const E_CHECK_FUNCTION_getRatingAndEnergyForAction: u64 = 99;
+    const E_CHECK_FUNCTION_getMutableTotalRewardShare: u64 = 100; // todo
+
     const START_USER_RATING: u64 = 10;
     const DEFAULT_IPFS: vector<u8> = x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc";
 
@@ -161,6 +178,9 @@ module basics::userLib {
     }
 
     entry fun createUserPrivate(userCollection: &mut UserCollection, userAddress: address, ipfsHash: vector<u8>) {
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIphsHash()); // TODO: TEST
+        assert!(!isExists(userCollection, userAddress), E_USER_EXIST); // TODO: TEST
+
         vec_map::insert(&mut userCollection.users, userAddress, User {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
             owner: userAddress,
@@ -220,7 +240,7 @@ module basics::userLib {
 
         let i = 0;
         while(i < vector::length(&mut user.followedCommunities)) {
-            assert!(*vector::borrow(&user.followedCommunities, i) != communityId, 11);
+            assert!(*vector::borrow(&user.followedCommunities, i) != communityId, E_ALREADY_FOLLOWED);
             i = i +1;
         };
 
@@ -246,7 +266,7 @@ module basics::userLib {
             };
             i = i +1;
         };
-        abort 12
+        abort E_COMMUNITY_NOT_FOLOWED
     }
 
     public fun getStatusEnergy(): u64 {
@@ -261,7 +281,7 @@ module basics::userLib {
     public fun getUser(userCollection: &mut UserCollection, userAddress: address): User {
         let position = vec_map::get_idx_opt(&mut userCollection.users, &userAddress);
         if (option::is_none(&position)) {
-            abort 10
+            abort E_USER_DOES_NOT_EXIST
         } else {
             // TODO: add
             // let user = vec_map::get(&userCollection.users, &userAddress);
@@ -274,7 +294,7 @@ module basics::userLib {
     public fun getMutableUser(userCollection: &mut UserCollection, userAddress: address): &mut User {
         let position = vec_map::get_idx_opt(&mut userCollection.users, &userAddress);
         if (option::is_none(&position)) {
-            abort 10
+            abort E_USER_DOES_NOT_EXIST
         } else {
             let user = vec_map::get_mut(&mut userCollection.users, &userAddress);
             user
@@ -436,13 +456,13 @@ module basics::userLib {
     fun getPeriodRating(userCollection: &mut UserCollection, userAddr: address, period: u64, communityId: u64): &mut PeriodRating {
         let user: &mut User = getMutableUser(userCollection, userAddr);
         // let (isExist, positionCarentPeriod) = vector::index_of(&user.userCommunityRating.rewardPeriods, &period);   // userPeriodRewards
-        // if (!isExist) abort 98; // todo!!!!
+        // if (!isExist) abort 97; // todo!!!!
         // let userPeriodRewards = vector::borrow_mut(&mut user.userCommunityRating.userPeriodRewards, positionCarentPeriod);
 
         let userPeriodRewards = vec_map::get_mut(&mut user.userCommunityRating.userPeriodRewards, &period);
 
         // let (isExistRewardCommunities, positionRewardCommunities) = vector::index_of(&userPeriodRewards.rewardCommunities, &communityId);
-        // if (!isExistRewardCommunities) abort 99;  // todo!!!!??
+        // if (!isExistRewardCommunities) abort 98;  // todo!!!!??
         // vector::borrow_mut(&mut userPeriodRewards.periodRating, positionRewardCommunities)
 
         vec_map::get_mut(&mut userPeriodRewards.periodRating, &communityId)
@@ -625,7 +645,7 @@ module basics::userLib {
         action: u8
     ): (i64Lib::I64, u64, u64) { // ratingAllowed, message, energy
         let ratingAllowed: i64Lib::I64 = i64Lib::zero();
-        let message: u64 = 99;
+        let message: u64 = E_CHECK_FUNCTION_getRatingAndEnergyForAction;
         let energy: u64 = 0;
 
         if (action == ACTION_NONE) {
@@ -649,43 +669,43 @@ module basics::userLib {
             energy = ENERGY_POST_COMMENT;
 
         } else if (action == ACTION_EDIT_ITEM) {
-            assert!(actionCaller == dataUser, 14);
+            assert!(actionCaller == dataUser, E_NOT_ALLOWED_EDIT);
             ratingAllowed = i64Lib::neg_from(MINIMUM_RATING);
             // message = "low_rating_edit";
             energy = ENERGY_MODIFY_ITEM;
 
         } else if (action == ACTION_DELETE_ITEM) {
-            assert!(actionCaller == dataUser, 15);
+            assert!(actionCaller == dataUser, E_NOT_ALLOWED_DELETE);
             ratingAllowed = i64Lib::zero();
             // message = "low_rating_delete"; // delete own item?
             energy = ENERGY_DELETE_ITEM;
 
         } else if (action == ACTION_UPVOTE_POST) {
-            assert!(actionCaller != dataUser, 16);
+            assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_POST);
             ratingAllowed = i64Lib::from(UPVOTE_POST_ALLOWED);
             // message = "low_rating_upvote";       // TODO unittests
             energy = ENERGY_UPVOTE_QUESTION;
 
         } else if (action == ACTION_UPVOTE_REPLY) {
-            assert!(actionCaller != dataUser, 17);
+            assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_REPLY);
             ratingAllowed = i64Lib::from(UPVOTE_REPLY_ALLOWED);
             // message = "low_rating_upvote_post";
             energy = ENERGY_UPVOTE_ANSWER;
 
         } else if (action == ACTION_VOTE_COMMENT) {
-            assert!(actionCaller != dataUser, 18);
+            assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_COMMENT);
             ratingAllowed = i64Lib::from(VOTE_COMMENT_ALLOWED);
             // message = "low_rating_vote_comment";
             energy = ENERGY_VOTE_COMMENT;
 
         } else if (action == ACTION_DOWNVOTE_POST) {
-            assert!(actionCaller != dataUser, 19);
+            assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_POST);
             ratingAllowed = i64Lib::from(DOWNVOTE_POST_ALLOWED);
             // message = "low_rating_downvote_post";
             energy = ENERGY_DOWNVOTE_QUESTION;
 
         } else if (action == ACTION_DOWNVOTE_REPLY) {
-            assert!(actionCaller != dataUser, 20);
+            assert!(actionCaller != dataUser, DOWNVOTE_REPLY_ALLOWED);
             ratingAllowed = i64Lib::from(DOWNVOTE_REPLY_ALLOWED);
             // message = "low_rating_downvote_reply";
             energy = ENERGY_DOWNVOTE_ANSWER;
@@ -710,7 +730,7 @@ module basics::userLib {
             energy = ENERGY_FOLLOW_COMMUNITY;
 
         } else {
-            abort 21
+            abort E_NOT_ALLOWED_ACTION
         };
         (ratingAllowed, message, energy)
     }
@@ -727,19 +747,19 @@ module basics::userLib {
             user.lastUpdatePeriod = currentPeriod;
         };
 
-        assert!(userEnergy >= energy, 22);
+        assert!(userEnergy >= energy, E_LOW_ENERGY);
         user.energy = userEnergy - energy;
     }
 
     fun checkUser(userCollection: &mut UserCollection, addr: address) {
-        assert!(isExists(userCollection, addr), 13);
+        assert!(isExists(userCollection, addr), E_USER_NOT_FOUND);
     }
 
     fun getMutableTotalRewardShares(userCollection: &mut UserCollection, period: u64): &mut PeriodRewardShares {
         if (vec_map::contains(&userCollection.periodRewardContainer.periodRewardShares, &period)) {
             vec_map::get_mut(&mut userCollection.periodRewardContainer.periodRewardShares, &period)
         } else {
-            abort 100   // TODO: add del
+            abort E_CHECK_FUNCTION_getMutableTotalRewardShare   // TODO: add del
         }
     }
 

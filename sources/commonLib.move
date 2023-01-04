@@ -2,6 +2,9 @@ module basics::commonLib {
     use std::vector;
     // friend basics::communityLib;
 
+    /* errors */
+
+    const E_INVALIT_IPFSHASH: u64 = 30;
 
     struct IpfsHash has store, copy, drop {
       hash: vector<u8>,
@@ -28,6 +31,10 @@ module basics::commonLib {
 
     public fun getPeriod(): u64 {    // TODO: add
         0
+    }
+
+    public fun getErrorInvalidIphsHash(): u64 {
+        E_INVALIT_IPFSHASH
     }
 
     // public fun setIpfsDoc(hash: vector<u8>, hash2: vector<u8>, ipfsHash2: vector<u8>): IpfsHash {   // need? we have getIpfsDoc()
