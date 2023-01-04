@@ -176,7 +176,7 @@ module basics::communityLib_test
         test_scenario::end(scenario_val);        
     }
 
-    #[test]
+    #[test, expected_failure(abort_code = communityLib::E_COMMUNITY_IS_FROZEN)]
     fun test_freeze_community() {
         let user1 = @0xA1;
 

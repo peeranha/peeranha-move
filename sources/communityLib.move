@@ -133,11 +133,11 @@ module basics::communityLib {
 
     public entry fun unfreezeCommunity(communityCollection: &mut CommunityCollection, communityId: u64, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);
-        communityId = communityId -1;
-
         // TODO: add check role   (if community doesnot exist in check will be error)
 
-        let community = getMutableCommunity(communityCollection, communityId);
+        assert!(communityId > 0, E_COMMUNITY_ID_CAN_NOT_BE_0);    // TODO TESTS
+        assert!(vector::length(&communityCollection.communities) >= communityId, E_COMMUNITY_DOES_NOT_EXIST); // TODO TESTS
+        let community = vector::borrow_mut(&mut communityCollection.communities, communityId - 1);
         community.isFrozen = false;
 
         // TODO: add emit CommunityUnfrozen(msg.sender, communityId);
@@ -151,10 +151,11 @@ module basics::communityLib {
     }
 
     public entry fun checkTags(communityCollection: &mut CommunityCollection, communityId: u64, tags: vector<u64>) {
-        let tagId = 0;
-        while(tagId < vector::length(&mut tags)) {
+        let i = 0;
+        while(i < vector::length(&mut tags)) {
+            let tagId = *vector::borrow(&tags, i);
             getTag(communityCollection, communityId, tagId);
-            tagId = tagId + 1;
+            i = i + 1;
         };
     }
 

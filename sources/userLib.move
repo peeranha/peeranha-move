@@ -159,24 +159,6 @@ module basics::userLib {
         createUserPrivate(userCollection, owner, ipfsDoc)
     }
 
-    public entry fun createUserTest(ctx: &mut TxContext) {  // del
-        let owner = tx_context::sender(ctx);
-
-        let userTest = UserTest {
-            id: object::new(ctx),
-            owner: owner,
-            energy: 1,
-        };
-        transfer::transfer(userTest, tx_context::sender(ctx));
-
-        let userTest = UserTestt {
-            id: object::new(ctx),
-            owner: owner,
-            energy: 1,
-        };
-        transfer::transfer(userTest, tx_context::sender(ctx));
-    }
-
     entry fun createUserPrivate(userCollection: &mut UserCollection, userAddress: address, ipfsHash: vector<u8>) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIphsHash()); // TODO: TEST
         assert!(!isExists(userCollection, userAddress), E_USER_EXIST); // TODO: TEST
@@ -273,9 +255,9 @@ module basics::userLib {
         1000
     }
 
-    public fun isExists(userCollection: &mut UserCollection, addr: address): bool { 
-        let user = getUser(userCollection, addr);
-        return commonLib::getIpfsHash(user.ipfsDoc) != vector::empty<u8>()
+    public fun isExists(userCollection: &mut UserCollection, userAddress: address): bool { 
+        let position = vec_map::get_idx_opt(&mut userCollection.users, &userAddress);
+        !option::is_none(&position)
     }
 
     public fun getUser(userCollection: &mut UserCollection, userAddress: address): User {
