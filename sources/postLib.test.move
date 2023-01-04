@@ -12,12 +12,11 @@ module basics::postLib_test
     const COMMON_POST: u8 = 1;
     const TYTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
+    const user: address = @0xA1;
 
     #[test]
     fun test_create_post() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -25,7 +24,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -67,7 +66,7 @@ module basics::postLib_test
             assert!(postType == EXPERT_POST, 1);
             assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
             assert!(postTime == 0, 3);
-            assert!(author == user1, 4);
+            assert!(author == user, 4);
             assert!(rating == i64Lib::zero(), 5);
             assert!(communityId == 1, 6);
             assert!(officialReply == 0, 7);
@@ -88,9 +87,7 @@ module basics::postLib_test
 
     #[test]
     fun test_create_reply() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -98,7 +95,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -135,7 +132,7 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
             assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
+            assert!(author == user, 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(parentReplyId == 0, 5);
             assert!(isFirstReply == false, 6);
@@ -154,9 +151,7 @@ module basics::postLib_test
 
     #[test]
     fun test_create_comment_to_post() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -164,7 +159,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -197,7 +192,7 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 1);
             assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
+            assert!(author == user, 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(isDeleted == false, 9);
             assert!(properties == vector<u8>[], 11);
@@ -213,9 +208,7 @@ module basics::postLib_test
 
     #[test]
     fun test_create_comment_to_reply() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -223,7 +216,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -257,7 +250,7 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 1);
             assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
+            assert!(author == user, 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(isDeleted == false, 9);
             assert!(properties == vector<u8>[], 11);
@@ -273,9 +266,7 @@ module basics::postLib_test
 
     #[test]
     fun test_edit_post() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -283,7 +274,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -324,7 +315,7 @@ module basics::postLib_test
             assert!(postType == 0, 1);
             assert!(ipfsDoc == x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc", 2);
             assert!(postTime == 0, 3);
-            assert!(author == user1, 4);
+            assert!(author == user, 4);
             assert!(rating == i64Lib::zero(), 5);
             assert!(communityId == 1, 6);
             assert!(officialReply == 0, 7);
@@ -345,9 +336,7 @@ module basics::postLib_test
 
     #[test]
     fun test_edit_reply() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -355,7 +344,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -393,7 +382,7 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
+            assert!(author == user, 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(parentReplyId == 0, 5);
             assert!(isFirstReply == false, 6);
@@ -412,9 +401,7 @@ module basics::postLib_test
 
     #[test]
     fun test_edit_comment_to_post() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -422,7 +409,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -464,7 +451,7 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
             assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
+            assert!(author == user, 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(isDeleted == false, 9);
             assert!(properties == vector<u8>[], 11);
@@ -480,9 +467,7 @@ module basics::postLib_test
 
     #[test]
     fun test_edit_comment_to_reply() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -490,7 +475,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -532,7 +517,7 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
             assert!(postTime == 0, 2);
-            assert!(author == user1, 3);
+            assert!(author == user, 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(isDeleted == false, 9);
             assert!(properties == vector<u8>[], 11);
@@ -546,12 +531,9 @@ module basics::postLib_test
         test_scenario::end(scenario_val);  
     }
 
-    // #[test, expected_failure(abort_code = 58)]
     #[test]
     fun test_delete_post() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -559,7 +541,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -606,9 +588,7 @@ module basics::postLib_test
 
     #[test]
     fun test_delete_reply() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -616,7 +596,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -662,9 +642,7 @@ module basics::postLib_test
 
     #[test]
     fun test_delete_comment_to_post() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -672,7 +650,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;
@@ -721,9 +699,7 @@ module basics::postLib_test
 
     #[test]
     fun test_delete_comment_to_reply() {
-        let user1 = @0xA1;
-
-        let scenario_val = test_scenario::begin(user1);
+        let scenario_val = test_scenario::begin(user);
         let scenario = &mut scenario_val;
         {
             communityLib::init_test(test_scenario::ctx(scenario));
@@ -731,7 +707,7 @@ module basics::postLib_test
             userLib::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, user1);
+        test_scenario::next_tx(scenario, user);
         {
             let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
             let communityCollection = &mut community_val;

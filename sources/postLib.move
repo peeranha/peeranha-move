@@ -1022,7 +1022,7 @@ module basics::postLib {
         return getCommentContainer(post, replyId, commentId)
     }
 
-    // for unitTests
+    #[test_only]
     public fun getPostData(postCollection: &mut PostCollection, postId: u64): (u8, vector<u8>, u64, address, i64Lib::I64, u64, u64, u64, u64, bool, vector<u64>, vector<u8>, vector<u8>, vector<address>) {
         let post = getPost(postCollection, postId);
         (
@@ -1045,7 +1045,7 @@ module basics::postLib {
         // comments: vector<Comment>,   // TODO: add
     }
 
-    // for unitTests
+    #[test_only]
     public fun getReplyData(postCollection: &mut PostCollection, postId: u64, replyId: u64): (vector<u8>, u64, address, i64Lib::I64, u64, bool, bool, bool, vector<u8>, vector<u8>, vector<address>) {
         let reply = getReply(postCollection, postId, replyId);
 
@@ -1065,7 +1065,7 @@ module basics::postLib {
         // comments: vector<Comment>, // TODO: add
     }
 
-    // for unitTests
+    #[test_only]
     public fun getCommentData(postCollection: &mut PostCollection, postId: u64, parentReplyId: u64, commentId: u64): (vector<u8>, u64, address, i64Lib::I64, bool, vector<u8>, vector<u8>, vector<address>) {
         let comment = getComment(postCollection, postId, parentReplyId, commentId);
         
@@ -1082,9 +1082,6 @@ module basics::postLib {
         )
     }
 
-        
-
-    
     #[test_only]
     public fun create_post(
         postCollection: &mut PostCollection,
