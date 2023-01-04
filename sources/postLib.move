@@ -1117,66 +1117,6 @@ module basics::postLib {
     }
 
 
-
-    //     // change post type expert -> common
-    //     test_scenario::next_tx(scenario, &user1);
-    //     {
-    //         let post_wrapper = test_scenario::take_shared<PostCollection>(scenario);
-    //         let postCollection = test_scenario::borrow_mut(&mut post_wrapper);
-            
-    //         changePostType(
-    //             postCollection,
-    //             user1,
-    //             1,
-    //             COMMON_POST,
-    //         );
-
-    //         let (
-    //             postType,
-    //             _ipfsDoc,
-    //             _postTime,
-    //             _author,
-    //             _rating,
-    //             _communityId,
-    //             _officialReply,
-    //             _bestReply,
-    //             _deletedReplyCount,
-    //             _isDeleted,
-    //             _tags,
-    //             _properties,
-    //             _historyVotes,
-    //             _votedUsers
-    //         ) = getPostData(postCollection, 1);
-    //         assert!(postType == COMMON_POST, 1);
-
-    //         changePostType(
-    //             postCollection,
-    //             user1,
-    //             1,
-    //             EXPERT_POST,
-    //         );
-
-    //         let (
-    //             postType,
-    //             _ipfsDoc,
-    //             _postTime,
-    //             _author,
-    //             _rating,
-    //             _communityId,
-    //             _officialReply,
-    //             _bestReply,
-    //             _deletedReplyCount,
-    //             _isDeleted,
-    //             _tags,
-    //             _properties,
-    //             _historyVotes,
-    //             _votedUsers
-    //         ) = getPostData(postCollection, 1);
-    //         assert!(postType == EXPERT_POST, 1);
-
-    //         test_scenario::return_shared(scenario, post_wrapper);
-    //     };
-
     // #[test]
     // fun test_upvote_post() {
     //     use sui::test_scenario;
