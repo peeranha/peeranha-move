@@ -1,5 +1,5 @@
 #[test_only]
-module basics::postLib_changePostType_test
+module basics::postLib_test_changePostType
 {
     use basics::communityLib;
     use basics::postLib;
