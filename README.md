@@ -1,5 +1,13 @@
 new version sui:
 - run commands from https://docs.sui.io/devnet/build/install
+    (Install Sui -> Linux prerequisites + Install Sui binaries)
+    - sudo apt-get update
+    - sudo apt-get update
+    - curl --version
+    - sudo apt-get install git-all
+    - sudo apt-get install libssl-dev
+    - sudo apt-get install libclang-dev
+    - cargo install --locked --git https://github.com/MystenLabs/sui.git --branch devnet sui
 if error (Cannot open wallet config file at "/home/freitag/.sui/sui_config/client.yaml")
     - open /home/freitag/.sui/sui_config/client.yaml file
     - back to .sui folder
