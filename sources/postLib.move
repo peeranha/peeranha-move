@@ -1321,6 +1321,12 @@ module basics::postLib {
         }
     }
     
+    ///
+    //  historyVotes: -> todo: add const
+    // 1 - downVote
+    // 2 - cancelVote
+    // 3 - upvote
+    // toDo describe return value
     public fun getForumItemRatingChange(
         actionAddress: address,
         historyVotes: &mut vector<u8>,
