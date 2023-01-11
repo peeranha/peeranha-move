@@ -380,7 +380,6 @@ module basics::postLib {
             // TODO: add check role
 
         };
-        
 
         if(vector::length(&tags) > 0) {
             communityLib::checkTags(communityCollection, post.communityId, post.tags);
@@ -905,7 +904,7 @@ module basics::postLib {
         let typeRating: StructRating = getTypesRating(postType);
 
         let (positive, negative) = getHistoryInformations(post.historyVotes, post.votedUsers);
-        
+
         let positiveRating = i64Lib::mul(&typeRating.upvotedPost, &i64Lib::from(positive));
         let negativeRating = i64Lib::mul(&typeRating.downvotedPost, &i64Lib::from(negative));
         let _changePostAuthorRating = i64Lib::add(&positiveRating, &negativeRating);
@@ -933,7 +932,7 @@ module basics::postLib {
                 changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptReply);
                 _changePostAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptedReply);
             };
-            
+
             // todo
             // self.peeranhaUser.updateUserRating(replyContainer.info.author, -changeReplyAuthorRating, oldCommunityId);
             // self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, newCommunityId);
