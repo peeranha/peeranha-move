@@ -292,6 +292,8 @@ module basics::postLib_test
                 1,
                 x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc",
                 vector<u64>[2],
+                1,
+                EXPERT_POST,
                 test_scenario::ctx(scenario)
             );
 

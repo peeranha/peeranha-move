@@ -12,7 +12,7 @@ module basics::postLib_test_vote
     use basics::i64Lib;
     use sui::test_scenario::{Self, Scenario};
 
-    // TODO: add enum PostType      //export
+    // TODO: add enum PostType      //import
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
     const TYTORIAL: u8 = 2;

@@ -79,7 +79,7 @@ Error code:
 
 41 - Users can not publish 2 replies for expert and common posts.
 
-42 - You can not edit this post. It is not your.
+42 - Not_allowed_edit_not_author
 
 43 - You can not edit this Reply. It is not your.
 
@@ -116,6 +116,8 @@ Error code:
 59 - Reply_deleted.
 
 60 - Comment_deleted.
+
+61 - Error_change_communityId
 
 86 - At_least_one_tag_is_required
 

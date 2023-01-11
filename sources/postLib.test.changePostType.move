@@ -5,14 +5,26 @@ module basics::postLib_test_changePostType
     use basics::postLib;
     use basics::userLib;
     // use basics::i64Lib;
-    use sui::test_scenario;
+    use sui::test_scenario::{Self, Scenario};
 
-    // TODO: add enum PostType      //export
+    // TODO: add enum PostType      //import
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
     const TYTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
     const USER: address = @0xA1;
+
+    fun change_name(
+        userCollection: &mut userLib::UserCollection,
+        communityCollection: &mut communityLib::CommunityCollection,
+        postCollection: &mut postLib::PostCollection,
+        scenario: &mut Scenario,
+        post_type: u8
+    ) {        // name from tests solidity
+        userLib::create_user(userCollection, test_scenario::ctx(scenario));
+        communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
+        postLib::create_post_with_type(postCollection, communityCollection, userCollection, post_type, test_scenario::ctx(scenario));
+    }
 
 
     #[test]
@@ -33,21 +45,14 @@ module basics::postLib_test_changePostType
             let postCollection = &mut post_val;
             let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
             let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
-            communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::createPost(
+            change_name(userCollection, communityCollection, postCollection, scenario, EXPERT_POST);
+
+            postLib::editPost(
                 postCollection,
                 communityCollection,
-                userCollection,
                 1,
                 x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                EXPERT_POST,
                 vector<u64>[1, 2],
-                test_scenario::ctx(scenario)
-            );
-
-            postLib::changePostType(
-                postCollection,
                 1,
                 COMMON_POST,
                 test_scenario::ctx(scenario)
@@ -55,7 +60,7 @@ module basics::postLib_test_changePostType
 
             let (
                 postType,
-                _ipfsDoc,
+                ipfsDoc,
                 _postTime,
                 _author,
                 _rating,
@@ -70,7 +75,8 @@ module basics::postLib_test_changePostType
                 _votedUsers
             ) = postLib::getPostData(postCollection, 1);
 
-            assert!(postType == COMMON_POST, 1);
+            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 0);
+            assert!(postType == COMMON_POST, 0);
 
             test_scenario::return_shared(community_val);
             test_scenario::return_shared(post_val);
