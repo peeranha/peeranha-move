@@ -10,7 +10,7 @@ module basics::postLib_test
     // TODO: add enum PostType      //export
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
-    const TYTORIAL: u8 = 2;
+    const TUTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
     const USER: address = @0xA1;
 

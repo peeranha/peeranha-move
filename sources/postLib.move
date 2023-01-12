@@ -64,12 +64,12 @@ module basics::postLib {
 
     const QUICK_REPLY_TIME_SECONDS: u64 = 900; // 6
     const DELETE_TIME: u64 = 604800;    //7 days
-    const DEFAULT_COMMUNITY: u64 = 5;
+    const DEFAULT_COMMUNITY: u64 = 3;
 
     // TODO: add enum PostType
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
-    const TYTORIAL: u8 = 2;
+    const TUTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
 
     const DIRECTION_DOWNVOTE: u8 = 4;
@@ -222,7 +222,7 @@ module basics::postLib {
         let userAddr = tx_context::sender(ctx);
 
         let post = getPostContainer(postCollection, postId);
-        assert!(post.postType != TYTORIAL && post.postType != DOCUMENTATION, E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL_OR_DOCUMENTATION);
+        assert!(post.postType != TUTORIAL && post.postType != DOCUMENTATION, E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL_OR_DOCUMENTATION);
         assert!(parentReplyId == 0 || (post.postType != EXPERT_POST && post.postType != COMMON_POST), E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST);
 
         // TODO: add check role
@@ -250,7 +250,7 @@ module basics::postLib {
                 post.officialReply = vector::length(&mut post.replies);
             };
 
-            if (post.postType != TYTORIAL && post.author != userAddr) {
+            if (post.postType != TUTORIAL && post.author != userAddr) {
                 if (getActiveReplyCount(post) == 0) {    // unit test
                     isFirstReply = true;
                     // TODO: add
@@ -576,7 +576,7 @@ module basics::postLib {
             if (reply.isQuickReply) {// -=?
                 changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_QUICK_REPLY));
             };
-            if (isBestReply && postType != TYTORIAL) {// -=?
+            if (isBestReply && postType != TUTORIAL) {// -=?
                 changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY));
             };
         };
@@ -843,7 +843,7 @@ module basics::postLib {
         if (post.postType == newPostType) return;
 
         let oldPostType = post.postType;
-        assert!(newPostType != TYTORIAL || getActiveReplyCount(post) == 0, E_ERROR_POST_TYPE);
+        assert!(newPostType != TUTORIAL || getActiveReplyCount(post) == 0, E_ERROR_POST_TYPE);
 
         let oldTypeRating: StructRating = getTypesRating(oldPostType);
         let newTypeRating: StructRating = getTypesRating(newPostType);
@@ -858,7 +858,10 @@ module basics::postLib {
         let replyId = 1;
         while(replyId <= vector::length(&post.replies)) {
             let reply = getReplyContainer(post, replyId);
-            if (reply.isDeleted) continue;
+            if (reply.isDeleted) {
+                replyId = replyId + 1;
+                continue
+            };
             let (positive, negative) = getHistoryInformations(reply.historyVotes, reply.votedUsers);
 
             positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedReply, &oldTypeRating.upvotedReply), &i64Lib::from(positive));
@@ -913,7 +916,10 @@ module basics::postLib {
         let replyId = 1;
         while(replyId <= vector::length(&post.replies)) {
             let reply = getReplyContainer(post, replyId);
-            if (reply.isDeleted) continue;
+            if (reply.isDeleted) {
+                replyId = replyId + 1;
+                continue
+            };
             (positive, negative) = getHistoryInformations(reply.historyVotes, reply.votedUsers);
 
             positiveRating = i64Lib::mul(&typeRating.upvotedReply, &i64Lib::from(positive));
@@ -936,6 +942,7 @@ module basics::postLib {
             // todo
             // self.peeranhaUser.updateUserRating(replyContainer.info.author, -changeReplyAuthorRating, oldCommunityId);
             // self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, newCommunityId);
+            replyId = replyId + 1;
         };
 
         //todo
@@ -951,7 +958,7 @@ module basics::postLib {
             getExpertRating()
         } else if (postType == COMMON_POST) {
             getCommonRating()
-        } else if (postType == TYTORIAL) {
+        } else if (postType == TUTORIAL) {
             getTutorialRating()
         } else {
             abort E_INVALID_POST_TYPE
@@ -1323,7 +1330,7 @@ module basics::postLib {
             else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_COMMON_POST)
             else abort E_INVALID_POST_TYPE
 
-        } else if (postType == TYTORIAL) {
+        } else if (postType == TUTORIAL) {
             if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_TUTORIAL)
             else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_TUTORIAL)
             else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_TUTORIAL)
@@ -1358,7 +1365,7 @@ module basics::postLib {
             else if (resourceAction == RESOURCE_ACTION_QUICK_REPLY) i64Lib::from(QUICK_COMMON_REPLY)
             else abort E_INVALID_RESOURCE_TYPE
 
-        } else if (postType == TYTORIAL) {
+        } else if (postType == TUTORIAL) {
             i64Lib::zero()
 
         } else {

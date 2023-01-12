@@ -1,9 +1,9 @@
-#[test_only]
-
-///
+//
 // done 
 // upvote/downvote expert post
-///
+//
+
+#[test_only]
 module basics::postLib_test_vote
 {
     use basics::communityLib;
@@ -15,7 +15,7 @@ module basics::postLib_test_vote
     // TODO: add enum PostType      //import
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
-    const TYTORIAL: u8 = 2;
+    const TUTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
 
     const DOWNVOTED_ITEM: u8 = 1;
