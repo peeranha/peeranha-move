@@ -1,0 +1,16 @@
+{
+  "name": "peeranha-sui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "sui move build",
+    "test": "sui move test",
+    "deploy": "sui client publish ./ --gas-budget 30000"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {},
+  "dependencies": {}
+}
