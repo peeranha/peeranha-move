@@ -43,6 +43,10 @@ module basics::commonLib {
         object::uid_to_inner(uid)
     }
 
+    public fun getZeroId(): ID {
+        object::id_from_address(@0x0)
+    }
+
     // public fun setIpfsDoc(hash: vector<u8>, hash2: vector<u8>, ipfsHash2: vector<u8>): IpfsHash {   // need? we have getIpfsDoc()
     //     IpfsHash { hash: hash, hash2: hash2  }
     // }
