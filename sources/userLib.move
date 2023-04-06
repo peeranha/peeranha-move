@@ -180,13 +180,13 @@ module basics::userLib {
     //     }
     // }
 
-    public entry fun updateUser(user: &mut User, userCommunityRating: &mut UserCommunityRating, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
+    public entry fun updateUser(user: &mut User, userCommunityRating: &UserCommunityRating, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
         let userAddress = tx_context::sender(ctx);
         // createIfDoesNotExist(userCollection, userAddress);
         updateUserPrivate(user, userCommunityRating, userAddress, ipfsDoc);
     }
 
-    entry fun updateUserPrivate(user: &mut User, userCommunityRating: &mut UserCommunityRating, userAddress: address, ipfsHash: vector<u8>) {
+    entry fun updateUserPrivate(user: &mut User, userCommunityRating: &UserCommunityRating, userAddress: address, ipfsHash: vector<u8>) {
         checkRatingAndEnergy(
             user,
             userCommunityRating,
@@ -198,7 +198,7 @@ module basics::userLib {
         user.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
     }
 
-    public entry fun followCommunity(user: &mut User, userCommunityRating: &mut UserCommunityRating, community: &mut communityLib::Community, ctx: &mut TxContext) {
+    public entry fun followCommunity(user: &mut User, userCommunityRating: &UserCommunityRating, community: &communityLib::Community, ctx: &mut TxContext) {
         communityLib::onlyExistingAndNotFrozenCommunity(community);
         let userAddress = tx_context::sender(ctx);
         checkRatingAndEnergy(
@@ -220,7 +220,7 @@ module basics::userLib {
         vector::push_back(&mut user.followedCommunities, community_id);
     }
 
-    public entry fun unfollowCommunity(user: &mut User, userCommunityRating: &mut UserCommunityRating, community: &mut communityLib::Community, ctx: &mut TxContext) {
+    public entry fun unfollowCommunity(user: &mut User, userCommunityRating: &UserCommunityRating, community: &communityLib::Community, ctx: &mut TxContext) {
         communityLib::onlyExistingAndNotFrozenCommunity(community);
         let userAddress = tx_context::sender(ctx);
         let user = checkRatingAndEnergy(
@@ -571,7 +571,7 @@ module basics::userLib {
     // TODO: add UserLib.Action action + add field UserLib.ActionRole actionRole
     public fun checkActionRole(
         user: &mut User,
-        userCommunityRating: &mut UserCommunityRating,
+        userCommunityRating: &UserCommunityRating,
         actionCaller: address,  // need? user -> owner
         dataUser: address,
         communityId: ID,
@@ -602,12 +602,12 @@ module basics::userLib {
 
     public fun checkRatingAndEnergy(
         user: &mut User,
-        userCommunityRating: &mut UserCommunityRating,
+        userCommunityRating: &UserCommunityRating,
         actionCaller: address,
         dataUser: address,
         communityId: ID,
         action: u8
-    ): &mut User // &mut?
+    ): &mut User
     {
         let userRating = getUserRating(userCommunityRating, communityId);
             
@@ -742,8 +742,8 @@ module basics::userLib {
         }
     }
 
-    public fun getUserRating(userCommunityRating: &mut UserCommunityRating, communityId: ID): i64Lib::I64 {   // public?  + user &mut?
-        let position = vec_map::get_idx_opt(&mut userCommunityRating.userRating, &communityId);
+    public fun getUserRating(userCommunityRating: &UserCommunityRating, communityId: ID): i64Lib::I64 {   // public?  + user &mut?
+        let position = vec_map::get_idx_opt(&userCommunityRating.userRating, &communityId);
         if (option::is_none(&position)) {
             i64Lib::from(START_USER_RATING)
         } else {

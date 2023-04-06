@@ -169,8 +169,8 @@ module basics::postLib {
 
     public entry fun createPost(
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
-        community: &mut communityLib::Community, // new transfer community &mut
+        userCommunityRating: &userLib::UserCommunityRating,
+        community: &communityLib::Community, // new transfer community &mut
         ipfsHash: vector<u8>, 
         postType: u8,
         tags: vector<u64>,
@@ -277,7 +277,7 @@ module basics::postLib {
         let timestamp: u64 = commonLib::getTimestamp();
         if (parentReplyId == commonLib::getZeroId()) {
             if (isOfficialReply) {
-                postMetaData.officialReply = commonLib::getItemId(&mut replyUID);
+                postMetaData.officialReply = commonLib::getItemId(&replyUID);
             };
 
             if (postMetaData.postType != TUTORIAL && postMetaData.author != userAddr) {
@@ -338,9 +338,8 @@ module basics::postLib {
 
     public entry fun createCommentToPost(
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
+        userCommunityRating: &userLib::UserCommunityRating,
         postMetaData: &mut PostMetaData,
-        _replyMetaData: &mut ReplyMetaData,
         ipfsHash: vector<u8>,
         ctx: &mut TxContext
     ) {
@@ -386,8 +385,8 @@ module basics::postLib {
 
     public entry fun createCommentToReply(
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
-        postMetaData: &mut PostMetaData,
+        userCommunityRating: &userLib::UserCommunityRating,
+        postMetaData: &PostMetaData,
         replyMetaData: &mut ReplyMetaData,
         ipfsHash: vector<u8>,
         ctx: &mut TxContext
@@ -438,7 +437,7 @@ module basics::postLib {
         userCommunityRating: &mut userLib::UserCommunityRating,
         post: &mut Post,
         postMetaData: &mut PostMetaData,
-        community: &mut communityLib::Community, // new transfer community &mut
+        community: &communityLib::Community,
         ipfsHash: vector<u8>, 
         tags: vector<u64>,
         newCommunityId: ID,
@@ -480,10 +479,10 @@ module basics::postLib {
 
     public entry fun editReply(
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
+        userCommunityRating: &userLib::UserCommunityRating,
         postMetaData: &mut PostMetaData,
         reply: &mut Reply,
-        replyMetaData: &mut ReplyMetaData,
+        replyMetaData: &ReplyMetaData,
         ipfsHash: vector<u8>, 
         isOfficialReply: bool,
         ctx: &mut TxContext
@@ -508,8 +507,8 @@ module basics::postLib {
 
         
         if (isOfficialReply) {
-            postMetaData.officialReply = commonLib::getItemId(&mut postMetaData.id);
-        } else if (postMetaData.officialReply == commonLib::getItemId(&mut postMetaData.id))
+            postMetaData.officialReply = commonLib::getItemId(&postMetaData.id);
+        } else if (postMetaData.officialReply == commonLib::getItemId(&postMetaData.id))
             postMetaData.officialReply = commonLib::getZeroId();
 
         // TODO: add emit ReplyEdited(userAddr, postId, replyId);
@@ -517,10 +516,10 @@ module basics::postLib {
 
     public entry fun editComment(
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
+        userCommunityRating: &userLib::UserCommunityRating,
         postMetaData: &PostMetaData,
         comment: &mut Comment,
-        commentMetaData: &mut CommentMetaData,
+        commentMetaData: &CommentMetaData,
         ipfsHash: vector<u8>,
         ctx: &mut TxContext
     ) {
@@ -546,6 +545,7 @@ module basics::postLib {
     }
 
     /*
+    // &mut
     public entry fun deletePost(  // new transfer
         user: &mut userLib::User,
         userCommunityRating: &mut userLib::UserCommunityRating,
@@ -676,10 +676,10 @@ module basics::postLib {
         replyMetaData.isDeleted = true;
         postMetaData.deletedReplyCount = postMetaData.deletedReplyCount + 1;
 
-        if (postMetaData.bestReply == commonLib::getItemId(&mut replyMetaData.id))
+        if (postMetaData.bestReply == commonLib::getItemId(&replyMetaData.id))
             postMetaData.bestReply = commonLib::getZeroId();
 
-        if (postMetaData.officialReply == commonLib::getItemId(&mut replyMetaData.id))
+        if (postMetaData.officialReply == commonLib::getItemId(&replyMetaData.id))
             postMetaData.officialReply = commonLib::getZeroId();
 
         if (isDeductReplyRating) {
@@ -700,7 +700,7 @@ module basics::postLib {
         postType: u8,
         isBestReply: bool,
         communityId: ID,
-        replyMetaData: &mut ReplyMetaData,
+        replyMetaData: &ReplyMetaData,
         userCommunityRating: &mut userLib::UserCommunityRating
     ) {
         // TODO: add
@@ -776,13 +776,13 @@ module basics::postLib {
 
     public entry fun changeStatusBestReply(
         postMetaData: &mut PostMetaData,
-        newBestReplyMetaData: &mut ReplyMetaData,
-        oldBestReplyMetaData: &mut ReplyMetaData,
+        newBestReplyMetaData: &ReplyMetaData,
+        oldBestReplyMetaData: &ReplyMetaData,
         postAuthor: &mut userLib::User,
         postAuthorCommunityRating: &mut userLib::UserCommunityRating,
-        newReplyAuthor: &mut userLib::User,
+        newReplyAuthor: &userLib::User,
         newReplyAuthorCommunityRating: &mut userLib::UserCommunityRating,
-        oldReplyAuthor: &mut userLib::User,
+        oldReplyAuthor: &userLib::User,
         oldReplyAuthorCommunityRating: &mut userLib::UserCommunityRating,
         ctx: &mut TxContext
     ) {
@@ -790,7 +790,7 @@ module basics::postLib {
         let communityId = postMetaData.communityId;
         assert!(postMetaData.author == userAddr, E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY);
 
-        if (postMetaData.bestReply == commonLib::getItemId(&mut newBestReplyMetaData.id)) {
+        if (postMetaData.bestReply == commonLib::getItemId(&newBestReplyMetaData.id)) {
             updateRatingForBestReply(
                 postAuthor,
                 postAuthorCommunityRating,
@@ -829,7 +829,7 @@ module basics::postLib {
                 true,
                 communityId
             );
-            postMetaData.bestReply = commonLib::getItemId(&mut newBestReplyMetaData.id);
+            postMetaData.bestReply = commonLib::getItemId(&newBestReplyMetaData.id);
         };
         userLib::checkActionRole(
             postAuthor,
@@ -845,10 +845,10 @@ module basics::postLib {
     }
 
     fun updateRatingForBestReply(
-        postAuthor: &mut userLib::User,
+        postAuthor: &userLib::User,
         postAuthorCommunityRating: &mut userLib::UserCommunityRating,
         postAuthorAddress: address,
-        replyAuthor: &mut userLib::User,
+        replyAuthor: &userLib::User,
         replyAuthorCommunityRating: &mut userLib::UserCommunityRating,
         replyAuthorAddress: address,
         postType: u8,
@@ -879,6 +879,7 @@ module basics::postLib {
         }
     }
 
+    // &mut
     public entry fun votePost(
         postMetaData: &mut PostMetaData,
         votedUser: &mut userLib::User,
@@ -930,6 +931,7 @@ module basics::postLib {
         // transfer add ForumItemVoted delete return value
     }
 
+    // &mut
     public entry fun voteReply(
         postMetaData: &PostMetaData,
         replyMetaData: &mut ReplyMetaData,
@@ -1009,6 +1011,7 @@ module basics::postLib {
         // transfer add ForumItemVoted delete return value
     }
 
+    // &mut
     public entry fun voteComment(
         postMetaData: &PostMetaData,
         commentMetaData: &mut CommentMetaData,
@@ -1055,6 +1058,7 @@ module basics::postLib {
         // transfer add ForumItemVoted delete return value
     }
 
+    // &mut
     fun vote(
         voteUser: &mut userLib::User,
         voteUserCommunityRating: &mut userLib::UserCommunityRating,
@@ -1175,7 +1179,7 @@ module basics::postLib {
 
     fun changePostCommunity(
         postMetaData: &mut PostMetaData,
-        community: &mut communityLib::Community, // new transfer community &mut
+        community: &communityLib::Community, // new transfer community &mut
         newCommunityId: ID
     ) {
         if (postMetaData.communityId == newCommunityId) return;
@@ -1232,8 +1236,8 @@ module basics::postLib {
     }
 
     fun checkSigner(
-        user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
+        user: &userLib::User,
+        userCommunityRating: &userLib::UserCommunityRating,
         userAddress: address
     ) {
        assert!(
@@ -1342,7 +1346,7 @@ module basics::postLib {
     // }
 
     fun getActiveReplyCount(
-        postMetaData: &mut PostMetaData     // new transfer postMetaData &mut
+        postMetaData: &PostMetaData
     ): u64 {
         return vector::length(&postMetaData.replies) - postMetaData.deletedReplyCount
     }
@@ -1499,7 +1503,7 @@ module basics::postLib {
     ///
     //voteLib
     ///
-    struct StructRating has drop {  // TODO: add drop?
+    struct StructRating has drop {
         upvotedPost: i64Lib::I64,
         downvotedPost: i64Lib::I64,
 
