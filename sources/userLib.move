@@ -34,7 +34,7 @@ module basics::userLib {
     const ACTION_NONE: u8 = 0;
     const ACTION_PUBLICATION_POST: u8 = 1;
     const ACTION_PUBLICATION_REPLY: u8 = 2;
-    const ACTION_PUBLICATION_COMMNET: u8 = 3;
+    const ACTION_PUBLICATION_COMMENT: u8 = 3;
     const ACTION_EDIT_ITEM: u8 = 4;
     const ACTION_DELETE_ITEM: u8 = 5;
     const ACTION_UPVOTE_POST: u8 = 6;
@@ -149,7 +149,7 @@ module basics::userLib {
         createUserPrivate(owner, ipfsDoc, ctx)
     }
 
-    public entry fun createUserPrivate(userAddress: address, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    fun createUserPrivate(userAddress: address, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
         // assert!(!isExists(userCollection, userAddress), E_USER_EXIST); // TODO: TEST     new transfer ???
 
@@ -576,6 +576,7 @@ module basics::userLib {
         dataUser: address,
         communityId: ID,
         action: u8,
+        // role
         //createUserIfDoesNotExist: bool  // new transfer ???
     ) 
     {
@@ -637,7 +638,7 @@ module basics::userLib {
             // message = "low_rating_reply";
             energy = ENERGY_POST_ANSWER;
 
-        } else if (action == ACTION_PUBLICATION_COMMNET) {
+        } else if (action == ACTION_PUBLICATION_COMMENT) {
             if (actionCaller == dataUser) {
                 ratingAllowed = i64Lib::from(POST_OWN_COMMENT_ALLOWED);
             } else {
@@ -801,6 +802,58 @@ module basics::userLib {
     //         debug::print(user);
     //     }
     // }
+
+    public fun get_action_none(): u8 {
+        ACTION_NONE
+    }
+
+    public fun get_action_publication_post(): u8 {
+        ACTION_PUBLICATION_POST
+    }
+
+    public fun get_action_publication_reply(): u8 {
+        ACTION_PUBLICATION_REPLY
+    }
+
+    public fun get_action_publication_comment(): u8 {
+        ACTION_PUBLICATION_COMMENT
+    }
+
+    public fun get_action_edit_item(): u8 {
+        ACTION_EDIT_ITEM
+    }
+
+    public fun get_action_delete_item(): u8 {
+        ACTION_DELETE_ITEM
+    }
+
+    public fun get_action_upvote_post(): u8 {
+        ACTION_UPVOTE_POST
+    }
+
+    public fun get_action_downvote_post(): u8 {
+        ACTION_DOWNVOTE_POST
+    }
+
+    public fun get_action_upvote_reply(): u8 {
+        ACTION_UPVOTE_REPLY
+    }
+
+    public fun get_action_downvote_reply(): u8 {
+        ACTION_DOWNVOTE_REPLY
+    }
+
+    public fun get_action_vote_comment(): u8 {
+        ACTION_VOTE_COMMENT
+    }
+
+    public fun get_action_cancel_vote(): u8 {
+        ACTION_CANCEL_VOTE
+    }
+
+    public fun get_action_best_reply(): u8 {
+        ACTION_BEST_REPLY
+    }
 
     #[test_only]
     public fun getUserData(user: &mut User): (vector<u8>, address, u64, u64, vector<ID>) {

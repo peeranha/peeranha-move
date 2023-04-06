@@ -17,7 +17,7 @@ module basics::communityLib_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            userLib::createUserPrivate(USER1, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+            userLib::createUser(x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
             communityLib::createCommunity(
                 // communityCollection,
                 x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
@@ -58,7 +58,7 @@ module basics::communityLib_test
 
     #[test_only]
     fun create_user_and_community(scenario: &mut Scenario) {
-        userLib::createUserPrivate(USER1, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+        userLib::createUser(x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
         communityLib::createCommunity(
             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
             vector<vector<u8>>[
