@@ -1,5 +1,6 @@
 module basics::userLib {
     use sui::transfer;
+    use sui::event;
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
@@ -131,6 +132,17 @@ module basics::userLib {
         activeUsersInPeriod: vector<address>,
     }
 
+    // ====== Events ======
+
+    struct EvUser has copy, drop {
+        userId: ID,
+    }
+
+    struct EvFollowCommunity has copy, drop {
+        userId: ID,
+        communityId: ID
+    }
+
     fun init(ctx: &mut TxContext) {
         transfer::share_object(PeriodRewardContainer {
             id: object::new(ctx),
@@ -158,19 +170,20 @@ module basics::userLib {
             userRating: vec_map::empty(),
             userPeriodRewards: vec_map::empty(),
         };
+        let user = User {
+            id: object::new(ctx),
+            ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            owner: userAddress,
+            energy: getStatusEnergy(),
+            lastUpdatePeriod: commonLib::getPeriod(),
+            followedCommunities: vector::empty<ID>(),
+            userRatingId: commonLib::getItemId(&userCommunityRating.id)
+        };
 
+        event::emit(EvUser {userId: commonLib::getItemId(&user.id)});
         transfer::transfer(
-            User {
-                id: object::new(ctx),
-                ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-                owner: userAddress,
-                energy: getStatusEnergy(),
-                lastUpdatePeriod: commonLib::getPeriod(),
-                followedCommunities: vector::empty<ID>(),
-                userRatingId: commonLib::getItemId(&userCommunityRating.id)
-            }, userAddress
+            user, userAddress
         );
-
         transfer::share_object(userCommunityRating);
     }
 
@@ -196,6 +209,7 @@ module basics::userLib {
             ACTION_UPDATE_PROFILE
         );
         user.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
+        event::emit(EvUser {userId: commonLib::getItemId(&user.id)});
     }
 
     public entry fun followCommunity(user: &mut User, userCommunityRating: &UserCommunityRating, community: &communityLib::Community, ctx: &mut TxContext) {
@@ -218,6 +232,7 @@ module basics::userLib {
         };
 
         vector::push_back(&mut user.followedCommunities, community_id);
+        event::emit(EvFollowCommunity{userId: commonLib::getItemId(&user.id), communityId: community_id});
     }
 
     public entry fun unfollowCommunity(user: &mut User, userCommunityRating: &UserCommunityRating, community: &communityLib::Community, ctx: &mut TxContext) {
@@ -237,6 +252,8 @@ module basics::userLib {
         while(i < vector::length(&mut user.followedCommunities)) {
             if(*vector::borrow(&user.followedCommunities, i) == community_id) {
                 vector::remove(&mut user.followedCommunities, i);
+
+                event::emit(EvFollowCommunity{userId: commonLib::getItemId(&user.id), communityId: community_id});
                 return
             };
             i = i +1;

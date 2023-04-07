@@ -35,9 +35,12 @@ module basics::communityLib {
     // error "Expected primitive or object type. Got: vector<0x0::communityLib::Tag>"
     // commit - fixed sui move build (c888fd5b339665abff8e76275866b1fcfb640540)
     ///
-    public entry fun createCommunity(ipfsHash: vector<u8>, tags: vector<vector<u8>>, ctx: &mut TxContext) {
+    public entry fun createCommunity(
+        ipfsHash: vector<u8>,
+        tags: vector<vector<u8>>,
+        ctx: &mut TxContext
+    ) {
         let _userAddress = tx_context::sender(ctx);
-        // TODO: add check role
 
         let tagsLength = vector::length(&mut tags);
         assert!(tagsLength >= 5, E_REQUIRE_AT_LEAST_5_TAGS);
