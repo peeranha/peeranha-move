@@ -118,7 +118,7 @@ module basics::postLib {
         properties: vector<u8>,
 
         historyVotes: vector<u8>,                 // downVote = 1, NONE = 2, upVote = 3
-        votedUsers: vector<address>
+        voteUsers: vector<address>
     }
 
     struct Reply has key {
@@ -140,7 +140,7 @@ module basics::postLib {
         comments: vector<CommentMetaData>,
         properties: vector<u8>,
         historyVotes: vector<u8>,                 // to u128?   // 1 - negative, 2 - positive
-        votedUsers: vector<address>
+        voteUsers: vector<address>
     }
 
     struct Comment has key {
@@ -158,7 +158,7 @@ module basics::postLib {
         isDeleted: bool,
         properties: vector<u8>,
         historyVotes: vector<u8>,                 // to u128?   // 1 - negative, 2 - positive
-        votedUsers: vector<address>
+        voteUsers: vector<address>
     }
 
     struct UserRatingChange {
@@ -216,7 +216,7 @@ module basics::postLib {
                 comments: vector::empty<CommentMetaData>(),
                 properties: vector::empty<u8>(),
                 historyVotes: vector::empty<u8>(),
-                votedUsers: vector::empty<address>(),
+                voteUsers: vector::empty<address>(),
             }
         );
 
@@ -321,7 +321,7 @@ module basics::postLib {
                 comments: vector::empty<CommentMetaData>(),
                 properties: vector::empty<u8>(),
                 historyVotes: vector::empty<u8>(),
-                votedUsers: vector::empty<address>(),
+                voteUsers: vector::empty<address>(),
             }
         );
 
@@ -368,7 +368,7 @@ module basics::postLib {
 
                 properties: vector::empty<u8>(),
                 historyVotes: vector::empty<u8>(),
-                votedUsers: vector::empty<address>(),
+                voteUsers: vector::empty<address>(),
             }
         );
 
@@ -417,7 +417,7 @@ module basics::postLib {
 
                 properties: vector::empty<u8>(),
                 historyVotes: vector::empty<u8>(),
-                votedUsers: vector::empty<address>(),
+                voteUsers: vector::empty<address>(),
             }
         );
 
@@ -722,7 +722,7 @@ module basics::postLib {
 
         // change user rating considering reply rating
         let typeRating: StructRating = getTypesRating(postType);
-        let (positive, negative) = getHistoryInformations(replyMetaData.historyVotes, replyMetaData.votedUsers);
+        let (positive, negative) = getHistoryInformations(replyMetaData.historyVotes, replyMetaData.voteUsers);
         
         // typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
         let changeUserRating: i64Lib::I64 = i64Lib::add(&i64Lib::mul(&typeRating.upvotedReply, &i64Lib::from(positive)), &i64Lib::mul(&typeRating.downvotedReply, &i64Lib::from(negative)));
@@ -879,29 +879,28 @@ module basics::postLib {
         }
     }
 
-    // &mut
     public entry fun votePost(
         postMetaData: &mut PostMetaData,
-        votedUser: &mut userLib::User,
-        votedUserCommunityRating: &mut userLib::UserCommunityRating,
         voteUser: &mut userLib::User,
         voteUserCommunityRating: &mut userLib::UserCommunityRating,
+        votedUser: &userLib::User,
+        votedUserCommunityRating: &mut userLib::UserCommunityRating,
         isUpvote: bool,
         ctx: &mut TxContext
     ): u8 {
-        let votedUserAddress = tx_context::sender(ctx);
-        checkSigner(votedUser, votedUserCommunityRating, votedUserAddress);
-        checkSigner(voteUser, voteUserCommunityRating, postMetaData.author);
+        let voteUserAddress = tx_context::sender(ctx);
+        checkSigner(voteUser, voteUserCommunityRating, voteUserAddress);
+        checkSigner(votedUser, votedUserCommunityRating, postMetaData.author);
         let postType = postMetaData.postType;
         assert!(postType != DOCUMENTATION, E_YOU_CAN_NOT_VOTE_TO_DOCUMENTATION);
-        assert!(votedUserAddress != postMetaData.author, E_ERROR_VOTE_POST);
+        assert!(voteUserAddress != postMetaData.author, E_ERROR_VOTE_POST);
         
-        let (ratingChange, isCancel) = getForumItemRatingChange(votedUserAddress, &mut postMetaData.historyVotes, isUpvote, &mut postMetaData.votedUsers);
+        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserAddress, &mut postMetaData.historyVotes, isUpvote, &mut postMetaData.voteUsers);
         // ed / e && other argument
         userLib::checkActionRole(
-            votedUser,
-            votedUserCommunityRating,
-            votedUserAddress,
+            voteUser,
+            voteUserCommunityRating,
+            voteUserAddress,
             postMetaData.author,
             postMetaData.communityId,
             if(isCancel) 
@@ -912,7 +911,7 @@ module basics::postLib {
             /*false*/
         );
 
-        vote(votedUser, votedUserCommunityRating, voteUser, voteUserCommunityRating, postType, isUpvote, ratingChange, TYPE_CONTENT_POST, postMetaData.communityId);
+        vote(voteUser, voteUserCommunityRating, votedUser, votedUserCommunityRating, postType, isUpvote, ratingChange, TYPE_CONTENT_POST, postMetaData.communityId);
         postMetaData.rating = i64Lib::add(&postMetaData.rating, &ratingChange);
 
         if (isCancel) {
@@ -931,13 +930,12 @@ module basics::postLib {
         // transfer add ForumItemVoted delete return value
     }
 
-    // &mut
     public entry fun voteReply(
         postMetaData: &PostMetaData,
         replyMetaData: &mut ReplyMetaData,
         voteUser: &mut userLib::User,
         voteUserCommunityRating: &mut userLib::UserCommunityRating,
-        votedUser: &mut userLib::User,
+        votedUser: &userLib::User,
         votedUserCommunityRating: &mut userLib::UserCommunityRating,
         isUpvote: bool,
         ctx: &mut TxContext
@@ -945,15 +943,15 @@ module basics::postLib {
         let postType = postMetaData.postType;
         let voteUserAddress = tx_context::sender(ctx);
         let communityId = postMetaData.communityId;
-        checkSigner(votedUser, votedUserCommunityRating, voteUserAddress);
+        checkSigner(voteUser, voteUserCommunityRating, voteUserAddress);
         checkSigner(votedUser, votedUserCommunityRating, replyMetaData.author);
         assert!(voteUserAddress != replyMetaData.author, E_ERROR_VOTE_REPLY);
 
-        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserAddress, &mut replyMetaData.historyVotes, isUpvote, &mut replyMetaData.votedUsers);
+        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserAddress, &mut replyMetaData.historyVotes, isUpvote, &mut replyMetaData.voteUsers);
         // ed / e && other argument
         userLib::checkActionRole(
-            votedUser,
-            votedUserCommunityRating,
+            voteUser,
+            voteUserCommunityRating,
             voteUserAddress,
             replyMetaData.author,
             communityId,
@@ -1011,27 +1009,24 @@ module basics::postLib {
         // transfer add ForumItemVoted delete return value
     }
 
-    // &mut
     public entry fun voteComment(
         postMetaData: &PostMetaData,
         commentMetaData: &mut CommentMetaData,
-        votedUser: &mut userLib::User,
-        votedUserCommunityRating: &mut userLib::UserCommunityRating,
-        _voteUser: &mut userLib::User,
-        _voteUserCommunityRating: &mut userLib::UserCommunityRating,
+        voteUser: &mut userLib::User,
+        voteUserCommunityRating: &userLib::UserCommunityRating,
         isUpvote: bool,
         ctx: &mut TxContext
     ): u8 {
-        let votedUserAddress = tx_context::sender(ctx);
-        checkSigner(votedUser, votedUserCommunityRating, votedUserAddress);
-        assert!(votedUserAddress != commentMetaData.author, E_ERROR_VOTE_COMMENT);
+        let voteUserAddress = tx_context::sender(ctx);
+        checkSigner(voteUser, voteUserCommunityRating, voteUserAddress);
+        assert!(voteUserAddress != commentMetaData.author, E_ERROR_VOTE_COMMENT);
         
-        let (ratingChange, isCancel) = getForumItemRatingChange(votedUserAddress, &mut commentMetaData.historyVotes, isUpvote, &mut commentMetaData.votedUsers);
+        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserAddress, &mut commentMetaData.historyVotes, isUpvote, &mut commentMetaData.voteUsers);
         // ed / e && other argument
         userLib::checkActionRole(
-            votedUser,
-            votedUserCommunityRating,
-            votedUserAddress,
+            voteUser,
+            voteUserCommunityRating,
+            voteUserAddress,
             commentMetaData.author,
             postMetaData.communityId,
             if(isCancel) 
@@ -1058,11 +1053,10 @@ module basics::postLib {
         // transfer add ForumItemVoted delete return value
     }
 
-    // &mut
     fun vote(
-        voteUser: &mut userLib::User,
+        voteUser: &userLib::User,
         voteUserCommunityRating: &mut userLib::UserCommunityRating,
-        votedUser: &mut userLib::User,
+        votedUser: &userLib::User,
         votedUserCommunityRating: &mut userLib::UserCommunityRating,
         postType: u8,
         isUpvote: bool,
@@ -1071,24 +1065,24 @@ module basics::postLib {
         communityId: ID
     ) {
         // TODO: add why warning - Unused assignment or binding for local '_authorRating'. Consider removing, replacing with '_', or prefixing with '_'
+        let voteUserRating = i64Lib::zero();
         let _authorRating = i64Lib::zero();
-        let votedUserRating = i64Lib::zero();
 
         if (isUpvote) {
             _authorRating = getUserRatingChange(postType, RESOURCE_ACTION_UPVOTED, typeContent);
 
             if (i64Lib::compare(&ratingChanged, &i64Lib::from(2)) == i64Lib::getEual()) {
                 _authorRating = i64Lib::add(&_authorRating, &i64Lib::mul(&getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTED, typeContent), &i64Lib::neg_from(1)));
-                votedUserRating = i64Lib::mul(&getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTE, typeContent), &i64Lib::neg_from(1)); 
+                voteUserRating = i64Lib::mul(&getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTE, typeContent), &i64Lib::neg_from(1)); 
             };
 
             if (i64Lib::compare(&ratingChanged, &i64Lib::zero()) == i64Lib::getLessThan()) {
                 _authorRating = i64Lib::mul(&_authorRating, &i64Lib::neg_from(1));
-                votedUserRating = i64Lib::mul(&votedUserRating, &i64Lib::neg_from(1));
+                voteUserRating = i64Lib::mul(&voteUserRating, &i64Lib::neg_from(1));
             };
         } else {
             _authorRating = getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTED, typeContent);
-            votedUserRating = getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTE, typeContent);
+            voteUserRating = getUserRatingChange(postType, RESOURCE_ACTION_DOWNVOTE, typeContent);
 
             if (i64Lib::compare(&ratingChanged, &i64Lib::neg_from(2)) == i64Lib::getEual()) {
                 _authorRating = i64Lib::add(&_authorRating, &i64Lib::mul(&getUserRatingChange(postType, RESOURCE_ACTION_UPVOTED, typeContent), &i64Lib::neg_from(1)));
@@ -1096,20 +1090,20 @@ module basics::postLib {
 
             if (i64Lib::compare(&ratingChanged, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
                 _authorRating = i64Lib::mul(&_authorRating, &i64Lib::neg_from(1));
-                votedUserRating = i64Lib::mul(&votedUserRating, &i64Lib::neg_from(2));  
+                voteUserRating = i64Lib::mul(&voteUserRating, &i64Lib::neg_from(2));  
             };
         };
 
         userLib::updateRatingNotFull(
-            userLib::getUserOwner(votedUser),
-            votedUserCommunityRating,
-            _authorRating,
+            userLib::getUserOwner(voteUser),
+            voteUserCommunityRating,
+            voteUserRating,
             communityId
         );
         userLib::updateRatingNotFull(
-            userLib::getUserOwner(voteUser),
-            voteUserCommunityRating,
-            votedUserRating,
+            userLib::getUserOwner(votedUser),
+            votedUserCommunityRating,
+            _authorRating,
             communityId
         );
     }
@@ -1126,7 +1120,7 @@ module basics::postLib {
         let oldTypeRating: StructRating = getTypesRating(oldPostType);
         let newTypeRating: StructRating = getTypesRating(newPostType);
 
-        let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.votedUsers);
+        let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.voteUsers);
 
         let positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedPost, &oldTypeRating.upvotedPost), &i64Lib::from(positive));
         let negativeRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.downvotedPost, &oldTypeRating.downvotedPost), &i64Lib::from(negative));
@@ -1140,7 +1134,7 @@ module basics::postLib {
                 replyId = replyId + 1;
                 continue
             };
-            let (positive, negative) = getHistoryInformations(replyMetaData.historyVotes, replyMetaData.votedUsers);
+            let (positive, negative) = getHistoryInformations(replyMetaData.historyVotes, replyMetaData.voteUsers);
 
             positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedReply, &oldTypeRating.upvotedReply), &i64Lib::from(positive));
             negativeRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.downvotedReply, &oldTypeRating.downvotedReply), &i64Lib::from(negative));
@@ -1189,7 +1183,7 @@ module basics::postLib {
         let postType: u8 = postMetaData.postType;
         let typeRating: StructRating = getTypesRating(postType);
 
-        let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.votedUsers);
+        let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.voteUsers);
 
         let positiveRating = i64Lib::mul(&typeRating.upvotedPost, &i64Lib::from(positive));
         let negativeRating = i64Lib::mul(&typeRating.downvotedPost, &i64Lib::from(negative));
@@ -1204,7 +1198,7 @@ module basics::postLib {
                 replyId = replyId + 1;
                 continue
             };
-            (positive, negative) = getHistoryInformations(reply.historyVotes, reply.votedUsers);
+            (positive, negative) = getHistoryInformations(reply.historyVotes, reply.voteUsers);
 
             positiveRating = i64Lib::mul(&typeRating.upvotedReply, &i64Lib::from(positive));
             negativeRating = i64Lib::mul(&typeRating.downvotedReply, &i64Lib::from(negative));
@@ -1547,8 +1541,8 @@ module basics::postLib {
     const DOWNVOTE_EXPERT_REPLY: u64 = 1;       // negative
     const UPVOTED_EXPERT_REPLY: u64 = 10;
     const DOWNVOTED_EXPERT_REPLY: u64 = 2;      // negative
-    const ACCEPT_EXPERT_REPLY: u64 = 15;
-    const ACCEPTED_EXPERT_REPLY: u64 = 2;
+    const ACCEPTED_EXPERT_REPLY: u64 = 15;
+    const ACCEPT_EXPERT_REPLY: u64 = 2;
     const FIRST_EXPERT_REPLY: u64 = 5;
     const QUICK_EXPERT_REPLY: u64 = 5;
 
@@ -1556,8 +1550,8 @@ module basics::postLib {
     const DOWNVOTE_COMMON_REPLY: u64 = 1;       // negative
     const UPVOTED_COMMON_REPLY: u64 = 1;
     const DOWNVOTED_COMMON_REPLY: u64 = 1;      // negative
-    const ACCEPT_COMMON_REPLY: u64 = 3;
-    const ACCEPTED_COMMON_REPLY: u64 = 1;
+    const ACCEPTED_COMMON_REPLY: u64 = 3;
+    const ACCEPT_COMMON_REPLY: u64 = 1;
     const FIRST_COMMON_REPLY: u64 = 1;
     const QUICK_COMMON_REPLY: u64 = 1;
     
@@ -1577,8 +1571,8 @@ module basics::postLib {
             downvotedReply: i64Lib::neg_from(DOWNVOTED_EXPERT_REPLY),
             firstReply: i64Lib::from(FIRST_EXPERT_REPLY),
             quickReply: i64Lib::from(QUICK_EXPERT_REPLY),
-            acceptReply: i64Lib::from(ACCEPT_EXPERT_REPLY),
-            acceptedReply: i64Lib::from(ACCEPTED_EXPERT_REPLY)
+            acceptedReply: i64Lib::from(ACCEPTED_EXPERT_REPLY),
+            acceptReply: i64Lib::from(ACCEPT_EXPERT_REPLY)
         }
     }
 
@@ -1591,8 +1585,8 @@ module basics::postLib {
             downvotedReply: i64Lib::neg_from(DOWNVOTED_COMMON_REPLY),
             firstReply: i64Lib::from(FIRST_COMMON_REPLY),
             quickReply: i64Lib::from(QUICK_COMMON_REPLY),
-            acceptReply: i64Lib::from(ACCEPT_COMMON_REPLY),
-            acceptedReply: i64Lib::from(ACCEPTED_COMMON_REPLY)
+            acceptedReply: i64Lib::from(ACCEPTED_COMMON_REPLY),
+            acceptReply: i64Lib::from(ACCEPT_COMMON_REPLY)
         }
     }
 
@@ -1605,8 +1599,8 @@ module basics::postLib {
             downvotedReply: i64Lib::zero(),
             firstReply: i64Lib::zero(),
             quickReply: i64Lib::zero(),
-            acceptReply: i64Lib::zero(),
-            acceptedReply: i64Lib::zero()
+            acceptedReply: i64Lib::zero(),
+            acceptReply: i64Lib::zero()
         }
     }
 
@@ -1645,8 +1639,8 @@ module basics::postLib {
             if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_EXPERT_REPLY)
             else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_EXPERT_REPLY)
             else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_EXPERT_REPLY)
-            else if (resourceAction == RESOURCE_ACTION_ACCEPT_REPLY) i64Lib::from(ACCEPT_EXPERT_REPLY)
             else if (resourceAction == RESOURCE_ACTION_ACCEPTED_REPLY) i64Lib::from(ACCEPTED_EXPERT_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_ACCEPT_REPLY) i64Lib::from(ACCEPT_EXPERT_REPLY)
             else if (resourceAction == RESOURCE_ACTION_FIRST_REPLY) i64Lib::from(FIRST_EXPERT_REPLY)
             else if (resourceAction == RESOURCE_ACTION_QUICK_REPLY) i64Lib::from(QUICK_EXPERT_REPLY)
             else abort E_INVALID_RESOURCE_TYPE
@@ -1655,8 +1649,8 @@ module basics::postLib {
             if (resourceAction == RESOURCE_ACTION_DOWNVOTE) i64Lib::neg_from(DOWNVOTE_COMMON_POST)
             else if (resourceAction == RESOURCE_ACTION_UPVOTED) i64Lib::from(UPVOTED_COMMON_POST)
             else if (resourceAction == RESOURCE_ACTION_DOWNVOTED) i64Lib::neg_from(DOWNVOTED_COMMON_POST)
-            else if (resourceAction == RESOURCE_ACTION_ACCEPT_REPLY) i64Lib::from(ACCEPT_COMMON_REPLY)
             else if (resourceAction == RESOURCE_ACTION_ACCEPTED_REPLY) i64Lib::from(ACCEPTED_COMMON_REPLY)
+            else if (resourceAction == RESOURCE_ACTION_ACCEPT_REPLY) i64Lib::from(ACCEPT_COMMON_REPLY)
             else if (resourceAction == RESOURCE_ACTION_FIRST_REPLY) i64Lib::from(FIRST_COMMON_REPLY)
             else if (resourceAction == RESOURCE_ACTION_QUICK_REPLY) i64Lib::from(QUICK_COMMON_REPLY)
             else abort E_INVALID_RESOURCE_TYPE
