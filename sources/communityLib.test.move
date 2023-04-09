@@ -6,6 +6,7 @@ module basics::communityLib_test
     use sui::test_scenario::{Self, Scenario};
 
     // use std::debug;
+    // debug::print(community);
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
@@ -151,8 +152,9 @@ module basics::communityLib_test
         {
             let community_val = test_scenario::take_shared<Community>(scenario);
             let community = &mut community_val;
+            let tag = communityLib::getMutableTag(community, 2);
 
-            communityLib::updateTag(community, 2, x"0000000000000000000000000000000000000000000000000000000000000007", test_scenario::ctx(scenario));
+            communityLib::updateTag(tag, x"0000000000000000000000000000000000000000000000000000000000000007", test_scenario::ctx(scenario));
 
             let (ipfsDoc, timeCreate, isFrozen) = communityLib::getCommunityData(community);
             let tags = communityLib::getCommunityTags(community);

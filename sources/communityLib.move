@@ -1,9 +1,9 @@
 module basics::communityLib {
     use sui::transfer;
-    use sui::object::{Self, UID, ID};
+    use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
-    use std::debug;
+    // use std::debug;
     use basics::commonLib;
     // friend basics::commonLib;
 
@@ -99,12 +99,11 @@ module basics::communityLib {
         });
     }
 
-    public entry fun updateTag(community: &mut Community, tagId: u64, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    public entry fun updateTag(tag: &mut Tag, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);
         // TODO: add check role
         // CHECK 81 ERROR (E_REQUIRE_TAGS_WITH_UNIQUE_NAME)?
 
-        let tag = getMutableTag(community, tagId);
         tag.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
     }
 
@@ -175,16 +174,11 @@ module basics::communityLib {
     //     object::delete(community_id);
     // }
 
-    public fun getCommunityID(community: &Community): ID {
-        let Community { id: community_id, ipfsDoc: _ipfsDoc, timeCreate: _timeCreate, isFrozen: _isFrozen, tags: _tags } = community;
-        commonLib::getItemId(community_id)
-    }
-
     // #[test_only]
-    public entry fun printCommunity(community: &Community) {
-        // let community = vector::borrow(&communityCollection.communities, communityId);
-        debug::print(community);
-    }
+    // public entry fun printCommunity(community: &Community) {
+    //     // let community = vector::borrow(&communityCollection.communities, communityId);
+    //     debug::print(community);
+    // }
 
     #[test_only]
     public fun getCommunityData(community: &Community): (vector<u8>, u64, bool) {

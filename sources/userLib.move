@@ -91,7 +91,7 @@ module basics::userLib {
     struct User has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
-        owner: address,
+        owner: address,             // del
         energy: u64,
         lastUpdatePeriod: u64,
         followedCommunities: vector<ID>,
@@ -225,7 +225,7 @@ module basics::userLib {
         );
 
         let i = 0;
-        let community_id = communityLib::getCommunityID(community);
+        let community_id = object::id(community);
         while(i < vector::length(&mut user.followedCommunities)) {
             assert!(*vector::borrow(&user.followedCommunities, i) != community_id, E_ALREADY_FOLLOWED);
             i = i +1;
@@ -248,7 +248,7 @@ module basics::userLib {
         );
 
         let i = 0;
-        let community_id = communityLib::getCommunityID(community);
+        let community_id = object::id(community);
         while(i < vector::length(&mut user.followedCommunities)) {
             if(*vector::borrow(&user.followedCommunities, i) == community_id) {
                 vector::remove(&mut user.followedCommunities, i);
