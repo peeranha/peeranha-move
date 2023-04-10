@@ -7,6 +7,7 @@ module basics::userLib {
     // use std::debug;
     use basics::i64Lib;
     use basics::communityLib;
+    use sui::table::{Self, Table};
     // use basics::accessControl;
     use basics::commonLib;
     use sui::vec_map::{Self, VecMap};
@@ -80,13 +81,12 @@ module basics::userLib {
     const ENERGY_UPDATE_PROFILE: u64 = 1;
     const ENERGY_FOLLOW_COMMUNITY: u64 = 1;
 
-    // /// A shared user.
-    // struct UserCollection has key {
-    //     id: UID,
-    //     users: VecMap<address, User>,               // key - userAddress        
-    //     periodRewardContainer: PeriodRewardContainer,
-    //     // roles: accessControl::Role,
-    // }
+    struct UserCollection has key {
+        id: UID,
+        usersCommunityRating: Table<ID, UserCommunityRating>,
+        periodRewardContainer: PeriodRewardContainer,
+        // roles: accessControl::Role,
+    }
 
     struct User has key {
         id: UID,
@@ -100,10 +100,10 @@ module basics::userLib {
     }
 
     // link to User?
-    struct UserCommunityRating has key {    // shared
+    struct UserCommunityRating has key, store {    // shared
         id: UID,
-        userRating: VecMap<ID, i64Lib::I64>,               // key - communityId
-        userPeriodRewards: VecMap<u64, UserPeriodRewards>,  // key - period
+        userRating: VecMap<ID, i64Lib::I64>,               // key - communityId         // vecMap??
+        userPeriodRewards: VecMap<u64, UserPeriodRewards>,  // key - period             // vecMap??
     }
 
     struct DataUpdateUserRating has drop {
@@ -122,14 +122,14 @@ module basics::userLib {
         penalty: u64,
     }
 
-    struct PeriodRewardContainer has key /*store*/ {
+    struct PeriodRewardContainer has key, store {
         id: UID,
         periodRewardShares: VecMap<u64, PeriodRewardShares>,          // key - period
     }
 
     struct PeriodRewardShares has store {
         totalRewardShares: u64,
-        activeUsersInPeriod: vector<address>,
+        activeUsersInPeriod: vector<address>,       // Id ??
     }
 
     // ====== Events ======
@@ -144,9 +144,13 @@ module basics::userLib {
     }
 
     fun init(ctx: &mut TxContext) {
-        transfer::share_object(PeriodRewardContainer {
+        transfer::share_object(UserCollection {
             id: object::new(ctx),
-            periodRewardShares: vec_map::empty()
+            usersCommunityRating: table::new(ctx),
+            periodRewardContainer: PeriodRewardContainer {
+                id: object::new(ctx),
+                periodRewardShares: vec_map::empty()
+            }
             // roles: accessControl::initRole()
         });
     }
@@ -156,12 +160,24 @@ module basics::userLib {
         init(ctx)
     }
 
-    public fun createUser(ipfsDoc: vector<u8>, ctx: &mut TxContext) {
+    public entry fun createUser(userCollection: &mut UserCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
         let owner = tx_context::sender(ctx);
-        createUserPrivate(owner, ipfsDoc, ctx)
+        createUserPrivate(userCollection, owner, ipfsDoc, ctx)
     }
 
-    fun createUserPrivate(userAddress: address, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    public entry fun readUserMut(user: &mut User) {
+        let _userAddress = user.owner;
+    }
+
+    public entry fun readUser(user: &User) {
+        let _userAddress = user.owner;
+    }
+
+    public entry fun editUserMut(user: &mut User) {
+        user.energy = 5;
+    }
+
+    fun createUserPrivate(userCollection: &mut UserCollection, userAddress: address, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
         // assert!(!isExists(userCollection, userAddress), E_USER_EXIST); // TODO: TEST     new transfer ???
 
@@ -180,11 +196,11 @@ module basics::userLib {
             userRatingId: commonLib::getItemId(&userCommunityRating.id)
         };
 
+        table::add(&mut userCollection.usersCommunityRating, object::id(&user), userCommunityRating);
         event::emit(EvUser {userId: commonLib::getItemId(&user.id)});
         transfer::transfer(
             user, userAddress
         );
-        transfer::share_object(userCommunityRating);
     }
 
     // public entry fun createIfDoesNotExist(userCollection: &mut UserCollection, userAddress: address) {       // new transfer ???
@@ -203,8 +219,8 @@ module basics::userLib {
         checkRatingAndEnergy(
             user,
             userCommunityRating,
-            userAddress,
-            userAddress,
+            object::id(user),
+            object::id(user),
             commonLib::getZeroId(),
             ACTION_UPDATE_PROFILE
         );
@@ -218,8 +234,8 @@ module basics::userLib {
         checkRatingAndEnergy(
             user,
             userCommunityRating,
-            userAddress,
-            userAddress,
+            object::id(user),
+            object::id(user),
             commonLib::getZeroId(),
             ACTION_FOLLOW_COMMUNITY
         );
@@ -241,8 +257,8 @@ module basics::userLib {
         let user = checkRatingAndEnergy(
             user,
             userCommunityRating,
-            userAddress,
-            userAddress,
+            object::id(user),
+            object::id(user),
             commonLib::getZeroId(),
             ACTION_FOLLOW_COMMUNITY
         );
@@ -589,8 +605,8 @@ module basics::userLib {
     public fun checkActionRole(
         user: &mut User,
         userCommunityRating: &UserCommunityRating,
-        actionCaller: address,  // need? user -> owner
-        dataUser: address,
+        actionCaller: ID,  // need? user -> owner
+        dataUser: ID,
         communityId: ID,
         action: u8,
         // role
@@ -620,8 +636,8 @@ module basics::userLib {
     public fun checkRatingAndEnergy(
         user: &mut User,
         userCommunityRating: &UserCommunityRating,
-        actionCaller: address,
-        dataUser: address,
+        actionCaller: ID,
+        dataUser: ID,
         communityId: ID,
         action: u8
     ): &mut User
@@ -636,8 +652,8 @@ module basics::userLib {
     }
 
     fun getRatingAndEnergyForAction(
-        actionCaller: address,
-        dataUser: address,
+        actionCaller: ID,
+        dataUser: ID,
         action: u8
     ): (i64Lib::I64, u64, u64) { // ratingAllowed, message, energy
         let ratingAllowed: i64Lib::I64 = i64Lib::zero();
@@ -879,7 +895,7 @@ module basics::userLib {
     
     
     #[test_only]
-    public fun create_user(scenario: &mut TxContext) {
-        createUser(x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", scenario);
+    public fun create_user(userCollection: &mut UserCollection, scenario: &mut TxContext) {
+        createUser(userCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", scenario);
     }
 }

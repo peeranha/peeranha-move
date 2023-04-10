@@ -3,7 +3,7 @@ module basics::userLib_test
 {
     use basics::communityLib::{Self, Community};
     use sui::object::{Self, ID};
-    use basics::userLib::{Self, User, UserCommunityRating /*, PeriodRewardContainer*/};
+    use basics::userLib::{Self, User, UserCommunityRating, UserCollection /*, PeriodRewardContainer*/};
     use sui::test_scenario::{Self, Scenario};
     // use std::debug;
 
@@ -31,10 +31,17 @@ module basics::userLib_test
     fun test_create_user() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
+        {
+            userLib::init_test(test_scenario::ctx(scenario));
+        };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            userLib::createUser(x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+            let userCollection_val = test_scenario::take_shared<UserCollection>(scenario);
+            let userCollection = &mut userCollection_val;
+            userLib::createUser(userCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+
+            test_scenario::return_shared(userCollection_val);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -58,10 +65,17 @@ module basics::userLib_test
     fun test_updateIPFS_user() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
+        {
+            userLib::init_test(test_scenario::ctx(scenario));
+        };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            userLib::createUser(x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+            let userCollection_val = test_scenario::take_shared<UserCollection>(scenario);
+            let userCollection = &mut userCollection_val;
+            userLib::createUser(userCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+
+            test_scenario::return_shared(userCollection_val);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -91,6 +105,11 @@ module basics::userLib_test
     fun test_follow_community() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
+        {
+            userLib::init_test(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
         {
             create_user_and_community(scenario);
         };
@@ -125,6 +144,11 @@ module basics::userLib_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
+            userLib::init_test(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
             create_user_and_community(scenario);
         };
 
@@ -157,7 +181,10 @@ module basics::userLib_test
     // todo Expert from communityLib.test?
     #[test_only]
     fun create_user_and_community(scenario: &mut Scenario) {
-        userLib::createUser(x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+        let userCollection_val = test_scenario::take_shared<UserCollection>(scenario);
+        let userCollection = &mut userCollection_val;
+
+        userLib::createUser(userCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
         communityLib::createCommunity(
             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
             vector<vector<u8>>[
@@ -169,5 +196,7 @@ module basics::userLib_test
             ],
             test_scenario::ctx(scenario)
         );
+
+        test_scenario::return_shared(userCollection_val);
     }
 }

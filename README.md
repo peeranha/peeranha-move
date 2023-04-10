@@ -128,7 +128,7 @@ user object - 0x94e98b7c4f229e5011fffbb1778e2a03003aac5f
 community - 0xf67fdeab0355f72438df93c11bff68eb3c538e43
 post - 0xb5d76295c7010d60f9a50c18a965a2cf586f29ff
 
-createUser - sui client call --function createUser --module userLib --package 0x8dd39d994b9321bf23f7790f3091e75ab2be07a8405914faf187856325d1edc3 --args \"x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"\" --gas-budget 30000
+createUser - sui client call --function createUser --module userLib --package 0x423fce050d8199225169669caa82a59170db2aabff0ce7e6dfd831995d419fb9 --args \"0x82ca683baa0bb73a1d924cfd023b2d9db2ffd83bc9345817135614e9e86c007e\" \"x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"\" --gas-budget 30000
 
 updateUser - sui client call --function updateUser --module userLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0x94e98b7c4f229e5011fffbb1778e2a03003aac5f\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" \"x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"\" --gas-budget 30000
 
