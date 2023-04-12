@@ -7,7 +7,7 @@
     "build": "sui move build",
     "test": "sui move test",
     "deploy": "sui client publish ./ --gas-budget 30000",
-    "deploy2": "sui client publish ./ --gas-budget 30000 --skip-dependency-verification",
+    "deploy2": "sui client publish ./ --gas-budget 200000000 --skip-dependency-verification",
     "version": "sui --version"
   },
   "keywords": [],

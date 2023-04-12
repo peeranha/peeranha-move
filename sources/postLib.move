@@ -62,10 +62,6 @@ module basics::postLib {
 
     const E_ERROR_CHANGE_COMMUNITY_ID: u64 = 61;
 
-    const E_WRONG_USER_LENGTH_DELETE_POST: u64 = 62;
-
-    const E_WRONG_USER_PARAMS_DELETE_POST: u64 = 63;
-
     const E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY: u64 = 64;
 
     const E_WRONG_SIGNER: u64 = 64;
@@ -99,6 +95,7 @@ module basics::postLib {
         ipfsDoc: commonLib::IpfsHash,
     }
 
+    // add postId
     struct PostMetaData has key {       // shared
         id: UID,
         postType: u8,
@@ -118,7 +115,7 @@ module basics::postLib {
         properties: vector<u8>,
 
         historyVotes: vector<u8>,                 // downVote = 1, NONE = 2, upVote = 3
-        voteUsers: vector<address>      // ID?
+        voteUsers: vector<ID>
     }
 
     struct Reply has key {
@@ -126,12 +123,13 @@ module basics::postLib {
         ipfsDoc: commonLib::IpfsHash,
     }
 
+    // add replyId
     struct ReplyMetaData has key, store {
         id: UID,
         postTime: u64,
         author: ID,
         rating: i64Lib::I64,
-        parentReplyId: ID,      // need?
+        parentReplyId: ID,      // need?  // U64?
 
         isFirstReply: bool,
         isQuickReply: bool,
@@ -140,7 +138,7 @@ module basics::postLib {
         comments: Table<u64, CommentMetaData>,
         properties: vector<u8>,
         historyVotes: vector<u8>,                 // to u128?   // 1 - negative, 2 - positive
-        voteUsers: vector<address>     // ID?
+        voteUsers: vector<ID>
     }
 
     struct Comment has key {
@@ -149,6 +147,7 @@ module basics::postLib {
 
     }
 
+    // commentId
     struct CommentMetaData has key, store {
         id: UID,
         postTime: u64,
@@ -158,7 +157,7 @@ module basics::postLib {
         isDeleted: bool,
         properties: vector<u8>,
         historyVotes: vector<u8>,                 // to u128?   // 1 - negative, 2 - positive
-        voteUsers: vector<address>     // ID?
+        voteUsers: vector<ID>
     }
 
     struct UserRatingChange {
@@ -168,24 +167,27 @@ module basics::postLib {
     }
 
     public entry fun createPost(
+        userCollection: &userLib::UserCollection,
         user: &mut userLib::User,
-        userCommunityRating: &userLib::UserCommunityRating,
         community: &communityLib::Community, // new transfer community &mut
         ipfsHash: vector<u8>, 
         postType: u8,
         tags: vector<u64>,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
-        checkSigner(user, userCommunityRating, userAddr);
+        let userId = object::id(user);
+        let userAddr = tx_context::sender(ctx);     // del
+        let userCommunityRating = userLib::getUserCommunityRating(userCollection, object::id(user));
+        
+        // checkSigner(user, userCommunityRating, userAddr);
         communityLib::onlyExistingAndNotFrozenCommunity(community);
         communityLib::checkTags(community, tags);
         let communityId = object::id(community);
         userLib::checkActionRole(
             user,
             userCommunityRating,
-            userAddr,
-            userAddr,
+            userId,
+            userId,
             communityId,
             userLib::get_action_publication_post(),
             /*true*/
@@ -204,7 +206,7 @@ module basics::postLib {
                 id: object::new(ctx),
                 postType: postType,
                 postTime: commonLib::getTimestamp(),
-                author: object::id(user),
+                author: userId,
                 rating: i64Lib::zero(),
                 communityId: communityId,
                 officialReply: 0,
@@ -216,7 +218,7 @@ module basics::postLib {
                 comments: table::new(ctx),
                 properties: vector::empty<u8>(),
                 historyVotes: vector::empty<u8>(),
-                voteUsers: vector::empty<address>(),
+                voteUsers: vector::empty<ID>(),
             }
         );
 
@@ -232,16 +234,19 @@ module basics::postLib {
     }
 
     public entry fun createReply(
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
         postMetaData: &mut PostMetaData,
         parentReplyId: ID,
         ipfsHash: vector<u8>,
         isOfficialReply: bool,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
-        checkSigner(user, userCommunityRating, userAddr);
+        let userId = object::id(user);
+        let userAddr = tx_context::sender(ctx);     // del
+        // checkSigner(user, userCommunityRating, userAddr);
+        let userCommunityRating = userLib::getMutableUserCommunityRating(userCollection, object::id(user));
 
         assert!(postMetaData.postType != TUTORIAL && postMetaData.postType != DOCUMENTATION, E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL_OR_DOCUMENTATION);
         assert!(parentReplyId == commonLib::getZeroId(), E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST);
@@ -249,7 +254,7 @@ module basics::postLib {
         userLib::checkActionRole(
             user,
             userCommunityRating,
-            userAddr,
+            userId,
             postMetaData.author,
             communityId,
             userLib::get_action_publication_reply(),
@@ -263,7 +268,7 @@ module basics::postLib {
             while (replyId < countReplies) {
                 let replyContainer = getReplyMetaData(postMetaData, replyId);
                 assert!(
-                    userAddr != replyContainer.author || replyContainer.isDeleted,
+                    userId != replyContainer.author || replyContainer.isDeleted,
                     E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_EXPERT_AND_COMMON_POSTS
                 );
                 replyId = replyId + 1;
@@ -279,24 +284,28 @@ module basics::postLib {
                 postMetaData.officialReply = countReplies + 1;
             };
 
-            if (postMetaData.postType != TUTORIAL && postMetaData.author != userAddr) {
+            if (postMetaData.postType != TUTORIAL && postMetaData.author != userId) {
                 if (getActiveReplyCount(postMetaData) == 0) {
                     isFirstReply = true;
-                    userLib::updateRatingNotFull(
-                        userAddr,
+                    userLib::updateRating(
                         userCommunityRating,
+                        periodRewardContainer,
+                        object::id(user),
                         getUserRatingChangeForReplyAction(postMetaData.postType, RESOURCE_ACTION_FIRST_REPLY),
-                        communityId
+                        communityId,
+                        ctx
                     );
                 };
 
                 if (timestamp - postMetaData.postTime < QUICK_REPLY_TIME_SECONDS) {
                     isQuickReply = true;   
-                    userLib::updateRatingNotFull(
-                        userAddr,
+                    userLib::updateRating(
                         userCommunityRating,
+                        periodRewardContainer,
+                        object::id(user),
                         getUserRatingChangeForReplyAction(postMetaData.postType, RESOURCE_ACTION_QUICK_REPLY),
-                        communityId
+                        communityId,
+                        ctx
                     );
                 }
             };
@@ -307,7 +316,7 @@ module basics::postLib {
         let reply = ReplyMetaData {
             id: replyUID,
             postTime: timestamp,
-            author: userAddr,
+            author: userId,
             rating: i64Lib::zero(),
             parentReplyId: parentReplyId,
               
@@ -318,7 +327,7 @@ module basics::postLib {
             comments: table::new(ctx),
             properties: vector::empty<u8>(),
             historyVotes: vector::empty<u8>(),
-            voteUsers: vector::empty<address>(),
+            voteUsers: vector::empty<ID>(),
         };
         table::add(&mut postMetaData.replies, countReplies + 1, reply);
 
@@ -334,21 +343,23 @@ module basics::postLib {
     }
 
     public entry fun createComment(
+        userCollection: &userLib::UserCollection,
         user: &mut userLib::User,
-        userCommunityRating: &userLib::UserCommunityRating,
         postMetaData: &mut PostMetaData,
         parentReplyId: u64,
         ipfsHash: vector<u8>,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
-        checkSigner(user, userCommunityRating, userAddr);
+        let userId = object::id(user);
+        let userAddr = tx_context::sender(ctx);     // del
+        let userCommunityRating = userLib::getUserCommunityRating(userCollection, userId);
+        // checkSigner(user, userCommunityRating, userAddr);
         assert!(postMetaData.postType != DOCUMENTATION, E_YOU_CAN_NOT_PUBLISH_COMMENTS_IN_DOCUMENTATION);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
         userLib::checkActionRole(
             user,
             userCommunityRating,
-            userAddr,
+            userId,
             postMetaData.author,
             postMetaData.communityId,
             userLib::get_action_publication_comment(),
@@ -360,13 +371,13 @@ module basics::postLib {
             let comment = CommentMetaData {
                 id: object::new(ctx),
                 postTime: commonLib::getTimestamp(),
-                author: userAddr,
+                author: userId,
                 rating: i64Lib::zero(),
                 isDeleted: false,
 
                 properties: vector::empty<u8>(),
                 historyVotes: vector::empty<u8>(),
-                voteUsers: vector::empty<address>(),
+                voteUsers: vector::empty<ID>(),
             };
             table::add(&mut postMetaData.comments, countComments, comment);
         } else {
@@ -376,30 +387,16 @@ module basics::postLib {
             let comment = CommentMetaData {
                 id: object::new(ctx),
                 postTime: commonLib::getTimestamp(),
-                author: userAddr,
+                author: userId,
                 rating: i64Lib::zero(),
                 isDeleted: false,
 
                 properties: vector::empty<u8>(),
                 historyVotes: vector::empty<u8>(),
-                voteUsers: vector::empty<address>(),
+                voteUsers: vector::empty<ID>(),
             };
             table::add(&mut replyMetaData.comments, countComments, comment);
         };
-        
-        let countComments = table::length(&postMetaData.comments);
-        let comment = CommentMetaData {
-            id: object::new(ctx),
-            postTime: commonLib::getTimestamp(),
-            author: userAddr,
-            rating: i64Lib::zero(),
-            isDeleted: false,
-
-            properties: vector::empty<u8>(),
-            historyVotes: vector::empty<u8>(),
-            voteUsers: vector::empty<address>(),
-        };
-        table::add(&mut postMetaData.comments, countComments, comment);
 
         transfer::transfer(
             Comment {
@@ -413,8 +410,8 @@ module basics::postLib {
     }
 
     public entry fun editPost(
+        userCollection: &userLib::UserCollection,
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
         post: &mut Post,
         postMetaData: &mut PostMetaData,
         community: &communityLib::Community,
@@ -424,12 +421,14 @@ module basics::postLib {
         _newPostType: u8,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
-        checkSigner(user, userCommunityRating, userAddr);
+        let userId = object::id(user);
+        let _userAddr = tx_context::sender(ctx);             // del
+        let userCommunityRating = userLib::getUserCommunityRating(userCollection, userId);
+        // checkSigner(user, userCommunityRating, userAddr);
         // changePostType(postMetaData, newPostType);                                  // TODO: add tests
         // changePostCommunity(postMetaData, community, newCommunityId);               // TODO: add tests
 
-        if(userAddr == postMetaData.author) {
+        if(userId == postMetaData.author) {
             assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());       // todo: test
             if(commonLib::getIpfsHash(post.ipfsDoc) != ipfsHash)
                 post.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -442,10 +441,10 @@ module basics::postLib {
         userLib::checkActionRole(
             user,
             userCommunityRating,
-            userAddr,
+            userId,
             postMetaData.author,
             postMetaData.communityId,
-            if(userAddr == postMetaData.author) userLib::get_action_edit_item() else userLib::get_action_none(),
+            if(userId == postMetaData.author) userLib::get_action_edit_item() else userLib::get_action_none(),
             /*false*/
         );
 
@@ -458,22 +457,25 @@ module basics::postLib {
     }
 
     public entry fun editReply(     // isDeleted?
+        userCollection: &userLib::UserCollection,
         user: &mut userLib::User,
-        userCommunityRating: &userLib::UserCommunityRating,
         postMetaData: &mut PostMetaData,
-        reply: &mut Reply,
+        reply: &mut Reply,      // reply match with replyId?
         replyId: u64,
         ipfsHash: vector<u8>, 
         isOfficialReply: bool,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
+        let userId = object::id(user);
+        let _userAddr = tx_context::sender(ctx);             // del
         let replyMetaData = getReplyMetaDataSafe(postMetaData, replyId);
-        checkSigner(user, userCommunityRating, userAddr);
+        let userCommunityRating = userLib::getUserCommunityRating(userCollection, userId);
+        
+        // checkSigner(user, userCommunityRating, userAddr);
         userLib::checkActionRole(
             user,
             userCommunityRating,
-            userAddr,
+            userId,
             replyMetaData.author,
             postMetaData.communityId,
             userLib::get_action_edit_item(),
@@ -481,7 +483,7 @@ module basics::postLib {
         );
         
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
-        assert!(userAddr == replyMetaData.author, E_YOU_CAN_NOT_EDIT_THIS_REPLY_IT_IS_NOT_YOUR);
+        assert!(userId == replyMetaData.author, E_YOU_CAN_NOT_EDIT_THIS_REPLY_IT_IS_NOT_YOUR);
 
         if (commonLib::getIpfsHash(reply.ipfsDoc) != ipfsHash)
             reply.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -496,8 +498,8 @@ module basics::postLib {
     }
 
     public entry fun editComment(
+        userCollection: &userLib::UserCollection,
         user: &mut userLib::User,
-        userCommunityRating: &userLib::UserCommunityRating,
         postMetaData: &mut PostMetaData,
         comment: &mut Comment,
         parentReplyId: u64,
@@ -505,21 +507,23 @@ module basics::postLib {
         ipfsHash: vector<u8>,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
-        checkSigner(user, userCommunityRating, userAddr);
+        let userId = object::id(user);
+        let _userAddr = tx_context::sender(ctx);             // del
+        // checkSigner(user, userCommunityRating, userAddr);
         let commentMetaData = getCommentContainerSafe(postMetaData, parentReplyId, commentId);
+        let userCommunityRating = userLib::getUserCommunityRating(userCollection, userId);
 
         userLib::checkActionRole(
             user,
             userCommunityRating,
-            userAddr,
+            userId,
             commentMetaData.author,
             postMetaData.communityId,
             userLib::get_action_edit_item(),
             /*false*/
         );
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
-        assert!(userAddr == commentMetaData.author, E_YOU_CAN_NOT_EDIT_THIS_COMMENT_IT_IS_NOT_YOUR);
+        assert!(userId == commentMetaData.author, E_YOU_CAN_NOT_EDIT_THIS_COMMENT_IT_IS_NOT_YOUR);
 
         if (commonLib::getIpfsHash(comment.ipfsDoc) != ipfsHash)
             comment.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -527,104 +531,110 @@ module basics::postLib {
         // TODO: add emit CommentEdited(userAddr, postId, parentReplyId, commentId);
     }
 
-    /*
     // &mut
     public entry fun deletePost(  // new transfer
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
         postMetaData: &mut PostMetaData,
-        _postAuthor: &mut userLib::User,
-        _postAuthorCommunityRating: &mut userLib::UserCommunityRating,
-        repliesAuthors: &mut vector<userLib::User>,
-        repliesAuthorsCommunityRating: &mut vector<userLib::UserCommunityRating>,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
-        checkSigner(user, userCommunityRating, userAddr);
-        // TODO: add check role
+        // let userAddr = tx_context::sender(ctx);
+        // checkSigner(user, userCommunityRating, userAddr);
 
-        postMetaData.isDeleted = true;
-        // TODO: add emit PostDeleted(userAddr, postId);
+        let communityId = postMetaData.communityId;
+        let postAuthor = postMetaData.author;
+        let bestReplyId = postMetaData.bestReply;
+        let userId = object::id(user);
+        let userCommunityRating = userLib::getMutableUserCommunityRating(userCollection, userId);
+        userLib::checkActionRole(
+            user,
+            userCommunityRating,
+            userId,
+            postAuthor,
+            communityId,
+            userLib::get_action_delete_item(),
+            /*false*/
+        );
 
         let postType = postMetaData.postType;
         if (postType != DOCUMENTATION) {
             let time: u64 = commonLib::getTimestamp();
-            if (time - postMetaData.postTime < DELETE_TIME || userAddr == postMetaData.author) {
-                // TODO: add
+            if (time - postMetaData.postTime < DELETE_TIME || userId == postAuthor) {
                 let typeRating: StructRating = getTypesRating(postType);
-                let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.votedUsers);
+                let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.voteUsers);
 
                 let changeUserRating: i64Lib::I64 = i64Lib::add(&i64Lib::mul(&typeRating.upvotedPost, &i64Lib::from(positive)), &i64Lib::mul(&typeRating.downvotedPost, &i64Lib::from(negative)));
                 if (i64Lib::compare(&changeUserRating, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-                    // TODO: add
-                    // self.peeranhaUser.updateUserRating(
-                    //     postContainer.info.author,
-                    //     -changeUserRating,
-                    //     postContainer.info.communityId
-                    // );
+                    userLib::updateRating(
+                        userCommunityRating,
+                        periodRewardContainer,
+                        userId,
+                        i64Lib::mul(&changeUserRating, &i64Lib::neg_from(1)),   // *= -1
+                        communityId,
+                        ctx
+                    );
                 };
             };
-            if (postMetaData.bestReply != commonLib::getZeroId()) {
-                // TODO: add
-                // self.peeranhaUser.updateUserRating(postContainer.info.author, -VoteLib.getUserRatingChangeForReplyAction(postContainer.info.postType, VoteLib.ResourceAction.AcceptedReply), postContainer.info.communityId);
+            if (bestReplyId != 0) {
+                userLib::updateRating(
+                    userCommunityRating,
+                    periodRewardContainer,
+                    userId,
+                    i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY), &i64Lib::neg_from(1)),   // *= -1
+                    communityId,
+                    ctx
+                );
             };
 
-            if (time - postMetaData.postTime < DELETE_TIME) {
-                let replyCount = vector::length(&postMetaData.replies);
+            userLib::updateRating(
+                userCommunityRating,
+                periodRewardContainer,
+                userId,
+                if(userId == postAuthor)
+                    i64Lib::neg_from(DELETE_OWN_POST) else
+                    i64Lib::neg_from(MODERATOR_DELETE_POST),
+                communityId,
+                ctx
+            );
+
+            if (time - postMetaData.postTime < DELETE_TIME || userId == postAuthor) {
+                let replyCount = table::length(&postMetaData.replies);
                 let replyId = 0;
-                assert!(
-                    replyCount == vector::length(repliesAuthors) &&
-                    replyCount == vector::length(repliesAuthorsCommunityRating),
-                    E_WRONG_USER_LENGTH_DELETE_POST
-                );
 
                 while (replyId < replyCount) {
-                    //bad code start
-                    let communityId = postMetaData.communityId;
-                    let bestReplyId = postMetaData.bestReply;
-                    //bad code end
-
-                    let user = vector::borrow(repliesAuthors, replyId);
-                    let userCommunityRating = vector::borrow_mut(repliesAuthorsCommunityRating, replyId);
-                    let replyMetaData = getReplyMetaData(postMetaData, replyId);        // getReplyMetaDataSafe?
-                    assert!(
-                        replyMetaData.author == userLib::getUserOwner(user) &&
-                        userLib::getUserRatingId(user) == userLib::getUserCommunityRatingId(userCommunityRating),
-                        E_WRONG_USER_PARAMS_DELETE_POST
-                    );
+                    let replyMetaData = getReplyMetaData(postMetaData, replyId);
+                    let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(userCollection, replyMetaData.author);
 
                     deductReplyRating(
-                        postType,
-                        bestReplyId == commonLib::getItemId(&replyMetaData.id),
-                        communityId,
+                        replyAuthorCommunityRating,
+                        periodRewardContainer,
                         replyMetaData,
-                        userCommunityRating
+                        postType,
+                        bestReplyId == replyId,
+                        communityId,
+                        ctx
                     );
                     replyId = replyId + 1;
                 }
             };
-
-            let postAuthor = postMetaData.author;
-            if (userAddr == postAuthor) {
-                // TODO: add 
-                // self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.DeleteOwnPost, postContainer.info.communityId);
-            } else {
-                // TODO: add 
-                // self.peeranhaUser.updateUserRating(postContainer.info.author, VoteLib.ModeratorDeletePost, postContainer.info.communityId);
-            };
         };
+
+        postMetaData.isDeleted = true;
+        // TODO: add emit PostDeleted(userAddr, postId);
     }
-    */
 
     public entry fun deleteReply(
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
         postMetaData: &mut PostMetaData,
         replyId: u64,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
+        let userId = object::id(user);
         let communityId = postMetaData.communityId;
+        let userCommunityRating = userLib::getMutableUserCommunityRating(userCollection, object::id(user));
         
         postMetaData.deletedReplyCount = postMetaData.deletedReplyCount + 1;
         if (postMetaData.bestReply == replyId)
@@ -636,46 +646,43 @@ module basics::postLib {
         let bestReply = postMetaData.bestReply;
         
         let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyId);
-        checkSigner(user, userCommunityRating, userAddr);
+        // checkSigner(user, userCommunityRating, userAddr);
         userLib::checkActionRole(
             user,
             userCommunityRating,
-            userAddr,
+            userId,
             replyMetaData.author,
             communityId,
             userLib::get_action_delete_item(),
             /*false*/
         );
         
-        assert!(userAddr != replyMetaData.author || bestReply != replyId, E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY);
+        assert!(userId != replyMetaData.author || bestReply != replyId, E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY);
         
         let time: u64 = commonLib::getTimestamp();
-        let isDeductReplyRating = time - replyMetaData.postTime < DELETE_TIME || userAddr == replyMetaData.author; // TODO: add ???
-        if (userAddr == replyMetaData.author) {
-            userLib::updateRatingNotFull(
-                userAddr,
-                userCommunityRating,
-                i64Lib::neg_from(DELETE_OWN_REPLY),
-                communityId
-            );
-        } else {
-            userLib::updateRatingNotFull(
-                userAddr,
-                userCommunityRating,
+        let isDeductReplyRating = time - replyMetaData.postTime < DELETE_TIME || userId == replyMetaData.author;
+        userLib::updateRating(
+            userCommunityRating,
+            periodRewardContainer,
+            object::id(user),
+            if(userId == replyMetaData.author) 
+                i64Lib::neg_from(DELETE_OWN_REPLY) else 
                 i64Lib::neg_from(MODERATOR_DELETE_REPLY),
-                communityId
-            );
-        };
+            communityId,
+            ctx
+        );
         
         replyMetaData.isDeleted = true;
-
+        let parentReplyId = replyMetaData.parentReplyId;
         if (isDeductReplyRating) {
             deductReplyRating(
-                postType,
-                replyMetaData.parentReplyId == commonLib::getZeroId() && bestReply == replyId,
-                communityId,
+                userCommunityRating,
+                periodRewardContainer,
                 replyMetaData,
-                userCommunityRating
+                postType,
+                parentReplyId == commonLib::getZeroId() && bestReply == replyId,
+                communityId,
+                ctx
             );
         };
 
@@ -684,11 +691,13 @@ module basics::postLib {
 
 
     fun deductReplyRating(
+        userCommunityRating: &mut userLib::UserCommunityRating,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        replyMetaData: &ReplyMetaData,
         postType: u8,
         isBestReply: bool,
         communityId: ID,
-        replyMetaData: &ReplyMetaData,
-        userCommunityRating: &mut userLib::UserCommunityRating
+        ctx: &mut TxContext
     ) {
         // TODO: add
         // if (CommonLib.isEmptyIpfs(replyContainer.info.ipfsDoc.hash) || replyContainer.info.isDeleted)
@@ -719,44 +728,51 @@ module basics::postLib {
         };
 
         if (i64Lib::compare(&changeReplyAuthorRating, &i64Lib::zero()) != i64Lib::getEual()) {
-            userLib::updateRatingNotFull(
-                replyMetaData.author,
+            userLib::updateRating(
                 userCommunityRating,
+                periodRewardContainer,
+                replyMetaData.author,
                 changeReplyAuthorRating,
-                communityId
+                communityId,
+                ctx
             );
         };
     }
 
     public entry fun deleteComment(
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
-        userCommunityRating: &mut userLib::UserCommunityRating,
         postMetaData: &mut PostMetaData,
         parentReplyId: u64,
         commentId: u64,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
+        let userId = object::id(user);
+        let _userAddr = tx_context::sender(ctx);     // del
         let communityId = postMetaData.communityId;
-        checkSigner(user, userCommunityRating, userAddr);
+        // checkSigner(user, userCommunityRating, userAddr);
         let commentMetaData = getMutableCommentContainerSafe(postMetaData, parentReplyId, commentId);
+        let userCommunityRating = userLib::getMutableUserCommunityRating(userCollection, object::id(user));
         
         userLib::checkActionRole(
             user,
             userCommunityRating,
-            userAddr,
+            userId,
             commentMetaData.author,
             communityId,
             userLib::get_action_delete_item(),
             /*false*/
         );
 
-        if (userAddr != commentMetaData.author) {
-            userLib::updateRatingNotFull(
-                userAddr,
+        if (userId != commentMetaData.author) {
+            userLib::updateRating(
                 userCommunityRating,
+                periodRewardContainer,
+                object::id(user),
                 i64Lib::neg_from(MODERATOR_DELETE_COMMENT),
-                communityId
+                communityId,
+                ctx
             );
         };
 
@@ -765,68 +781,64 @@ module basics::postLib {
     }
 
     public entry fun changeStatusBestReply(
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        postAuthor: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newBestReplyId: u64,
         oldBestReplyId: u64,
-        postAuthor: &mut userLib::User,
-        postAuthorCommunityRating: &mut userLib::UserCommunityRating,
-        newReplyAuthor: &userLib::User,
-        newReplyAuthorCommunityRating: &mut userLib::UserCommunityRating,
-        oldReplyAuthor: &userLib::User,
-        oldReplyAuthorCommunityRating: &mut userLib::UserCommunityRating,
         ctx: &mut TxContext
     ) {
-        let userAddr = tx_context::sender(ctx);
         let newBestReplyMetaData = getReplyMetaDataSafe(postMetaData, newBestReplyId);
         let oldBestReplyMetaData = getReplyMetaDataSafe(postMetaData, oldBestReplyId);
+
         let communityId = postMetaData.communityId;
-        assert!(postMetaData.author == userAddr, E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY);
+        assert!(postMetaData.author == postMetaData.author, E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY);
 
         if (postMetaData.bestReply == newBestReplyId) {
             updateRatingForBestReply(
-                postAuthor,
-                postAuthorCommunityRating,
+                userCollection,
+                periodRewardContainer,
                 postMetaData.author,
-                oldReplyAuthor,
-                oldReplyAuthorCommunityRating,
                 oldBestReplyMetaData.author,
                 postMetaData.postType,
                 false,
-                communityId
+                communityId,
+                ctx
             );
             postMetaData.bestReply = 0;
         } else {
             if (postMetaData.bestReply != 0) {
                 updateRatingForBestReply(
-                    postAuthor,
-                    postAuthorCommunityRating,
+                    userCollection,
+                    periodRewardContainer,
                     postMetaData.author,
-                    oldReplyAuthor,
-                    oldReplyAuthorCommunityRating,
                     oldBestReplyMetaData.author,
                     postMetaData.postType,
                     false,
-                    communityId
+                    communityId,
+                    ctx
                 );
             };
 
             updateRatingForBestReply(
-                postAuthor,
-                postAuthorCommunityRating,
+                userCollection,
+                periodRewardContainer,
                 postMetaData.author,
-                newReplyAuthor,
-                newReplyAuthorCommunityRating,
                 newBestReplyMetaData.author,
                 postMetaData.postType,
                 true,
-                communityId
+                communityId,
+                ctx
             );
             postMetaData.bestReply = newBestReplyId;
         };
+        let postAuthorId = object::id(postAuthor);
+        let postAuthorCommunityRating = userLib::getUserCommunityRating(userCollection, postMetaData.author);
         userLib::checkActionRole(
             postAuthor,
             postAuthorCommunityRating,
-            userAddr,
+            postAuthorId,
             postMetaData.author,
             communityId,
             userLib::get_action_best_reply(),
@@ -836,63 +848,66 @@ module basics::postLib {
         // emit StatusBestReplyChanged(userAddr, postId, postContainer.info.bestReply);
     }
 
+    
     fun updateRatingForBestReply(
-        postAuthor: &userLib::User,
-        postAuthorCommunityRating: &mut userLib::UserCommunityRating,
-        postAuthorAddress: address,
-        replyAuthor: &userLib::User,
-        replyAuthorCommunityRating: &mut userLib::UserCommunityRating,
-        replyAuthorAddress: address,
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        postAuthorAddress: ID,
+        replyAuthorAddress: ID,
         postType: u8,
         isMark: bool,
-        communityId: ID
+        communityId: ID,
+        ctx: &mut TxContext
     ) {
         if (postAuthorAddress != replyAuthorAddress) {
-            checkSigner(postAuthor, postAuthorCommunityRating, postAuthorAddress);
-            checkSigner(replyAuthor, replyAuthorCommunityRating, replyAuthorAddress);
-
-            userLib::updateRatingNotFull(
-                postAuthorAddress,
+            let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(userCollection, postAuthorAddress);
+            userLib::updateRating(
                 postAuthorCommunityRating,
+                periodRewardContainer,
+                postAuthorAddress,
                 if (isMark)
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY), &i64Lib::neg_from(1)),
-                communityId
+                communityId,
+                ctx
             );
 
-            userLib::updateRatingNotFull(
-                replyAuthorAddress,
+            let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(userCollection, replyAuthorAddress);
+            userLib::updateRating(
                 replyAuthorCommunityRating,
+                periodRewardContainer,
+                replyAuthorAddress,
                 if (isMark)
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY), &i64Lib::neg_from(1)),
-                communityId
+                communityId,
+                ctx
             );
         }
     }
 
     public entry fun votePost(
-        postMetaData: &mut PostMetaData,
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUser: &mut userLib::User,
-        voteUserCommunityRating: &mut userLib::UserCommunityRating,
-        votedUser: &userLib::User,
-        votedUserCommunityRating: &mut userLib::UserCommunityRating,
+        postMetaData: &mut PostMetaData,
         isUpvote: bool,
         ctx: &mut TxContext
     ): u8 {
-        let voteUserAddress = tx_context::sender(ctx);
-        checkSigner(voteUser, voteUserCommunityRating, voteUserAddress);
-        checkSigner(votedUser, votedUserCommunityRating, postMetaData.author);
+        // let voteUserAddress = tx_context::sender(ctx);
+        // checkSigner(voteUser, voteUserCommunityRating, voteUserAddress);
+        // checkSigner(votedUser, votedUserCommunityRating, postMetaData.author);
         let postType = postMetaData.postType;
+        let voteUserId = object::id(voteUser);
         assert!(postType != DOCUMENTATION, E_YOU_CAN_NOT_VOTE_TO_DOCUMENTATION);
-        assert!(voteUserAddress != postMetaData.author, E_ERROR_VOTE_POST);
+        assert!(voteUserId != postMetaData.author, E_ERROR_VOTE_POST);
         
-        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserAddress, &mut postMetaData.historyVotes, isUpvote, &mut postMetaData.voteUsers);
-        // ed / e && other argument
+        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut postMetaData.historyVotes, isUpvote, &mut postMetaData.voteUsers);
+        let voteUserCommunityRating = userLib::getUserCommunityRating(userCollection, voteUserId);
         userLib::checkActionRole(
             voteUser,
             voteUserCommunityRating,
-            voteUserAddress,
+            voteUserId,
             postMetaData.author,
             postMetaData.communityId,
             if(isCancel) 
@@ -903,7 +918,18 @@ module basics::postLib {
             /*false*/
         );
 
-        vote(voteUser, voteUserCommunityRating, votedUser, votedUserCommunityRating, postType, isUpvote, ratingChange, TYPE_CONTENT_POST, postMetaData.communityId);
+        vote(
+            userCollection,
+            periodRewardContainer,
+            voteUserId,
+            postMetaData.author,
+            postType,
+            isUpvote,
+            ratingChange,
+            TYPE_CONTENT_POST,
+            postMetaData.communityId,
+            ctx
+        );
         postMetaData.rating = i64Lib::add(&postMetaData.rating, &ratingChange);
 
         if (isCancel) {
@@ -922,139 +948,140 @@ module basics::postLib {
         // transfer add ForumItemVoted delete return value
     }
 
-    public entry fun voteReply(
-        postMetaData: &PostMetaData,
-        replyMetaData: &mut ReplyMetaData,
-        voteUser: &mut userLib::User,
-        voteUserCommunityRating: &mut userLib::UserCommunityRating,
-        votedUser: &userLib::User,
-        votedUserCommunityRating: &mut userLib::UserCommunityRating,
-        isUpvote: bool,
-        ctx: &mut TxContext
-    ): u8 {
-        let postType = postMetaData.postType;
-        let voteUserAddress = tx_context::sender(ctx);
-        let communityId = postMetaData.communityId;
-        checkSigner(voteUser, voteUserCommunityRating, voteUserAddress);
-        checkSigner(votedUser, votedUserCommunityRating, replyMetaData.author);
-        assert!(voteUserAddress != replyMetaData.author, E_ERROR_VOTE_REPLY);
+    // public entry fun voteReply(
+    //     postMetaData: &PostMetaData,
+    //     replyMetaData: &mut ReplyMetaData,
+    //     voteUser: &mut userLib::User,
+    //     voteUserCommunityRating: &mut userLib::UserCommunityRating,
+    //     votedUser: &userLib::User,
+    //     votedUserCommunityRating: &mut userLib::UserCommunityRating,
+    //     isUpvote: bool,
+    //     ctx: &mut TxContext
+    // ): u8 {
+    //     let postType = postMetaData.postType;
+    //     let voteUserAddress = tx_context::sender(ctx);
+    //     let communityId = postMetaData.communityId;
+    //     checkSigner(voteUser, voteUserCommunityRating, voteUserAddress);
+    //     checkSigner(votedUser, votedUserCommunityRating, replyMetaData.author);
+    //     assert!(voteUserAddress != replyMetaData.author, E_ERROR_VOTE_REPLY);
 
-        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserAddress, &mut replyMetaData.historyVotes, isUpvote, &mut replyMetaData.voteUsers);
-        // ed / e && other argument
-        userLib::checkActionRole(
-            voteUser,
-            voteUserCommunityRating,
-            voteUserAddress,
-            replyMetaData.author,
-            communityId,
-            if(isCancel) 
-                userLib::get_action_cancel_vote() else 
-                    if(i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) 
-                        userLib::get_action_upvote_reply() else 
-                        userLib::get_action_downvote_reply(),
-            /*false*/
-        );
+    //     let (ratingChange, isCancel) = getForumItemRatingChange(voteUserAddress, &mut replyMetaData.historyVotes, isUpvote, &mut replyMetaData.voteUsers);
+    //     // ed / e && other argument
+    //     userLib::checkActionRole(
+    //         voteUser,
+    //         voteUserCommunityRating,
+    //         voteUserAddress,
+    //         replyMetaData.author,
+    //         communityId,
+    //         if(isCancel) 
+    //             userLib::get_action_cancel_vote() else 
+    //                 if(i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) 
+    //                     userLib::get_action_upvote_reply() else 
+    //                     userLib::get_action_downvote_reply(),
+    //         /*false*/
+    //     );
 
-        let oldRating: i64Lib::I64 = replyMetaData.rating;
-        replyMetaData.rating = i64Lib::add(&replyMetaData.rating, &ratingChange);
-        let newRating: i64Lib::I64 = replyMetaData.rating;
+    //     let oldRating: i64Lib::I64 = replyMetaData.rating;
+    //     replyMetaData.rating = i64Lib::add(&replyMetaData.rating, &ratingChange);
+    //     let newRating: i64Lib::I64 = replyMetaData.rating;
 
-        let changeReplyAuthorRating: i64Lib::I64 = i64Lib::zero();
-        if (replyMetaData.isFirstReply) {  // oldRating < 0 && newRating >= 0
-            if (i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getLessThan() && (i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getEual())) {
-                changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_FIRST_REPLY));
-            } else if ((i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getEual()) && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getLessThan()) { // (oldRating >= 0 && newRating < 0)
-                changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_FIRST_REPLY));
-            };
-        };
+    //     let changeReplyAuthorRating: i64Lib::I64 = i64Lib::zero();
+    //     if (replyMetaData.isFirstReply) {  // oldRating < 0 && newRating >= 0
+    //         if (i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getLessThan() && (i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getEual())) {
+    //             changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_FIRST_REPLY));
+    //         } else if ((i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getEual()) && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getLessThan()) { // (oldRating >= 0 && newRating < 0)
+    //             changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_FIRST_REPLY));
+    //         };
+    //     };
 
-        if (replyMetaData.isQuickReply) { //oldRating < 0 && newRating >= 0
-            if (i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getLessThan() && (i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getEual())) {
-                changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_QUICK_REPLY));
-            } else if ((i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getEual()) && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getLessThan()) { // oldRating >= 0 && newRating < 0
-                changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_QUICK_REPLY));
-            };
-        };
+    //     if (replyMetaData.isQuickReply) { //oldRating < 0 && newRating >= 0
+    //         if (i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getLessThan() && (i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getEual())) {
+    //             changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_QUICK_REPLY));
+    //         } else if ((i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&oldRating, &i64Lib::zero()) == i64Lib::getEual()) && i64Lib::compare(&newRating, &i64Lib::zero()) == i64Lib::getLessThan()) { // oldRating >= 0 && newRating < 0
+    //             changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_QUICK_REPLY));
+    //         };
+    //     };
 
-        userLib::updateRatingNotFull(
-            replyMetaData.author,
-            votedUserCommunityRating,
-            changeReplyAuthorRating,
-            communityId
-        );
+    //     userLib::updateRatingNotFull(
+    //         replyMetaData.author,
+    //         votedUserCommunityRating,
+    //         changeReplyAuthorRating,
+    //         communityId
+    //     );
         
-        vote(votedUser, votedUserCommunityRating, voteUser, voteUserCommunityRating, postType, isUpvote, ratingChange, TYPE_CONTENT_REPLY, postMetaData.communityId);
+    //     vote(votedUser, votedUserCommunityRating, voteUser, voteUserCommunityRating, postType, isUpvote, ratingChange, TYPE_CONTENT_REPLY, postMetaData.communityId);
         
-        if (isCancel) {
-            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-                DIRECTION_CANCEL_DOWNVOTE
-            } else {
-                DIRECTION_CANCEL_UPVOTE
-            }
-        } else {
-            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-                DIRECTION_UPVOTE
-            } else {
-                DIRECTION_DOWNVOTE
-            }
-        }
-        // transfer add ForumItemVoted delete return value
-    }
+    //     if (isCancel) {
+    //         if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+    //             DIRECTION_CANCEL_DOWNVOTE
+    //         } else {
+    //             DIRECTION_CANCEL_UPVOTE
+    //         }
+    //     } else {
+    //         if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+    //             DIRECTION_UPVOTE
+    //         } else {
+    //             DIRECTION_DOWNVOTE
+    //         }
+    //     }
+    //     // transfer add ForumItemVoted delete return value
+    // }
 
-    public entry fun voteComment(
-        postMetaData: &PostMetaData,
-        commentMetaData: &mut CommentMetaData,
-        voteUser: &mut userLib::User,
-        voteUserCommunityRating: &userLib::UserCommunityRating,
-        isUpvote: bool,
-        ctx: &mut TxContext
-    ): u8 {
-        let voteUserAddress = tx_context::sender(ctx);
-        checkSigner(voteUser, voteUserCommunityRating, voteUserAddress);
-        assert!(voteUserAddress != commentMetaData.author, E_ERROR_VOTE_COMMENT);
+    // public entry fun voteComment(
+    //     postMetaData: &PostMetaData,
+    //     commentMetaData: &mut CommentMetaData,
+    //     voteUser: &mut userLib::User,
+    //     voteUserCommunityRating: &userLib::UserCommunityRating,
+    //     isUpvote: bool,
+    //     ctx: &mut TxContext
+    // ): u8 {
+    //     let voteUserAddress = tx_context::sender(ctx);
+    //     checkSigner(voteUser, voteUserCommunityRating, voteUserAddress);
+    //     assert!(voteUserAddress != commentMetaData.author, E_ERROR_VOTE_COMMENT);
         
-        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserAddress, &mut commentMetaData.historyVotes, isUpvote, &mut commentMetaData.voteUsers);
-        // ed / e && other argument
-        userLib::checkActionRole(
-            voteUser,
-            voteUserCommunityRating,
-            voteUserAddress,
-            commentMetaData.author,
-            postMetaData.communityId,
-            if(isCancel) 
-                userLib::get_action_cancel_vote() else  
-                userLib::get_action_vote_comment(),
-            /*false*/
-        );
+    //     let (ratingChange, isCancel) = getForumItemRatingChange(voteUserAddress, &mut commentMetaData.historyVotes, isUpvote, &mut commentMetaData.voteUsers);
+    //     // ed / e && other argument
+    //     userLib::checkActionRole(
+    //         voteUser,
+    //         voteUserCommunityRating,
+    //         voteUserAddress,
+    //         commentMetaData.author,
+    //         postMetaData.communityId,
+    //         if(isCancel) 
+    //             userLib::get_action_cancel_vote() else  
+    //             userLib::get_action_vote_comment(),
+    //         /*false*/
+    //     );
         
-        commentMetaData.rating = i64Lib::add(&commentMetaData.rating, &ratingChange);
+    //     commentMetaData.rating = i64Lib::add(&commentMetaData.rating, &ratingChange);
 
-        if (isCancel) {
-            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-                DIRECTION_CANCEL_DOWNVOTE
-            } else {
-                DIRECTION_CANCEL_UPVOTE
-            }
-        } else {
-            if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-                DIRECTION_UPVOTE
-            } else {
-                DIRECTION_DOWNVOTE
-            }
-        }
-        // transfer add ForumItemVoted delete return value
-    }
+    //     if (isCancel) {
+    //         if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+    //             DIRECTION_CANCEL_DOWNVOTE
+    //         } else {
+    //             DIRECTION_CANCEL_UPVOTE
+    //         }
+    //     } else {
+    //         if (i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+    //             DIRECTION_UPVOTE
+    //         } else {
+    //             DIRECTION_DOWNVOTE
+    //         }
+    //     }
+    //     // transfer add ForumItemVoted delete return value
+    // }
 
     fun vote(
-        voteUser: &userLib::User,
-        voteUserCommunityRating: &mut userLib::UserCommunityRating,
-        votedUser: &userLib::User,
-        votedUserCommunityRating: &mut userLib::UserCommunityRating,
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        voteUserId: ID,
+        votedUserId: ID,
         postType: u8,
         isUpvote: bool,
         ratingChanged: i64Lib::I64,
         typeContent: u8,
-        communityId: ID
+        communityId: ID,
+        ctx: &mut TxContext
     ) {
         // TODO: add why warning - Unused assignment or binding for local '_authorRating'. Consider removing, replacing with '_', or prefixing with '_'
         let voteUserRating = i64Lib::zero();
@@ -1086,21 +1113,28 @@ module basics::postLib {
             };
         };
 
-        userLib::updateRatingNotFull(
-            userLib::getUserOwner(voteUser),
+        let voteUserCommunityRating = userLib::getMutableUserCommunityRating(userCollection, voteUserId);
+        userLib::updateRating(
             voteUserCommunityRating,
+            periodRewardContainer,
+            voteUserId,
             voteUserRating,
-            communityId
+            communityId,
+            ctx
         );
-        userLib::updateRatingNotFull(
-            userLib::getUserOwner(votedUser),
+
+        let votedUserCommunityRating = userLib::getMutableUserCommunityRating(userCollection, votedUserId);
+        userLib::updateRating(
             votedUserCommunityRating,
+            periodRewardContainer,
+            votedUserId,
             _authorRating,
-            communityId
+            communityId,
+            ctx
         );
     }
 
-    /* transfer add 
+    /* transfer add      
     fun changePostType(
         postMetaData: &mut PostMetaData,
         newPostType: u8
@@ -1225,15 +1259,15 @@ module basics::postLib {
     */
 
     fun checkSigner(        // need?
-        user: &userLib::User,
-        userCommunityRating: &userLib::UserCommunityRating,
-        userAddress: address
+        _user: &userLib::User,
+        _userCommunityRating: &userLib::UserCommunityRating,
+        _userAddress: address
     ) {
-       assert!(
-            userLib::getUserOwner(user) == userAddress &&
-            userLib::getUserRatingId(user) == userLib::getUserCommunityRatingId(userCommunityRating),
-            E_WRONG_USER_PARAMS_DELETE_POST
-        ); 
+    //    assert!(
+    //         userLib::getUserOwner(user) == userAddress &&
+    //         userLib::getUserRatingId(user) == object::id(userCommunityRating),
+    //         E_WRONG_USER_PARAMS_DELETE_POST
+    //     ); 
     }
 
     fun getTypesRating(        //name?
@@ -1252,7 +1286,7 @@ module basics::postLib {
 
     fun getHistoryInformations(        //name?
         historyVotes: vector<u8>,
-        votedUsers: vector<address>
+        votedUsers: vector<ID>
     ): (u64, u64) {
         let i = 0;
         let positive = 0;
@@ -1667,12 +1701,12 @@ module basics::postLib {
     // 3 - upvote
     // toDo describe return value
     public fun getForumItemRatingChange(
-        actionAddress: address,
+        userActionId: ID,
         historyVotes: &mut vector<u8>,
         isUpvote: bool,
-        votedUsers: &mut vector<address>
+        votedUsers: &mut vector<ID>
     ): (i64Lib::I64, bool) {
-        let (history, userPosition, isExistVote) = getHistoryVote(actionAddress, *historyVotes, *votedUsers);
+        let (history, userPosition, isExistVote) = getHistoryVote(userActionId, *historyVotes, *votedUsers);
         // int history = getHistoryVote(actionAddress, historyVotes);
         let ratingChange: i64Lib::I64;
         let isCancel: bool = false;
@@ -1687,7 +1721,7 @@ module basics::postLib {
                    let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
                     *userHistoryVote = 3;
                 } else {
-                    vector::push_back(votedUsers, actionAddress);
+                    vector::push_back(votedUsers, userActionId);
                     vector::push_back(historyVotes, 3);
                 };
                 ratingChange = i64Lib::from(1);
@@ -1708,7 +1742,7 @@ module basics::postLib {
                     let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
                     *userHistoryVote = 1;
                 } else {
-                    vector::push_back(votedUsers, actionAddress);
+                    vector::push_back(votedUsers, userActionId);
                     vector::push_back(historyVotes, 1);
                 };
                 ratingChange = i64Lib::neg_from(1);
@@ -1727,11 +1761,11 @@ module basics::postLib {
     // NONE = 2
     // upVote = 3
     public fun getHistoryVote(
-        user: address,
+        userId: ID,
         historyVotes: vector<u8>,
-        votedUsers: vector<address>
+        votedUsers: vector<ID>
     ): (u8, u64, bool) { // (status vote, isExistVote)
-        let (isExist, position) = vector::index_of(&mut votedUsers, &user);
+        let (isExist, position) = vector::index_of(&mut votedUsers, &userId);
 
         if (isExist) {
             let voteVolue = vector::borrow(&mut historyVotes, position);

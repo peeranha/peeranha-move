@@ -81,11 +81,15 @@ module basics::userLib {
     const ENERGY_UPDATE_PROFILE: u64 = 1;
     const ENERGY_FOLLOW_COMMUNITY: u64 = 1;
 
-    struct UserCollection has key {
+    struct UserCollection has key {         // Container || Collection??    // name UserRating...
         id: UID,
         usersCommunityRating: Table<ID, UserCommunityRating>,
-        periodRewardContainer: PeriodRewardContainer,
         // roles: accessControl::Role,
+    }
+
+    struct PeriodRewardContainer has key, store {   // Container || Collection??
+        id: UID,
+        periodRewardShares: VecMap<u64, PeriodRewardShares>,          // key - period   // VecMap? table/bag
     }
 
     struct User has key {
@@ -99,7 +103,6 @@ module basics::userLib {
         // TODO: add roles                       // add userRatingCollection, periodRewardContainer, achievementsContainer ?
     }
 
-    // link to User?
     struct UserCommunityRating has key, store {    // shared
         id: UID,
         userRating: VecMap<ID, i64Lib::I64>,               // key - communityId         // vecMap??
@@ -122,14 +125,10 @@ module basics::userLib {
         penalty: u64,
     }
 
-    struct PeriodRewardContainer has key, store {
-        id: UID,
-        periodRewardShares: VecMap<u64, PeriodRewardShares>,          // key - period
-    }
-
-    struct PeriodRewardShares has store {
+    struct PeriodRewardShares has key, store {
+        id: UID,                                // uid need??
         totalRewardShares: u64,
-        activeUsersInPeriod: vector<address>,       // Id ??
+        activeUsersInPeriod: vector<ID>,       // Id ??
     }
 
     // ====== Events ======
@@ -147,11 +146,12 @@ module basics::userLib {
         transfer::share_object(UserCollection {
             id: object::new(ctx),
             usersCommunityRating: table::new(ctx),
-            periodRewardContainer: PeriodRewardContainer {
-                id: object::new(ctx),
-                periodRewardShares: vec_map::empty()
-            }
             // roles: accessControl::initRole()
+        });
+
+        transfer::share_object(PeriodRewardContainer {
+            id: object::new(ctx),
+            periodRewardShares: vec_map::empty()
         });
     }
 
@@ -210,17 +210,19 @@ module basics::userLib {
     // }
 
     public entry fun updateUser(user: &mut User, userCommunityRating: &UserCommunityRating, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
-        let userAddress = tx_context::sender(ctx);
-        // createIfDoesNotExist(userCollection, userAddress);
-        updateUserPrivate(user, userCommunityRating, userAddress, ipfsDoc);
+        let _userAddress = tx_context::sender(ctx);  // del
+        // createIfDoesNotExist(userCollection, userAddress);   // add?
+        updateUserPrivate(user, userCommunityRating, /*userAddress,*/ ipfsDoc);
     }
 
-    entry fun updateUserPrivate(user: &mut User, userCommunityRating: &UserCommunityRating, userAddress: address, ipfsHash: vector<u8>) {
+    entry fun updateUserPrivate(user: &mut User, userCommunityRating: &UserCommunityRating/*, userAddress: address*/, ipfsHash: vector<u8>) {
+        let userId = object::id(user);
+        
         checkRatingAndEnergy(
             user,
             userCommunityRating,
-            object::id(user),
-            object::id(user),
+            userId,
+            userId,
             commonLib::getZeroId(),
             ACTION_UPDATE_PROFILE
         );
@@ -230,12 +232,13 @@ module basics::userLib {
 
     public entry fun followCommunity(user: &mut User, userCommunityRating: &UserCommunityRating, community: &communityLib::Community, ctx: &mut TxContext) {
         communityLib::onlyExistingAndNotFrozenCommunity(community);
-        let userAddress = tx_context::sender(ctx);
+        let userId = object::id(user);
+        let _userAddress = tx_context::sender(ctx);  // del
         checkRatingAndEnergy(
             user,
             userCommunityRating,
-            object::id(user),
-            object::id(user),
+            userId,
+            userId,
             commonLib::getZeroId(),
             ACTION_FOLLOW_COMMUNITY
         );
@@ -253,12 +256,13 @@ module basics::userLib {
 
     public entry fun unfollowCommunity(user: &mut User, userCommunityRating: &UserCommunityRating, community: &communityLib::Community, ctx: &mut TxContext) {
         communityLib::onlyExistingAndNotFrozenCommunity(community);
-        let userAddress = tx_context::sender(ctx);
+        let _userAddress = tx_context::sender(ctx);      // del
+        let userId = object::id(user);
         let user = checkRatingAndEnergy(
             user,
             userCommunityRating,
-            object::id(user),
-            object::id(user),
+            userId,
+            userId,
             commonLib::getZeroId(),
             ACTION_FOLLOW_COMMUNITY
         );
@@ -309,76 +313,14 @@ module basics::userLib {
     //     }
     // }
 
-    // public fun testError(userCollection: &mut UserCollection, userAddr: address) {
-    //     let user: &mut User = getMutableUser(userCollection, userAddr);
-    //     let userCommunityRating = &mut user.userCommunityRating;
-        
-    //     vector::push_back(&mut userCollection.periodRewardContainer.periodRewardSharesPosition, 1);
-    //     vector::borrow(&userCollection.users, 1);
-        
-    //     let _rewardPeriods = vector::borrow(&userCommunityRating.rewardPeriods, 1);
-    // }
-
-    // public fun testErrorFix(userCollection: &mut UserCollection, userAddr: address) {
-    //     let user: &mut User = getMutableUser(userCollection, userAddr);
-    //     let userCommunityRating = &mut user.userCommunityRating;
-        
-    //     let copyUserCommunityRating = *userCommunityRating;
-    //     vector::push_back(&mut userCollection.periodRewardContainer.periodRewardSharesPosition, 1);
-    //     vector::borrow(&userCollection.users, 1);
-        
-    //     let _rewardPeriods = vector::borrow(&copyUserCommunityRating.rewardPeriods, 1);
-    // }
-
-    // public fun testErrorFix2(userCollection: &mut UserCollection, userAddr: address) {
-    //     let user: &mut User = getMutableUser(userCollection, userAddr);
-    //     let userCommunityRating = &mut user.userCommunityRating;
-
-    //     let _rewardPeriods = vector::borrow(&userCommunityRating.rewardPeriods, 1);
-    //     vector::push_back(&mut userCollection.periodRewardContainer.periodRewardSharesPosition, 1);
-    //     let _periodRewardShares = vector::borrow(&userCollection.users, 1);
-        
-    // }
-
-    // public fun testError2(userCollection: &mut UserCollection, userAddr: address) {
-    //     let user: &mut User = getMutableUser(userCollection, userAddr);
-    //     let userCommunityRating = &mut user.userCommunityRating;
-    //     let copyUserCommunityRating = *userCommunityRating;
-
-    //     vector::push_back(&mut userCollection.periodRewardContainer.periodRewardSharesPosition, 1);
-    //     vector::borrow(&userCollection.users, 1);
-    //     vector::borrow(&copyUserCommunityRating.rewardPeriods, 1);
-    // }
-
-    // public fun testError2(userCollection: &mut UserCollection, userAddr: address) {
-    //     let user: &mut User = getMutableUser(userCollection, userAddr);
-    //     let userCommunityRating = &mut user.userCommunityRating;
-    //     vector::push_back(&mut userCollection.periodRewardContainer.periodRewardSharesPosition, 1);
-    //     vector::push_back(&mut userCommunityRating.rewardPeriods, 1);
-    // }
-
-    // public fun testError2Fix(userCollection: &mut UserCollection, userAddr: address) {
-    //     vector::push_back(&mut userCollection.periodRewardContainer.periodRewardSharesPosition, 1);
-    //     testLo(userCollection, userAddr);
-    // }
-
-    // public fun testLo(userCollection: &mut UserCollection, userAddr: address) {
-    //     let user: &mut User = getMutableUser(userCollection, userAddr);
-    //     let userCommunityRating = &mut user.userCommunityRating;
-    //     vector::push_back(&mut userCommunityRating.rewardPeriods, 1)
-    // }
-
-    public fun updateRatingNotFull(_userAddress: address, _userCommunityRating: &mut UserCommunityRating, _rating: i64Lib::I64, _communityId: ID) {
-    }
-
-    public fun updateRating(periodRewardContainer: &mut PeriodRewardContainer, userAddress: address, userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
+    public fun updateRating(userCommunityRating: &mut UserCommunityRating, periodRewardContainer: &mut PeriodRewardContainer, userId: ID, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
         
-        updateRatingBase(periodRewardContainer, userAddress, userCommunityRating, rating, communityId);
+        updateRatingBase(userCommunityRating, periodRewardContainer, userId, rating, communityId, ctx);
     }
     
-    public fun updateRatingBase(periodRewardContainer: &mut PeriodRewardContainer, userAddress: address, userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
+    public fun updateRatingBase(userCommunityRating: &mut UserCommunityRating, periodRewardContainer: &mut PeriodRewardContainer, userId: ID, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
         let currentPeriod: u64 = commonLib::getPeriod();
 
         // let userCommunityRating = &mut user.userCommunityRating; // del transfer
@@ -392,7 +334,7 @@ module basics::userLib {
         let pastPeriodsCount: u64 = vec_map::size(&mut userCommunityRating.userPeriodRewards);      // move down?
 
         if (!vec_map::contains(&periodRewardContainer.periodRewardShares, &currentPeriod)) {
-            vec_map::insert(&mut periodRewardContainer.periodRewardShares, currentPeriod, PeriodRewardShares { totalRewardShares: 0, activeUsersInPeriod: vector::empty<address>() });
+            vec_map::insert(&mut periodRewardContainer.periodRewardShares, currentPeriod, PeriodRewardShares { id: object::new(ctx), totalRewardShares: 0, activeUsersInPeriod: vector::empty<ID>() });
         };
 
         let isFirstTransactionInPeriod = false;
@@ -413,7 +355,7 @@ module basics::userLib {
 
         if (isFirstTransactionInPeriod) {
             let periodRewardShares = vec_map::get_mut(&mut periodRewardContainer.periodRewardShares, &currentPeriod);
-            vector::push_back(&mut periodRewardShares.activeUsersInPeriod, userAddress);     // new transfer ??? user.owner or user.ID?
+            vector::push_back(&mut periodRewardShares.activeUsersInPeriod, userId);     // new transfer ??? user.owner or user.ID?
             pushUserRewardPeriods(userCommunityRating, currentPeriod, communityId);         // TODO: add, what?
         } else {  // rewrite
             pastPeriodsCount = pastPeriodsCount - 1;
@@ -430,7 +372,7 @@ module basics::userLib {
         };
 
         
-        updateUserPeriodRating(periodRewardContainer, userCommunityRating, userAddress, rating, communityId, currentPeriod, _previousPeriod, isFirstTransactionInPeriod);
+        updateUserPeriodRating(periodRewardContainer, userCommunityRating, userId, rating, communityId, currentPeriod, _previousPeriod, isFirstTransactionInPeriod);
 
         changeUserRating(userCommunityRating, communityId, rating);
 
@@ -484,7 +426,7 @@ module basics::userLib {
             periodRating.ratingToReward = ratingToReward;
     }
 
-    fun updateUserPeriodRating(periodRewardContainer: &mut PeriodRewardContainer, userCommunityRating: &mut UserCommunityRating, userAddress: address, rating: i64Lib::I64, communityId: ID, currentPeriod: u64, previousPeriod: u64, isFirstTransactionInPeriod: bool ) {
+    fun updateUserPeriodRating(periodRewardContainer: &mut PeriodRewardContainer, userCommunityRating: &mut UserCommunityRating, userId: ID, rating: i64Lib::I64, communityId: ID, currentPeriod: u64, previousPeriod: u64, isFirstTransactionInPeriod: bool ) {
         // RewardLib.PeriodRating storage currentPeriodRating = userCommunityRating.userPeriodRewards[currentPeriod].periodRating[communityId];
         // bool isFirstTransactionInPeriod = !currentPeriodRating.isActive;
         let currentPeriodRating: PeriodRating = *getPeriodRating(userCommunityRating, currentPeriod, communityId);
@@ -563,10 +505,10 @@ module basics::userLib {
                 dataUpdateUserRatingPreviousPeriod.ratingToRewardChange = getRatingToRewardChange(i64Lib::sub(&i64Lib::from(dataUpdateUserRatingPreviousPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty)), i64Lib::add(&i64Lib::sub(&i64Lib::from(dataUpdateUserRatingPreviousPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty)), &dataUpdateUserRatingPreviousPeriod.changeRating));
                 if (i64Lib::compare(&dataUpdateUserRatingPreviousPeriod.ratingToRewardChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
                     let periodRewardShares = getMutableTotalRewardShares(periodRewardContainer, previousPeriod);
-                    periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares + i64Lib::as_u64(&getRewardShare(userAddress, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
+                    periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares + i64Lib::as_u64(&getRewardShare(userId, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
                 } else {
                     let periodRewardShares = getMutableTotalRewardShares(periodRewardContainer, previousPeriod);
-                    periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares - i64Lib::as_u64(&i64Lib::mul(&getRewardShare(userAddress, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange), &i64Lib::neg_from(1)));
+                    periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares - i64Lib::as_u64(&i64Lib::mul(&getRewardShare(userId, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange), &i64Lib::neg_from(1)));
                 };
             };
         };      // +
@@ -575,10 +517,10 @@ module basics::userLib {
             dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(i64Lib::sub(&i64Lib::from(dataUpdateUserRatingCurrentPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingCurrentPeriod.penalty)), i64Lib::add(&i64Lib::sub(&i64Lib::from(dataUpdateUserRatingCurrentPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingCurrentPeriod.penalty)), &dataUpdateUserRatingCurrentPeriod.changeRating));
             if (i64Lib::compare(&dataUpdateUserRatingCurrentPeriod.ratingToRewardChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {    // neg?   i64Lib::compare(&dataUpdateUserRatingCurrentPeriod.ratingToRewardChange, &i64Lib::zero()) == i64Lib::getGreaterThan()  //
                 let periodRewardShares = getMutableTotalRewardShares(periodRewardContainer, currentPeriod);
-                periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares + i64Lib::as_u64(&getRewardShare(userAddress, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
+                periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares + i64Lib::as_u64(&getRewardShare(userId, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
             } else {
                 let periodRewardShares = getMutableTotalRewardShares(periodRewardContainer, currentPeriod);
-                periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares - i64Lib::as_u64(&i64Lib::mul(&getRewardShare(userAddress, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange), &i64Lib::neg_from(1)));
+                periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares - i64Lib::as_u64(&i64Lib::mul(&getRewardShare(userId, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange), &i64Lib::neg_from(1)));
             };
 
             let _changeRating: i64Lib::I64 = i64Lib::zero();     // TODD: add Unused assignment or binding for local 'changeRating'. Consider removing, replacing with '_', or prefixing with '_' (e.g., '_changeRating')
@@ -785,7 +727,7 @@ module basics::userLib {
     }
 
     // TODO: add userCollection: &mut UserCollection 1-st argument
-    fun getRewardShare(_userAddr: address, _period: u64, rating: i64Lib::I64): i64Lib::I64 { // FIX
+    fun getRewardShare(_userId: ID, _period: u64, rating: i64Lib::I64): i64Lib::I64 { // FIX
         // TODO: add
         /*return CommonLib.toInt32FromUint256(userContext.peeranhaToken.getBoost(userAddr, period)) * */ rating
     }
@@ -805,9 +747,12 @@ module basics::userLib {
         user.userRatingId
     }
 
-    public fun getUserCommunityRatingId(userCommunityRating: &UserCommunityRating): ID {
-        let UserCommunityRating { id: user_community_rating_id, userRating: _userRating, userPeriodRewards: _userPeriodRewards } = userCommunityRating;
-        commonLib::getItemId(user_community_rating_id)
+    public fun getUserCommunityRating(userCollection: &UserCollection, userId: ID): &UserCommunityRating {
+        table::borrow(&userCollection.usersCommunityRating, userId)
+    }
+
+    public fun getMutableUserCommunityRating(userCollection: &mut UserCollection, userId: ID): &mut UserCommunityRating {
+        table::borrow_mut(&mut userCollection.usersCommunityRating, userId)
     }
 
     // public entry fun mass_mint(recipients: vector<address>, ctx: &mut TxContext) {
