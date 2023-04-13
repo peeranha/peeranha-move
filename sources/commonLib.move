@@ -1,7 +1,7 @@
 module basics::commonLib {
     use std::vector;
     // friend basics::communityLib;
-    use sui::object::{Self, ID, UID};
+    use sui::object::{Self, ID};
 
 
     /* errors */

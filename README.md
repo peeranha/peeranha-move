@@ -122,11 +122,7 @@ Error code:
 86 - At_least_one_tag_is_required
 
 
-owner - 0x62a5541796a4fa35229543da71df4f570f7cbe02
-package object ID - 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0
-user object - 0x94e98b7c4f229e5011fffbb1778e2a03003aac5f
-community - 0xf67fdeab0355f72438df93c11bff68eb3c538e43
-post - 0xb5d76295c7010d60f9a50c18a965a2cf586f29ff
+
 
 createUser - sui client call --function createUser --module userLib --package 0x91fc7202ca988cf6a0a6c67222e80c0d3645e080dafd996123b01c1ad29c4ddf --args \"0x59ccd16fc2ecd813855f5718eb7d56432c9653c623ba52f3187a46eb508ef3c0\" \"x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1"\" --gas-budget 200000000
 
@@ -147,11 +143,3 @@ unfreezeCommmunity - sui client call --function unfreezeCommmunity --module comm
 createPost - sui client call --function createPost --module postLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xb5d76295c7010d60f9a50c18a965a2cf586f29ff\" \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" 0 \"x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc"\" \[1,3\] --gas-budget 30000
 
 editPost - sui client call --function editPost --module postLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xb5d76295c7010d60f9a50c18a965a2cf586f29ff\" \"0xf67fdeab0355f72438df93c11bff68eb3c538e43\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" 1 \"x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82"\" \[1,4\] --gas-budget 30000
-
-
-
-
-
-
-<!-- deletePost - sui client call --function deletePost --module postLib --package 0x53e642709cab2b2f8d04c3041a5325a0657bb3d0 --args \"0xb5d76295c7010d60f9a50c18a965a2cf586f29ff\" \"0x62a5541796a4fa35229543da71df4f570f7cbe02\" 1 --gas-budget 30000 -->
-

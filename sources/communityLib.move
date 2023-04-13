@@ -79,14 +79,14 @@ module basics::communityLib {
     public entry fun updateCommunity(community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);
         // TODO: add check role
-
+        // onlyExistingAndNotFrozenCommunity // test
         community.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
     }
 
     public entry fun createTag(community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);
         // TODO: add check role
-
+        // onlyExistingAndNotFrozenCommunity // test
         let i = 0;
         while(i < vector::length(&community.tags)) {
             assert!(commonLib::getIpfsHash(vector::borrow(&community.tags, i).ipfsDoc) != ipfsHash, E_REQUIRE_TAGS_WITH_UNIQUE_NAME);
@@ -103,6 +103,8 @@ module basics::communityLib {
         let _userAddress = tx_context::sender(ctx);
         // TODO: add check role
         // CHECK 81 ERROR (E_REQUIRE_TAGS_WITH_UNIQUE_NAME)?
+        // onlyExistingAndNotFrozenCommunity // need ? + polygon
+
 
         tag.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
     }
@@ -110,7 +112,7 @@ module basics::communityLib {
     public entry fun freezeCommunity(community: &mut Community, ctx: &mut TxContext) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
         let _userAddress = tx_context::sender(ctx);
         // TODO: add check role
-
+        // onlyExistingAndNotFrozenCommunity  // test
         community.isFrozen = true;
 
         // TODO: add emit CommunityFrozen(msg.sender, communityId);
@@ -122,6 +124,8 @@ module basics::communityLib {
 
         // assert!(communityId > 0, E_COMMUNITY_ID_CAN_NOT_BE_0);    // TODO TESTS
         // assert!(vector::length(&communityCollection.communities) >= communityId, E_COMMUNITY_DOES_NOT_EXIST); // TODO TESTS
+
+        // is frozen? need + polygon
         community.isFrozen = false;
 
         // TODO: add emit CommunityUnfrozen(msg.sender, communityId);
