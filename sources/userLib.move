@@ -87,7 +87,7 @@ module basics::userLib {
         // roles: accessControl::Role,
     }
 
-    struct PeriodRewardContainer has key, store {   // Container || Collection??
+    struct PeriodRewardContainer has key {   // Container || Collection??
         id: UID,
         periodRewardShares: VecMap<u64, PeriodRewardShares>,          // key - period   // VecMap? table/bag
     }
@@ -165,18 +165,6 @@ module basics::userLib {
         createUserPrivate(userCollection, owner, ipfsDoc, ctx)
     }
 
-    public entry fun readUserMut(user: &mut User) {
-        let _userAddress = user.owner;
-    }
-
-    public entry fun readUser(user: &User) {
-        let _userAddress = user.owner;
-    }
-
-    public entry fun editUserMut(user: &mut User) {
-        user.energy = 5;
-    }
-
     fun createUserPrivate(userCollection: &mut UserCollection, userAddress: address, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
         // assert!(!isExists(userCollection, userAddress), E_USER_EXIST); // TODO: TEST     new transfer ???
@@ -193,11 +181,11 @@ module basics::userLib {
             energy: getStatusEnergy(),
             lastUpdatePeriod: commonLib::getPeriod(),
             followedCommunities: vector::empty<ID>(),
-            userRatingId: commonLib::getItemId(&userCommunityRating.id)
+            userRatingId: object::id(&userCommunityRating)
         };
 
         table::add(&mut userCollection.usersCommunityRating, object::id(&user), userCommunityRating);
-        event::emit(EvUser {userId: commonLib::getItemId(&user.id)});
+        event::emit(EvUser {userId: object::id(&user)});
         transfer::transfer(
             user, userAddress
         );
@@ -209,15 +197,16 @@ module basics::userLib {
     //     }
     // }
 
-    public entry fun updateUser(user: &mut User, userCommunityRating: &UserCommunityRating, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
+    public entry fun updateUser(userCollection: &mut UserCollection, user: &mut User, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);  // del
         // createIfDoesNotExist(userCollection, userAddress);   // add?
-        updateUserPrivate(user, userCommunityRating, /*userAddress,*/ ipfsDoc);
+        updateUserPrivate(userCollection, user, ipfsDoc);
     }
 
-    entry fun updateUserPrivate(user: &mut User, userCommunityRating: &UserCommunityRating/*, userAddress: address*/, ipfsHash: vector<u8>) {
+    entry fun updateUserPrivate(userCollection: &mut UserCollection, user: &mut User, ipfsHash: vector<u8>) {
         let userId = object::id(user);
-        
+        let userCommunityRating = getUserCommunityRating(userCollection, userId);
+
         checkRatingAndEnergy(
             user,
             userCommunityRating,
@@ -227,13 +216,15 @@ module basics::userLib {
             ACTION_UPDATE_PROFILE
         );
         user.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
-        event::emit(EvUser {userId: commonLib::getItemId(&user.id)});
+        event::emit(EvUser {userId: userId});
     }
 
-    public entry fun followCommunity(user: &mut User, userCommunityRating: &UserCommunityRating, community: &communityLib::Community, ctx: &mut TxContext) {
+    public entry fun followCommunity(userCollection: &mut UserCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
         communityLib::onlyExistingAndNotFrozenCommunity(community);
         let userId = object::id(user);
         let _userAddress = tx_context::sender(ctx);  // del
+        let userCommunityRating = getUserCommunityRating(userCollection, userId);
+
         checkRatingAndEnergy(
             user,
             userCommunityRating,
@@ -251,13 +242,15 @@ module basics::userLib {
         };
 
         vector::push_back(&mut user.followedCommunities, community_id);
-        event::emit(EvFollowCommunity{userId: commonLib::getItemId(&user.id), communityId: community_id});
+        event::emit(EvFollowCommunity{userId: userId, communityId: community_id});
     }
 
-    public entry fun unfollowCommunity(user: &mut User, userCommunityRating: &UserCommunityRating, community: &communityLib::Community, ctx: &mut TxContext) {
+    public entry fun unfollowCommunity(userCollection: &mut UserCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
         communityLib::onlyExistingAndNotFrozenCommunity(community);
         let _userAddress = tx_context::sender(ctx);      // del
         let userId = object::id(user);
+        let userCommunityRating = getUserCommunityRating(userCollection, userId);
+
         let user = checkRatingAndEnergy(
             user,
             userCommunityRating,
@@ -273,7 +266,7 @@ module basics::userLib {
             if(*vector::borrow(&user.followedCommunities, i) == community_id) {
                 vector::remove(&mut user.followedCommunities, i);
 
-                event::emit(EvFollowCommunity{userId: commonLib::getItemId(&user.id), communityId: community_id});
+                event::emit(EvFollowCommunity{userId: userId, communityId: community_id});
                 return
             };
             i = i +1;

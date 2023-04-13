@@ -161,7 +161,7 @@ module basics::communityLib {
         let tag = vector::borrow_mut(&mut community.tags, tagId - 1);
         tag
     }
-    
+
     public fun getTag(community: &Community, tagId: u64): &Tag {
         assert!(tagId > 0, E_TAG_ID_CAN_NOT_BE_0);
         assert!(vector::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);

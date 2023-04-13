@@ -1176,7 +1176,7 @@ module basics::postLib {
                     _changeReplyAuthorRating = i64Lib::add(&_changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.quickReply, &oldTypeRating.quickReply));
                 };
             };
-            if (bestReplyId == commonLib::getItemId(&replyMetaData.id)) {
+            if (bestReplyId == object::id(replyMetaData)) {
                 _changeReplyAuthorRating = i64Lib::add(&_changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.acceptReply, &oldTypeRating.acceptReply));
                 changePostAuthorRating = i64Lib::add(&changePostAuthorRating, &i64Lib::sub(&newTypeRating.acceptedReply, &oldTypeRating.acceptedReply));
             };
@@ -1240,7 +1240,7 @@ module basics::postLib {
                     changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.quickReply);
                 };
             };
-            if (bestReplyId == commonLib::getItemId(&reply.id)) {
+            if (bestReplyId == object::id(reply.id)) {
                 changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptReply);
                 _changePostAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptedReply);
             };

@@ -39,9 +39,9 @@ module basics::commonLib {
         E_INVALIT_IPFSHASH
     }
 
-    public fun getItemId(uid: &UID): ID  {
-        object::uid_to_inner(uid)
-    }
+    // public fun getItemId(uid: &UID): ID  {
+    //     object::uid_to_inner(uid)
+    // }
 
     public fun getZeroId(): ID {
         object::id_from_address(@0x0)

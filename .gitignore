@@ -1,3 +1,4 @@
 build
 node_modules
 sui.log*
+secrets*

@@ -6,9 +6,12 @@
   "scripts": {
     "build": "sui move build",
     "test": "sui move test",
-    "deploy": "sui client publish ./ --gas-budget 30000",
+    "deploy": "sui client publish ./ --gas-budget 200000000",
     "deploy2": "sui client publish ./ --gas-budget 200000000 --skip-dependency-verification",
-    "version": "sui --version"
+    "version": "sui --version",
+    "create-user": "sui client call --function createUser --module userLib --package 0xfde2500aec52df355eba6d2f598ac6531b486f55c88962b68ff5db1d851a92d0 --args 0x59ccd16fc2ecd813855f5718eb7d56432c9653c623ba52f3187a46eb508ef3c0 a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1 --gas-budget 20000000",
+    "create-community": "sui client call --function createCommunity --module communityLib --package 0xfde2500aec52df355eba6d2f598ac6531b486f55c88962b68ff5db1d851a92d0 --args 7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6 [0x0000000000000000000000000000000000000000000000000000000000000001,0x0000000000000000000000000000000000000000000000000000000000000002,0x0000000000000000000000000000000000000000000000000000000000000003,0x0000000000000000000000000000000000000000000000000000000000000004,0x0000000000000000000000000000000000000000000000000000000000000005] --gas-budget 100000000",
+    "update-tag": "sui client call --function updateTag --module communityLib --package 0xfde2500aec52df355eba6d2f598ac6531b486f55c88962b68ff5db1d851a92d0 --args 0x0076d0e8982fd5ac820f66938d8c5df4d51f8a74a1eefee6482969d05b8872eb 0x0000000000000000000000000000000000000000000000000000000000000666 --gas-budget 100000000"
   },
   "keywords": [],
   "author": "",
