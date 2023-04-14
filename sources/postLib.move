@@ -129,7 +129,7 @@ module basics::postLib {
         postTime: u64,
         author: ID,
         rating: i64Lib::I64,
-        parentReplyId: ID,      // need?  // U64?
+        parentReplyId: u64,
 
         isFirstReply: bool,
         isQuickReply: bool,
@@ -180,7 +180,7 @@ module basics::postLib {
         let userCommunityRating = userLib::getUserCommunityRating(userCollection, object::id(user));
         
         // checkSigner(user, userCommunityRating, userAddr);
-        communityLib::onlyExistingAndNotFrozenCommunity(community);
+        communityLib::onlyNotFrezenCommunity(community);
         communityLib::checkTags(community, tags);
         let communityId = object::id(community);
         userLib::checkActionRole(
@@ -238,7 +238,7 @@ module basics::postLib {
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
-        parentReplyId: ID,
+        parentReplyId: u64,
         ipfsHash: vector<u8>,
         isOfficialReply: bool,
         ctx: &mut TxContext
@@ -246,10 +246,10 @@ module basics::postLib {
         let userId = object::id(user);
         let userAddr = tx_context::sender(ctx);     // del
         // checkSigner(user, userCommunityRating, userAddr);
-        let userCommunityRating = userLib::getMutableUserCommunityRating(userCollection, object::id(user));
+        let userCommunityRating = userLib::getMutableUserCommunityRating(userCollection, userId);
 
         assert!(postMetaData.postType != TUTORIAL && postMetaData.postType != DOCUMENTATION, E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL_OR_DOCUMENTATION);
-        assert!(parentReplyId == commonLib::getZeroId(), E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST);
+        assert!(parentReplyId == 0, E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST);
         let communityId = postMetaData.communityId;
         userLib::checkActionRole(
             user,
@@ -279,38 +279,32 @@ module basics::postLib {
         let isFirstReply = false;
         let isQuickReply = false;
         let timestamp: u64 = commonLib::getTimestamp();
-        if (parentReplyId == commonLib::getZeroId()) {
+        if (parentReplyId == 0) {
             if (isOfficialReply) {
                 postMetaData.officialReply = countReplies + 1;
             };
 
             if (postMetaData.postType != TUTORIAL && postMetaData.author != userId) {
+                let changeUserRating = i64Lib::zero();
                 if (getActiveReplyCount(postMetaData) == 0) {
                     isFirstReply = true;
-                    userLib::updateRating(
-                        userCommunityRating,
-                        periodRewardContainer,
-                        object::id(user),
-                        getUserRatingChangeForReplyAction(postMetaData.postType, RESOURCE_ACTION_FIRST_REPLY),
-                        communityId,
-                        ctx
-                    );
+                    changeUserRating = i64Lib::add(&changeUserRating, &getUserRatingChangeForReplyAction(postMetaData.postType, RESOURCE_ACTION_FIRST_REPLY));
                 };
-
                 if (timestamp - postMetaData.postTime < QUICK_REPLY_TIME_SECONDS) {
-                    isQuickReply = true;   
-                    userLib::updateRating(
-                        userCommunityRating,
-                        periodRewardContainer,
-                        object::id(user),
-                        getUserRatingChangeForReplyAction(postMetaData.postType, RESOURCE_ACTION_QUICK_REPLY),
-                        communityId,
-                        ctx
-                    );
-                }
+                    isQuickReply = true;
+                    changeUserRating = i64Lib::add(&changeUserRating, &getUserRatingChangeForReplyAction(postMetaData.postType, RESOURCE_ACTION_QUICK_REPLY));
+                };
+                userLib::updateRating(
+                    userCommunityRating,
+                    periodRewardContainer,
+                    userId,
+                    changeUserRating,
+                    communityId,
+                    ctx
+                );
             };
         } else {
-            //getReplyContainerSafe(postContainer, parentReplyId);    // TODO: add check parentReplyId is exist
+            getReplyMetaDataSafe(postMetaData, parentReplyId);  // checking parentReplyId is exist
         };
 
         let reply = ReplyMetaData {
@@ -428,16 +422,16 @@ module basics::postLib {
         // changePostType(postMetaData, newPostType);                                  // TODO: add tests
         // changePostCommunity(postMetaData, community, newCommunityId);               // TODO: add tests
 
-        if(userId == postMetaData.author) {
+        /*if(userId == postMetaData.author) {*/
             assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());       // todo: test
             if(commonLib::getIpfsHash(post.ipfsDoc) != ipfsHash)
                 post.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
 
-        } else {
-            assert!(commonLib::getIpfsHash(post.ipfsDoc) == ipfsHash, E_NOT_ALLOWED_EDIT_NOT_AUTHOR);       // todo: test
-            if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
-                abort E_ERROR_CHANGE_COMMUNITY_ID
-        };
+        // } else {     // recomment
+        //     assert!(commonLib::getIpfsHash(post.ipfsDoc) == ipfsHash, E_NOT_ALLOWED_EDIT_NOT_AUTHOR);       // todo: test
+        //     if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
+        //         abort E_ERROR_CHANGE_COMMUNITY_ID
+        // };
         userLib::checkActionRole(
             user,
             userCommunityRating,
@@ -532,7 +526,7 @@ module basics::postLib {
     }
 
     // &mut
-    public entry fun deletePost(  // new transfer
+    public entry fun deletePost( // updateRating will make only 1 action
         userCollection: &mut userLib::UserCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
@@ -680,7 +674,7 @@ module basics::postLib {
                 periodRewardContainer,
                 replyMetaData,
                 postType,
-                parentReplyId == commonLib::getZeroId() && bestReply == replyId,
+                parentReplyId == 0 && bestReply == replyId,
                 communityId,
                 ctx
             );
@@ -1206,7 +1200,7 @@ module basics::postLib {
     ) {
         if (postMetaData.communityId == newCommunityId) return;
 
-        communityLib::onlyExistingAndNotFrozenCommunity(community);
+        communityLib::onlyNotFrezenCommunity(community);
         let _oldCommunityId: ID = postMetaData.communityId;
         let postType: u8 = postMetaData.postType;
         let typeRating: StructRating = getTypesRating(postType);
@@ -1257,6 +1251,28 @@ module basics::postLib {
         postMetaData.communityId = newCommunityId;
     }
     */
+
+    public entry fun addUserRating(     // del
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        user: &mut userLib::User,
+        community: &mut userLib::UserCollection,
+        changeRating: u64,
+        isPositive: bool,
+        ctx: &mut TxContext
+    ) {
+        let userId = object::id(user);
+        let userCommunityRating = userLib::getMutableUserCommunityRating(userCollection, userId);
+
+        userLib::updateRating(
+            userCommunityRating,
+            periodRewardContainer,
+            userId,
+            if(isPositive) i64Lib::from(changeRating) else i64Lib::neg_from(changeRating),
+            object::id(community),
+            ctx
+        );
+    }
 
     fun checkSigner(        // need?
         _user: &userLib::User,

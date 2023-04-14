@@ -6,14 +6,14 @@ unfollowCommunity(UserCollection, User, Community)
 createCommunity(ipfsHash: vector<u8>, tags: vector<vector<u8>>)
 updateCommunity(Community, ipfsHash: vector<u8>)
 createTag(Community, ipfsHash: vector<u8>)
-updateTag(Tag, ipfsHash: vector<u8>)
+<!-- updateTag(Tag, ipfsHash: vector<u8>) -->
 freezeCommunity(Community)
 unfreezeCommunity(Community)
 
 
-0x5943a6290d1ae6a0aa6e7f6c4858e4eb6724fdc854a072d8612fd70b509b5d61 - package
-0xe94214356ef55fe2ed27beaf4407bb0baef5a5ad21ca3f6880dba43e2e15d3ff - userCollention
-0xa78b68cf27872f9074c87b1002d11250f68fbdda5b80c710316860a6396e0456 - community
-0xf094cad6c93a2322480b906c18c9bb5c5e3df6df31fbadca38beeba516659fd9 - PeriodRewardContainer
-0x73e6f83445903b7c77724cd614ecfe7057a86876fd12a2a1dab818130faf8b71 - user
-0x6b0d0c28af1c67a2831251e5d8df14af774e08b31f780a2c448ac28db94917bd - userCommunityRating
+0xd0c15d6d2e717b623dac4fb0383580524dac340cefe15f1403edd4f38df3eb6a - package
+0x91549dd918109fd83e625181a1f7e9bea8088f42e814009a88c36cfb2047b0e7 - userCollention
+0x8c28c3db40448474101f0e7805db0757102c88e94bb5d932a52c4a975f7a8e60 - community
+0x9b710c908aa22a581795ef2f50388139dafae94841513028151d12088726245d - PeriodRewardContainer
+0xac455c9ac57b899922f8ef44da76e60591ee029914fe71a291632f5342098530 - user
+0xba27faaeec81f9e445f05b726fe6277ccc723460f1ca01bc6da8b880ba638353 - userCommunityRating

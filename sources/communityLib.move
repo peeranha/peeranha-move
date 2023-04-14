@@ -6,6 +6,7 @@ module basics::communityLib {
     // use std::debug;
     use basics::commonLib;
     // friend basics::commonLib;
+    use sui::table::{Self, Table};
 
     /* errors */
     const E_REQUIRE_AT_LEAST_5_TAGS: u64 = 80;
@@ -15,14 +16,15 @@ module basics::communityLib {
     const E_COMMUNITY_DOES_NOT_EXIST: u64 = 84;
     const E_TAG_ID_CAN_NOT_BE_0: u64 = 85;
     const E_TAG_DOES_NOT_EXIST: u64 = 86;
+    const E_COMMUNITY_IS_NOT_FROZEN: u64 = 87;
 
 
-    struct Community has key/*, store*/ {
+    struct Community has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
         timeCreate: u64,
         isFrozen: bool,
-        tags: vector<Tag>,
+        tags: Table<u64, Tag>,
     }
 
     struct Tag has key, store {
@@ -31,9 +33,8 @@ module basics::communityLib {
     }
 
     ///
-    // tags: vector<Tag> -> tags: vector<vector<u8>>.       // now Works?
+    // tags: vector<Tag> -> tags: vector<vector<u8>>.
     // error "Expected primitive or object type. Got: vector<0x0::communityLib::Tag>"
-    // commit - fixed sui move build (c888fd5b339665abff8e76275866b1fcfb640540)
     ///
     public entry fun createCommunity(
         ipfsHash: vector<u8>,
@@ -57,10 +58,10 @@ module basics::communityLib {
             i = i +1;
         };
 
-        let communityTags = vector::empty<Tag>();
+        let communityTags = table::new(ctx);
         let tagId = 0;
         while(tagId < tagsLength) {
-            vector::push_back(&mut communityTags, Tag {
+            table::add(&mut communityTags, tagId + 1, Tag {
                 id: object::new(ctx),
                 ipfsDoc: commonLib::getIpfsDoc(*vector::borrow(&mut tags, tagId), vector::empty<u8>())
             });
@@ -79,32 +80,33 @@ module basics::communityLib {
     public entry fun updateCommunity(community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);
         // TODO: add check role
-        // onlyExistingAndNotFrozenCommunity // test
+        onlyNotFrezenCommunity(community);  // test
         community.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
     }
 
     public entry fun createTag(community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);
         // TODO: add check role
-        // onlyExistingAndNotFrozenCommunity // test
+        onlyNotFrezenCommunity(community);  // test
         let i = 0;
-        while(i < vector::length(&community.tags)) {
-            assert!(commonLib::getIpfsHash(vector::borrow(&community.tags, i).ipfsDoc) != ipfsHash, E_REQUIRE_TAGS_WITH_UNIQUE_NAME);
+        let tagsCount = table::length(&community.tags);
+        while(i < tagsCount) {
+            assert!(commonLib::getIpfsHash(table::borrow(&community.tags, i).ipfsDoc) != ipfsHash, E_REQUIRE_TAGS_WITH_UNIQUE_NAME);
             i = i +1;
         };
 
-        vector::push_back(&mut community.tags, Tag {
+        table::add(&mut community.tags, tagsCount + 1, Tag {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>())
         });
     }
 
-    public entry fun updateTag(tag: &mut Tag, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    public entry fun updateTag(community: &mut Community, tagId: u64, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);
+        onlyNotFrezenCommunity(community);  // test + polygon
+        let tag = getMutableTag(community, tagId);
         // TODO: add check role
         // CHECK 81 ERROR (E_REQUIRE_TAGS_WITH_UNIQUE_NAME)?
-        // onlyExistingAndNotFrozenCommunity // need ? + polygon
-
 
         tag.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
     }
@@ -112,7 +114,7 @@ module basics::communityLib {
     public entry fun freezeCommunity(community: &mut Community, ctx: &mut TxContext) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
         let _userAddress = tx_context::sender(ctx);
         // TODO: add check role
-        // onlyExistingAndNotFrozenCommunity  // test
+        onlyNotFrezenCommunity(community);  // test
         community.isFrozen = true;
 
         // TODO: add emit CommunityFrozen(msg.sender, communityId);
@@ -120,25 +122,21 @@ module basics::communityLib {
 
     public entry fun unfreezeCommunity(community: &mut Community, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);
-        // TODO: add check role   (if community doesnot exist in check will be error)
+        // TODO: add check role
 
-        // assert!(communityId > 0, E_COMMUNITY_ID_CAN_NOT_BE_0);    // TODO TESTS
-        // assert!(vector::length(&communityCollection.communities) >= communityId, E_COMMUNITY_DOES_NOT_EXIST); // TODO TESTS
-
-        // is frozen? need + polygon
+        if(!community.isFrozen) {
+            abort E_COMMUNITY_IS_NOT_FROZEN // + polygon?
+        };
         community.isFrozen = false;
 
         // TODO: add emit CommunityUnfrozen(msg.sender, communityId);
     }
 
-    public entry fun onlyExistingAndNotFrozenCommunity(community: &Community) {    // new transfer (drop)+ -> onlyNotFrezenCommunity ?
-        // assert!(communityId > 0, E_COMMUNITY_ID_CAN_NOT_BE_0);    // TODO TESTS
-        // assert!(vector::length(&communityCollection.communities) >= communityId, E_COMMUNITY_DOES_NOT_EXIST); // TODO TESTS
-        // let community = vector::borrow(&mut communityCollection.communities, communityId - 1); // TODO: add get community?
+    public entry fun onlyNotFrezenCommunity(community: &Community) {
         assert!(!community.isFrozen, E_COMMUNITY_IS_FROZEN);
     }
 
-    public entry fun checkTags(community: &Community, tags: vector<u64>) {      // new transfer community &mut ? (drop)
+    public entry fun checkTags(community: &Community, tags: vector<u64>) {
         let i = 0;
         while(i < vector::length(&mut tags)) {
             let tagId = *vector::borrow(&tags, i);
@@ -147,42 +145,19 @@ module basics::communityLib {
         };
     }
 
-    // public fun getMutableCommunity(communityCollection: &mut CommunityCollection, communityId: u64): &mut Community {
-    //     onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
-    //     let community = vector::borrow_mut(&mut communityCollection.communities, communityId - 1);
-    //     community
-    // }
-
-    // public fun getCommunity(communityCollection: &mut CommunityCollection, communityId: u64): &Community {
-    //     onlyExistingAndNotFrozenCommunity(communityCollection, communityId);
-    //     let community = vector::borrow(&communityCollection.communities, communityId - 1);
-    //     community
-    // }
-
     public fun getMutableTag(community: &mut Community, tagId: u64): &mut Tag {
         assert!(tagId > 0, E_TAG_ID_CAN_NOT_BE_0);
-        assert!(vector::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);
-        let tag = vector::borrow_mut(&mut community.tags, tagId - 1);
+        assert!(table::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);
+        let tag = table::borrow_mut(&mut community.tags, tagId - 1);
         tag
     }
 
     public fun getTag(community: &Community, tagId: u64): &Tag {
         assert!(tagId > 0, E_TAG_ID_CAN_NOT_BE_0);
-        assert!(vector::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);
-        let tag = vector::borrow(&community.tags, tagId - 1);
+        assert!(table::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);
+        let tag = table::borrow(&community.tags, tagId - 1);
         tag
     }
-
-    // public entry fun printCommunit(community: Community) {      // del?
-    //     let Community { id: community_id, ipfsDoc: _ipfsDoc, timeCreate: _timeCreate, isFrozen: _isFrozen, tags: _tags } = community;
-    //     object::delete(community_id);
-    // }
-
-    // #[test_only]
-    // public entry fun printCommunity(community: &Community) {
-    //     // let community = vector::borrow(&communityCollection.communities, communityId);
-    //     debug::print(community);
-    // }
 
     #[test_only]
     public fun getCommunityData(community: &Community): (vector<u8>, u64, bool) {
@@ -193,11 +168,11 @@ module basics::communityLib {
     public fun getCommunityTags(community: &Community): (vector<commonLib::IpfsHash>) {
         let tags: vector<commonLib::IpfsHash> = vector::empty<commonLib::IpfsHash>();
         
-        let tagsLength = vector::length(&community.tags);
+        let tagsLength = table::length(&community.tags);
         assert!(tagsLength >= 5, E_REQUIRE_AT_LEAST_5_TAGS);
         let i = 0;
         while(i < tagsLength) {
-            vector::push_back(&mut tags, vector::borrow(&community.tags, i).ipfsDoc);
+            vector::push_back(&mut tags, table::borrow(&community.tags, i).ipfsDoc);
             i = i + 1;
         };
         tags

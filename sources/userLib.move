@@ -99,7 +99,7 @@ module basics::userLib {
         energy: u64,
         lastUpdatePeriod: u64,
         followedCommunities: vector<ID>,
-        userRatingId: ID,
+        userRatingId: ID,   // nned?
         // TODO: add roles                       // add userRatingCollection, periodRewardContainer, achievementsContainer ?
     }
 
@@ -220,7 +220,7 @@ module basics::userLib {
     }
 
     public entry fun followCommunity(userCollection: &mut UserCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
-        communityLib::onlyExistingAndNotFrozenCommunity(community);
+        communityLib::onlyNotFrezenCommunity(community);
         let userId = object::id(user);
         let _userAddress = tx_context::sender(ctx);  // del
         let userCommunityRating = getUserCommunityRating(userCollection, userId);
@@ -246,7 +246,7 @@ module basics::userLib {
     }
 
     public entry fun unfollowCommunity(userCollection: &mut UserCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
-        communityLib::onlyExistingAndNotFrozenCommunity(community);
+        communityLib::onlyNotFrezenCommunity(community);
         let _userAddress = tx_context::sender(ctx);      // del
         let userId = object::id(user);
         let userCommunityRating = getUserCommunityRating(userCollection, userId);
