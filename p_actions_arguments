@@ -11,9 +11,9 @@ freezeCommunity(Community)
 unfreezeCommunity(Community)
 
 
-0xd0c15d6d2e717b623dac4fb0383580524dac340cefe15f1403edd4f38df3eb6a - package
-0x91549dd918109fd83e625181a1f7e9bea8088f42e814009a88c36cfb2047b0e7 - userCollention
-0x8c28c3db40448474101f0e7805db0757102c88e94bb5d932a52c4a975f7a8e60 - community
-0x9b710c908aa22a581795ef2f50388139dafae94841513028151d12088726245d - PeriodRewardContainer
-0xac455c9ac57b899922f8ef44da76e60591ee029914fe71a291632f5342098530 - user
-0xba27faaeec81f9e445f05b726fe6277ccc723460f1ca01bc6da8b880ba638353 - userCommunityRating
+ - package
+ - userCollention
+ - community
+ - PeriodRewardContainer
+ - user
+ - userCommunityRating  // rating to user

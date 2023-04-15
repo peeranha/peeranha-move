@@ -404,46 +404,77 @@ module basics::postLib {
     }
 
     public entry fun editPost(
-        userCollection: &userLib::UserCollection,
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         post: &mut Post,
         postMetaData: &mut PostMetaData,
-        community: &communityLib::Community,
+        newCommunity: &communityLib::Community,
         ipfsHash: vector<u8>, 
         tags: vector<u64>,
-        newCommunityId: ID,
-        _newPostType: u8,
+        newPostType: u8,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
-        let _userAddr = tx_context::sender(ctx);             // del
+        // let _userAddr = tx_context::sender(ctx);             // del
         let userCommunityRating = userLib::getUserCommunityRating(userCollection, userId);
         // checkSigner(user, userCommunityRating, userAddr);
-        // changePostType(postMetaData, newPostType);                                  // TODO: add tests
-        // changePostCommunity(postMetaData, community, newCommunityId);               // TODO: add tests
 
-        /*if(userId == postMetaData.author) {*/
-            assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());       // todo: test
-            if(commonLib::getIpfsHash(post.ipfsDoc) != ipfsHash)
-                post.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());       // todo: test
+        if(commonLib::getIpfsHash(post.ipfsDoc) != ipfsHash)
+            post.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
 
-        // } else {     // recomment
-        //     assert!(commonLib::getIpfsHash(post.ipfsDoc) == ipfsHash, E_NOT_ALLOWED_EDIT_NOT_AUTHOR);       // todo: test
-        //     if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
-        //         abort E_ERROR_CHANGE_COMMUNITY_ID
-        // };
         userLib::checkActionRole(
             user,
             userCommunityRating,
             userId,
             postMetaData.author,
             postMetaData.communityId,
-            if(userId == postMetaData.author) userLib::get_action_edit_item() else userLib::get_action_none(),
+            userLib::get_action_edit_item(),
             /*false*/
         );
 
+        changePostType(userCollection, periodRewardContainer, postMetaData, newPostType, ctx);                      // TODO: add tests
+        changePostCommunity(userCollection, periodRewardContainer, postMetaData, newCommunity, ctx);                // TODO: add tests
         if(vector::length(&tags) > 0) {
-            communityLib::checkTags(community, postMetaData.tags);
+            communityLib::checkTags(newCommunity, postMetaData.tags);
+            postMetaData.tags = tags;
+        };
+
+        // TODO: add emit PostEdited(userAddr, postId);
+    }
+
+    public entry fun moderatorEditPostMetaData(
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        user: &mut userLib::User,
+        postMetaData: &mut PostMetaData,
+        newCommunity: &communityLib::Community,
+        tags: vector<u64>,
+        newPostType: u8,
+        ctx: &mut TxContext
+    ) {
+        let userId = object::id(user);
+        let userCommunityRating = userLib::getUserCommunityRating(userCollection, userId);
+
+        let newCommunityId = object::id(newCommunity);
+        if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
+            abort E_ERROR_CHANGE_COMMUNITY_ID;
+
+        userLib::checkActionRole(
+            user,
+            userCommunityRating,
+            userId,
+            postMetaData.author,
+            postMetaData.communityId,
+            userLib::get_action_none(),
+            /*false*/
+        );
+
+        changePostType(userCollection, periodRewardContainer, postMetaData, newPostType, ctx);                      // TODO: add tests
+        changePostCommunity(userCollection, periodRewardContainer, postMetaData, newCommunity, ctx);                // TODO: add tests
+        if(vector::length(&tags) > 0) {
+            communityLib::checkTags(newCommunity, postMetaData.tags);
             postMetaData.tags = tags;
         };
 
@@ -1128,10 +1159,12 @@ module basics::postLib {
         );
     }
 
-    /* transfer add      
     fun changePostType(
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postMetaData: &mut PostMetaData,
-        newPostType: u8
+        newPostType: u8,
+        ctx: &mut TxContext
     ) {
         if (postMetaData.postType == newPostType) return;
 
@@ -1159,49 +1192,60 @@ module basics::postLib {
 
             positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedReply, &oldTypeRating.upvotedReply), &i64Lib::from(positive));
             negativeRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.downvotedReply, &oldTypeRating.downvotedReply), &i64Lib::from(negative));
-            let _changeReplyAuthorRating = i64Lib::add(&positiveRating, &negativeRating);
+            let changeReplyAuthorRating = i64Lib::add(&positiveRating, &negativeRating);
 
             if (i64Lib::compare(&replyMetaData.rating, &i64Lib::zero()) == i64Lib::getGreaterThan() 
                 || i64Lib::compare(&replyMetaData.rating, &i64Lib::zero()) == i64Lib::getEual()) {
                 if (replyMetaData.isFirstReply) {
-                    _changeReplyAuthorRating = i64Lib::add(&_changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.firstReply, &oldTypeRating.firstReply));
+                    changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.firstReply, &oldTypeRating.firstReply));
                 };
                 if (replyMetaData.isQuickReply) {
-                    _changeReplyAuthorRating = i64Lib::add(&_changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.quickReply, &oldTypeRating.quickReply));
+                    changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.quickReply, &oldTypeRating.quickReply));
                 };
             };
-            if (bestReplyId == object::id(replyMetaData)) {
-                _changeReplyAuthorRating = i64Lib::add(&_changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.acceptReply, &oldTypeRating.acceptReply));
+            if (bestReplyId == replyId) {
+                changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.acceptReply, &oldTypeRating.acceptReply));
                 changePostAuthorRating = i64Lib::add(&changePostAuthorRating, &i64Lib::sub(&newTypeRating.acceptedReply, &oldTypeRating.acceptedReply));
             };
-            // TODO: add
-            // self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, postContainer.info.communityId);
-            
-            // userLib::updateRatingNotFull(
-            //     replyMetaData.author,
-            //     userCommunityRating,
-            //     changePostAuthorRating,
-            //     postMetaData.communityId
-            // );
+
+            let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(userCollection, replyMetaData.author);
+            userLib::updateRating(
+                replyAuthorCommunityRating,
+                periodRewardContainer,
+                replyMetaData.author,
+                changeReplyAuthorRating,
+                postMetaData.communityId,
+                ctx
+            );
             replyId = replyId + 1;
         };
+        let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(userCollection, postMetaData.author);
+        userLib::updateRating(
+            postAuthorCommunityRating,
+            periodRewardContainer,
+            postMetaData.author,
+            changePostAuthorRating,
+            postMetaData.communityId,
+            ctx
+        );
 
-        // self.peeranhaUser.updateUserRating(postContainer.info.author, changePostAuthorRating, postContainer.info.communityId);
         postMetaData.postType = newPostType;
         // TODO: add
         // emit ChangePostType(userAddr, postId, newPostType);
-    */
+    }
 
-    /* transfer add 
     fun changePostCommunity(
+        userCollection: &mut userLib::UserCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postMetaData: &mut PostMetaData,
-        community: &communityLib::Community, // new transfer community &mut
-        newCommunityId: ID
+        community: &communityLib::Community,
+        ctx: &mut TxContext
     ) {
+        let newCommunityId = object::id(community);
         if (postMetaData.communityId == newCommunityId) return;
 
         communityLib::onlyNotFrezenCommunity(community);
-        let _oldCommunityId: ID = postMetaData.communityId;
+        let oldCommunityId: ID = postMetaData.communityId;
         let postType: u8 = postMetaData.postType;
         let typeRating: StructRating = getTypesRating(postType);
 
@@ -1209,54 +1253,81 @@ module basics::postLib {
 
         let positiveRating = i64Lib::mul(&typeRating.upvotedPost, &i64Lib::from(positive));
         let negativeRating = i64Lib::mul(&typeRating.downvotedPost, &i64Lib::from(negative));
-        let _changePostAuthorRating = i64Lib::add(&positiveRating, &negativeRating);
+        let changePostAuthorRating = i64Lib::add(&positiveRating, &negativeRating);
 
         let bestReplyId = postMetaData.bestReply;
         let replyId = 1;
         while(replyId <= table::length(&postMetaData.replies)) {
             // let reply = getReplyContainer(post, replyId);
-            let reply = table::borrow(&postMetaData.replies, replyId - 1);
-            if (reply.isDeleted) {
+            let replyMetaData = table::borrow(&postMetaData.replies, replyId - 1);
+            if (replyMetaData.isDeleted) {
                 replyId = replyId + 1;
                 continue
             };
-            (positive, negative) = getHistoryInformations(reply.historyVotes, reply.voteUsers);
+            (positive, negative) = getHistoryInformations(replyMetaData.historyVotes, replyMetaData.voteUsers);
 
             positiveRating = i64Lib::mul(&typeRating.upvotedReply, &i64Lib::from(positive));
             negativeRating = i64Lib::mul(&typeRating.downvotedReply, &i64Lib::from(negative));
             let changeReplyAuthorRating = i64Lib::add(&positiveRating, &negativeRating);
-            if (i64Lib::compare(&reply.rating, &i64Lib::zero()) == i64Lib::getGreaterThan() 
-                || i64Lib::compare(&reply.rating, &i64Lib::zero()) == i64Lib::getEual()) {
-                if (reply.isFirstReply) {
+            if (i64Lib::compare(&replyMetaData.rating, &i64Lib::zero()) == i64Lib::getGreaterThan() 
+                || i64Lib::compare(&replyMetaData.rating, &i64Lib::zero()) == i64Lib::getEual()) {
+                if (replyMetaData.isFirstReply) {
                     changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.firstReply);
                 };
-                if (reply.isQuickReply) {
+                if (replyMetaData.isQuickReply) {
                     changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.quickReply);
                 };
             };
-            if (bestReplyId == object::id(reply.id)) {
+            if (bestReplyId == replyId) {
                 changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptReply);
-                _changePostAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptedReply);
+                changePostAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptedReply);
             };
 
-            // todo
-            // self.peeranhaUser.updateUserRating(replyContainer.info.author, -changeReplyAuthorRating, oldCommunityId);
-            // self.peeranhaUser.updateUserRating(replyContainer.info.author, changeReplyAuthorRating, newCommunityId);
+            let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(userCollection, replyMetaData.author);
+            userLib::updateRating(
+                replyAuthorCommunityRating,
+                periodRewardContainer,
+                postMetaData.author,
+                i64Lib::mul(&changeReplyAuthorRating, &i64Lib::neg_from(1)),
+                oldCommunityId,
+                ctx
+            );
+            userLib::updateRating(
+                replyAuthorCommunityRating,
+                periodRewardContainer,
+                postMetaData.author,
+                changeReplyAuthorRating,
+                newCommunityId,
+                ctx
+            );
             replyId = replyId + 1;
         };
 
-        //todo
-        // self.peeranhaUser.updateUserRating(postContainer.info.author, -changePostAuthorRating, oldCommunityId);
-        // self.peeranhaUser.updateUserRating(postContainer.info.author, changePostAuthorRating, newCommunityId);
+        let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(userCollection, postMetaData.author);
+        userLib::updateRating(
+            postAuthorCommunityRating,
+            periodRewardContainer,
+            postMetaData.author,
+            i64Lib::mul(&changePostAuthorRating, &i64Lib::neg_from(1)),
+            oldCommunityId,
+            ctx
+        );
+        userLib::updateRating(
+            postAuthorCommunityRating,
+            periodRewardContainer,
+            postMetaData.author,
+            changePostAuthorRating,
+            newCommunityId,
+            ctx
+        );
         postMetaData.communityId = newCommunityId;
     }
-    */
 
     public entry fun addUserRating(     // del
         userCollection: &mut userLib::UserCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
-        community: &mut userLib::UserCollection,
+        community: &communityLib::Community,
         changeRating: u64,
         isPositive: bool,
         ctx: &mut TxContext
