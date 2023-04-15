@@ -81,7 +81,7 @@ module basics::userLib {
     const ENERGY_UPDATE_PROFILE: u64 = 1;
     const ENERGY_FOLLOW_COMMUNITY: u64 = 1;
 
-    struct UserCollection has key {         // Container || Collection??    // name UserRating...
+    struct UsersRatingCollection has key {
         id: UID,
         usersCommunityRating: Table<ID, UserCommunityRating>,
         // roles: accessControl::Role,
@@ -143,7 +143,7 @@ module basics::userLib {
     }
 
     fun init(ctx: &mut TxContext) {
-        transfer::share_object(UserCollection {
+        transfer::share_object(UsersRatingCollection {
             id: object::new(ctx),
             usersCommunityRating: table::new(ctx),
             // roles: accessControl::initRole()
@@ -160,14 +160,14 @@ module basics::userLib {
         init(ctx)
     }
 
-    public entry fun createUser(userCollection: &mut UserCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
+    public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
         let owner = tx_context::sender(ctx);
-        createUserPrivate(userCollection, owner, ipfsDoc, ctx)
+        createUserPrivate(usersRatingCollection, owner, ipfsDoc, ctx)
     }
 
-    fun createUserPrivate(userCollection: &mut UserCollection, userAddress: address, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    fun createUserPrivate(usersRatingCollection: &mut UsersRatingCollection, userAddress: address, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
-        // assert!(!isExists(userCollection, userAddress), E_USER_EXIST); // TODO: TEST     new transfer ???
+        // assert!(!isExists(userRatingCollection, userAddress), E_USER_EXIST); // TODO: TEST     new transfer ???
 
         let userCommunityRating = UserCommunityRating {
             id: object::new(ctx),
@@ -184,28 +184,28 @@ module basics::userLib {
             userRatingId: object::id(&userCommunityRating)
         };
 
-        table::add(&mut userCollection.usersCommunityRating, object::id(&user), userCommunityRating);
+        table::add(&mut usersRatingCollection.usersCommunityRating, object::id(&user), userCommunityRating);
         event::emit(EvUser {userId: object::id(&user)});
         transfer::transfer(
             user, userAddress
         );
     }
 
-    // public entry fun createIfDoesNotExist(userCollection: &mut UserCollection, userAddress: address) {       // new transfer ???
-    //     if (!isExists(userCollection, userAddress)) {
-    //         createUserPrivate(userCollection, userAddress, DEFAULT_IPFS);
+    // public fun createIfDoesNotExist(usersRatingCollection: &mut UsersRatingCollection, userAddress: address) {       // new transfer ???
+    //     if (!isExists(userRatingCollection, userAddress)) {
+    //         createUserPrivate(userRatingCollection, userAddress, DEFAULT_IPFS);
     //     }
     // }
 
-    public entry fun updateUser(userCollection: &mut UserCollection, user: &mut User, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
+    public entry fun updateUser(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);  // del
-        // createIfDoesNotExist(userCollection, userAddress);   // add?
-        updateUserPrivate(userCollection, user, ipfsDoc);
+        // createIfDoesNotExist(usersRatingCollection, userAddress);   // add?
+        updateUserPrivate(usersRatingCollection, user, ipfsDoc);
     }
 
-    entry fun updateUserPrivate(userCollection: &mut UserCollection, user: &mut User, ipfsHash: vector<u8>) {
+    entry fun updateUserPrivate(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsHash: vector<u8>) {
         let userId = object::id(user);
-        let userCommunityRating = getUserCommunityRating(userCollection, userId);
+        let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
 
         checkRatingAndEnergy(
             user,
@@ -219,11 +219,11 @@ module basics::userLib {
         event::emit(EvUser {userId: userId});
     }
 
-    public entry fun followCommunity(userCollection: &mut UserCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
+    public entry fun followCommunity(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
         communityLib::onlyNotFrezenCommunity(community);
         let userId = object::id(user);
         let _userAddress = tx_context::sender(ctx);  // del
-        let userCommunityRating = getUserCommunityRating(userCollection, userId);
+        let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
 
         checkRatingAndEnergy(
             user,
@@ -245,11 +245,11 @@ module basics::userLib {
         event::emit(EvFollowCommunity{userId: userId, communityId: community_id});
     }
 
-    public entry fun unfollowCommunity(userCollection: &mut UserCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
+    public entry fun unfollowCommunity(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
         communityLib::onlyNotFrezenCommunity(community);
         let _userAddress = tx_context::sender(ctx);      // del
         let userId = object::id(user);
-        let userCommunityRating = getUserCommunityRating(userCollection, userId);
+        let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
 
         let user = checkRatingAndEnergy(
             user,
@@ -278,30 +278,30 @@ module basics::userLib {
         1000
     }
 
-    // public fun isExists(userCollection: &mut UserCollection, userAddress: address): bool { 
-    //     let position = vec_map::get_idx_opt(&mut userCollection.users, &userAddress);
+    // public fun isExists(usersRatingCollection: &mut UsersRatingCollection, userAddress: address): bool { 
+    //     let position = vec_map::get_idx_opt(&mut userRatingCollection.users, &userAddress);
     //     !option::is_none(&position)
     // }
 
-    // public fun getUser(userCollection: &mut UserCollection, userAddress: address): User {
-    //     let position = vec_map::get_idx_opt(&mut userCollection.users, &userAddress);
+    // public fun getUser(usersRatingCollection: &mut UsersRatingCollection, userAddress: address): User {
+    //     let position = vec_map::get_idx_opt(&mut userRatingCollection.users, &userAddress);
     //     if (option::is_none(&position)) {
     //         abort E_USER_DOES_NOT_EXIST
     //     } else {
     //         // TODO: add
-    //         // let user = vec_map::get(&userCollection.users, &userAddress);
+    //         // let user = vec_map::get(&userRatingCollection.users, &userAddress);
     //         // user
-    //         let user = vec_map::get_mut(&mut userCollection.users, &userAddress);
+    //         let user = vec_map::get_mut(&mut userRatingCollection.users, &userAddress);
     //         *user
     //     }
     // }
 
-    // public fun getMutableUser(userCollection: &mut UserCollection, userAddress: address): &mut User {
-    //     let position = vec_map::get_idx_opt(&mut userCollection.users, &userAddress);
+    // public fun getMutableUser(usersRatingCollection: &mut UsersRatingCollection, userAddress: address): &mut User {
+    //     let position = vec_map::get_idx_opt(&mut userRatingCollection.users, &userAddress);
     //     if (option::is_none(&position)) {
     //         abort E_USER_DOES_NOT_EXIST
     //     } else {
-    //         let user = vec_map::get_mut(&mut userCollection.users, &userAddress);
+    //         let user = vec_map::get_mut(&mut userRatingCollection.users, &userAddress);
     //         user
     //     }
     // }
@@ -553,9 +553,9 @@ module basics::userLib {
        
         /*
         if (createUserIfDoesNotExist) {                     // new transfer ??? commented
-            createIfDoesNotExist(userCollection, actionCaller);
+            createIfDoesNotExist(userRatingCollection, actionCaller);
         } else {
-            checkUser(userCollection, actionCaller);        // need?
+            checkUser(userRatingCollection, actionCaller);        // need?
         }; 
         */
 
@@ -698,8 +698,8 @@ module basics::userLib {
         user.energy = userEnergy - energy;
     }
 
-    // fun checkUser(userCollection: &mut UserCollection, addr: address) {
-    //     assert!(isExists(userCollection, addr), E_USER_NOT_FOUND);
+    // fun checkUser(usersRatingCollection: &mut UsersRatingCollection, addr: address) {
+    //     assert!(isExists(userRatingCollection, addr), E_USER_NOT_FOUND);
     // }
 
     fun getMutableTotalRewardShares(periodRewardContainer: &mut PeriodRewardContainer, period: u64): &mut PeriodRewardShares {
@@ -719,7 +719,7 @@ module basics::userLib {
         }
     }
 
-    // TODO: add userCollection: &mut UserCollection 1-st argument
+    // TODO: add usersRatingCollection: &mut UsersRatingCollection 1-st argument
     fun getRewardShare(_userId: ID, _period: u64, rating: i64Lib::I64): i64Lib::I64 { // FIX
         // TODO: add
         /*return CommonLib.toInt32FromUint256(userContext.peeranhaToken.getBoost(userAddr, period)) * */ rating
@@ -740,12 +740,12 @@ module basics::userLib {
         user.userRatingId
     }
 
-    public fun getUserCommunityRating(userCollection: &UserCollection, userId: ID): &UserCommunityRating {
-        table::borrow(&userCollection.usersCommunityRating, userId)
+    public fun getUserCommunityRating(usersRatingCollection: &UsersRatingCollection, userId: ID): &UserCommunityRating {
+        table::borrow(&usersRatingCollection.usersCommunityRating, userId)
     }
 
-    public fun getMutableUserCommunityRating(userCollection: &mut UserCollection, userId: ID): &mut UserCommunityRating {
-        table::borrow_mut(&mut userCollection.usersCommunityRating, userId)
+    public fun getMutableUserCommunityRating(usersRatingCollection: &mut UsersRatingCollection, userId: ID): &mut UserCommunityRating {
+        table::borrow_mut(&mut usersRatingCollection.usersCommunityRating, userId)
     }
 
     // public entry fun mass_mint(recipients: vector<address>, ctx: &mut TxContext) {
@@ -759,17 +759,17 @@ module basics::userLib {
     //     }
     // }
 
-    // public entry fun printUserCollection(userCollection: &mut UserCollection) {
-    //     debug::print(userCollection);
+    // public entry fun printUsersRatingCollection(usersRatingCollection: &mut UsersRatingCollection) {
+    //     debug::print(userRatingCollection);
     // }
 
-    // public entry fun printUser(userCollection: &mut UserCollection, owner: address) {
-    //     let (isExist, position) = vector::index_of(&mut userCollection.userAddress, &owner);
+    // public entry fun printUser(usersRatingCollection: &mut UsersRatingCollection, owner: address) {
+    //     let (isExist, position) = vector::index_of(&mut userRatingCollection.userAddress, &owner);
     //     debug::print(&isExist);
     //     debug::print(&position);
 
     //     if (isExist) {
-    //         let user = vector::borrow(&mut userCollection.users, position);
+    //         let user = vector::borrow(&mut userRatingCollection.users, position);
     //         debug::print(user);
     //     }
     // }
@@ -833,7 +833,7 @@ module basics::userLib {
     
     
     #[test_only]
-    public fun create_user(userCollection: &mut UserCollection, scenario: &mut TxContext) {
-        createUser(userCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", scenario);
+    public fun create_user(usersRatingCollection: &mut UsersRatingCollection, scenario: &mut TxContext) {
+        createUser(usersRatingCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", scenario);
     }
 }

@@ -31,15 +31,15 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
 
             postLib::createPost(
                 postCollection,
                 communityCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
                 EXPERT_POST,
@@ -102,11 +102,11 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
             
             postLib::createReply(
                 postCollection,
@@ -166,11 +166,11 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::createComment(
                 postCollection,
@@ -223,11 +223,11 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
             postLib::create_reply(postCollection, test_scenario::ctx(scenario));
 
             postLib::createComment(
@@ -281,11 +281,11 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::editPost(
                 postCollection,
@@ -353,11 +353,11 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
             postLib::create_reply(postCollection, test_scenario::ctx(scenario));
 
             postLib::editReply(
@@ -418,11 +418,11 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
             postLib::create_reply(postCollection, test_scenario::ctx(scenario));
             postLib::createComment(
                 postCollection,
@@ -484,11 +484,11 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
             postLib::create_reply(postCollection, test_scenario::ctx(scenario));
             postLib::createComment(
                 postCollection,
@@ -550,15 +550,15 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
             
             postLib::deletePost(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 test_scenario::ctx(scenario)
             );
@@ -605,16 +605,16 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
             postLib::create_reply(postCollection, test_scenario::ctx(scenario));
             
             postLib::deleteReply(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 1,
                 test_scenario::ctx(scenario)
@@ -659,11 +659,11 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
             postLib::createComment(
                 postCollection,
                 1,
@@ -716,11 +716,11 @@ module basics::postLib_test
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post(postCollection, communityCollection, userCollection, test_scenario::ctx(scenario));
+            postLib::create_post(postCollection, communityCollection, userRatingCollection, test_scenario::ctx(scenario));
             postLib::create_reply(postCollection, test_scenario::ctx(scenario));
 
             postLib::createComment(

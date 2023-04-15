@@ -1,7 +1,7 @@
-createUser(UserCollection, ipfsDoc: vector<u8>)
-updateUser(UserCollection, User, ipfsDoc: vector<u8>)
-followCommunity(UserCollection, User, Community)
-unfollowCommunity(UserCollection, User, Community)
+createUser(UsersRatingCollection, ipfsDoc: vector<u8>)
+updateUser(UsersRatingCollection, User, ipfsDoc: vector<u8>)
+followCommunity(UsersRatingCollection, User, Community)
+unfollowCommunity(UsersRatingCollection, User, Community)
 
 createCommunity(ipfsHash: vector<u8>, tags: vector<vector<u8>>)
 updateCommunity(Community, ipfsHash: vector<u8>)

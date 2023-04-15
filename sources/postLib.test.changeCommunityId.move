@@ -23,16 +23,16 @@ module basics::postLib_test_changeCommunityId
     const USER: address = @0xA1;
 
     fun change_name(        // todo: change name
-        userCollection: &mut userLib::UserCollection,
+        usersRatingCollection: &mut userLib::UsersRatingCollection,
         communityCollection: &mut communityLib::CommunityCollection,
         postCollection: &mut postLib::PostCollection,
         scenario: &mut Scenario,
         post_type: u8
     ) {        // name from tests solidity
-        userLib::create_user(userCollection, test_scenario::ctx(scenario));
+        userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
         communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
         communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-        postLib::create_post_with_type(postCollection, communityCollection, userCollection, post_type, test_scenario::ctx(scenario));
+        postLib::create_post_with_type(postCollection, communityCollection, userRatingCollection, post_type, test_scenario::ctx(scenario));
     }
 
 
@@ -52,11 +52,11 @@ module basics::postLib_test_changeCommunityId
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post_with_type(postCollection, communityCollection, userCollection, EXPERT_POST, test_scenario::ctx(scenario));
+            postLib::create_post_with_type(postCollection, communityCollection, userRatingCollection, EXPERT_POST, test_scenario::ctx(scenario));
 
             postLib::editPost(
                 postCollection,
@@ -92,11 +92,11 @@ module basics::postLib_test_changeCommunityId
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-            postLib::create_post_with_type(postCollection, communityCollection, userCollection, EXPERT_POST, test_scenario::ctx(scenario));
+            postLib::create_post_with_type(postCollection, communityCollection, userRatingCollection, EXPERT_POST, test_scenario::ctx(scenario));
 
             postLib::editPost(
                 postCollection,
@@ -132,9 +132,9 @@ module basics::postLib_test_changeCommunityId
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            change_name(userCollection, communityCollection, postCollection, scenario, EXPERT_POST);
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            change_name(userRatingCollection, communityCollection, postCollection, scenario, EXPERT_POST);
             communityLib::freezeCommunity(communityCollection, 2, test_scenario::ctx(scenario));
 
             postLib::editPost(
@@ -171,9 +171,9 @@ module basics::postLib_test_changeCommunityId
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            change_name(userCollection, communityCollection, postCollection, scenario, EXPERT_POST);
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            change_name(userRatingCollection, communityCollection, postCollection, scenario, EXPERT_POST);
 
             postLib::editPost(
                 postCollection,
@@ -228,9 +228,9 @@ module basics::postLib_test_changeCommunityId
             let communityCollection = &mut community_val;
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            change_name(userCollection, communityCollection, postCollection, scenario, EXPERT_POST);
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            change_name(userRatingCollection, communityCollection, postCollection, scenario, EXPERT_POST);
             communityLib::create_community(communityCollection, test_scenario::ctx(scenario)); // create default community
 
             postLib::editPost(

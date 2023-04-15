@@ -31,11 +31,11 @@ module basics::postLib_test_vote
         let communityCollection = &mut community_val;
         let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
         let postCollection = &mut post_val;
-        let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-        let userCollection = &mut user_val;
-        userLib::create_user(userCollection, test_scenario::ctx(scenario));
+        let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+        let userRatingCollection = &mut user_val;
+        userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
         communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-        postLib::create_post_with_type(postCollection, communityCollection, userCollection, post_type, test_scenario::ctx(scenario));
+        postLib::create_post_with_type(postCollection, communityCollection, userRatingCollection, post_type, test_scenario::ctx(scenario));
 
         test_scenario::return_shared(community_val);
         test_scenario::return_shared(post_val);
@@ -61,13 +61,13 @@ module basics::postLib_test_vote
         {
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -133,13 +133,13 @@ module basics::postLib_test_vote
         {
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -149,7 +149,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -206,13 +206,13 @@ module basics::postLib_test_vote
         {
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -222,7 +222,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -232,7 +232,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -289,13 +289,13 @@ module basics::postLib_test_vote
         {
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -305,7 +305,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -362,13 +362,13 @@ module basics::postLib_test_vote
         {
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -378,7 +378,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -388,7 +388,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -445,13 +445,13 @@ module basics::postLib_test_vote
         {
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -517,13 +517,13 @@ module basics::postLib_test_vote
         {
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -533,7 +533,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -590,13 +590,13 @@ module basics::postLib_test_vote
         {
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -606,7 +606,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -616,7 +616,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -673,13 +673,13 @@ module basics::postLib_test_vote
         {
             let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
             let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UserCollection>(scenario);
-            let userCollection = &mut user_val;
-            userLib::create_user(userCollection, test_scenario::ctx(scenario));
+            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
+            let userRatingCollection = &mut user_val;
+            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,
@@ -689,7 +689,7 @@ module basics::postLib_test_vote
 
             postLib::voteForumItem(
                 postCollection,
-                userCollection,
+                userRatingCollection,
                 1,
                 0,
                 0,

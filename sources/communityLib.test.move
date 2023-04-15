@@ -2,7 +2,7 @@
 // module basics::communityLib_test
 // {
 //     use basics::communityLib::{Self, Community};
-//     use basics::userLib::{Self, UserCollection};
+//     use basics::userLib::{Self, UsersRatingCollection};
 //     use sui::test_scenario::{Self, Scenario};
 
 //     // use std::debug;
@@ -21,9 +21,9 @@
 
 //         test_scenario::next_tx(scenario, USER1);
 //         {
-//             let userCollection_val = test_scenario::take_shared<UserCollection>(scenario);
-//             let userCollection = &mut userCollection_val;
-//             userLib::createUser(userCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+//             let userRatingCollection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
+//             let userRatingCollection = &mut userRatingCollection_val;
+//             userLib::createUser(userRatingCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
 
 //             communityLib::createCommunity(
 //                 // communityCollection,
@@ -37,7 +37,7 @@
 //                 ],
 //                 test_scenario::ctx(scenario)
 //             );
-//             test_scenario::return_shared(userCollection_val);
+//             test_scenario::return_shared(userRatingCollection_val);
 //         };
 
 //         test_scenario::next_tx(scenario, USER1);
@@ -66,10 +66,10 @@
 
 //     #[test_only]
 //     fun create_user_and_community(scenario: &mut Scenario) {
-//         let userCollection_val = test_scenario::take_shared<UserCollection>(scenario);
-//         let userCollection = &mut userCollection_val;
+//         let userRatingCollection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
+//         let userRatingCollection = &mut userRatingCollection_val;
 
-//         userLib::createUser(userCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+//         userLib::createUser(userRatingCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
 //         communityLib::createCommunity(
 //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
 //             vector<vector<u8>>[
@@ -81,7 +81,7 @@
 //             ],
 //             test_scenario::ctx(scenario)
 //         );
-//         test_scenario::return_shared(userCollection_val);
+//         test_scenario::return_shared(userRatingCollection_val);
 //     }
 
 //     #[test]
