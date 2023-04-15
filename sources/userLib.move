@@ -95,7 +95,6 @@ module basics::userLib {
     struct User has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
-        owner: address,             // del
         energy: u64,
         lastUpdatePeriod: u64,
         followedCommunities: vector<ID>,
@@ -161,14 +160,15 @@ module basics::userLib {
     }
 
     public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
-        let owner = tx_context::sender(ctx);
-        createUserPrivate(usersRatingCollection, owner, ipfsDoc, ctx)
+        // let owner = tx_context::sender(ctx);
+        createUserPrivate(usersRatingCollection, ipfsDoc, ctx)
     }
 
-    fun createUserPrivate(usersRatingCollection: &mut UsersRatingCollection, userAddress: address, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    fun createUserPrivate(usersRatingCollection: &mut UsersRatingCollection, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
         // assert!(!isExists(userRatingCollection, userAddress), E_USER_EXIST); // TODO: TEST     new transfer ???
 
+        let owner = tx_context::sender(ctx);
         let userCommunityRating = UserCommunityRating {
             id: object::new(ctx),
             userRating: vec_map::empty(),
@@ -177,7 +177,6 @@ module basics::userLib {
         let user = User {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            owner: userAddress,
             energy: getStatusEnergy(),
             lastUpdatePeriod: commonLib::getPeriod(),
             followedCommunities: vector::empty<ID>(),
@@ -187,7 +186,7 @@ module basics::userLib {
         table::add(&mut usersRatingCollection.usersCommunityRating, object::id(&user), userCommunityRating);
         event::emit(EvUser {userId: object::id(&user)});
         transfer::transfer(
-            user, userAddress
+            user, owner
         );
     }
 
@@ -732,10 +731,6 @@ module basics::userLib {
         else i64Lib::zero() // from negative to negative
     }
 
-    public fun getUserOwner(user: &User): address {
-        user.owner
-    }
-
     public fun getUserRatingId(user: &User): ID {
         user.userRatingId
     }
@@ -827,8 +822,8 @@ module basics::userLib {
     }
 
     #[test_only]
-    public fun getUserData(user: &mut User): (vector<u8>, address, u64, u64, vector<ID>) {
-        (commonLib::getIpfsHash(user.ipfsDoc), user.owner, user.energy, user.lastUpdatePeriod, user.followedCommunities)
+    public fun getUserData(user: &mut User): (vector<u8>, u64, u64, vector<ID>) {
+        (commonLib::getIpfsHash(user.ipfsDoc), user.energy, user.lastUpdatePeriod, user.followedCommunities)
     }
     
     
