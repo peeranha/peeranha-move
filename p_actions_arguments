@@ -9,11 +9,3 @@ createTag(Community, ipfsHash: vector<u8>)
 <!-- updateTag(Tag, ipfsHash: vector<u8>) -->
 freezeCommunity(Community)
 unfreezeCommunity(Community)
-
-
- - package
- - userCollention
- - community
- - PeriodRewardContainer
- - user
- - userCommunityRating  // rating to user

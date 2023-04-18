@@ -137,7 +137,7 @@ module basics::communityLib {
     }
 
     public entry fun checkTags(community: &Community, tags: vector<u64>) {
-        let i = 0;
+        let i = 1;
         while(i < vector::length(&mut tags)) {
             let tagId = *vector::borrow(&tags, i);
             getTag(community, tagId);
@@ -172,7 +172,7 @@ module basics::communityLib {
         assert!(tagsLength >= 5, E_REQUIRE_AT_LEAST_5_TAGS);
         let i = 0;
         while(i < tagsLength) {
-            vector::push_back(&mut tags, table::borrow(&community.tags, i).ipfsDoc);
+            vector::push_back(&mut tags, table::borrow(&community.tags, i + 1).ipfsDoc);
             i = i + 1;
         };
         tags

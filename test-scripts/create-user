@@ -1,1 +1,0 @@
-sui client call --function createUser --module userLib --package 0x5943a6290d1ae6a0aa6e7f6c4858e4eb6724fdc854a072d8612fd70b509b5d61 --args 0xe94214356ef55fe2ed27beaf4407bb0baef5a5ad21ca3f6880dba43e2e15d3ff a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1 --gas-budget 20000000

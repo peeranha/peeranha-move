@@ -1,3 +1,75 @@
+    // #[test]
+    // fun test_create_post() {       // del
+    //     let scenario_val = test_scenario::begin(USER1);
+    //     let scenario = &mut scenario_val;
+    //     {
+    //         userLib::init_test(test_scenario::ctx(scenario));
+    //     };
+
+    //     test_scenario::next_tx(scenario, USER1);
+    //     {
+    //         let userRatingCollection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
+    //         let userRatingCollection = &mut userRatingCollection_val;
+    //         userLib::createUser(userRatingCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+
+    //         communityLib::createCommunity(
+    //             // communityCollection,
+    //             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+    //             vector<vector<u8>>[
+    //                 x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
+    //                 x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
+    //                 x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc",
+    //                 x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc",
+    //                 x"a1fe8ede53e1989db4eb913bf789759b3573c101d2410343e151908823b4acd8"
+    //             ],
+    //             test_scenario::ctx(scenario)
+    //         );
+    //         test_scenario::return_shared(userRatingCollection_val);
+    //     };
+
+        
+    //     test_scenario::next_tx(scenario, USER1);
+    //     {
+    //         let usersRatingCollection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
+    //         let usersRatingCollection = &mut usersRatingCollection_val;
+    //         let community_val = test_scenario::take_shared<Community>(scenario);
+    //         let community = &mut community_val;
+    //         let user_val = test_scenario::take_from_sender<User>(scenario);
+    //         let user = &mut user_val;
+            
+    //         postLib::createPost(usersRatingCollection, user, community, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 0, vector<u64>[1], test_scenario::ctx(scenario));
+
+    //         test_scenario::return_shared(usersRatingCollection_val);
+    //         test_scenario::return_shared(community_val);
+    //         test_scenario::return_to_sender(scenario, user_val);
+    //     };
+
+    //     test_scenario::next_tx(scenario, USER1);
+    //     {
+    //         let usersRatingCollection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
+    //         let usersRatingCollection = &mut usersRatingCollection_val;
+    //         let periodRewardContainer_val = test_scenario::take_shared<PeriodRewardContainer>(scenario);
+    //         let periodRewardContainer = &mut periodRewardContainer_val;
+    //         // let community_val = test_scenario::take_shared<Community>(scenario);
+    //         // let community = &mut community_val;
+    //         let postMetaData_val = test_scenario::take_shared<PostMetaData>(scenario);
+    //         let postMetaData = &mut postMetaData_val;
+    //         let user_val = test_scenario::take_from_sender<User>(scenario);
+    //         let user = &mut user_val;
+            
+    //         postLib::createReply(usersRatingCollection, periodRewardContainer, user, postMetaData, 0, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", false, test_scenario::ctx(scenario));
+
+    //         test_scenario::return_shared(usersRatingCollection_val);
+    //         test_scenario::return_shared(postMetaData_val);
+    //         test_scenario::return_shared(periodRewardContainer_val);
+    //         // test_scenario::return_shared(community_val);
+    //         test_scenario::return_to_sender(scenario, user_val);
+    //     };
+
+    //     test_scenario::end(scenario_val);
+    // }
+
+
 /*
 #[test_only]
 module basics::postLib_test
