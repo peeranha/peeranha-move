@@ -19,7 +19,7 @@ module basics::userLib {
     const E_ALREADY_FOLLOWED: u64 = 11;
     const E_COMMUNITY_NOT_FOLOWED: u64 = 12;
     const E_USER_NOT_FOUND: u64 = 13;
-    const E_NOT_ALLOWED_EDIT: u64 = 14;
+    // const E_NOT_ALLOWED_EDIT: u64 = 14;
     const E_NOT_ALLOWED_DELETE: u64 = 15;
     const E_NOT_ALLOWED_VOTE_POST: u64 = 16;
     const E_NOT_ALLOWED_VOTE_REPLY: u64 = 17;
@@ -615,7 +615,7 @@ module basics::userLib {
             energy = ENERGY_POST_COMMENT;
 
         } else if (action == ACTION_EDIT_ITEM) {
-            assert!(actionCaller == dataUser, E_NOT_ALLOWED_EDIT);
+            // assert!(actionCaller == dataUser, E_NOT_ALLOWED_EDIT);
             ratingAllowed = i64Lib::neg_from(MINIMUM_RATING);
             // message = "low_rating_edit";
             energy = ENERGY_MODIFY_ITEM;
