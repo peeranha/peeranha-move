@@ -147,7 +147,7 @@ module basics::userLib {
         communityId: ID
     }
 
-    struct UnFollowCommunityEvent has copy, drop {
+    struct UnfollowCommunityEvent has copy, drop {
         userId: ID,
         communityId: ID
     }
@@ -278,7 +278,7 @@ module basics::userLib {
             if(*vector::borrow(&user.followedCommunities, i) == community_id) {
                 vector::remove(&mut user.followedCommunities, i);
 
-                event::emit(UnFollowCommunityEvent{userId: userId, communityId: community_id});
+                event::emit(UnfollowCommunityEvent{userId: userId, communityId: community_id});
                 return
             };
             i = i +1;
