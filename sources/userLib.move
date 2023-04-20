@@ -105,6 +105,7 @@ module basics::userLib {
     struct UserCommunityRating has key, store {    // shared
         id: UID,
         userRating: VecMap<ID, i64Lib::I64>,               // key - communityId         // vecMap??
+        // uint16[] rewardPeriods; // periods when the rating was changed               // add?
         userPeriodRewards: VecMap<u64, UserPeriodRewards>,  // key - period             // vecMap??
     }
 
@@ -305,6 +306,20 @@ module basics::userLib {
     //     }
     // }
 
+    public fun updateRating(userCommunityRating: &mut UserCommunityRating, _periodRewardContainer: &mut PeriodRewardContainer, _userId: ID, rating: i64Lib::I64, communityId: ID, _ctx: &mut TxContext) {
+        if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
+            return;
+        
+        let position = vec_map::get_idx_opt(&mut userCommunityRating.userRating, &communityId);
+        if (option::is_none(&position)) {
+            vec_map::insert(&mut userCommunityRating.userRating, communityId, i64Lib::from(START_USER_RATING));
+        };
+
+        let userRating = vec_map::get_mut(&mut userCommunityRating.userRating, &communityId);
+        *userRating = i64Lib::add(&*userRating, &rating);
+    }
+
+    /*
     public fun updateRating(userCommunityRating: &mut UserCommunityRating, periodRewardContainer: &mut PeriodRewardContainer, userId: ID, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
@@ -534,6 +549,7 @@ module basics::userLib {
             };
         };
     }
+    */
 
     // TODO: add UserLib.Action action + add field UserLib.ActionRole actionRole
     public fun checkActionRole(

@@ -6,7 +6,7 @@
   "scripts": {
     "build": "sui move build",
     "test": "sui move test",
-    "deploy": "sui client publish ./ --gas-budget 200000000",
+    "deploy": "sui client publish ./ --gas-budget 2000000000",
     "deploy2": "sui client publish ./ --gas-budget 200000000 --skip-dependency-verification",
     "version": "sui --version"
   },
