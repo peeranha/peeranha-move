@@ -1,5 +1,6 @@
 module basics::postLib {    
     use sui::transfer;
+    use sui::event;
     use sui::object::{Self, ID, UID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
@@ -151,7 +152,6 @@ module basics::postLib {
 
     }
 
-    // commentId
     struct CommentMetaData has key, store {
         id: UID,
         commentId: ID,
@@ -170,6 +170,40 @@ module basics::postLib {
         userCommunityRating: userLib::UserCommunityRating,
         rating: i64Lib::I64
     }
+
+    // ====== Events ======
+
+    struct CreatePostEvent has copy, drop {
+        userId: ID,
+        communityId: ID,
+        postMetaDataId: ID
+    }
+
+    struct CreateReplyEvent has copy, drop {
+        userId: ID,
+        postMetaDataId: ID,
+        parentReplyKey: u64,
+        replyMetaDataKey: u64
+    }
+
+    // event PostCreated(address indexed user, uint32 indexed communityId, uint256 indexed postId); 
+    // event ReplyCreated(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint16 replyId);
+    // event CommentCreated(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
+    // event PostEdited(address indexed user, uint256 indexed postId);
+    // event ReplyEdited(address indexed user, uint256 indexed postId, uint16 replyId);
+    // event CommentEdited(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
+    // event PostDeleted(address indexed user, uint256 indexed postId);
+    // event ReplyDeleted(address indexed user, uint256 indexed postId, uint16 replyId);
+    // event CommentDeleted(address indexed user, uint256 indexed postId, uint16 parentReplyId, uint8 commentId);
+    // event StatusBestReplyChanged(address indexed user, uint256 indexed postId, uint16 replyId);
+    // event ForumItemVoted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, int8 voteDirection);
+    // event ChangePostType(address indexed user, uint256 indexed postId, PostType newPostType);   // dont delete (for indexing)
+    // event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
+    // event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
+    // event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyId, uint8 commentId, Language language);
+    // event SetDocumentationTree(address indexed userAddr, uint32 indexed communityId);
+    // event PostTypeChanged(address indexed user, uint256 indexed postId, PostType oldPostType);
+    // event PostCommunityChanged(address indexed user, uint256 indexed postId, uint32 indexed oldCommunityId);
 
     public entry fun createPost(
         usersRatingCollection: &userLib::UsersRatingCollection,
@@ -210,33 +244,34 @@ module basics::postLib {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
         };
+        let postMetaData = PostMetaData {
+            id: object::new(ctx),
+            postId: object::id(&post),
+            postType: postType,
+            postTime: commonLib::getTimestamp(),
+            author: userId,
+            rating: i64Lib::zero(),
+            communityId: communityId,
+            officialReply: 0,
+            bestReply: 0,
+            deletedReplyCount: 0,
+            isDeleted: false,
+            tags: postTags,
+            replies: table::new(ctx),
+            comments: table::new(ctx),
+            properties: vector::empty<u8>(),
+            historyVotes: vector::empty<u8>(),
+            voteUsers: vector::empty<ID>(),
+        };
+
+        event::emit(CreatePostEvent{userId: userId, communityId: communityId, postMetaDataId: object::id(&postMetaData)});
         transfer::share_object(
-            PostMetaData {
-                id: object::new(ctx),
-                postId: object::id(&post),
-                postType: postType,
-                postTime: commonLib::getTimestamp(),
-                author: userId,
-                rating: i64Lib::zero(),
-                communityId: communityId,
-                officialReply: 0,
-                bestReply: 0,
-                deletedReplyCount: 0,
-                isDeleted: false,
-                tags: postTags,
-                replies: table::new(ctx),
-                comments: table::new(ctx),
-                properties: vector::empty<u8>(),
-                historyVotes: vector::empty<u8>(),
-                voteUsers: vector::empty<ID>(),
-            }
+            postMetaData
         );
         transfer::transfer(
             post,
             tx_context::sender(ctx)
         );
-
-        // TODO: add emit PostCreated(userAddr, communityId, self.postCount);
     }
 
     public entry fun createReply(
@@ -250,8 +285,6 @@ module basics::postLib {
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
-        let userAddr = tx_context::sender(ctx);     // del
-        // checkSigner(user, userCommunityRating, userAddr);
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
 
         assert!(postMetaData.postType != TUTORIAL && postMetaData.postType != DOCUMENTATION, E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL_OR_DOCUMENTATION);
@@ -334,10 +367,13 @@ module basics::postLib {
             historyVotes: vector::empty<u8>(),
             voteUsers: vector::empty<ID>(),
         };
-        table::add(&mut postMetaData.replies, countReplies + 1, replyMetaData);
+
+        let replyMetaDataKey = countReplies + 1;
+        event::emit(CreateReplyEvent{userId: userId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyId, replyMetaDataKey: replyMetaDataKey});
+        table::add(&mut postMetaData.replies, replyMetaDataKey, replyMetaData);
         transfer::transfer(
             reply,
-            userAddr
+            tx_context::sender(ctx)
         );
 
         // TODO: add emit ReplyCreated(userAddr, postId, parentReplyId, postContainer.info.replyCount);

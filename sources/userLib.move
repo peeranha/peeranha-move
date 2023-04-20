@@ -6,7 +6,7 @@ module basics::userLib {
     use std::vector;
     // use std::debug;
     use basics::i64Lib;
-    use basics::communityLib;
+    // use basics::communityLib;
     use sui::table::{Self, Table};
     // use basics::accessControl;
     use basics::commonLib;
@@ -133,14 +133,25 @@ module basics::userLib {
 
     // ====== Events ======
 
-    struct EvUser has copy, drop {
+    struct CreateUserEvent has copy, drop {
         userId: ID,
     }
 
-    struct EvFollowCommunity has copy, drop {
+    struct UpdateUserEvent has copy, drop {     // double event
+        userId: ID,
+    }
+
+    /*
+    struct FollowCommunityEvent has copy, drop {
         userId: ID,
         communityId: ID
     }
+
+    struct UnFollowCommunityEvent has copy, drop {
+        userId: ID,
+        communityId: ID
+    }
+    */
 
     fun init(ctx: &mut TxContext) {
         transfer::share_object(UsersRatingCollection {
@@ -185,7 +196,7 @@ module basics::userLib {
         };
 
         table::add(&mut usersRatingCollection.usersCommunityRating, object::id(&user), userCommunityRating);
-        event::emit(EvUser {userId: object::id(&user)});
+        event::emit(CreateUserEvent {userId: object::id(&user)});
         transfer::transfer(
             user, owner
         );
@@ -216,9 +227,10 @@ module basics::userLib {
             ACTION_UPDATE_PROFILE
         );
         user.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
-        event::emit(EvUser {userId: userId});
+        event::emit(UpdateUserEvent {userId: userId});
     }
 
+    /*
     public entry fun followCommunity(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
         communityLib::onlyNotFrezenCommunity(community);
         let userId = object::id(user);
@@ -242,7 +254,7 @@ module basics::userLib {
         };
 
         vector::push_back(&mut user.followedCommunities, community_id);
-        event::emit(EvFollowCommunity{userId: userId, communityId: community_id});
+        event::emit(FollowCommunityEvent{userId: userId, communityId: community_id});
     }
 
     public entry fun unfollowCommunity(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
@@ -266,13 +278,14 @@ module basics::userLib {
             if(*vector::borrow(&user.followedCommunities, i) == community_id) {
                 vector::remove(&mut user.followedCommunities, i);
 
-                event::emit(EvFollowCommunity{userId: userId, communityId: community_id});
+                event::emit(UnFollowCommunityEvent{userId: userId, communityId: community_id});
                 return
             };
             i = i +1;
         };
         abort E_COMMUNITY_NOT_FOLOWED
     }
+    */
 
     public fun getStatusEnergy(): u64 {
         1000

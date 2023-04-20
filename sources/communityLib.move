@@ -1,10 +1,12 @@
 module basics::communityLib {
     use sui::transfer;
-    use sui::object::{Self, UID};
+    use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
+    use sui::event;
     // use std::debug;
     use basics::commonLib;
+    use basics::userLib;
     // friend basics::commonLib;
     use sui::table::{Self, Table};
 
@@ -32,17 +34,54 @@ module basics::communityLib {
         ipfsDoc: commonLib::IpfsHash,
     }
 
+    // ====== Events ======
+
+    struct CreateCommunityEvent has copy, drop {
+        userId: ID,
+        communityId: ID,
+    }
+
+    struct UpdateCommunityEvent has copy, drop {
+        userId: ID,
+        communityId: ID,
+    }
+
+    struct CreateTagEvent has copy, drop {
+        userId: ID,
+        tagKey: u64,
+        communityId: ID,
+    }
+
+    struct UpdateTagEvent has copy, drop {
+        userId: ID,
+        tagKey: u64,
+        communityId: ID,
+    }
+
+    struct FreezeCommunityEvent has copy, drop {
+        userId: ID,
+        communityId: ID,
+    }
+
+    struct UnfreezeCommunityEvent has copy, drop {
+        userId: ID,
+        communityId: ID,
+    }
+
     ///
     // tags: vector<Tag> -> tags: vector<vector<u8>>.
     // error "Expected primitive or object type. Got: vector<0x0::communityLib::Tag>"
     ///
     public entry fun createCommunity(
+        user: &mut userLib::User,
         ipfsHash: vector<u8>,
         tags: vector<vector<u8>>,
         ctx: &mut TxContext
     ) {
-        let _userAddress = tx_context::sender(ctx);
-
+        let userId = object::id(user);
+        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.Admin, 0);
+        // peeranhaUser.initCommunityAdminPermission(user, communityId);
+        
         let tagsLength = vector::length(&mut tags);
         assert!(tagsLength >= 5, E_REQUIRE_AT_LEAST_5_TAGS);
         let i = 0;
@@ -68,25 +107,27 @@ module basics::communityLib {
             tagId = tagId +1;
         };
 
-        transfer::share_object(Community {
+        let community = Community {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
             timeCreate: commonLib::getTimestamp(),
             isFrozen: false,
             tags: communityTags,
-        });
+        };
+
+        event::emit(CreateCommunityEvent {userId: userId, communityId: object::id(&community)});
+        transfer::share_object(community);
     }
 
-    public entry fun updateCommunity(community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
-        let _userAddress = tx_context::sender(ctx);
-        // TODO: add check role
+    public entry fun updateCommunity(user: &mut userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
+        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         onlyNotFrezenCommunity(community);  // test
         community.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
+        event::emit(UpdateCommunityEvent {userId: object::id(user), communityId: object::id(community)});
     }
 
-    public entry fun createTag(community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
-        let _userAddress = tx_context::sender(ctx);
-        // TODO: add check role
+    public entry fun createTag(user: &mut userLib::User, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         onlyNotFrezenCommunity(community);  // test
         let i = 0;
         let tagsCount = table::length(&community.tags);
@@ -95,41 +136,38 @@ module basics::communityLib {
             i = i +1;
         };
 
+        event::emit(CreateTagEvent {userId: object::id(user), tagKey: tagsCount + 1, communityId: object::id(community)});
         table::add(&mut community.tags, tagsCount + 1, Tag {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>())
         });
     }
 
-    public entry fun updateTag(community: &mut Community, tagId: u64, ipfsHash: vector<u8>, ctx: &mut TxContext) {
-        let _userAddress = tx_context::sender(ctx);
+    public entry fun updateTag(user: &mut userLib::User, community: &mut Community, tagId: u64, ipfsHash: vector<u8>) {
+        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         onlyNotFrezenCommunity(community);  // test + polygon
         let tag = getMutableTag(community, tagId);
-        // TODO: add check role
         // CHECK 81 ERROR (E_REQUIRE_TAGS_WITH_UNIQUE_NAME)?
 
         tag.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
+        event::emit(CreateTagEvent {userId: object::id(user), tagKey: tagId, communityId: object::id(community)});
     }
 
-    public entry fun freezeCommunity(community: &mut Community, ctx: &mut TxContext) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
-        let _userAddress = tx_context::sender(ctx);
-        // TODO: add check role
+    public entry fun freezeCommunity(user: &mut userLib::User, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
+        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         onlyNotFrezenCommunity(community);  // test
         community.isFrozen = true;
-
-        // TODO: add emit CommunityFrozen(msg.sender, communityId);
+        event::emit(FreezeCommunityEvent {userId: object::id(user), communityId: object::id(community)});
     }
 
-    public entry fun unfreezeCommunity(community: &mut Community, ctx: &mut TxContext) {
-        let _userAddress = tx_context::sender(ctx);
-        // TODO: add check role
+    public entry fun unfreezeCommunity(user: &mut userLib::User, community: &mut Community) {
+        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
 
         if(!community.isFrozen) {
-            abort E_COMMUNITY_IS_NOT_FROZEN // + polygon?
+            abort E_COMMUNITY_IS_NOT_FROZEN // add to polygon?
         };
         community.isFrozen = false;
-
-        // TODO: add emit CommunityUnfrozen(msg.sender, communityId);
+        event::emit(UnfreezeCommunityEvent {userId: object::id(user), communityId: object::id(community)});
     }
 
     public entry fun onlyNotFrezenCommunity(community: &Community) {
