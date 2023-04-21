@@ -129,9 +129,9 @@ module basics::communityLib {
     public entry fun createTag(user: &mut userLib::User, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         onlyNotFrezenCommunity(community);  // test
-        let i = 0;
+        let i = 1;
         let tagsCount = table::length(&community.tags);
-        while(i < tagsCount) {
+        while(i <= tagsCount) {
             assert!(commonLib::getIpfsHash(table::borrow(&community.tags, i).ipfsDoc) != ipfsHash, E_REQUIRE_TAGS_WITH_UNIQUE_NAME);
             i = i +1;
         };
