@@ -186,14 +186,14 @@ module basics::communityLib {
     public fun getMutableTag(community: &mut Community, tagId: u64): &mut Tag {
         assert!(tagId > 0, E_TAG_ID_CAN_NOT_BE_0);
         assert!(table::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);
-        let tag = table::borrow_mut(&mut community.tags, tagId - 1);
+        let tag = table::borrow_mut(&mut community.tags, tagId);
         tag
     }
 
     public fun getTag(community: &Community, tagId: u64): &Tag {
         assert!(tagId > 0, E_TAG_ID_CAN_NOT_BE_0);
         assert!(table::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);
-        let tag = table::borrow(&community.tags, tagId - 1);
+        let tag = table::borrow(&community.tags, tagId);
         tag
     }
 
