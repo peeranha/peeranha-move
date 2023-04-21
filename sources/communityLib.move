@@ -1,7 +1,7 @@
 module basics::communityLib {
     use sui::transfer;
     use sui::object::{Self, UID, ID};
-    use sui::tx_context::{Self, TxContext};
+    use sui::tx_context::{TxContext};
     use std::vector;
     use sui::event;
     // use std::debug;
