@@ -150,7 +150,7 @@ module basics::communityLib {
         // CHECK 81 ERROR (E_REQUIRE_TAGS_WITH_UNIQUE_NAME)?
 
         tag.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
-        event::emit(CreateTagEvent {userId: object::id(user), tagKey: tagId, communityId: object::id(community)});
+        event::emit(UpdateTagEvent {userId: object::id(user), tagKey: tagId, communityId: object::id(community)});
     }
 
     public entry fun freezeCommunity(user: &mut userLib::User, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
