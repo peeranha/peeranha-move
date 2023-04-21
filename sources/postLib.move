@@ -13,7 +13,7 @@ module basics::postLib {
     use sui::table::{Self, Table};
     // use sui::bag::{Self, Bag};
 
-    /* errors */
+    // ====== Errors ======
 
     const E_INVALID_POST_TYPE: u64 = 31;
 
@@ -1421,27 +1421,30 @@ module basics::postLib {
         postMetaData.communityId = newCommunityId;
     }
 
-    public entry fun addUserRating(     // del
-        usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
-        user: &mut userLib::User,
-        community: &communityLib::Community,
-        changeRating: u64,
-        isPositive: bool,
-        ctx: &mut TxContext
-    ) {
-        let userId = object::id(user);
-        let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
+    ///
+    // del
+    ///
+    // public entry fun addUserRating(
+    //     usersRatingCollection: &mut userLib::UsersRatingCollection,
+    //     periodRewardContainer: &mut userLib::PeriodRewardContainer,
+    //     user: &mut userLib::User,
+    //     community: &communityLib::Community,
+    //     changeRating: u64,
+    //     isPositive: bool,
+    //     ctx: &mut TxContext
+    // ) {
+    //     let userId = object::id(user);
+    //     let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
 
-        userLib::updateRating(
-            userCommunityRating,
-            periodRewardContainer,
-            userId,
-            if(isPositive) i64Lib::from(changeRating) else i64Lib::neg_from(changeRating),
-            object::id(community),
-            ctx
-        );
-    }
+    //     userLib::updateRating(
+    //         userCommunityRating,
+    //         periodRewardContainer,
+    //         userId,
+    //         if(isPositive) i64Lib::from(changeRating) else i64Lib::neg_from(changeRating),
+    //         object::id(community),
+    //         ctx
+    //     );
+    // }
 
     fun checkMatchItemId(
         itemId: ID,

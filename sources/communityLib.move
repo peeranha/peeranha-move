@@ -10,7 +10,7 @@ module basics::communityLib {
     // friend basics::commonLib;
     use sui::table::{Self, Table};
 
-    /* errors */
+    // ====== Errors ======
     const E_REQUIRE_AT_LEAST_5_TAGS: u64 = 80;
     const E_REQUIRE_TAGS_WITH_UNIQUE_NAME: u64 = 81;
     const E_COMMUNITY_IS_FROZEN: u64 = 82;
@@ -73,7 +73,7 @@ module basics::communityLib {
     // error "Expected primitive or object type. Got: vector<0x0::communityLib::Tag>"
     ///
     public entry fun createCommunity(
-        user: &mut userLib::User,
+        user: &userLib::User,
         ipfsHash: vector<u8>,
         tags: vector<vector<u8>>,
         ctx: &mut TxContext
@@ -82,7 +82,7 @@ module basics::communityLib {
         // peeranhaUser.checkHasRole(user, UserLib.ActionRole.Admin, 0);
         // peeranhaUser.initCommunityAdminPermission(user, communityId);
         
-        let tagsLength = vector::length(&mut tags);
+        let tagsLength = vector::length(&tags);
         assert!(tagsLength >= 5, E_REQUIRE_AT_LEAST_5_TAGS);
         let i = 0;
         while(i < tagsLength) {
@@ -90,7 +90,7 @@ module basics::communityLib {
 
             while(j < tagsLength) {
                 if (i != j) {
-                    assert!(vector::borrow(&mut tags, i) != vector::borrow(&mut tags, j), E_REQUIRE_TAGS_WITH_UNIQUE_NAME);
+                    assert!(vector::borrow(&tags, i) != vector::borrow(&tags, j), E_REQUIRE_TAGS_WITH_UNIQUE_NAME);
                 };
                 j = j + 5;
             };
@@ -102,7 +102,7 @@ module basics::communityLib {
         while(tagId < tagsLength) {
             table::add(&mut communityTags, tagId + 1, Tag {
                 id: object::new(ctx),
-                ipfsDoc: commonLib::getIpfsDoc(*vector::borrow(&mut tags, tagId), vector::empty<u8>())
+                ipfsDoc: commonLib::getIpfsDoc(*vector::borrow(&tags, tagId), vector::empty<u8>())
             });
             tagId = tagId +1;
         };
@@ -119,14 +119,14 @@ module basics::communityLib {
         transfer::share_object(community);
     }
 
-    public entry fun updateCommunity(user: &mut userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
+    public entry fun updateCommunity(user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
         // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         onlyNotFrezenCommunity(community);  // test
         community.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
         event::emit(UpdateCommunityEvent {userId: object::id(user), communityId: object::id(community)});
     }
 
-    public entry fun createTag(user: &mut userLib::User, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    public entry fun createTag(user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         onlyNotFrezenCommunity(community);  // test
         let i = 1;
@@ -143,7 +143,7 @@ module basics::communityLib {
         });
     }
 
-    public entry fun updateTag(user: &mut userLib::User, community: &mut Community, tagId: u64, ipfsHash: vector<u8>) {
+    public entry fun updateTag(user: &userLib::User, community: &mut Community, tagId: u64, ipfsHash: vector<u8>) {
         // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         onlyNotFrezenCommunity(community);  // test + polygon
         let tag = getMutableTag(community, tagId);
@@ -153,14 +153,14 @@ module basics::communityLib {
         event::emit(UpdateTagEvent {userId: object::id(user), tagKey: tagId, communityId: object::id(community)});
     }
 
-    public entry fun freezeCommunity(user: &mut userLib::User, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
+    public entry fun freezeCommunity(user: &userLib::User, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
         // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
         onlyNotFrezenCommunity(community);  // test
         community.isFrozen = true;
         event::emit(FreezeCommunityEvent {userId: object::id(user), communityId: object::id(community)});
     }
 
-    public entry fun unfreezeCommunity(user: &mut userLib::User, community: &mut Community) {
+    public entry fun unfreezeCommunity(user: &userLib::User, community: &mut Community) {
         // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
 
         if(!community.isFrozen) {

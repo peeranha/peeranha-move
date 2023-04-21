@@ -4,7 +4,7 @@ module basics::commonLib {
     use sui::object::{Self, ID};
 
 
-    /* errors */
+    // ====== Errors ======
 
     const E_INVALIT_IPFSHASH: u64 = 30;
 

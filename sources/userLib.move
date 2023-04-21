@@ -6,18 +6,16 @@ module basics::userLib {
     use std::vector;
     // use std::debug;
     use basics::i64Lib;
-    // use basics::communityLib;
     use sui::table::{Self, Table};
-    // use basics::accessControl;
     use basics::commonLib;
     use sui::vec_map::{Self, VecMap};
     use std::option::{Self};
+    friend basics::followCommunityLib;
 
-    /* errors */
+    // ====== Errors ======
+
     const E_USER_EXIST: u64 = 9;
     const E_USER_DOES_NOT_EXIST: u64 = 10;
-    const E_ALREADY_FOLLOWED: u64 = 11;
-    const E_COMMUNITY_NOT_FOLOWED: u64 = 12;
     const E_USER_NOT_FOUND: u64 = 13;
     // const E_NOT_ALLOWED_EDIT: u64 = 14;
     const E_NOT_ALLOWED_DELETE: u64 = 15;
@@ -141,18 +139,6 @@ module basics::userLib {
         userId: ID,
     }
 
-    /*
-    struct FollowCommunityEvent has copy, drop {
-        userId: ID,
-        communityId: ID
-    }
-
-    struct UnfollowCommunityEvent has copy, drop {
-        userId: ID,
-        communityId: ID
-    }
-    */
-
     fun init(ctx: &mut TxContext) {
         transfer::share_object(UsersRatingCollection {
             id: object::new(ctx),
@@ -214,7 +200,7 @@ module basics::userLib {
         updateUserPrivate(usersRatingCollection, user, ipfsDoc);
     }
 
-    entry fun updateUserPrivate(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsHash: vector<u8>) {
+    fun updateUserPrivate(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
 
@@ -230,62 +216,17 @@ module basics::userLib {
         event::emit(UpdateUserEvent {userId: userId});
     }
 
-    /*
-    public entry fun followCommunity(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
-        communityLib::onlyNotFrezenCommunity(community);
-        let userId = object::id(user);
-        let _userAddress = tx_context::sender(ctx);  // del
-        let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
-
-        checkRatingAndEnergy(
-            user,
-            userCommunityRating,
-            userId,
-            userId,
-            commonLib::getZeroId(),
-            ACTION_FOLLOW_COMMUNITY
-        );
-
-        let i = 0;
-        let community_id = object::id(community);
-        while(i < vector::length(&mut user.followedCommunities)) {
-            assert!(*vector::borrow(&user.followedCommunities, i) != community_id, E_ALREADY_FOLLOWED);
-            i = i +1;
-        };
-
-        vector::push_back(&mut user.followedCommunities, community_id);
-        event::emit(FollowCommunityEvent{userId: userId, communityId: community_id});
+    public(friend) fun getUserFollowedCommunities(user: &User): &vector<ID> {
+        &user.followedCommunities
     }
 
-    public entry fun unfollowCommunity(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, community: &communityLib::Community, ctx: &mut TxContext) {
-        communityLib::onlyNotFrezenCommunity(community);
-        let _userAddress = tx_context::sender(ctx);      // del
-        let userId = object::id(user);
-        let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
-
-        let user = checkRatingAndEnergy(
-            user,
-            userCommunityRating,
-            userId,
-            userId,
-            commonLib::getZeroId(),
-            ACTION_FOLLOW_COMMUNITY
-        );
-
-        let i = 0;
-        let community_id = object::id(community);
-        while(i < vector::length(&mut user.followedCommunities)) {
-            if(*vector::borrow(&user.followedCommunities, i) == community_id) {
-                vector::remove(&mut user.followedCommunities, i);
-
-                event::emit(UnfollowCommunityEvent{userId: userId, communityId: community_id});
-                return
-            };
-            i = i +1;
-        };
-        abort E_COMMUNITY_NOT_FOLOWED
+    public(friend) fun followCommunity(user: &mut User, communityId: ID) {
+        vector::push_back(&mut user.followedCommunities, communityId);
     }
-    */
+
+    public(friend) fun unfollowCommunity(user: &mut User, communityIndex: u64) {
+        vector::remove(&mut user.followedCommunities, communityIndex);
+    }
 
     public fun getStatusEnergy(): u64 {
         1000
@@ -309,16 +250,7 @@ module basics::userLib {
     //     }
     // }
 
-    // public fun getMutableUser(usersRatingCollection: &mut UsersRatingCollection, userAddress: address): &mut User {
-    //     let position = vec_map::get_idx_opt(&mut userRatingCollection.users, &userAddress);
-    //     if (option::is_none(&position)) {
-    //         abort E_USER_DOES_NOT_EXIST
-    //     } else {
-    //         let user = vec_map::get_mut(&mut userRatingCollection.users, &userAddress);
-    //         user
-    //     }
-    // }
-
+    /*plug*/
     public fun updateRating(userCommunityRating: &mut UserCommunityRating, _periodRewardContainer: &mut PeriodRewardContainer, _userId: ID, rating: i64Lib::I64, communityId: ID, _ctx: &mut TxContext) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
@@ -848,6 +780,10 @@ module basics::userLib {
 
     public fun get_action_best_reply(): u8 {
         ACTION_BEST_REPLY
+    }
+
+    public fun get_action_follow_community(): u8 {
+        ACTION_FOLLOW_COMMUNITY
     }
 
     #[test_only]
