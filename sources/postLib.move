@@ -130,7 +130,7 @@ module basics::postLib {
     // add replyMetaDataKey
     struct ReplyMetaData has key, store {
         id: UID,
-        replyMetaDataKey: ID,
+        replyId: ID,
         postTime: u64,
         author: ID,
         rating: i64Lib::I64,
@@ -154,7 +154,7 @@ module basics::postLib {
 
     struct CommentMetaData has key, store {
         id: UID,
-        commentMetaDataKey: ID,
+        commentId: ID,
         postTime: u64,
         author: ID,
         rating: i64Lib::I64,
@@ -404,7 +404,7 @@ module basics::postLib {
         };
         let replyMetaData = ReplyMetaData {
             id: replyUID,
-            replyMetaDataKey: object::id(&reply),
+            replyId: object::id(&reply),
             postTime: timestamp,
             author: userId,
             rating: i64Lib::zero(),
@@ -458,7 +458,7 @@ module basics::postLib {
         let commentMetaDataKey = object::id(&comment);
         let commentMetaData = CommentMetaData {
             id: object::new(ctx),
-            commentMetaDataKey: commentMetaDataKey,
+            commentId: commentMetaDataKey,
             postTime: commonLib::getTimestamp(),
             author: userId,
             rating: i64Lib::zero(),
@@ -627,7 +627,7 @@ module basics::postLib {
     ) {
         let userId = object::id(user);
         let commentMetaData = getCommentContainerSafe(postMetaData, parentReplyKey, commentMetaDataKey);
-        checkMatchItemId(object::id(comment), commentMetaData.commentMetaDataKey);
+        checkMatchItemId(object::id(comment), commentMetaData.commentId);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
         userLib::checkActionRole(
