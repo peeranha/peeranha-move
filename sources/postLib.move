@@ -896,11 +896,9 @@ module basics::postLib {
         postAuthor: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newBestReplyMetaDataKey: u64,
-        oldBestReplyMetaDataKey: u64,
         ctx: &mut TxContext
     ) {
         let newBestReplyMetaData = getReplyMetaDataSafe(postMetaData, newBestReplyMetaDataKey);
-        let oldBestReplyMetaData = getReplyMetaDataSafe(postMetaData, oldBestReplyMetaDataKey);
 
         let communityId = postMetaData.communityId;
         assert!(postMetaData.author == postMetaData.author, E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY);
@@ -910,7 +908,7 @@ module basics::postLib {
                 usersRatingCollection,
                 periodRewardContainer,
                 postMetaData.author,
-                oldBestReplyMetaData.author,
+                newBestReplyMetaData.author,
                 postMetaData.postType,
                 false,
                 communityId,
@@ -919,6 +917,8 @@ module basics::postLib {
             postMetaData.bestReplyMetaDataKey = 0;
         } else {
             if (postMetaData.bestReplyMetaDataKey != 0) {
+                let bestReplyMetaDataKey = postMetaData.bestReplyMetaDataKey;
+                let oldBestReplyMetaData = getReplyMetaDataSafe(postMetaData, bestReplyMetaDataKey);
                 updateRatingForBestReply(
                     usersRatingCollection,
                     periodRewardContainer,
