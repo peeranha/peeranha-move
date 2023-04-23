@@ -1540,7 +1540,7 @@ module basics::postLib {
     }
 
     public fun getCommentContainerSafe(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &CommentMetaData {
-        getCommentContainerSafe(postMetaData, parentReplyMetaDataKey, commentMetaDataKey)
+        getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey)
     }
 
     fun getActiveReplyCount(
