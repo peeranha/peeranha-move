@@ -152,7 +152,7 @@ module basics::accessControl {
     }
 
     public entry fun grantRole(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
-        assert!(role == DEFAULT_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_DEFAULT_ADMIN_ROLE);
+        assert!(role != DEFAULT_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_DEFAULT_ADMIN_ROLE);
 
         let adminRole = getRoleAdmin(userRolesCollection, role);
         onlyRole(userRolesCollection, adminRole, userId);
