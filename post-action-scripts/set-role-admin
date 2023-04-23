@@ -1,0 +1,4 @@
+if [ -f .env ]; then
+  export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
+fi
+sui client call --function setRoleAdmin_ --module accessControl --package $PACKAGE --args $UserRolesCollection [3] [2] --gas-budget 2000000000
