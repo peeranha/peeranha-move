@@ -1,0 +1,4 @@
+if [ -f .env ]; then
+  export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
+fi
+sui client call --function addUserRating --module postLib --package $PACKAGE --args $USERS_RATING_COLLECTION $PERIOD_REWARD_CONTAINER $USER $COMMUNITY 50 true --gas-budget 300000000
