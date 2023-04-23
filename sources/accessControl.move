@@ -7,6 +7,7 @@ module basics::accessControl {
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
     use std::option;
+    friend basics::communityLib;
 
     // ====== Errors ======
 
@@ -164,9 +165,15 @@ module basics::accessControl {
     }
 
     public entry fun revokeRole(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {    // add revokeProtocolAdminRole
+        assert!(role != DEFAULT_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_DEFAULT_ADMIN_ROLE);
+
         let adminRole = getRoleAdmin(userRolesCollection, role);
         onlyRole(userRolesCollection, adminRole, userId);
         revokeRole_(userRolesCollection, role, userId);
+    }
+
+    public entry fun revokeProtocolAdminRole(_: &DefaultAdminCap, userRolesCollection: &mut UserRolesCollection, userId: ID) {
+        revokeRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }
 
     public fun renounceRole(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
@@ -178,7 +185,7 @@ module basics::accessControl {
         grantRole_(userRolesCollection, role, userId);
     }
 
-    public entry fun setRoleAdmin_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
+    public(friend) entry fun setRoleAdmin_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
         let previousAdminRole = getRoleAdmin(userRolesCollection, role);
 
         if (table::contains(&userRolesCollection.roles, role)) {

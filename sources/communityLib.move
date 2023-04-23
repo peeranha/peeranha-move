@@ -122,15 +122,20 @@ module basics::communityLib {
         transfer::share_object(community);
     }
 
-    public entry fun updateCommunity(user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
-        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+    public entry fun updateCommunity(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, ipfsHash: vector<u8>) {
+        let userId = object::id(user);
+        accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), object::id(community));
+
         onlyNotFrezenCommunity(community);  // test
         community.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
-        event::emit(UpdateCommunityEvent {userId: object::id(user), communityId: object::id(community)});
+        event::emit(UpdateCommunityEvent {userId: userId, communityId: object::id(community)});
     }
 
-    public entry fun createTag(user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
-        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+    public entry fun createTag(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+        let userId = object::id(user);
+        let communityId = object::id(community);
+        accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), communityId);
+
         onlyNotFrezenCommunity(community);  // test
         let i = 1;
         let tagsCount = table::length(&community.tags);
@@ -139,38 +144,46 @@ module basics::communityLib {
             i = i +1;
         };
 
-        event::emit(CreateTagEvent {userId: object::id(user), tagKey: tagsCount + 1, communityId: object::id(community)});
+        event::emit(CreateTagEvent {userId: userId, tagKey: tagsCount + 1, communityId: communityId});
         table::add(&mut community.tags, tagsCount + 1, Tag {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>())
         });
     }
 
-    public entry fun updateTag(user: &userLib::User, community: &mut Community, tagId: u64, ipfsHash: vector<u8>) {
-        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+    public entry fun updateTag(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, tagId: u64, ipfsHash: vector<u8>) {
+        let userId = object::id(user);
+        let communityId = object::id(community);
+        accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), communityId);
+
         onlyNotFrezenCommunity(community);  // test + polygon
         let tag = getMutableTag(community, tagId);
         // CHECK 81 ERROR (E_REQUIRE_TAGS_WITH_UNIQUE_NAME)?
 
         tag.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
-        event::emit(UpdateTagEvent {userId: object::id(user), tagKey: tagId, communityId: object::id(community)});
+        event::emit(UpdateTagEvent {userId: userId, tagKey: tagId, communityId: communityId});
     }
 
-    public entry fun freezeCommunity(user: &userLib::User, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
-        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+    public entry fun freezeCommunity(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
+        let userId = object::id(user);
+        let communityId = object::id(community);
+        accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), communityId);
+
         onlyNotFrezenCommunity(community);  // test
         community.isFrozen = true;
-        event::emit(FreezeCommunityEvent {userId: object::id(user), communityId: object::id(community)});
+        event::emit(FreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
-    public entry fun unfreezeCommunity(user: &userLib::User, community: &mut Community) {
-        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.AdminOrCommunityAdmin, communityId);
+    public entry fun unfreezeCommunity(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community) {
+        let userId = object::id(user);
+        let communityId = object::id(community);
+        accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), communityId);
 
         if(!community.isFrozen) {
             abort E_COMMUNITY_IS_NOT_FROZEN // add to polygon?
         };
         community.isFrozen = false;
-        event::emit(UnfreezeCommunityEvent {userId: object::id(user), communityId: object::id(community)});
+        event::emit(UnfreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
     public entry fun onlyNotFrezenCommunity(community: &Community) {
