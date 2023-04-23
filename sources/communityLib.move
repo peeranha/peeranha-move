@@ -6,11 +6,13 @@ module basics::communityLib {
     use sui::event;
     // use std::debug;
     use basics::commonLib;
+    use basics::accessControl;
     use basics::userLib;
     // friend basics::commonLib;
     use sui::table::{Self, Table};
 
     // ====== Errors ======
+
     const E_REQUIRE_AT_LEAST_5_TAGS: u64 = 80;
     const E_REQUIRE_TAGS_WITH_UNIQUE_NAME: u64 = 81;
     const E_COMMUNITY_IS_FROZEN: u64 = 82;
@@ -74,12 +76,13 @@ module basics::communityLib {
     ///
     public entry fun createCommunity(
         user: &userLib::User,
+        roles: &accessControl::UserRolesCollection,
         ipfsHash: vector<u8>,
         tags: vector<vector<u8>>,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
-        // peeranhaUser.checkHasRole(user, UserLib.ActionRole.Admin, 0);
+        accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin(), commonLib::getZeroId());
         // peeranhaUser.initCommunityAdminPermission(user, communityId);
         
         let tagsLength = vector::length(&tags);

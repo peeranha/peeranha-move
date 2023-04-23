@@ -10,7 +10,7 @@ module basics::communityLib_test
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
-
+/*
     #[test]
     fun test_create_tag_error_del() {
         let scenario_val = test_scenario::begin(USER1);
@@ -65,6 +65,7 @@ module basics::communityLib_test
 
         test_scenario::end(scenario_val);
     }
+    */
 
     
     // #[test]

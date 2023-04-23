@@ -73,11 +73,14 @@ module basics::postLib {
 
     // 98, 99 - getPeriodRating  ???
 
+    // ====== Constant ======
+
     const QUICK_REPLY_TIME_SECONDS: u64 = 900; // 6
     const DELETE_TIME: u64 = 604800;    //7 days
     // const DEFAULT_COMMUNITY: ID = object::id_from_address(@0x0);
 
-    // TODO: add enum PostType
+    // ====== Enum ======
+
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
     const TUTORIAL: u8 = 2;
@@ -88,7 +91,6 @@ module basics::postLib {
     const DIRECTION_UPVOTE: u8 = 3;
     const DIRECTION_CANCEL_UPVOTE: u8 = 1;
 
-    // TODO: add enum TypeContent
     const TYPE_CONTENT_POST: u8 = 0;
     const TYPE_CONTENT_REPLY: u8 = 1;
     const TYPE_CONTENT_COMMENT: u8 = 2;

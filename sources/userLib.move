@@ -27,10 +27,8 @@ module basics::userLib {
     const E_CHECK_FUNCTION_getRatingAndEnergyForAction: u64 = 99;
     const E_CHECK_FUNCTION_getMutableTotalRewardShare: u64 = 100; // todo
 
-    const START_USER_RATING: u64 = 10;
-    const DEFAULT_IPFS: vector<u8> = x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc";
+    // ====== Enum ======
 
-    // TODO: add enum Action
     const ACTION_NONE: u8 = 0;
     const ACTION_PUBLICATION_POST: u8 = 1;
     const ACTION_PUBLICATION_REPLY: u8 = 2;
@@ -46,6 +44,11 @@ module basics::userLib {
     const ACTION_BEST_REPLY: u8 = 12;
     const ACTION_UPDATE_PROFILE: u8 = 13;
     const ACTION_FOLLOW_COMMUNITY: u8 = 14;
+
+    // ====== Constant ======
+
+    const START_USER_RATING: u64 = 10;
+    const DEFAULT_IPFS: vector<u8> = x"c09b19f65afd0df610c90ea00120bccd1fc1b8c6e7cdbe440376ee13e156a5bc";
 
     const MINIMUM_RATING: u64 = 300;        //neg
     const POST_QUESTION_ALLOWED: u64 = 0;
