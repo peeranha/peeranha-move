@@ -3,8 +3,9 @@ module basics::postLib {
     use sui::event;
     use sui::object::{Self, ID, UID};
     use sui::tx_context::{Self, TxContext};
-    use basics::accessControl;
+    use sui::vec_map::{Self, VecMap};
     use std::vector;
+    use basics::accessControl;
     use basics::communityLib;
     use basics::commonLib;
     use basics::userLib;
@@ -72,6 +73,8 @@ module basics::postLib {
 
     const E_AT_LEAST_ONE_TAG_IS_REQUIRED: u64 = 86;
 
+    const E_INVALID_LANGUAGE: u64 = 67;
+
     // 98, 99 - getPeriodRating  ???
 
     // ====== Constant ======
@@ -86,6 +89,15 @@ module basics::postLib {
     const COMMON_POST: u8 = 1;
     const TUTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
+
+    const MESSENGER_SENDER_ITEM_PROPERTY: u8 = 0;
+    const LANGUAGE_ITEM_PROPERTY: u8 = 1;    
+
+    const ENGLISH_LANGUAGE: u8 = 0;
+    const CHINESE_LANGUAGE: u8 = 1;
+    const SPANISH_LANGUAGE: u8 = 2;
+    const VIETNAMESE_LANGUAGE: u8 = 3;
+    const LANGUAGE_LENGTH: u8 = 4; // Update after add new language
 
     const DIRECTION_DOWNVOTE: u8 = 4;
     const DIRECTION_CANCEL_DOWNVOTE: u8 = 0;
@@ -119,7 +131,7 @@ module basics::postLib {
         tags: vector<u64>,
         replies: Table<u64, ReplyMetaData>,
         comments: Table<u64, CommentMetaData>,
-        properties: vector<u8>,
+        properties: VecMap<u8, u8>,
 
         historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
         voteUsers: vector<ID>
@@ -144,7 +156,7 @@ module basics::postLib {
         isDeleted: bool,
 
         comments: Table<u64, CommentMetaData>,
-        properties: vector<u8>,
+        properties: VecMap<u8, u8>,
         historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3
         voteUsers: vector<ID>
     }
@@ -163,7 +175,7 @@ module basics::postLib {
         rating: i64Lib::I64,
 
         isDeleted: bool,
-        properties: vector<u8>,
+        properties: VecMap<u8, u8>,
         historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3
         voteUsers: vector<ID>
     }
@@ -270,6 +282,7 @@ module basics::postLib {
         ipfsHash: vector<u8>, 
         postType: u8,
         tags: vector<u64>,
+        language: u8,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -291,12 +304,17 @@ module basics::postLib {
         );
 
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
         let postTags = vector::empty<u64>();
         if (postType != DOCUMENTATION) {
             assert!(vector::length(&mut tags) > 0, E_AT_LEAST_ONE_TAG_IS_REQUIRED);
             postTags = tags;
         };
+
+        let postProperties = vec_map::empty();
+        vec_map::insert(&mut postProperties, MESSENGER_SENDER_ITEM_PROPERTY, 0);
+        vec_map::insert(&mut postProperties, LANGUAGE_ITEM_PROPERTY, language);
 
         let post = Post {
             id: object::new(ctx),
@@ -317,7 +335,7 @@ module basics::postLib {
             tags: postTags,
             replies: table::new(ctx),
             comments: table::new(ctx),
-            properties: vector::empty<u8>(),
+            properties: postProperties,
             historyVotes: vector::empty<u8>(),
             voteUsers: vector::empty<ID>(),
         };
@@ -341,6 +359,7 @@ module basics::postLib {
         parentReplyMetaDataKey: u64,
         ipfsHash: vector<u8>,
         isOfficialReply: bool,
+        language: u8,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -363,6 +382,7 @@ module basics::postLib {
             /*true*/
         );
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
         let countReplies = table::length(&postMetaData.replies);
         if (postMetaData.postType == EXPERT_POST || postMetaData.postType == COMMON_POST) {
@@ -409,6 +429,10 @@ module basics::postLib {
             getReplyMetaDataSafe(postMetaData, parentReplyMetaDataKey);  // checking parentReplyMetaDataKey is exist
         };
 
+        let replyProperties = vec_map::empty();
+        vec_map::insert(&mut replyProperties, MESSENGER_SENDER_ITEM_PROPERTY, 0);
+        vec_map::insert(&mut replyProperties, LANGUAGE_ITEM_PROPERTY, language);
+
         let reply = Reply {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
@@ -426,7 +450,7 @@ module basics::postLib {
             isDeleted: false,
 
             comments: table::new(ctx),
-            properties: vector::empty<u8>(),
+            properties: replyProperties,
             historyVotes: vector::empty<u8>(),
             voteUsers: vector::empty<ID>(),
         };
@@ -447,6 +471,7 @@ module basics::postLib {
         postMetaData: &mut PostMetaData,
         parentReplyMetaDataKey: u64,
         ipfsHash: vector<u8>,
+        language: u8,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -464,6 +489,11 @@ module basics::postLib {
             accessControl::get_action_role_none(),
             /*true*/
         );
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
+
+        let commentProperties = vec_map::empty();
+        vec_map::insert(&mut commentProperties, MESSENGER_SENDER_ITEM_PROPERTY, 0);
+        vec_map::insert(&mut commentProperties, LANGUAGE_ITEM_PROPERTY, language);
 
         let comment = Comment {
             id: object::new(ctx),
@@ -478,7 +508,7 @@ module basics::postLib {
             rating: i64Lib::zero(),
             isDeleted: false,
 
-            properties: vector::empty<u8>(),
+            properties: commentProperties,
             historyVotes: vector::empty<u8>(),
             voteUsers: vector::empty<ID>(),
         };
