@@ -176,16 +176,7 @@ module basics::accessControl {
         revokeRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }
 
-    public fun renounceRole(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
-        // assert!(account == tx_context::sender(ctx), E_ACCESS_CONTROL_CAN_ONLY_RENOUNCE_ROLE_FOR_SELF);       // ?????
-        revokeRole_(userRolesCollection, role, userId);
-    }
-
-    public fun setupRole_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
-        grantRole_(userRolesCollection, role, userId);
-    }
-
-    public(friend) entry fun setRoleAdmin_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
+    public(friend) fun setRoleAdmin(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
         let previousAdminRole = getRoleAdmin(userRolesCollection, role);
 
         if (table::contains(&userRolesCollection.roles, role)) {
