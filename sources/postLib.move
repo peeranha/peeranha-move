@@ -624,7 +624,11 @@ module basics::postLib {
 
         changePostType(usersRatingCollection, periodRewardContainer, postMetaData, newPostType, ctx);                      // TODO: add tests
         changePostCommunity(usersRatingCollection, periodRewardContainer, postMetaData, newCommunity, ctx);                // TODO: add tests
-        postMetaData.language = language;
+
+        if (postMetaData.language != language) {
+            postMetaData.language = language;
+        };
+        
         if(vector::length(&tags) > 0) {
             communityLib::checkTags(newCommunity, postMetaData.tags);
             postMetaData.tags = tags;
@@ -696,8 +700,10 @@ module basics::postLib {
         let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
-        replyMetaData.language = language;
-        
+        if (replyMetaData.language != language) {
+            replyMetaData.language = language;
+        };
+
         userLib::checkActionRole(
             user,
             userCommunityRating,
