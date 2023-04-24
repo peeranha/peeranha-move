@@ -89,8 +89,8 @@ module basics::postLib {
     const TUTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
 
-    const MESSENGER_SENDER_ITEM_PROPERTY: u8 = 0;
-    const LANGUAGE_ITEM_PROPERTY: u8 = 1;    
+    const MESSENGER_SENDER_ITEM_PROPERTY: u64 = 0;
+    const LANGUAGE_ITEM_PROPERTY: u64 = 1;    
 
     const ENGLISH_LANGUAGE: u8 = 0;
     const CHINESE_LANGUAGE: u8 = 1;
@@ -312,8 +312,8 @@ module basics::postLib {
         };
 
         let postProperties = vector::empty<u8>();
-        vector::push_back(&mut postProperties, 0); // MESSENGER_SENDER_PROPERTY
-        vector::push_back(&mut postProperties, language); // LANGUAGE_PROPERTY
+        vector::insert(&mut postProperties, 0, MESSENGER_SENDER_ITEM_PROPERTY);
+        vector::insert(&mut postProperties, language, LANGUAGE_ITEM_PROPERTY);
 
         let post = Post {
             id: object::new(ctx),
@@ -429,8 +429,8 @@ module basics::postLib {
         };
 
         let replyProperties = vector::empty<u8>();
-        vector::push_back(&mut replyProperties, 0); // MESSENGER_SENDER_PROPERTY
-        vector::push_back(&mut replyProperties, language); // LANGUAGE_PROPERTY
+        vector::insert(&mut replyProperties, 0, MESSENGER_SENDER_ITEM_PROPERTY);
+        vector::insert(&mut replyProperties, language, LANGUAGE_ITEM_PROPERTY);
 
         let reply = Reply {
             id: object::new(ctx),
@@ -491,8 +491,8 @@ module basics::postLib {
         assert!(language >= 0 && language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
         let commentProperties = vector::empty<u8>();
-        vector::push_back(&mut commentProperties, 0); // MESSENGER_SENDER_PROPERTY
-        vector::push_back(&mut commentProperties, language); // LANGUAGE_PROPERTY
+        vector::insert(&mut commentProperties, 0, MESSENGER_SENDER_ITEM_PROPERTY);
+        vector::insert(&mut commentProperties, language, LANGUAGE_ITEM_PROPERTY);
 
         let comment = Comment {
             id: object::new(ctx),
