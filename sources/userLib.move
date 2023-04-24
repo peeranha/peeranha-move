@@ -4,6 +4,7 @@ module basics::userLib {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
+    use basics::accessControl;
     // use std::debug;
     use basics::i64Lib;
     use sui::table::{Self, Table};
@@ -503,11 +504,12 @@ module basics::userLib {
     public fun checkActionRole(
         user: &mut User,
         userCommunityRating: &UserCommunityRating,
-        actionCaller: ID,  // need? user -> owner
-        dataUser: ID,
+        userRolesCollection: &accessControl::UserRolesCollection,
+        actionCallerId: ID,  // need? user -> owner
+        dataUserId: ID,
         communityId: ID,
         action: u8,
-        // role
+        actionRole: u8,
         //createUserIfDoesNotExist: bool  // new transfer ???
     ) 
     {
@@ -522,13 +524,26 @@ module basics::userLib {
         }; 
         */
 
-        // TODO: add 
-        // if (hasModeratorRole(actionCaller, communityId)) {
-        //     return;
-        // }
-                
-        // checkHasRole(actionCaller, actionRole, communityId);
-        checkRatingAndEnergy(user, userCommunityRating, actionCaller, dataUser, communityId, action);
+        if (hasModeratorRole(userRolesCollection, actionCallerId, communityId)) {
+            return
+        };
+
+        accessControl::checkHasRole(userRolesCollection, actionCallerId, actionRole, communityId);
+        checkRatingAndEnergy(user, userCommunityRating, actionCallerId, dataUserId, communityId, action);
+    }
+
+    public fun hasModeratorRole(
+        userRolesCollection: &accessControl::UserRolesCollection,
+        userId: ID,
+        communityId: ID
+    ): bool {
+        let communityModeratorRole = accessControl::getCommunityRole(accessControl::get_community_moderator_role(), communityId);
+        let isModerator = accessControl::hasRole(userRolesCollection, communityModeratorRole, userId) || accessControl::hasRole(userRolesCollection, accessControl::get_protocol_admin_role(), userId);
+        if (isModerator) {
+            true
+        } else {
+            false
+        }
     }
 
     public fun checkRatingAndEnergy(

@@ -277,10 +277,12 @@ module basics::accessControl {
         abort errorType
     }
 
-    fun getCommunityRole(roleTemplate: vector<u8>, communityId: ID): vector<u8> {
+    public fun getCommunityRole(roleTemplate: vector<u8>, communityId: ID): vector<u8> {
         vector::append<u8>(&mut roleTemplate, object::id_to_bytes(&communityId));
         roleTemplate
     }
+
+    // ====== get enum "action role" ======
 
     public fun get_action_role_none(): u8 {
         ACTION_ROLE_NONE
@@ -312,5 +314,19 @@ module basics::accessControl {
 
     public fun get_action_role_community_moderator(): u8 {
         ACTION_ROLE_COMMUNITY_MODERATOR
+    }
+
+    // ====== get role ======
+
+    public fun get_protocol_admin_role(): vector<u8> {
+        PROTOCOL_ADMIN_ROLE
+    }
+
+    public fun get_community_admin_role(): vector<u8> {
+        COMMUNITY_ADMIN_ROLE
+    }
+
+    public fun get_community_moderator_role(): vector<u8> {
+        COMMUNITY_MODERATOR_ROLE
     }
 }
