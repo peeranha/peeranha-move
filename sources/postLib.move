@@ -689,7 +689,7 @@ module basics::postLib {
         ipfsHash: vector<u8>
     ) {
         let userId = object::id(user);
-        let commentMetaData = getCommentContainerSafe(postMetaData, parentReplyKey, commentMetaDataKey);
+        let commentMetaData = getCommentMetaDataSafe(postMetaData, parentReplyKey, commentMetaDataKey);
         checkMatchItemId(object::id(comment), commentMetaData.commentId);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
@@ -1603,13 +1603,13 @@ module basics::postLib {
         assert!(commentMetaDataKey > 0, E_ITEM_ID_CAN_NOT_BE_0);
         if (parentReplyMetaDataKey == 0) {
             assert!(table::length(&postMetaData.comments) >= commentMetaDataKey, E_COMMENT_NOT_EXIST);
-            let comment = table::borrow_mut(&mut postMetaData.comments, commentMetaDataKey - 1);
+            let comment = table::borrow_mut(&mut postMetaData.comments, commentMetaDataKey);
             comment
 
         } else {
             let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, parentReplyMetaDataKey);
             assert!(table::length(&replyMetaData.comments) >= commentMetaDataKey, E_COMMENT_NOT_EXIST);
-            let commentMetaData = table::borrow_mut(&mut replyMetaData.comments, commentMetaDataKey - 1);
+            let commentMetaData = table::borrow_mut(&mut replyMetaData.comments, commentMetaDataKey);
             commentMetaData
         }
     }
@@ -1624,8 +1624,10 @@ module basics::postLib {
         getMutableCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey)
     }
 
-    public fun getCommentContainerSafe(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &CommentMetaData {
-        getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey)
+    public fun getCommentMetaDataSafe(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &CommentMetaData {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        assert!(!commentMetaData.isDeleted, E_COMMENT_DELETED);
+        commentMetaData
     }
 
     fun getActiveReplyCount(
