@@ -176,7 +176,7 @@ module basics::accessControl {
         revokeRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }
 
-    public(friend) fun setRoleAdmin(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
+    fun setRoleAdmin(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
         let previousAdminRole = getRoleAdmin(userRolesCollection, role);
 
         if (table::contains(&userRolesCollection.roles, role)) {
@@ -235,6 +235,14 @@ module basics::accessControl {
             };
             event::emit(RoleRevoked{role, userId});    // , _msgSender() ??
         }
+    }
+
+    public(friend) fun setCommunityPermission(userRolesCollection: &mut UserRolesCollection, communityId: ID) {
+        let communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
+        let communityModeratorRole = getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId);
+
+        setRoleAdmin(userRolesCollection, communityModeratorRole, communityAdminRole);
+        setRoleAdmin(userRolesCollection, communityAdminRole, PROTOCOL_ADMIN_ROLE);
     }
 
     public fun checkHasRole(userRolesCollection: &UserRolesCollection, userId: ID, actionRole: u8, communityId: ID) {
