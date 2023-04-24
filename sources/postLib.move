@@ -3,8 +3,9 @@ module basics::postLib {
     use sui::event;
     use sui::object::{Self, ID, UID};
     use sui::tx_context::{Self, TxContext};
-    use basics::accessControl;
+    use sui::vec_map::{Self, VecMap};
     use std::vector;
+    use basics::accessControl;
     use basics::communityLib;
     use basics::commonLib;
     use basics::userLib;
@@ -89,8 +90,8 @@ module basics::postLib {
     const TUTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
 
-    const MESSENGER_SENDER_ITEM_PROPERTY: u64 = 0;
-    const LANGUAGE_ITEM_PROPERTY: u64 = 1;    
+    const MESSENGER_SENDER_ITEM_PROPERTY: u8 = 0;
+    const LANGUAGE_ITEM_PROPERTY: u8 = 1;    
 
     const ENGLISH_LANGUAGE: u8 = 0;
     const CHINESE_LANGUAGE: u8 = 1;
@@ -130,7 +131,7 @@ module basics::postLib {
         tags: vector<u64>,
         replies: Table<u64, ReplyMetaData>,
         comments: Table<u64, CommentMetaData>,
-        properties: vector<u8>,
+        properties: VecMap<u8, u8>,
 
         historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
         voteUsers: vector<ID>
@@ -155,7 +156,7 @@ module basics::postLib {
         isDeleted: bool,
 
         comments: Table<u64, CommentMetaData>,
-        properties: vector<u8>,
+        properties: VecMap<u8, u8>,
         historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3
         voteUsers: vector<ID>
     }
@@ -174,7 +175,7 @@ module basics::postLib {
         rating: i64Lib::I64,
 
         isDeleted: bool,
-        properties: vector<u8>,
+        properties: VecMap<u8, u8>,
         historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3
         voteUsers: vector<ID>
     }
@@ -303,7 +304,7 @@ module basics::postLib {
         );
 
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
-        assert!(language >= 0 && language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
         let postTags = vector::empty<u64>();
         if (postType != DOCUMENTATION) {
@@ -311,9 +312,9 @@ module basics::postLib {
             postTags = tags;
         };
 
-        let postProperties = vector::empty<u8>();
-        vector::insert(&mut postProperties, 0, MESSENGER_SENDER_ITEM_PROPERTY);
-        vector::insert(&mut postProperties, language, LANGUAGE_ITEM_PROPERTY);
+        let postProperties = vec_map::empty();
+        vec_map::insert(&mut postProperties, MESSENGER_SENDER_ITEM_PROPERTY, 0);
+        vec_map::insert(&mut postProperties, LANGUAGE_ITEM_PROPERTY, language);
 
         let post = Post {
             id: object::new(ctx),
@@ -381,7 +382,7 @@ module basics::postLib {
             /*true*/
         );
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
-        assert!(language >= 0 && language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
         let countReplies = table::length(&postMetaData.replies);
         if (postMetaData.postType == EXPERT_POST || postMetaData.postType == COMMON_POST) {
@@ -428,9 +429,9 @@ module basics::postLib {
             getReplyMetaDataSafe(postMetaData, parentReplyMetaDataKey);  // checking parentReplyMetaDataKey is exist
         };
 
-        let replyProperties = vector::empty<u8>();
-        vector::insert(&mut replyProperties, 0, MESSENGER_SENDER_ITEM_PROPERTY);
-        vector::insert(&mut replyProperties, language, LANGUAGE_ITEM_PROPERTY);
+        let replyProperties = vec_map::empty();
+        vec_map::insert(&mut replyProperties, MESSENGER_SENDER_ITEM_PROPERTY, 0);
+        vec_map::insert(&mut replyProperties, LANGUAGE_ITEM_PROPERTY, language);
 
         let reply = Reply {
             id: object::new(ctx),
@@ -488,11 +489,11 @@ module basics::postLib {
             accessControl::get_action_role_none(),
             /*true*/
         );
-        assert!(language >= 0 && language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
-        let commentProperties = vector::empty<u8>();
-        vector::insert(&mut commentProperties, 0, MESSENGER_SENDER_ITEM_PROPERTY);
-        vector::insert(&mut commentProperties, language, LANGUAGE_ITEM_PROPERTY);
+        let commentProperties = vec_map::empty();
+        vec_map::insert(&mut commentProperties, MESSENGER_SENDER_ITEM_PROPERTY, 0);
+        vec_map::insert(&mut commentProperties, LANGUAGE_ITEM_PROPERTY, language);
 
         let comment = Comment {
             id: object::new(ctx),
