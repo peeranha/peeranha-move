@@ -385,8 +385,8 @@ module basics::postLib {
 
         let countReplies = table::length(&postMetaData.replies);
         if (postMetaData.postType == EXPERT_POST || postMetaData.postType == COMMON_POST) {
-            let replyMetaDataKey = 0;
-            while (replyMetaDataKey < countReplies) {
+            let replyMetaDataKey = 1;
+            while (replyMetaDataKey <= countReplies) {
                 let replyContainer = getReplyMetaData(postMetaData, replyMetaDataKey);
                 assert!(
                     userId != replyContainer.author || replyContainer.isDeleted,
