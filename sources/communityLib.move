@@ -26,7 +26,6 @@ module basics::communityLib {
     struct Community has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
-        timeCreate: u64,
         isFrozen: bool,
         tags: Table<u64, Tag>,
     }
@@ -112,7 +111,6 @@ module basics::communityLib {
         let community = Community {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            timeCreate: commonLib::getTimestamp(),
             isFrozen: false,
             tags: communityTags,
         };
@@ -215,8 +213,8 @@ module basics::communityLib {
     }
 
     #[test_only]
-    public fun getCommunityData(community: &Community): (vector<u8>, u64, bool) {
-        (commonLib::getIpfsHash(community.ipfsDoc), community.timeCreate, community.isFrozen)
+    public fun getCommunityData(community: &Community): (vector<u8>, bool) {
+        (commonLib::getIpfsHash(community.ipfsDoc), community.isFrozen)
     }
 
     #[test_only]

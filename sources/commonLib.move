@@ -1,7 +1,7 @@
 module basics::commonLib {
     use std::vector;
-    // friend basics::communityLib;
     use sui::object::{Self, ID};
+    use sui::clock::{Self, Clock};
 
 
     // ====== Errors ======
@@ -26,8 +26,8 @@ module basics::commonLib {
         ipfsHash.hash
     }
 
-    public fun getTimestamp(): u64 {    // TODO: add
-        0
+    public fun getTimestamp(time: &Clock): u64 {
+        clock::timestamp_ms(time)
     }
 
 

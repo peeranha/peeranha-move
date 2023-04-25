@@ -2,6 +2,7 @@ module basics::postLib {
     use sui::transfer;
     use sui::event;
     use sui::object::{Self, ID, UID};
+    use sui::clock::{Clock};
     use sui::tx_context::{Self, TxContext};
     use sui::vec_map::{Self, VecMap};
     use std::vector;
@@ -112,7 +113,6 @@ module basics::postLib {
         ipfsDoc: commonLib::IpfsHash,
     }
 
-    // add postId
     struct PostMetaData has key {       // shared
         id: UID,
         postId: ID,
@@ -142,7 +142,6 @@ module basics::postLib {
         ipfsDoc: commonLib::IpfsHash,
     }
 
-    // add replyMetaDataKey
     struct ReplyMetaData has key, store {
         id: UID,
         replyId: ID,
@@ -285,6 +284,7 @@ module basics::postLib {
         postType: u8,
         tags: vector<u64>,
         language: u8,
+        time: &Clock,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -322,7 +322,7 @@ module basics::postLib {
             id: object::new(ctx),
             postId: object::id(&post),
             postType: postType,
-            postTime: commonLib::getTimestamp(),
+            postTime: commonLib::getTimestamp(time),
             author: userId,
             rating: i64Lib::zero(),
             communityId: communityId,
@@ -359,6 +359,7 @@ module basics::postLib {
         ipfsHash: vector<u8>,
         isOfficialReply: bool,
         language: u8,
+        time: &Clock,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -399,7 +400,7 @@ module basics::postLib {
         let replyUID = object::new(ctx);
         let isFirstReply = false;
         let isQuickReply = false;
-        let timestamp: u64 = commonLib::getTimestamp();
+        let timestamp: u64 = commonLib::getTimestamp(time);
         if (parentReplyMetaDataKey == 0) {
             if (isOfficialReply) {
                 postMetaData.officialReplyMetaDataKey = countReplies + 1;
@@ -468,6 +469,7 @@ module basics::postLib {
         parentReplyMetaDataKey: u64,
         ipfsHash: vector<u8>,
         language: u8,
+        time: &Clock,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -495,7 +497,7 @@ module basics::postLib {
         let commentMetaData = CommentMetaData {
             id: object::new(ctx),
             commentId: commentMetaDataKey,
-            postTime: commonLib::getTimestamp(),
+            postTime: commonLib::getTimestamp(time),
             author: userId,
             rating: i64Lib::zero(),
             isDeleted: false,
@@ -769,6 +771,7 @@ module basics::postLib {
         user: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
         postMetaData: &mut PostMetaData,
+        time: &Clock,
         ctx: &mut TxContext
     ) {
         let communityId = postMetaData.communityId;
@@ -790,7 +793,7 @@ module basics::postLib {
 
         let postType = postMetaData.postType;
         if (postType != DOCUMENTATION) {
-            let time: u64 = commonLib::getTimestamp();
+            let time: u64 = commonLib::getTimestamp(time);
             if (time - postMetaData.postTime < DELETE_TIME || userId == postAuthor) {
                 let typeRating: StructRating = getTypesRating(postType);
                 let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.voteUsers);
@@ -862,6 +865,7 @@ module basics::postLib {
         userRolesCollection: &accessControl::UserRolesCollection,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
+        time: &Clock,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -892,7 +896,7 @@ module basics::postLib {
         
         assert!(userId != replyMetaData.author || bestReplyMetaDataKey != replyMetaDataKey, E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY);
         
-        let time: u64 = commonLib::getTimestamp();
+        let time: u64 = commonLib::getTimestamp(time);
         let isDeductReplyRating = time - replyMetaData.postTime < DELETE_TIME || userId == replyMetaData.author;
         userLib::updateRating(
             userCommunityRating,
@@ -1698,23 +1702,22 @@ module basics::postLib {
     // }
 
     // #[test_only]
-    // public fun getPostData(postCollection: &mut PostCollection, postId: u64): (u8, vector<u8>, u64, address, i64Lib::I64, u64, u64, u64, u64, bool, vector<u64>, vector<u8>, vector<u8>, vector<address>) {
-    //     let post = getPost(postCollection, postId);
+    // public fun getPostData(postMetaData: &mut PostMetaData): (u8, vector<u8>, u64, address, i64Lib::I64, u64, u64, u64, u64, bool, vector<u64>, vector<u8>, vector<u8>, vector<address>) {
     //     (
-    //         post.postType,
-    //         commonLib::getIpfsHash(post.ipfsDoc),
-    //         post.postTime,
-    //         post.author,
-    //         post.rating,
-    //         post.communityId,
-    //         post.officialReplyMetaDataKey,
-    //         post.bestReplyMetaDataKey,
-    //         post.deletedReplyCount,
-    //         post.isDeleted,
-    //         post.tags,
-    //         post.properties,
-    //         post.historyVotes,
-    //         post.votedUsers
+    //         postMetaData.postType,
+    //         commonLib::getIpfsHash(postMetaData.ipfsDoc),
+    //         postMetaData.postTime,
+    //         postMetaData.author,
+    //         postMetaData.rating,
+    //         postMetaData.communityId,
+    //         postMetaData.officialReplyMetaDataKey,
+    //         postMetaData.bestReplyMetaDataKey,
+    //         postMetaData.deletedReplyCount,
+    //         postMetaData.isDeleted,
+    //         postMetaData.tags,
+    //         postMetaData.properties,
+    //         postMetaData.historyVotes,
+    //         postMetaData.votedUsers
     //     )
     //     // replies: vector<Reply>,  // TODO: add
     //     // comments: vector<Comment>,   // TODO: add

@@ -39,11 +39,11 @@ module basics::userLib_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let userRatingCollection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut userRatingCollection_val;
-            userLib::createUser(userRatingCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+            let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            userLib::createUser(user_rating_collection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
 
-            test_scenario::return_shared(userRatingCollection_val);
+            test_scenario::return_shared(user_rating_collection_val);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -72,11 +72,11 @@ module basics::userLib_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let userRatingCollection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut userRatingCollection_val;
-            userLib::createUser(userRatingCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
+            let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            userLib::createUser(user_rating_collection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", test_scenario::ctx(scenario));
 
-            test_scenario::return_shared(userRatingCollection_val);
+            test_scenario::return_shared(user_rating_collection_val);
         };
 
         test_scenario::next_tx(scenario, USER1);
