@@ -8,6 +8,7 @@ module basics::accessControl {
     use sui::vec_map::{Self, VecMap};
     use std::option;
     friend basics::communityLib;
+    friend basics::userLib;
 
     // ====== Errors ======
 
@@ -151,11 +152,11 @@ module basics::accessControl {
         }
     }
 
-    public entry fun grantRole(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
+    public(friend) fun grantRole(userRolesCollection: &mut UserRolesCollection, adminId: ID, userId: ID, role: vector<u8>) {
         assert!(role != DEFAULT_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_DEFAULT_ADMIN_ROLE);
 
         let adminRole = getRoleAdmin(userRolesCollection, role);
-        onlyRole(userRolesCollection, adminRole, userId);
+        onlyRole(userRolesCollection, adminRole, adminId);
         grantRole_(userRolesCollection, role, userId);
     }
 
@@ -163,11 +164,11 @@ module basics::accessControl {
         grantRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }
 
-    public entry fun revokeRole(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
+    public(friend) fun revokeRole(userRolesCollection: &mut UserRolesCollection, adminId: ID, userId: ID, role: vector<u8>) {
         assert!(role != DEFAULT_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_DEFAULT_ADMIN_ROLE);
 
         let adminRole = getRoleAdmin(userRolesCollection, role);
-        onlyRole(userRolesCollection, adminRole, userId);
+        onlyRole(userRolesCollection, adminRole, adminId);
         revokeRole_(userRolesCollection, role, userId);
     }
 

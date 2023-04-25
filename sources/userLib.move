@@ -220,6 +220,16 @@ module basics::userLib {
         event::emit(UpdateUserEvent {userId: userId});
     }
 
+    public entry fun grantRole(userRolesCollection: &mut accessControl::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
+        let adminId = object::id(admin);
+        accessControl::grantRole(userRolesCollection, adminId, userId, role)
+    }
+
+    public entry fun revokeRole(userRolesCollection: &mut accessControl::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
+        let adminId = object::id(admin);
+        accessControl::revokeRole(userRolesCollection, adminId, userId, role)
+    }
+
     public(friend) fun getUserFollowedCommunities(user: &User): &vector<ID> {
         &user.followedCommunities
     }
