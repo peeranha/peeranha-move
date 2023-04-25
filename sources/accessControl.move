@@ -97,11 +97,10 @@ module basics::accessControl {
         );
     }
 
-    // bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;
-
-    // public fun initRole(): Role {
-    //     Role{roles: vec_map::empty()}
-    // }
+    #[test_only]
+    public fun init_test(ctx: &mut TxContext) {
+        init(ctx)
+    }
 
     public fun onlyRole(userRolesCollection: &UserRolesCollection, role: vector<u8>, userId: ID) {
         checkRole_(userRolesCollection, role, userId);
