@@ -76,14 +76,13 @@ module basics::communityLib {
     ///
     public entry fun createCommunity(
         user: &userLib::User,
-        roles: &accessControl::UserRolesCollection,
+        roles: &mut accessControl::UserRolesCollection,
         ipfsHash: vector<u8>,
         tags: vector<vector<u8>>,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
         accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin(), commonLib::getZeroId());
-        // peeranhaUser.initCommunityAdminPermission(user, communityId);
         
         let tagsLength = vector::length(&tags);
         assert!(tagsLength >= 5, E_REQUIRE_AT_LEAST_5_TAGS);
@@ -118,7 +117,9 @@ module basics::communityLib {
             tags: communityTags,
         };
 
-        event::emit(CreateCommunityEvent {userId: userId, communityId: object::id(&community)});
+        let communityId = object::id(&community);
+        accessControl::setCommunityPermission(roles, communityId);
+        event::emit(CreateCommunityEvent {userId: userId, communityId: communityId});
         transfer::share_object(community);
     }
 

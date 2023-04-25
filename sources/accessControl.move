@@ -163,7 +163,7 @@ module basics::accessControl {
         grantRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }
 
-    public entry fun revokeRole(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {    // add revokeProtocolAdminRole
+    public entry fun revokeRole(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
         assert!(role != DEFAULT_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_DEFAULT_ADMIN_ROLE);
 
         let adminRole = getRoleAdmin(userRolesCollection, role);
@@ -175,16 +175,7 @@ module basics::accessControl {
         revokeRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }
 
-    public fun renounceRole(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
-        // assert!(account == tx_context::sender(ctx), E_ACCESS_CONTROL_CAN_ONLY_RENOUNCE_ROLE_FOR_SELF);       // ?????
-        revokeRole_(userRolesCollection, role, userId);
-    }
-
-    public fun setupRole_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
-        grantRole_(userRolesCollection, role, userId);
-    }
-
-    public(friend) entry fun setRoleAdmin_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
+    fun setRoleAdmin(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
         let previousAdminRole = getRoleAdmin(userRolesCollection, role);
 
         if (table::contains(&userRolesCollection.roles, role)) {
@@ -243,6 +234,14 @@ module basics::accessControl {
             };
             event::emit(RoleRevoked{role, userId});    // , _msgSender() ??
         }
+    }
+
+    public(friend) fun setCommunityPermission(userRolesCollection: &mut UserRolesCollection, communityId: ID) {
+        let communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
+        let communityModeratorRole = getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId);
+
+        setRoleAdmin(userRolesCollection, communityModeratorRole, communityAdminRole);
+        setRoleAdmin(userRolesCollection, communityAdminRole, PROTOCOL_ADMIN_ROLE);
     }
 
     public fun checkHasRole(userRolesCollection: &UserRolesCollection, userId: ID, actionRole: u8, communityId: ID) {

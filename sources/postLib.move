@@ -91,7 +91,6 @@ module basics::postLib {
     const DOCUMENTATION: u8 = 3;
 
     const MESSENGER_SENDER_ITEM_PROPERTY: u8 = 0;
-    const LANGUAGE_ITEM_PROPERTY: u8 = 1;    
 
     const ENGLISH_LANGUAGE: u8 = 0;
     const CHINESE_LANGUAGE: u8 = 1;
@@ -122,6 +121,7 @@ module basics::postLib {
         author: ID,
         rating: i64Lib::I64,
         communityId: ID,
+        language: u8,
 
         officialReplyMetaDataKey: u64,
         bestReplyMetaDataKey: u64,
@@ -131,7 +131,7 @@ module basics::postLib {
         tags: vector<u64>,
         replies: Table<u64, ReplyMetaData>,
         comments: Table<u64, CommentMetaData>,
-        properties: VecMap<u8, u8>,
+        properties: VecMap<u8, vector<u8>>,
 
         historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
         voteUsers: vector<ID>
@@ -150,13 +150,14 @@ module basics::postLib {
         author: ID,
         rating: i64Lib::I64,
         parentReplyMetaDataKey: u64,
+        language: u8,
 
         isFirstReply: bool,
         isQuickReply: bool,
         isDeleted: bool,
 
         comments: Table<u64, CommentMetaData>,
-        properties: VecMap<u8, u8>,
+        properties: VecMap<u8, vector<u8>>,
         historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3
         voteUsers: vector<ID>
     }
@@ -173,9 +174,10 @@ module basics::postLib {
         postTime: u64,
         author: ID,
         rating: i64Lib::I64,
+        language: u8,
 
         isDeleted: bool,
-        properties: VecMap<u8, u8>,
+        properties: VecMap<u8, vector<u8>>,
         historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3
         voteUsers: vector<ID>
     }
@@ -312,10 +314,6 @@ module basics::postLib {
             postTags = tags;
         };
 
-        let postProperties = vec_map::empty();
-        vec_map::insert(&mut postProperties, MESSENGER_SENDER_ITEM_PROPERTY, 0);
-        vec_map::insert(&mut postProperties, LANGUAGE_ITEM_PROPERTY, language);
-
         let post = Post {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
@@ -331,11 +329,12 @@ module basics::postLib {
             officialReplyMetaDataKey: 0,
             bestReplyMetaDataKey: 0,
             deletedReplyCount: 0,
+            language: language,
             isDeleted: false,
             tags: postTags,
             replies: table::new(ctx),
             comments: table::new(ctx),
-            properties: postProperties,
+            properties: vec_map::empty(),
             historyVotes: vector::empty<u8>(),
             voteUsers: vector::empty<ID>(),
         };
@@ -386,8 +385,8 @@ module basics::postLib {
 
         let countReplies = table::length(&postMetaData.replies);
         if (postMetaData.postType == EXPERT_POST || postMetaData.postType == COMMON_POST) {
-            let replyMetaDataKey = 0;
-            while (replyMetaDataKey < countReplies) {
+            let replyMetaDataKey = 1;
+            while (replyMetaDataKey <= countReplies) {
                 let replyContainer = getReplyMetaData(postMetaData, replyMetaDataKey);
                 assert!(
                     userId != replyContainer.author || replyContainer.isDeleted,
@@ -429,10 +428,6 @@ module basics::postLib {
             getReplyMetaDataSafe(postMetaData, parentReplyMetaDataKey);  // checking parentReplyMetaDataKey is exist
         };
 
-        let replyProperties = vec_map::empty();
-        vec_map::insert(&mut replyProperties, MESSENGER_SENDER_ITEM_PROPERTY, 0);
-        vec_map::insert(&mut replyProperties, LANGUAGE_ITEM_PROPERTY, language);
-
         let reply = Reply {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
@@ -444,13 +439,14 @@ module basics::postLib {
             author: userId,
             rating: i64Lib::zero(),
             parentReplyMetaDataKey: parentReplyMetaDataKey,
+            language: language,
               
             isFirstReply: isFirstReply,
             isQuickReply: isQuickReply,
             isDeleted: false,
 
             comments: table::new(ctx),
-            properties: replyProperties,
+            properties: vec_map::empty(),
             historyVotes: vector::empty<u8>(),
             voteUsers: vector::empty<ID>(),
         };
@@ -491,10 +487,6 @@ module basics::postLib {
         );
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
-        let commentProperties = vec_map::empty();
-        vec_map::insert(&mut commentProperties, MESSENGER_SENDER_ITEM_PROPERTY, 0);
-        vec_map::insert(&mut commentProperties, LANGUAGE_ITEM_PROPERTY, language);
-
         let comment = Comment {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
@@ -507,8 +499,9 @@ module basics::postLib {
             author: userId,
             rating: i64Lib::zero(),
             isDeleted: false,
+            language: language,
 
-            properties: commentProperties,
+            properties: vec_map::empty(),
             historyVotes: vector::empty<u8>(),
             voteUsers: vector::empty<ID>(),
         };
@@ -541,9 +534,11 @@ module basics::postLib {
         ipfsHash: vector<u8>, 
         newPostType: u8,
         tags: vector<u64>,
+        language: u8,
         ctx: &mut TxContext
     ) {
         checkMatchItemId(object::id(post), postMetaData.postId);
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());       // todo: test
         if(commonLib::getIpfsHash(post.ipfsDoc) != ipfsHash)
             post.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -557,6 +552,7 @@ module basics::postLib {
             newCommunity,
             newPostType,
             tags,
+            language,
             ctx
         );
         event::emit(EditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
@@ -571,8 +567,10 @@ module basics::postLib {
         newCommunity: &communityLib::Community,
         newPostType: u8,
         tags: vector<u64>,
+        language: u8,
         ctx: &mut TxContext
     ) {
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         let newCommunityId = object::id(newCommunity);
         if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
             abort E_ERROR_CHANGE_COMMUNITY_ID;
@@ -586,6 +584,7 @@ module basics::postLib {
             newCommunity,
             newPostType,
             tags,
+            language,
             ctx
         );
         event::emit(ModeratorEditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
@@ -600,6 +599,7 @@ module basics::postLib {
         newCommunity: &communityLib::Community,
         newPostType: u8,
         tags: vector<u64>,
+        language: u8,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -624,6 +624,11 @@ module basics::postLib {
 
         changePostType(usersRatingCollection, periodRewardContainer, postMetaData, newPostType, ctx);                      // TODO: add tests
         changePostCommunity(usersRatingCollection, periodRewardContainer, postMetaData, newCommunity, ctx);                // TODO: add tests
+
+        if (postMetaData.language != language) {
+            postMetaData.language = language;
+        };
+        
         if(vector::length(&tags) > 0) {
             communityLib::checkTags(newCommunity, postMetaData.tags);
             postMetaData.tags = tags;
@@ -641,7 +646,9 @@ module basics::postLib {
         replyMetaDataKey: u64,
         ipfsHash: vector<u8>, 
         isOfficialReply: bool,
+        language: u8,
     ) {
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
         if (commonLib::getIpfsHash(reply.ipfsDoc) != ipfsHash)
             reply.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -652,7 +659,8 @@ module basics::postLib {
             userRolesCollection,
             postMetaData,
             replyMetaDataKey,
-            isOfficialReply
+            isOfficialReply,
+            language
         );
         event::emit(EditReplyEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey});
     }
@@ -664,14 +672,17 @@ module basics::postLib {
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
         isOfficialReply: bool,
+        language: u8,
     ) {
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         editReply(
             usersRatingCollection,
             user,
             userRolesCollection,
             postMetaData,
             replyMetaDataKey,
-            isOfficialReply
+            isOfficialReply,
+            language
         );
         event::emit(ModeratorEditReplyEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey});
     }
@@ -683,11 +694,16 @@ module basics::postLib {
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
         isOfficialReply: bool,
+        language: u8,
     ) {
         let userId = object::id(user);
-        let replyMetaData = getReplyMetaDataSafe(postMetaData, replyMetaDataKey);
+        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
-        
+
+        if (replyMetaData.language != language) {
+            replyMetaData.language = language;
+        };
+
         userLib::checkActionRole(
             user,
             userCommunityRating,
@@ -704,8 +720,9 @@ module basics::postLib {
 
         if (isOfficialReply) {
             postMetaData.officialReplyMetaDataKey = replyMetaDataKey;
-        } else if (postMetaData.officialReplyMetaDataKey == replyMetaDataKey)
+        } else if (postMetaData.officialReplyMetaDataKey == replyMetaDataKey) {
             postMetaData.officialReplyMetaDataKey = 0;
+        };
     }
 
     public entry fun editComment(
@@ -716,12 +733,16 @@ module basics::postLib {
         comment: &mut Comment,
         parentReplyKey: u64,
         commentMetaDataKey: u64,
-        ipfsHash: vector<u8>
+        ipfsHash: vector<u8>,
+        language: u8,
     ) {
+        assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         let userId = object::id(user);
-        let commentMetaData = getCommentMetaDataSafe(postMetaData, parentReplyKey, commentMetaDataKey);
+        let commentMetaData = getMutableCommentMetaDataSafe(postMetaData, parentReplyKey, commentMetaDataKey);
         checkMatchItemId(object::id(comment), commentMetaData.commentId);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
+
+        commentMetaData.language = language;
 
         userLib::checkActionRole(
             user,
