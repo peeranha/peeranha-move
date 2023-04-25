@@ -742,7 +742,9 @@ module basics::postLib {
         checkMatchItemId(object::id(comment), commentMetaData.commentId);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
-        commentMetaData.language = language;
+        if (commentMetaData.language != language) {
+            commentMetaData.language = language;
+        };
 
         userLib::checkActionRole(
             user,
