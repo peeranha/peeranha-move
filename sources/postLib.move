@@ -91,8 +91,6 @@ module basics::postLib {
     const TUTORIAL: u8 = 2;
     const DOCUMENTATION: u8 = 3;
 
-    const MESSENGER_SENDER_ITEM_PROPERTY: u8 = 0;
-
     const ENGLISH_LANGUAGE: u8 = 0;
     const CHINESE_LANGUAGE: u8 = 1;
     const SPANISH_LANGUAGE: u8 = 2;
@@ -107,6 +105,10 @@ module basics::postLib {
     const TYPE_CONTENT_POST: u8 = 0;
     const TYPE_CONTENT_REPLY: u8 = 1;
     const TYPE_CONTENT_COMMENT: u8 = 2;
+
+    const UPVOTE: u8 = 1;
+    const NONE_VOTE: u8 = 2;
+    const DOWNVOTE: u8 = 3;
 
     struct Post has key {
         id: UID,
@@ -132,9 +134,7 @@ module basics::postLib {
         replies: Table<u64, ReplyMetaData>,
         comments: Table<u64, CommentMetaData>,
         properties: VecMap<u8, vector<u8>>,
-
-        historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
-        voteUsers: vector<ID>
+        historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
     }
 
     struct Reply has key {
@@ -157,8 +157,7 @@ module basics::postLib {
 
         comments: Table<u64, CommentMetaData>,
         properties: VecMap<u8, vector<u8>>,
-        historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3
-        voteUsers: vector<ID>
+        historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
     }
 
     struct Comment has key {
@@ -177,8 +176,7 @@ module basics::postLib {
 
         isDeleted: bool,
         properties: VecMap<u8, vector<u8>>,
-        historyVotes: vector<u8>,                   // downVote = 1, NONE = 2, upVote = 3
-        voteUsers: vector<ID>
+        historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
     }
 
     struct UserRatingChange {
@@ -335,8 +333,7 @@ module basics::postLib {
             replies: table::new(ctx),
             comments: table::new(ctx),
             properties: vec_map::empty(),
-            historyVotes: vector::empty<u8>(),
-            voteUsers: vector::empty<ID>(),
+            historyVotes: vec_map::empty(),
         };
 
         event::emit(CreatePostEvent{userId: userId, communityId: communityId, postMetaDataId: object::id(&postMetaData)});
@@ -448,8 +445,7 @@ module basics::postLib {
 
             comments: table::new(ctx),
             properties: vec_map::empty(),
-            historyVotes: vector::empty<u8>(),
-            voteUsers: vector::empty<ID>(),
+            historyVotes: vec_map::empty(),
         };
 
         let replyMetaDataKey = countReplies + 1;
@@ -504,8 +500,7 @@ module basics::postLib {
             language: language,
 
             properties: vec_map::empty(),
-            historyVotes: vector::empty<u8>(),
-            voteUsers: vector::empty<ID>(),
+            historyVotes: vec_map::empty(),
         };
         let commentMetaDataKey;
         if (parentReplyMetaDataKey == 0) {
@@ -798,8 +793,8 @@ module basics::postLib {
             let time: u64 = commonLib::getTimestamp(time);
             if (time - postMetaData.postTime < DELETE_TIME || userId == postAuthor) {
                 let typeRating: StructRating = getTypesRating(postType);
-                let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.voteUsers);
 
+                let (positive, negative) = getHistoryInformations(postMetaData.historyVotes);
                 let changeUserRating: i64Lib::I64 = i64Lib::add(&i64Lib::mul(&typeRating.upvotedPost, &i64Lib::from(positive)), &i64Lib::mul(&typeRating.downvotedPost, &i64Lib::from(negative)));
                 if (i64Lib::compare(&changeUserRating, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
                     userLib::updateRating(
@@ -956,8 +951,7 @@ module basics::postLib {
 
         // change user rating considering reply rating
         let typeRating: StructRating = getTypesRating(postType);
-        let (positive, negative) = getHistoryInformations(replyMetaData.historyVotes, replyMetaData.voteUsers);
-        
+        let (positive, negative) = getHistoryInformations(replyMetaData.historyVotes);
         // typeRating.upvotedReply * positive + typeRating.downvotedReply * negative;
         let changeUserRating: i64Lib::I64 = i64Lib::add(&i64Lib::mul(&typeRating.upvotedReply, &i64Lib::from(positive)), &i64Lib::mul(&typeRating.downvotedReply, &i64Lib::from(negative)));
         
@@ -1143,7 +1137,7 @@ module basics::postLib {
         assert!(postType != DOCUMENTATION, E_YOU_CAN_NOT_VOTE_TO_DOCUMENTATION);
         assert!(voteUserId != postMetaData.author, E_ERROR_VOTE_POST);
         
-        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut postMetaData.historyVotes, isUpvote, &mut postMetaData.voteUsers);
+        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut postMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, voteUserId);
         userLib::checkActionRole(
             voteUser,
@@ -1209,7 +1203,7 @@ module basics::postLib {
         let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
         assert!(voteUserId != replyMetaData.author, E_ERROR_VOTE_REPLY);
 
-        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut replyMetaData.historyVotes, isUpvote, &mut replyMetaData.voteUsers);
+        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut replyMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         userLib::checkActionRole(
             voteUser,
@@ -1301,7 +1295,7 @@ module basics::postLib {
         let commentMetaData = getMutableCommentMetaDataSafe(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
         assert!(voteUserId != commentMetaData.author, E_ERROR_VOTE_COMMENT);
         
-        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut commentMetaData.historyVotes, isUpvote, &mut commentMetaData.voteUsers);
+        let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut commentMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         
         userLib::checkActionRole(
@@ -1415,8 +1409,7 @@ module basics::postLib {
         let oldTypeRating: StructRating = getTypesRating(oldPostType);
         let newTypeRating: StructRating = getTypesRating(newPostType);
 
-        let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.voteUsers);
-
+        let (positive, negative) = getHistoryInformations(postMetaData.historyVotes);
         let positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedPost, &oldTypeRating.upvotedPost), &i64Lib::from(positive));
         let negativeRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.downvotedPost, &oldTypeRating.downvotedPost), &i64Lib::from(negative));
         let changePostAuthorRating = i64Lib::add(&positiveRating, &negativeRating);
@@ -1430,7 +1423,7 @@ module basics::postLib {
                 replyMetaDataKey = replyMetaDataKey + 1;
                 continue
             };
-            let (positive, negative) = getHistoryInformations(replyMetaData.historyVotes, replyMetaData.voteUsers);
+            let (positive, negative) = getHistoryInformations(replyMetaData.historyVotes);
 
             positiveRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.upvotedReply, &oldTypeRating.upvotedReply), &i64Lib::from(positive));
             negativeRating = i64Lib::mul(&i64Lib::sub(&newTypeRating.downvotedReply, &oldTypeRating.downvotedReply), &i64Lib::from(negative));
@@ -1489,8 +1482,7 @@ module basics::postLib {
         let postType: u8 = postMetaData.postType;
         let typeRating: StructRating = getTypesRating(postType);
 
-        let (positive, negative) = getHistoryInformations(postMetaData.historyVotes, postMetaData.voteUsers);
-
+        let (positive, negative) = getHistoryInformations(postMetaData.historyVotes);
         let positiveRating = i64Lib::mul(&typeRating.upvotedPost, &i64Lib::from(positive));
         let negativeRating = i64Lib::mul(&typeRating.downvotedPost, &i64Lib::from(negative));
         let changePostAuthorRating = i64Lib::add(&positiveRating, &negativeRating);
@@ -1504,8 +1496,8 @@ module basics::postLib {
                 replyMetaDataKey = replyMetaDataKey + 1;
                 continue
             };
-            (positive, negative) = getHistoryInformations(replyMetaData.historyVotes, replyMetaData.voteUsers);
 
+            (positive, negative) = getHistoryInformations(replyMetaData.historyVotes);
             positiveRating = i64Lib::mul(&typeRating.upvotedReply, &i64Lib::from(positive));
             negativeRating = i64Lib::mul(&typeRating.downvotedReply, &i64Lib::from(negative));
             let changeReplyAuthorRating = i64Lib::add(&positiveRating, &negativeRating);
@@ -1612,20 +1604,21 @@ module basics::postLib {
         }
     }
 
-    fun getHistoryInformations(        //name?
-        historyVotes: vector<u8>,
-        votedUsers: vector<ID>
+    fun getHistoryInformations(
+        historyVotes: VecMap<ID, u8>
     ): (u64, u64) {
-        let i = 0;
+        let index = 0;
         let positive = 0;
         let negative = 0;
-        while(i < vector::length(&votedUsers)) {
-            if (vector::borrow(&historyVotes, i) == &1) {
+        let historyVotesSize = vec_map::size(&historyVotes);
+        while(index < historyVotesSize) {
+            let (_, value) = vec_map::get_entry_by_idx(&historyVotes, index);
+            if (value == &1) {
                 positive = positive + 1;
-            } else if (vector::borrow(&historyVotes, i) == &2) {
+            } else if (value == &3) {
                 negative = negative + 1;
             };
-            i = i +1;
+            index = index +1;
         };
         (positive, negative)
     }
@@ -2006,54 +1999,50 @@ module basics::postLib {
     // 3 - upvote
     ///
     public fun getForumItemRatingChange(
-        userActionId: ID,
-        historyVotes: &mut vector<u8>,
+        userId: ID,
+        historyVotes: &mut VecMap<ID, u8>,
         isUpvote: bool,
-        votedUsers: &mut vector<ID>
     ): (i64Lib::I64, bool) {
-        let (history, userPosition, isExistVote) = getHistoryVote(userActionId, *historyVotes, *votedUsers);
-        // int history = getHistoryVote(actionAddress, historyVotes);
+        let (history, isExistVote) = getHistoryVote(userId, *historyVotes);
         let ratingChange: i64Lib::I64;
         let isCancel: bool = false;
         
         if (isUpvote) {
-            if (history == 1) {
-                let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
-                *userHistoryVote = 3;
+            if (history == UPVOTE) {
+                let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
+                *userHistoryVote = DOWNVOTE;
                 ratingChange = i64Lib::from(2);
-            } else if (history == 2) {
+            } else if (history == NONE_VOTE) {
                 if (isExistVote) {
-                   let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
-                    *userHistoryVote = 3;
+                   let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
+                    *userHistoryVote = DOWNVOTE;
                 } else {
-                    vector::push_back(votedUsers, userActionId);
-                    vector::push_back(historyVotes, 3);
+                    vec_map::insert(historyVotes, userId, DOWNVOTE);
                 };
                 ratingChange = i64Lib::from(1);
             } else {
-                let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
-                *userHistoryVote = 2;
+                let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
+                *userHistoryVote = NONE_VOTE;
                 ratingChange = i64Lib::neg_from(1);
                 isCancel = true;
             };
         } else {
             if (history == 1) {
-                let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
-                *userHistoryVote = 2;
+                let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
+                *userHistoryVote = NONE_VOTE;
                 ratingChange = i64Lib::from(1);
                 isCancel = true;
-            } else if (history == 2) {
+            } else if (history == NONE_VOTE) {
                 if (isExistVote) {
-                    let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
-                    *userHistoryVote = 1;
+                    let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
+                    *userHistoryVote = UPVOTE;
                 } else {
-                    vector::push_back(votedUsers, userActionId);
-                    vector::push_back(historyVotes, 1);
+                    vec_map::insert(historyVotes, userId, UPVOTE);
                 };
                 ratingChange = i64Lib::neg_from(1);
             } else {
-                let userHistoryVote = vector::borrow_mut(historyVotes, userPosition);
-                *userHistoryVote = 1;
+                let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
+                *userHistoryVote = UPVOTE;
                 ratingChange = i64Lib::neg_from(2);
             }
         };
@@ -2067,16 +2056,15 @@ module basics::postLib {
     // upVote = 3
     public fun getHistoryVote(
         userId: ID,
-        historyVotes: vector<u8>,
-        votedUsers: vector<ID>
-    ): (u8, u64, bool) { // (status vote, isExistVote)
-        let (isExist, position) = vector::index_of(&mut votedUsers, &userId);
+        historyVotes: VecMap<ID, u8>,
+    ): (u8, bool) { // (status vote, isExistVote)
+        let isExist = vec_map::contains(&historyVotes, &userId);
 
         if (isExist) {
-            let voteVolue = vector::borrow(&mut historyVotes, position);
-            (*voteVolue, position, true)
+            let voteVolue = vec_map::get(&historyVotes, &userId);
+            (*voteVolue, true)
         } else {
-            (2, 0, false)
+            (NONE_VOTE, false)
         }
     }
 }
