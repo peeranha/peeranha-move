@@ -26,6 +26,7 @@ module basics::communityLib {
     struct Community has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
+        documentation: commonLib::IpfsHash,
         isFrozen: bool,
         tags: Table<u64, Tag>,
     }
@@ -43,6 +44,12 @@ module basics::communityLib {
     }
 
     struct UpdateCommunityEvent has copy, drop {
+        userId: ID,
+        communityId: ID,
+    }
+
+
+    struct SetDocumentationTree has copy, drop {
         userId: ID,
         communityId: ID,
     }
@@ -111,6 +118,7 @@ module basics::communityLib {
         let community = Community {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            documentation: commonLib::getIpfsDoc(vector::empty<u8>(), vector::empty<u8>()),
             isFrozen: false,
             tags: communityTags,
         };
@@ -124,10 +132,19 @@ module basics::communityLib {
     public entry fun updateCommunity(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), object::id(community));
-
         onlyNotFrezenCommunity(community);  // test
+
         community.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
         event::emit(UpdateCommunityEvent {userId: userId, communityId: object::id(community)});
+    }
+
+    public entry fun updateDocumentationTree(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, ipfsHash: vector<u8>) {
+        let userId = object::id(user);
+        accessControl::checkHasRole(roles, userId, accessControl::get_action_role_community_admin(), object::id(community));
+        onlyNotFrezenCommunity(community);  // test
+
+        community.documentation = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
+        event::emit(SetDocumentationTree {userId: userId, communityId: object::id(community)});
     }
 
     public entry fun createTag(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
@@ -213,8 +230,8 @@ module basics::communityLib {
     }
 
     #[test_only]
-    public fun getCommunityData(community: &Community): (vector<u8>, bool) {
-        (commonLib::getIpfsHash(community.ipfsDoc), community.isFrozen)
+    public fun getCommunityData(community: &Community): (vector<u8>, vector<u8>, bool) {
+        (commonLib::getIpfsHash(community.ipfsDoc), commonLib::getIpfsHash(community.documentation), community.isFrozen)
     }
 
     #[test_only]

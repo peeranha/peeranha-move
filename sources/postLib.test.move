@@ -1,7 +1,7 @@
 #[test_only]
 module basics::postLib_test
 {
-    use basics::postLib::{Self, Post, PostMetaData};
+    use basics::postLib::{Self/*, Post, PostMetaData*/};
     use basics::userLib_test;
     use basics::communityLib_test;
     // use basics::i64Lib;

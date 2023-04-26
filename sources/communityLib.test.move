@@ -3,6 +3,7 @@ module basics::communityLib_test
 {
     use basics::communityLib::{Self, Community};
     use basics::userLib::{Self, User};
+    use std::vector;
     use basics::userLib_test::{Self};
     use basics::accessControl::{Self, UserRolesCollection, DefaultAdminCap};
     use sui::test_scenario::{Self, Scenario};
@@ -13,6 +14,7 @@ module basics::communityLib_test
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
+    const COMMUNITY_ADMIN_ROLE: vector<u8> = vector<u8>[3];
 
     #[test]
     fun test_create_community() {
@@ -43,9 +45,10 @@ module basics::communityLib_test
             let community_val = test_scenario::take_shared<Community>(scenario);
             let community = &mut community_val;
             
-            let (ipfsDoc, isFrozen) = communityLib::getCommunityData(community);
+            let (ipfsDoc, documentation, isFrozen) = communityLib::getCommunityData(community);
             let tags = communityLib::getCommunityTags(community);
             assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
+            assert!(documentation == vector<u8>[], 2);
             assert!(isFrozen == false, 3);
             assert!(tags == communityLib::unitTestGetCommunityTags(
                 x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
@@ -96,9 +99,61 @@ module basics::communityLib_test
 
             communityLib::updateCommunity(user, user_roles_collection, community, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1");
 
-            let (ipfsDoc, isFrozen) = communityLib::getCommunityData(community);
-            let tags = communityLib::getCommunityTags(community);
+            let (ipfsDoc, documentation, _isFrozen) = communityLib::getCommunityData(community);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
+            assert!(documentation == vector<u8>[], 2);
+
+            test_scenario::return_shared(community_val);
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(user_roles_collection_val);
+        };
+        test_scenario::end(scenario_val);        
+    }
+
+    #[test]
+    fun test_updateIPFS_documentation() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        {
+            userLib::init_test(test_scenario::ctx(scenario));
+            accessControl::init_test(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_community(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_community_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
+
+            communityLib::updateDocumentationTree(user, user_roles_collection, community, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83");
+
+            let (ipfsDoc, documentation, isFrozen) = communityLib::getCommunityData(community);
+            let tags = communityLib::getCommunityTags(community);
+            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
+            assert!(documentation == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83", 2);
             assert!(isFrozen == false, 3);
             assert!(tags == communityLib::unitTestGetCommunityTags(
                 x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
@@ -359,7 +414,7 @@ module basics::communityLib_test
 
             communityLib::freezeCommunity(user, user_roles_collection, community);
 
-            let (_ipfsDoc, isFrozen) = communityLib::getCommunityData(community);
+            let (_ipfsDoc, _documentation, isFrozen) = communityLib::getCommunityData(community);
             assert!(isFrozen == true, 3);
 
             test_scenario::return_shared(community_val);
@@ -405,7 +460,7 @@ module basics::communityLib_test
             communityLib::freezeCommunity(user, user_roles_collection, community);
             communityLib::unfreezeCommunity(user, user_roles_collection, community);
 
-            let (_ipfsDoc, isFrozen) = communityLib::getCommunityData(community);
+            let (_ipfsDoc, _documentation, isFrozen) = communityLib::getCommunityData(community);
             assert!(isFrozen == false, 3);
 
             test_scenario::return_shared(community_val);
@@ -451,9 +506,10 @@ module basics::communityLib_test
             let community_val2 = test_scenario::take_shared<Community>(scenario);
             let community2 = &mut community_val2;
 
-            let (ipfsDoc, isFrozen) = communityLib::getCommunityData(community);
+            let (ipfsDoc, documentation, isFrozen) = communityLib::getCommunityData(community);
             let tags = communityLib::getCommunityTags(community);
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 6);
+            assert!(documentation == vector<u8>[], 7);
             assert!(isFrozen == false, 8);
             assert!(tags == communityLib::unitTestGetCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000001",
@@ -463,9 +519,10 @@ module basics::communityLib_test
                 x"0000000000000000000000000000000000000000000000000000000000000005"
             ), 9);
 
-            let (ipfsDoc2, isFrozen2) = communityLib::getCommunityData(community2);
+            let (ipfsDoc2, documentation2, isFrozen2) = communityLib::getCommunityData(community2);
             let tags2 = communityLib::getCommunityTags(community2);
             assert!(ipfsDoc2 == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
+            assert!(documentation2 == vector<u8>[], 2);
             assert!(isFrozen2 == false, 3);
             assert!(tags2 == communityLib::unitTestGetCommunityTags(
                 x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
@@ -547,9 +604,10 @@ module basics::communityLib_test
             let community_val2 = test_scenario::take_shared<Community>(scenario);
             let community2 = &mut community_val2;
 
-            let (ipfsDoc, isFrozen) = communityLib::getCommunityData(community);
+            let (ipfsDoc, documentation, isFrozen) = communityLib::getCommunityData(community);
             let tags = communityLib::getCommunityTags(community);
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 6);
+            assert!(documentation == vector<u8>[], 7);
             assert!(isFrozen == false, 8);
             assert!(tags == communityLib::unitTestGetCommunityTags(
                 x"0000000000000000000000000000000000000000000000000000000000000001",
@@ -559,9 +617,10 @@ module basics::communityLib_test
                 x"0000000000000000000000000000000000000000000000000000000000000005"
             ), 9);
 
-            let (ipfsDoc2, isFrozen2) = communityLib::getCommunityData(community2);
+            let (ipfsDoc2, documentation2, isFrozen2) = communityLib::getCommunityData(community2);
             let tags2 = communityLib::getCommunityTags(community2);
             assert!(ipfsDoc2 == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
+            assert!(documentation2 == vector<u8>[], 2);
             assert!(isFrozen2 == false, 3);
             assert!(tags2 == communityLib::unitTestGetCommunityTags(
                 x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
@@ -590,6 +649,25 @@ module basics::communityLib_test
         test_scenario::return_to_sender(scenario, user_val);
         test_scenario::return_to_sender(scenario, default_admin_cap_val);
         test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun grant_community_admin_role(scenario: &mut Scenario) {
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+        let community_val = test_scenario::take_shared<Community>(scenario);
+        let community = &mut community_val;
+
+        let userId = object::id(user);
+        let roleTemplate = COMMUNITY_ADMIN_ROLE;
+        vector::append<u8>(&mut roleTemplate, object::id_to_bytes(&object::id(community)));
+        userLib::grantRole(user_roles_collection, user, userId, roleTemplate);
+
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+        test_scenario::return_shared(community_val);
     }
     
     #[test_only]
