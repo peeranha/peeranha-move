@@ -1,4 +1,4 @@
 if [ -f .env ]; then
   export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 fi
-sui client call --function createComment --module postLib --package $PACKAGE --args $USERS_RATING_COLLECTION $USER $USER_ROLES_COLLECTION $POST_META_DATA 0 74d0349c4e1e2426e11eebbd20e215df933f47bf7eef858632bcf34b983db7d0 0 0x6 --gas-budget 300000000
+sui client call --function createComment --module postLib --package $PACKAGE --args $USERS_RATING_COLLECTION $USER_ROLES_COLLECTION 0x6 $USER $POST_META_DATA 0 74d0349c4e1e2426e11eebbd20e215df933f47bf7eef858632bcf34b983db7d0 0 0x6 --gas-budget 300000000

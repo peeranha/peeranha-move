@@ -198,8 +198,8 @@ module basics::userLib_test
         accessControl::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user));
         
         communityLib::createCommunity(
-            user,
             user_roles_collection,
+            user,
             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
             vector<vector<u8>>[
                 x"0000000000000000000000000000000000000000000000000000000000000001",

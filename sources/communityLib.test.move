@@ -97,7 +97,7 @@ module basics::communityLib_test
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
 
-            communityLib::updateCommunity(user, user_roles_collection, community, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1");
+            communityLib::updateCommunity(user_roles_collection, user, community, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1");
 
             let (ipfsDoc, documentation, _isFrozen) = communityLib::getCommunityData(community);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
@@ -148,7 +148,7 @@ module basics::communityLib_test
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
 
-            communityLib::updateDocumentationTree(user, user_roles_collection, community, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83");
+            communityLib::updateDocumentationTree(user_roles_collection, user, community, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83");
 
             let (ipfsDoc, documentation, isFrozen) = communityLib::getCommunityData(community);
             let tags = communityLib::getCommunityTags(community);
@@ -203,7 +203,7 @@ module basics::communityLib_test
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
 
-            communityLib::createTag(user, user_roles_collection, community, x"0000000000000000000000000000000000000000000000000000000000000006", test_scenario::ctx(scenario));
+            communityLib::createTag(user_roles_collection, user, community, x"0000000000000000000000000000000000000000000000000000000000000006", test_scenario::ctx(scenario));
 
             let tags = communityLib::getCommunityTags(community);
             assert!(tags == communityLib::unitTestGetMoreCommunityTags(
@@ -255,7 +255,7 @@ module basics::communityLib_test
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
 
-            communityLib::updateTag(user, user_roles_collection, community, 2, x"0000000000000000000000000000000000000000000000000000000000000007");
+            communityLib::updateTag(user_roles_collection, user, community, 2, x"0000000000000000000000000000000000000000000000000000000000000007");
             let tags = communityLib::getCommunityTags(community);
             assert!(tags == communityLib::unitTestGetCommunityTags(
                 x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
@@ -305,8 +305,8 @@ module basics::communityLib_test
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
 
-            communityLib::createTag(user, user_roles_collection, community, x"0000000000000000000000000000000000000000000000000000000000000006", test_scenario::ctx(scenario));
-            communityLib::updateTag(user, user_roles_collection, community, 6, x"0000000000000000000000000000000000000000000000000000000000000007");
+            communityLib::createTag(user_roles_collection, user, community, x"0000000000000000000000000000000000000000000000000000000000000006", test_scenario::ctx(scenario));
+            communityLib::updateTag(user_roles_collection, user, community, 6, x"0000000000000000000000000000000000000000000000000000000000000007");
 
             let tags = communityLib::getCommunityTags(community);
             assert!(tags == communityLib::unitTestGetMoreCommunityTags(
@@ -359,7 +359,7 @@ module basics::communityLib_test
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
 
-            communityLib::updateTag(user, user_roles_collection, community, 1, x"0000000000000000000000000000000000000000000000000000000000000007");
+            communityLib::updateTag(user_roles_collection, user, community, 1, x"0000000000000000000000000000000000000000000000000000000000000007");
 
             let tags = communityLib::getCommunityTags(community);
             assert!(tags == communityLib::unitTestGetCommunityTags(
@@ -412,7 +412,7 @@ module basics::communityLib_test
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
 
-            communityLib::freezeCommunity(user, user_roles_collection, community);
+            communityLib::freezeCommunity(user_roles_collection, user, community);
 
             let (_ipfsDoc, _documentation, isFrozen) = communityLib::getCommunityData(community);
             assert!(isFrozen == true, 3);
@@ -457,8 +457,8 @@ module basics::communityLib_test
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
 
-            communityLib::freezeCommunity(user, user_roles_collection, community);
-            communityLib::unfreezeCommunity(user, user_roles_collection, community);
+            communityLib::freezeCommunity(user_roles_collection, user, community);
+            communityLib::unfreezeCommunity(user_roles_collection, user, community);
 
             let (_ipfsDoc, _documentation, isFrozen) = communityLib::getCommunityData(community);
             assert!(isFrozen == false, 3);
@@ -678,8 +678,8 @@ module basics::communityLib_test
         let user = &mut user_val;
         
         communityLib::createCommunity(
-            user,
             user_roles_collection,
+            user,
             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
             vector<vector<u8>>[
                 x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1",
@@ -703,8 +703,8 @@ module basics::communityLib_test
         let user = &mut user_val;
         
         communityLib::createCommunity(
-            user,
             user_roles_collection,
+            user,
             x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
             vector<vector<u8>>[
                 x"0000000000000000000000000000000000000000000000000000000000000001",

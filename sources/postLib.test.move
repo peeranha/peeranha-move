@@ -805,14 +805,14 @@ module basics::postLib_test
         
         postLib::createPost(
             user_rating_collection,
+            user_roles_collection,
+            time,
             user,
             community,
-            user_roles_collection,
             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
             EXPERT_POST,
             vector<u64>[1, 2],
             ENGLISH_LANGUAGE,
-            time,
             test_scenario::ctx(scenario)
         );
 

@@ -275,14 +275,14 @@ module basics::postLib {
 
     public entry fun createPost(
         usersRatingCollection: &userLib::UsersRatingCollection,
+        userRolesCollection: &accessControl::UserRolesCollection,
+        time: &Clock,
         user: &mut userLib::User,
         community: &communityLib::Community,
-        userRolesCollection: &accessControl::UserRolesCollection,
         ipfsHash: vector<u8>, 
         postType: u8,
         tags: vector<u64>,
         language: u8,
-        time: &Clock,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -348,15 +348,15 @@ module basics::postLib {
 
     public entry fun createReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
-        user: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        time: &Clock,
+        user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         parentReplyMetaDataKey: u64,
         ipfsHash: vector<u8>,
         isOfficialReply: bool,
         language: u8,
-        time: &Clock,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -459,13 +459,13 @@ module basics::postLib {
 
     public entry fun createComment(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        user: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
+        time: &Clock,
+        user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         parentReplyMetaDataKey: u64,
         ipfsHash: vector<u8>,
         language: u8,
-        time: &Clock,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -522,9 +522,9 @@ module basics::postLib {
 
     public entry fun authorEditPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        userRolesCollection: &accessControl::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
-        userRolesCollection: &accessControl::UserRolesCollection,
         post: &mut Post,
         postMetaData: &mut PostMetaData,
         newCommunity: &communityLib::Community,
@@ -542,9 +542,9 @@ module basics::postLib {
 
         editPost(
             usersRatingCollection,
+            userRolesCollection,
             periodRewardContainer,
             user,
-            userRolesCollection,
             postMetaData,
             newCommunity,
             newPostType,
@@ -557,9 +557,9 @@ module basics::postLib {
 
     public entry fun moderatorEditPostMetaData(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        userRolesCollection: &accessControl::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
-        userRolesCollection: &accessControl::UserRolesCollection,
         postMetaData: &mut PostMetaData,
         newCommunity: &communityLib::Community,
         newPostType: u8,
@@ -574,9 +574,9 @@ module basics::postLib {
 
         editPost(
             usersRatingCollection,
+            userRolesCollection,
             periodRewardContainer,
             user,
-            userRolesCollection,
             postMetaData,
             newCommunity,
             newPostType,
@@ -589,9 +589,9 @@ module basics::postLib {
 
     fun editPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        userRolesCollection: &accessControl::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
-        userRolesCollection: &accessControl::UserRolesCollection,
         postMetaData: &mut PostMetaData,
         newCommunity: &communityLib::Community,
         newPostType: u8,
@@ -636,8 +636,8 @@ module basics::postLib {
 
     public entry fun authorEditReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        user: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
+        user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         reply: &mut Reply,
         replyMetaDataKey: u64,
@@ -652,8 +652,8 @@ module basics::postLib {
 
         editReply(
             usersRatingCollection,
-            user,
             userRolesCollection,
+            user,
             postMetaData,
             replyMetaDataKey,
             isOfficialReply,
@@ -664,8 +664,8 @@ module basics::postLib {
 
     public entry fun moderatorEditReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        user: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
+        user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
         isOfficialReply: bool,
@@ -674,8 +674,8 @@ module basics::postLib {
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         editReply(
             usersRatingCollection,
-            user,
             userRolesCollection,
+            user,
             postMetaData,
             replyMetaDataKey,
             isOfficialReply,
@@ -686,8 +686,8 @@ module basics::postLib {
 
     fun editReply(      // reply isDeleted?
         usersRatingCollection: &userLib::UsersRatingCollection,
-        user: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
+        user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
         isOfficialReply: bool,
@@ -724,8 +724,8 @@ module basics::postLib {
 
     public entry fun editComment(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        user: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
+        user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         comment: &mut Comment,
         parentReplyKey: u64,
@@ -764,11 +764,11 @@ module basics::postLib {
 
     public entry fun deletePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
-        user: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
-        postMetaData: &mut PostMetaData,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
+        user: &mut userLib::User,
+        postMetaData: &mut PostMetaData,
         ctx: &mut TxContext
     ) {
         let communityId = postMetaData.communityId;
@@ -857,12 +857,12 @@ module basics::postLib {
 
     public entry fun deleteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
-        user: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        time: &Clock,
+        user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
-        time: &Clock,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
@@ -973,9 +973,9 @@ module basics::postLib {
 
     public entry fun deleteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        userRolesCollection: &accessControl::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
-        userRolesCollection: &accessControl::UserRolesCollection,
         postMetaData: &mut PostMetaData,
         parentReplyKey: u64,
         commentMetaDataKey: u64,
@@ -1015,8 +1015,8 @@ module basics::postLib {
 
     public entry fun changeStatusBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         userRolesCollection: &accessControl::UserRolesCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postAuthor: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newBestReplyMetaDataKey: u64,
@@ -1124,9 +1124,9 @@ module basics::postLib {
 
     public entry fun votePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        userRolesCollection: &accessControl::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUser: &mut userLib::User,
-        userRolesCollection: &accessControl::UserRolesCollection,
         postMetaData: &mut PostMetaData,
         isUpvote: bool,
         ctx: &mut TxContext
@@ -1189,9 +1189,9 @@ module basics::postLib {
 
     public entry fun voteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        userRolesCollection: &accessControl::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUser: &mut userLib::User,
-        userRolesCollection: &accessControl::UserRolesCollection,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
         isUpvote: bool,
@@ -1283,8 +1283,8 @@ module basics::postLib {
 
     public entry fun voteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        voteUser: &mut userLib::User,
         userRolesCollection: &accessControl::UserRolesCollection,
+        voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         parentReplyMetaDataKey: u64,
         commentMetaDataKey: u64,

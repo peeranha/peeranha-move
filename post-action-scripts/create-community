@@ -1,4 +1,4 @@
 if [ -f .env ]; then
   export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 fi
-sui client call --function createCommunity --module communityLib --package $PACKAGE --args $USER $USER_ROLES_COLLECTION 882b6db9d38ca112b0465cfa1cb70d724ae6c5d7bf6906c2ce10979deecd73d7 [fdddf1813d31868cb4d030eca2f75693f19357d08f7e4b37afc40e3ce61d2352,15608efb940da74c2b5ec34cfe0fa6843724a3bb4c9d8fea2e92e30ef4797f29,a733d8802dfb8c7d85b399eeb869ad4a515ec6045d15167e95897cdc4e5a6468,f0ad83085d7112582712e14f3e3193029c50aee2f56f9eff34105df6e79c3e7b,5e626a3eb15c587290cf810ae3786c1b0be3e4fcdaa49886e1cf22be8388c550] --gas-budget 400000000
+sui client call --function createCommunity --module communityLib --package $PACKAGE --args $USER_ROLES_COLLECTION $USER 882b6db9d38ca112b0465cfa1cb70d724ae6c5d7bf6906c2ce10979deecd73d7 [fdddf1813d31868cb4d030eca2f75693f19357d08f7e4b37afc40e3ce61d2352,15608efb940da74c2b5ec34cfe0fa6843724a3bb4c9d8fea2e92e30ef4797f29,a733d8802dfb8c7d85b399eeb869ad4a515ec6045d15167e95897cdc4e5a6468,f0ad83085d7112582712e14f3e3193029c50aee2f56f9eff34105df6e79c3e7b,5e626a3eb15c587290cf810ae3786c1b0be3e4fcdaa49886e1cf22be8388c550] --gas-budget 400000000

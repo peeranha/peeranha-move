@@ -81,8 +81,8 @@ module basics::communityLib {
     // error "Expected primitive or object type. Got: vector<0x0::communityLib::Tag>"
     ///
     public entry fun createCommunity(
-        user: &userLib::User,
         roles: &mut accessControl::UserRolesCollection,
+        user: &userLib::User,
         ipfsHash: vector<u8>,
         tags: vector<vector<u8>>,
         ctx: &mut TxContext
@@ -129,7 +129,7 @@ module basics::communityLib {
         transfer::share_object(community);
     }
 
-    public entry fun updateCommunity(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, ipfsHash: vector<u8>) {
+    public entry fun updateCommunity(roles: &accessControl::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), object::id(community));
         onlyNotFrezenCommunity(community);  // test
@@ -138,7 +138,7 @@ module basics::communityLib {
         event::emit(UpdateCommunityEvent {userId: userId, communityId: object::id(community)});
     }
 
-    public entry fun updateDocumentationTree(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, ipfsHash: vector<u8>) {
+    public entry fun updateDocumentationTree(roles: &accessControl::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         accessControl::checkHasRole(roles, userId, accessControl::get_action_role_community_admin(), object::id(community));
         onlyNotFrezenCommunity(community);  // test
@@ -147,7 +147,7 @@ module basics::communityLib {
         event::emit(SetDocumentationTree {userId: userId, communityId: object::id(community)});
     }
 
-    public entry fun createTag(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    public entry fun createTag(roles: &accessControl::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         let userId = object::id(user);
         let communityId = object::id(community);
         accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), communityId);
@@ -167,7 +167,7 @@ module basics::communityLib {
         });
     }
 
-    public entry fun updateTag(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community, tagId: u64, ipfsHash: vector<u8>) {
+    public entry fun updateTag(roles: &accessControl::UserRolesCollection, user: &userLib::User, community: &mut Community, tagId: u64, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         let communityId = object::id(community);
         accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), communityId);
@@ -180,7 +180,7 @@ module basics::communityLib {
         event::emit(UpdateTagEvent {userId: userId, tagKey: tagId, communityId: communityId});
     }
 
-    public entry fun freezeCommunity(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
+    public entry fun freezeCommunity(roles: &accessControl::UserRolesCollection, user: &userLib::User, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
         let userId = object::id(user);
         let communityId = object::id(community);
         accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), communityId);
@@ -190,7 +190,7 @@ module basics::communityLib {
         event::emit(FreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
-    public entry fun unfreezeCommunity(user: &userLib::User, roles: &accessControl::UserRolesCollection, community: &mut Community) {
+    public entry fun unfreezeCommunity(roles: &accessControl::UserRolesCollection, user: &userLib::User, community: &mut Community) {
         let userId = object::id(user);
         let communityId = object::id(community);
         accessControl::checkHasRole(roles, userId, accessControl::get_action_role_admin_or_community_admin(), communityId);
