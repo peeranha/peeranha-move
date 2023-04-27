@@ -96,6 +96,7 @@ module basics::userLib_test
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_shared(user_rating_collection_val);
         };
+
         test_scenario::end(scenario_val);
     }
 
@@ -140,6 +141,7 @@ module basics::userLib_test
             test_scenario::return_shared(user_rating_collection_val);
             test_scenario::return_shared(community_val);
         };
+
         test_scenario::end(scenario_val);
     }
 
@@ -184,6 +186,7 @@ module basics::userLib_test
             test_scenario::return_shared(user_rating_collection_val);
             test_scenario::return_shared(community_val);
         };
+
         test_scenario::end(scenario_val);
     }
 

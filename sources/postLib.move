@@ -472,27 +472,16 @@ module basics::postLib {
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
         assert!(postMetaData.postType != DOCUMENTATION, E_YOU_CAN_NOT_PUBLISH_COMMENTS_IN_DOCUMENTATION);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
-        userLib::checkActionRole(
-            user,
-            userCommunityRating,
-            userRolesCollection,
-            userId,
-            postMetaData.author,
-            postMetaData.communityId,
-            userLib::get_action_publication_comment(),
-            accessControl::get_action_role_none(),
-            /*true*/
-        );
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
         let comment = Comment {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
         };
-        let commentMetaDataKey = object::id(&comment);
+        let commentId = object::id(&comment);
         let commentMetaData = CommentMetaData {
             id: object::new(ctx),
-            commentId: commentMetaDataKey,
+            commentId: commentId,
             postTime: commonLib::getTimestamp(time),
             author: userId,
             rating: i64Lib::zero(),
@@ -503,14 +492,28 @@ module basics::postLib {
             historyVotes: vec_map::empty(),
         };
         let commentMetaDataKey;
+        let dataUser = postMetaData.author;
         if (parentReplyMetaDataKey == 0) {
             commentMetaDataKey = table::length(&postMetaData.comments) + 1;
             table::add(&mut postMetaData.comments, commentMetaDataKey, commentMetaData);
         } else {
             let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, parentReplyMetaDataKey);
+            dataUser = replyMetaData.author;
             commentMetaDataKey = table::length(&replyMetaData.comments) + 1;
             table::add(&mut replyMetaData.comments, commentMetaDataKey, commentMetaData);
         };
+
+        userLib::checkActionRole(
+            user,
+            userCommunityRating,
+            userRolesCollection,
+            userId,
+            dataUser,
+            postMetaData.communityId,
+            userLib::get_action_publication_comment(),
+            accessControl::get_action_role_none(),
+            /*true*/
+        );
 
         transfer::transfer(
             comment,
@@ -1696,64 +1699,69 @@ module basics::postLib {
     //     return getCommentContainer(post, replyMetaDataKey, commentMetaDataKey)
     // }
 
-    // #[test_only]
-    // public fun getPostData(postMetaData: &mut PostMetaData): (u8, vector<u8>, u64, address, i64Lib::I64, u64, u64, u64, u64, bool, vector<u64>, vector<u8>, vector<u8>, vector<address>) {
-    //     (
-    //         postMetaData.postType,
-    //         commonLib::getIpfsHash(postMetaData.ipfsDoc),
-    //         postMetaData.postTime,
-    //         postMetaData.author,
-    //         postMetaData.rating,
-    //         postMetaData.communityId,
-    //         postMetaData.officialReplyMetaDataKey,
-    //         postMetaData.bestReplyMetaDataKey,
-    //         postMetaData.deletedReplyCount,
-    //         postMetaData.isDeleted,
-    //         postMetaData.tags,
-    //         postMetaData.properties,
-    //         postMetaData.historyVotes,
-    //         postMetaData.votedUsers
-    //     )
-    //     // replies: vector<Reply>,  // TODO: add
-    //     // comments: vector<Comment>,   // TODO: add
-    // }
+    #[test_only]
+    public fun getPostData(postMetaData: &PostMetaData, post: &Post): (vector<u8>, ID, u8, u64, ID, i64Lib::I64, ID, u8, u64, u64, u64, bool, vector<u64>) {
+        (
+            commonLib::getIpfsHash(post.ipfsDoc),
+            postMetaData.postId,
+            postMetaData.postType,
+            postMetaData.postTime,
+            postMetaData.author,
+            postMetaData.rating,
+            postMetaData.communityId,
+            postMetaData.language,
+            postMetaData.officialReplyMetaDataKey,
+            postMetaData.bestReplyMetaDataKey,
+            postMetaData.deletedReplyCount,
+            postMetaData.isDeleted,
+            postMetaData.tags,
+        )
+        // todo
+        // replies: Table<u64, ReplyMetaData>,
+        // comments: Table<u64, CommentMetaData>,
+        // properties: VecMap<u8, vector<u8>>,
+        // historyVotes: VecMap<ID, u8>, 
+    }
 
-    // #[test_only]
-    // public fun getReplyData(postCollection: &mut PostCollection, postId: u64, replyMetaDataKey: u64): (vector<u8>, u64, address, i64Lib::I64, u64, bool, bool, bool, vector<u8>, vector<u8>, vector<address>) {
-    //     let reply = getReply(postCollection, postId, replyMetaDataKey);
+    #[test_only]
+    public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, u64, ID, i64Lib::I64, u64, u8, bool, bool, bool) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
 
-    //     (
-    //         commonLib::getIpfsHash(reply.ipfsDoc),
-    //         reply.postTime,
-    //         reply.author,
-    //         reply.rating,
-    //         reply.parentReplyMetaDataKey,
-    //         reply.isFirstReply,
-    //         reply.isQuickReply,
-    //         reply.isDeleted,
-    //         reply.properties,
-    //         reply.historyVotes,
-    //         reply.votedUsers
-    //     )
-    //     // comments: vector<Comment>, // TODO: add
-    // }
+        (
+            commonLib::getIpfsHash(reply.ipfsDoc),
+            replyMetaData.replyId,
+            replyMetaData.postTime,
+            replyMetaData.author,
+            replyMetaData.rating,
+            replyMetaData.parentReplyMetaDataKey,
+            replyMetaData.language,
+            replyMetaData.isFirstReply,
+            replyMetaData.isQuickReply,
+            replyMetaData.isDeleted,
+        )
+        // add
+        // comments: Table<u64, CommentMetaData>,
+        // properties: VecMap<u8, vector<u8>>,
+        // historyVotes: VecMap<ID, u8>,
+    }
 
-    // #[test_only]
-    // public fun getCommentData(postCollection: &mut PostCollection, postId: u64, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, u64, address, i64Lib::I64, bool, vector<u8>, vector<u8>, vector<address>) {
-    //     let comment = getComment(postCollection, postId, parentReplyMetaDataKey, commentMetaDataKey);
-        
-    //     (
-    //         commonLib::getIpfsHash(comment.ipfsDoc),
-    //         comment.postTime,
-    //         comment.author,
-    //         comment.rating,
+    #[test_only]
+    public fun getCommentData(postMetaData: &mut PostMetaData, comment: &Comment, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, ID, u64, ID, i64Lib::I64, u8, bool) {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
 
-    //         comment.isDeleted,
-    //         comment.properties,
-    //         comment.historyVotes,
-    //         comment.votedUsers
-    //     )
-    // }
+        (
+            commonLib::getIpfsHash(comment.ipfsDoc),
+            commentMetaData.commentId,
+            commentMetaData.postTime,
+            commentMetaData.author,
+            commentMetaData.rating,
+            commentMetaData.language,
+            commentMetaData.isDeleted,
+        )
+        // add
+        // properties: VecMap<u8, vector<u8>>,
+        // historyVotes: VecMap<ID, u8>,
+    }
 
     // #[test_only]
     // public fun create_post(

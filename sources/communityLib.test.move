@@ -107,6 +107,7 @@ module basics::communityLib_test
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_shared(user_roles_collection_val);
         };
+
         test_scenario::end(scenario_val);        
     }
 
@@ -167,6 +168,7 @@ module basics::communityLib_test
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_shared(user_roles_collection_val);
         };
+
         test_scenario::end(scenario_val);        
     }
 
@@ -219,6 +221,7 @@ module basics::communityLib_test
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_shared(user_roles_collection_val);
         };
+
         test_scenario::end(scenario_val);        
     }
 
@@ -269,6 +272,7 @@ module basics::communityLib_test
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_shared(user_roles_collection_val);
         };
+
         test_scenario::end(scenario_val);        
     }
 
@@ -421,6 +425,7 @@ module basics::communityLib_test
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_shared(user_roles_collection_val);
         };
+
         test_scenario::end(scenario_val);        
     }
 
@@ -467,6 +472,7 @@ module basics::communityLib_test
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_shared(user_roles_collection_val);
         };
+
         test_scenario::end(scenario_val);        
     }
 
@@ -535,6 +541,7 @@ module basics::communityLib_test
             test_scenario::return_shared(community_val);
             test_scenario::return_shared(community_val2);
         };
+
         test_scenario::end(scenario_val);        
     }
 
@@ -633,6 +640,7 @@ module basics::communityLib_test
             test_scenario::return_shared(community_val);
             test_scenario::return_shared(community_val2);
         };
+
         test_scenario::end(scenario_val);        
     }
 
