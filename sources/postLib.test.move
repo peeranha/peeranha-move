@@ -32,15 +32,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -97,15 +92,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -113,7 +103,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -161,15 +151,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -177,7 +162,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -219,15 +204,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -235,7 +215,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -243,7 +223,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -285,15 +265,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -366,15 +341,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -382,7 +352,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -444,14 +414,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -459,7 +425,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -515,15 +481,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -531,7 +492,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -539,7 +500,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -595,15 +556,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -658,15 +614,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -674,7 +625,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
              let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -727,14 +678,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -742,7 +689,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -792,15 +739,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -808,7 +750,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -816,7 +758,7 @@ module basics::postLib_test
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -866,15 +808,10 @@ module basics::postLib_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -898,7 +835,7 @@ module basics::postLib_test
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -987,7 +924,7 @@ module basics::postLib_test
         test_scenario::end(scenario_val);
     }
 
-    /*
+/*
     #[test]
     fun test_create_two_reply() {   // by different users
         let scenario_val = test_scenario::begin(USER1);
@@ -1075,14 +1012,14 @@ module basics::postLib_test
 
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);
-    }
-    */
-  
+    } 
+*/ 
 
     // ====== Support functions ======
 
     #[test_only]
-    fun init_postLib_test(time: &clock::Clock, scenario: &mut Scenario) {
+    fun init_postLib_test(scenario: &mut Scenario): clock::Clock {
+        let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
             accessControl::init_test(test_scenario::ctx(scenario));
@@ -1103,10 +1040,17 @@ module basics::postLib_test
             communityLib_test::create_community(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
-            create_post(time, scenario);
+            userLib_test::create_user(scenario);
         };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            create_post(&time, scenario);
+        };
+
+        time
     }
 
     #[test_only]
