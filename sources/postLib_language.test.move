@@ -30,15 +30,10 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -62,7 +57,7 @@ module basics::postLib_language_test
                 _tags,
             ) = postLib::getPostData(post_meta_data, post);
 
-            assert!(language == ENGLISH_LANGUAGE, 1);
+            assert!(language == 0, 1);
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -80,15 +75,10 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(CHINESE_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 1, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -112,7 +102,7 @@ module basics::postLib_language_test
                 _tags,
             ) = postLib::getPostData(post_meta_data, post);
 
-            assert!(language == CHINESE_LANGUAGE, 1);
+            assert!(language == 1, 1);
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -130,15 +120,10 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(SPANISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 2, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -162,7 +147,7 @@ module basics::postLib_language_test
                 _tags,
             ) = postLib::getPostData(post_meta_data, post);
 
-            assert!(language == SPANISH_LANGUAGE, 1);
+            assert!(language == 2, 1);
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -180,15 +165,10 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 3, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -212,7 +192,7 @@ module basics::postLib_language_test
                 _tags,
             ) = postLib::getPostData(post_meta_data, post);
 
-            assert!(language == VIETNAMESE_LANGUAGE, 1);
+            assert!(language == 3, 1);
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -230,12 +210,7 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
-        };
-
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 4, scenario);
+            time = init_postLib_test(4, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -243,20 +218,15 @@ module basics::postLib_language_test
     }
 
     #[test]
-    fun test_author_edit_english_post_to_chinese() {
+    fun test_edit_english_post_to_chinese() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -280,7 +250,7 @@ module basics::postLib_language_test
                 x"0000000000000000000000000000000000000000000000000000000000000005",
                 EXPERT_POST,
                 vector<u64>[2, 3],
-                1,
+                CHINESE_LANGUAGE,
                 test_scenario::ctx(scenario)
             );
 
@@ -299,7 +269,7 @@ module basics::postLib_language_test
                 _tags,
             ) = postLib::getPostData(post_meta_data, post);
 
-            assert!(language == CHINESE_LANGUAGE, 1);
+            assert!(language == 1, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
@@ -311,20 +281,15 @@ module basics::postLib_language_test
     }
 
     #[test]
-    fun test_moderator_edit_spanish_post_to_vietnamese() {
+    fun test_edit_spanish_post_to_vietnamese() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(SPANISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 2, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -337,16 +302,18 @@ module basics::postLib_language_test
             let post_val = test_scenario::take_from_sender<Post>(scenario);
             let post = &mut post_val;
 
-            postLib::moderatorEditPostMetaData(
+            postLib::authorEditPost(
                 user_rating_collection,
                 user_roles_collection,
                 period_reward_container,
                 user,
+                post,
                 post_meta_data,
                 community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
                 EXPERT_POST,
                 vector<u64>[2, 3],
-                3,
+                VIETNAMESE_LANGUAGE,
                 test_scenario::ctx(scenario)
             );
 
@@ -365,7 +332,7 @@ module basics::postLib_language_test
                 _tags,
             ) = postLib::getPostData(post_meta_data, post);
 
-            assert!(language == VIETNAMESE_LANGUAGE, 1);
+            assert!(language == 3, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
@@ -382,15 +349,10 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -433,23 +395,18 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, 0, scenario);
+            create_reply(post_meta_data, &time, ENGLISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -469,7 +426,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
-            assert!(language == ENGLISH_LANGUAGE, 1);
+            assert!(language == 0, 1);
 
             test_scenario::return_to_sender(scenario, reply_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -486,25 +443,20 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 3, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            create_reply(post_meta_data, &time, 1, scenario);
+            create_reply(post_meta_data, &time, CHINESE_LANGUAGE, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -524,7 +476,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
-            assert!(language == CHINESE_LANGUAGE, 1);
+            assert!(language == 1, 1);
 
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -541,25 +493,20 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 3, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            create_reply(post_meta_data, &time, 2, scenario);
+            create_reply(post_meta_data, &time, SPANISH_LANGUAGE, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -579,7 +526,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
-            assert!(language == SPANISH_LANGUAGE, 1);
+            assert!(language == 2, 1);
 
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -596,25 +543,20 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 3, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            create_reply(post_meta_data, &time, 3, scenario);
+            create_reply(post_meta_data, &time, VIETNAMESE_LANGUAGE, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -634,10 +576,33 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
-            assert!(language == VIETNAMESE_LANGUAGE, 1);
+            assert!(language == 3, 1);
 
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_to_sender(scenario, reply_val);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_INVALID_LANGUAGE)]
+    fun test_create_invalid_language_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, 4, scenario);
+
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -651,25 +616,20 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 3, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            create_reply(post_meta_data, &time, 0, scenario);
+            create_reply(post_meta_data, &time, ENGLISH_LANGUAGE, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -689,7 +649,7 @@ module basics::postLib_language_test
                 1,
                 x"0000000000000000000000000000000000000000000000000000000000000004",
                 false,
-                1
+                CHINESE_LANGUAGE
             );
 
             let (
@@ -704,7 +664,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
-            assert!(language == CHINESE_LANGUAGE, 1);
+            assert!(language == 1, 1);
 
 
             test_scenario::return_shared(post_meta_data_val);
@@ -722,25 +682,20 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 3, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            create_reply(post_meta_data, &time, 2, scenario);
+            create_reply(post_meta_data, &time, SPANISH_LANGUAGE, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -760,7 +715,7 @@ module basics::postLib_language_test
                 1,
                 x"0000000000000000000000000000000000000000000000000000000000000004",
                 false,
-                3
+                VIETNAMESE_LANGUAGE
             );
 
             let (
@@ -775,7 +730,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
-            assert!(language == VIETNAMESE_LANGUAGE, 1);
+            assert!(language == 3, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -792,25 +747,20 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 3, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            create_reply(post_meta_data, &time, 0, scenario);
+            create_reply(post_meta_data, &time, ENGLISH_LANGUAGE, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -848,23 +798,18 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 0, 0, scenario);
+            create_comment(post_meta_data, &time, 0, ENGLISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -880,7 +825,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
-            assert!(language == ENGLISH_LANGUAGE, 1);
+            assert!(language == 0, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
@@ -896,23 +841,18 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 0, 1, scenario);
+            create_comment(post_meta_data, &time, 0, CHINESE_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -928,7 +868,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
-            assert!(language == CHINESE_LANGUAGE, 1);
+            assert!(language == 1, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
@@ -944,31 +884,26 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, 0, scenario);
+            create_reply(post_meta_data, &time, ENGLISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 1, 2, scenario);
+            create_comment(post_meta_data, &time, 1, SPANISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -985,7 +920,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
-            assert!(language == SPANISH_LANGUAGE, 1);
+            assert!(language == 2, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -1002,31 +937,26 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, 0, scenario);
+            create_reply(post_meta_data, &time, ENGLISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 1, 3, scenario);
+            create_comment(post_meta_data, &time, 1, VIETNAMESE_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -1043,7 +973,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
-            assert!(language == VIETNAMESE_LANGUAGE, 1);
+            assert!(language == 3, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -1060,15 +990,10 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -1086,23 +1011,18 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, 0, scenario);
+            create_reply(post_meta_data, &time, ENGLISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -1120,23 +1040,18 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 0, 0, scenario);
+            create_comment(post_meta_data, &time, 0, ENGLISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -1156,7 +1071,7 @@ module basics::postLib_language_test
                 0,
                 1,
                 x"0000000000000000000000000000000000000000000000000000000000000005",
-                1
+                CHINESE_LANGUAGE
             );
 
             let (
@@ -1168,7 +1083,7 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
-            assert!(language == CHINESE_LANGUAGE, 1);
+            assert!(language == 1, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
@@ -1185,31 +1100,26 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, 0, scenario);
+            create_reply(post_meta_data, &time, ENGLISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 1, 2, scenario);
+            create_comment(post_meta_data, &time, 1, SPANISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -1229,7 +1139,7 @@ module basics::postLib_language_test
                 1,
                 1,
                 x"0000000000000000000000000000000000000000000000000000000000000005",
-                3
+                VIETNAMESE_LANGUAGE
             );
 
             let (
@@ -1241,7 +1151,56 @@ module basics::postLib_language_test
                 _isDeleted,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
-            assert!(language == VIETNAMESE_LANGUAGE, 1);
+            assert!(language == 3, 1);
+
+            test_scenario::return_to_sender(scenario, comment_val);
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_INVALID_LANGUAGE)]
+    fun test_edit_chinese_comment_to_post_to_invalid_language() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(post_meta_data, &time, 0, CHINESE_LANGUAGE, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
+            let comment = &mut comment_val;
+            let user = &mut user_val;
+
+            postLib::editComment(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                comment,
+                0,
+                1,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                4
+            );
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
@@ -1258,31 +1217,26 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(ENGLISH_LANGUAGE, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            init_postLib_test(&time, 0, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, 0, scenario);
+            create_reply(post_meta_data, &time, ENGLISH_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 1, 3, scenario);
+            create_comment(post_meta_data, &time, 1, VIETNAMESE_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
@@ -1318,7 +1272,8 @@ module basics::postLib_language_test
     // ====== Support functions ======
 
     #[test_only]
-    fun init_postLib_test(time: &clock::Clock, language: u8, scenario: &mut Scenario) {
+    fun init_postLib_test(language: u8, scenario: &mut Scenario): clock::Clock {
+        let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
             accessControl::init_test(test_scenario::ctx(scenario));
@@ -1339,10 +1294,17 @@ module basics::postLib_language_test
             communityLib_test::create_community(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
-            create_post(time, language, scenario);
+            userLib_test::create_user(scenario);
         };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            create_post(&time, language, scenario);
+        };
+
+        time
     }
 
     #[test_only]
