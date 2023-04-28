@@ -537,6 +537,7 @@ module basics::postLib {
         language: u8,
         ctx: &mut TxContext
     ) {
+        assert!(!postMetaData.isDeleted, E_POST_DELETED);
         checkMatchItemId(object::id(post), postMetaData.postId);
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());       // todo: test
@@ -570,6 +571,7 @@ module basics::postLib {
         language: u8,
         ctx: &mut TxContext
     ) {
+        assert!(!postMetaData.isDeleted, E_POST_DELETED);
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         let newCommunityId = object::id(newCommunity);
         if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
@@ -774,6 +776,7 @@ module basics::postLib {
         postMetaData: &mut PostMetaData,
         ctx: &mut TxContext
     ) {
+        assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let communityId = postMetaData.communityId;
         let postAuthor = postMetaData.author;
         let bestReplyMetaDataKey = postMetaData.bestReplyMetaDataKey;
@@ -1134,6 +1137,7 @@ module basics::postLib {
         isUpvote: bool,
         ctx: &mut TxContext
     ) {
+        assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let postType = postMetaData.postType;
         let voteUserId = object::id(voteUser);
         let communityId = postMetaData.communityId;
@@ -1714,6 +1718,23 @@ module basics::postLib {
     public fun isDeletedComment(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): bool {
         let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
         commentMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun getPostLanguage(postMetaData: &PostMetaData): u8 {
+        postMetaData.language
+    }
+
+    #[test_only]
+    public fun getReplyLanguage(postMetaData: &PostMetaData, replyMetaDataKey: u64): u8 {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.language
+    }
+
+    #[test_only]
+    public fun getCommentLanguage(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): u8 {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        commentMetaData.language
     }
 
     #[test_only]

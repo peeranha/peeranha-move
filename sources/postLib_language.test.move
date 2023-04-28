@@ -38,26 +38,10 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let post_val = test_scenario::take_from_sender<Post>(scenario);
-            let post = &mut post_val;
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let community_val = test_scenario::take_shared<Community>(scenario);
 
-            let (
-                _ipfsDoc,
-                _postId,
-                _postType,
-                _author,
-                _rating,
-                _communityId,
-                language,
-                _officialReplyMetaDataKey,
-                _bestReplyMetaDataKey,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-            ) = postLib::getPostData(post_meta_data, post);
-
-            assert!(language == 0, 1);
+            assert!(postLib::getPostLanguage(post_meta_data) == ENGLISH_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -83,26 +67,10 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let post_val = test_scenario::take_from_sender<Post>(scenario);
-            let post = &mut post_val;
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let community_val = test_scenario::take_shared<Community>(scenario);
 
-            let (
-                _ipfsDoc,
-                _postId,
-                _postType,
-                _author,
-                _rating,
-                _communityId,
-                language,
-                _officialReplyMetaDataKey,
-                _bestReplyMetaDataKey,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-            ) = postLib::getPostData(post_meta_data, post);
-
-            assert!(language == 1, 1);
+            assert!(postLib::getPostLanguage(post_meta_data) == CHINESE_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -128,26 +96,10 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let post_val = test_scenario::take_from_sender<Post>(scenario);
-            let post = &mut post_val;
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let community_val = test_scenario::take_shared<Community>(scenario);
 
-            let (
-                _ipfsDoc,
-                _postId,
-                _postType,
-                _author,
-                _rating,
-                _communityId,
-                language,
-                _officialReplyMetaDataKey,
-                _bestReplyMetaDataKey,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-            ) = postLib::getPostData(post_meta_data, post);
-
-            assert!(language == 2, 1);
+            assert!(postLib::getPostLanguage(post_meta_data) == SPANISH_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -173,26 +125,10 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let post_val = test_scenario::take_from_sender<Post>(scenario);
-            let post = &mut post_val;
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let community_val = test_scenario::take_shared<Community>(scenario);
 
-            let (
-                _ipfsDoc,
-                _postId,
-                _postType,
-                _author,
-                _rating,
-                _communityId,
-                language,
-                _officialReplyMetaDataKey,
-                _bestReplyMetaDataKey,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-            ) = postLib::getPostData(post_meta_data, post);
-
-            assert!(language == 3, 1);
+            assert!(postLib::getPostLanguage(post_meta_data) == VIETNAMESE_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -253,23 +189,8 @@ module basics::postLib_language_test
                 CHINESE_LANGUAGE,
                 test_scenario::ctx(scenario)
             );
-
-            let (
-                _ipfsDoc,
-                _postId,
-                _postType,
-                _author,
-                _rating,
-                _communityId,
-                language,
-                _officialReplyMetaDataKey,
-                _bestReplyMetaDataKey,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-            ) = postLib::getPostData(post_meta_data, post);
-
-            assert!(language == 1, 1);
+            
+            assert!(postLib::getPostLanguage(post_meta_data) == CHINESE_LANGUAGE, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
@@ -317,22 +238,7 @@ module basics::postLib_language_test
                 test_scenario::ctx(scenario)
             );
 
-            let (
-                _ipfsDoc,
-                _postId,
-                _postType,
-                _author,
-                _rating,
-                _communityId,
-                language,
-                _officialReplyMetaDataKey,
-                _bestReplyMetaDataKey,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-            ) = postLib::getPostData(post_meta_data, post);
-
-            assert!(language == 3, 1);
+            assert!(postLib::getPostLanguage(post_meta_data) == VIETNAMESE_LANGUAGE, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
@@ -411,22 +317,9 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let reply = &mut reply_val;
             let user_val = test_scenario::take_from_sender<User>(scenario);
 
-            let (
-                _ipfsDoc,
-                _replyId,
-                _author,
-                _rating,
-                _parentReplyMetaDataKey,
-                language,
-                _isFirstReply,
-                _isQuickReply,
-                _isDeleted,
-            ) = postLib::getReplyData(post_meta_data, reply, 1);
-
-            assert!(language == 0, 1);
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == ENGLISH_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, reply_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -461,22 +354,9 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let reply = &mut reply_val;
             let user_val = test_scenario::take_from_sender<User>(scenario);
 
-            let (
-                _ipfsDoc,
-                _replyId,
-                _author,
-                _rating,
-                _parentReplyMetaDataKey,
-                language,
-                _isFirstReply,
-                _isQuickReply,
-                _isDeleted,
-            ) = postLib::getReplyData(post_meta_data, reply, 1);
-
-            assert!(language == 1, 1);
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == CHINESE_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -511,22 +391,9 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let reply = &mut reply_val;
             let user_val = test_scenario::take_from_sender<User>(scenario);
 
-            let (
-                _ipfsDoc,
-                _replyId,
-                _author,
-                _rating,
-                _parentReplyMetaDataKey,
-                language,
-                _isFirstReply,
-                _isQuickReply,
-                _isDeleted,
-            ) = postLib::getReplyData(post_meta_data, reply, 1);
-
-            assert!(language == 2, 1);
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == SPANISH_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -561,22 +428,9 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let reply = &mut reply_val;
             let user_val = test_scenario::take_from_sender<User>(scenario);
 
-            let (
-                _ipfsDoc,
-                _replyId,
-                _author,
-                _rating,
-                _parentReplyMetaDataKey,
-                language,
-                _isFirstReply,
-                _isQuickReply,
-                _isDeleted,
-            ) = postLib::getReplyData(post_meta_data, reply, 1);
-
-            assert!(language == 3, 1);
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == VIETNAMESE_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -652,19 +506,7 @@ module basics::postLib_language_test
                 CHINESE_LANGUAGE
             );
 
-            let (
-                _ipfsDoc,
-                _replyId,
-                _author,
-                _rating,
-                _parentReplyMetaDataKey,
-                language,
-                _isFirstReply,
-                _isQuickReply,
-                _isDeleted,
-            ) = postLib::getReplyData(post_meta_data, reply, 1);
-
-            assert!(language == 1, 1);
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == CHINESE_LANGUAGE, 1);
 
 
             test_scenario::return_shared(post_meta_data_val);
@@ -718,19 +560,7 @@ module basics::postLib_language_test
                 VIETNAMESE_LANGUAGE
             );
 
-            let (
-                _ipfsDoc,
-                _replyId,
-                _author,
-                _rating,
-                _parentReplyMetaDataKey,
-                language,
-                _isFirstReply,
-                _isQuickReply,
-                _isDeleted,
-            ) = postLib::getReplyData(post_meta_data, reply, 1);
-
-            assert!(language == 3, 1);
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == VIETNAMESE_LANGUAGE, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -814,18 +644,8 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let comment_val = test_scenario::take_from_sender<Comment>(scenario);
-            let comment = &mut comment_val;
 
-            let (
-                _ipfsDoc,
-                _commentId,
-                _author,
-                _rating,
-                language,
-                _isDeleted,
-            ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
-
-            assert!(language == 0, 1);
+            assert!(postLib::getCommentLanguage(post_meta_data, 0, 1) == ENGLISH_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
@@ -857,18 +677,8 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let comment_val = test_scenario::take_from_sender<Comment>(scenario);
-            let comment = &mut comment_val;
 
-            let (
-                _ipfsDoc,
-                _commentId,
-                _author,
-                _rating,
-                language,
-                _isDeleted,
-            ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
-
-            assert!(language == 1, 1);
+            assert!(postLib::getCommentLanguage(post_meta_data, 0, 1) == CHINESE_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
@@ -909,18 +719,8 @@ module basics::postLib_language_test
             let post_meta_data = &mut post_meta_data_val;
             let comment_val = test_scenario::take_from_sender<Comment>(scenario);
             let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let comment = &mut comment_val;
 
-            let (
-                _ipfsDoc,
-                _commentId,
-                _author,
-                _rating,
-                language,
-                _isDeleted,
-            ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
-
-            assert!(language == 2, 1);
+            assert!(postLib::getCommentLanguage(post_meta_data, 1, 1) == SPANISH_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -962,18 +762,8 @@ module basics::postLib_language_test
             let post_meta_data = &mut post_meta_data_val;
             let comment_val = test_scenario::take_from_sender<Comment>(scenario);
             let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let comment = &mut comment_val;
 
-            let (
-                _ipfsDoc,
-                _commentId,
-                _author,
-                _rating,
-                language,
-                _isDeleted,
-            ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
-
-            assert!(language == 3, 1);
+            assert!(postLib::getCommentLanguage(post_meta_data, 1, 1) == VIETNAMESE_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -1074,16 +864,7 @@ module basics::postLib_language_test
                 CHINESE_LANGUAGE
             );
 
-            let (
-                _ipfsDoc,
-                _commentId,
-                _author,
-                _rating,
-                language,
-                _isDeleted,
-            ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
-
-            assert!(language == 1, 1);
+            assert!(postLib::getCommentLanguage(post_meta_data, 0, 1) == CHINESE_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
@@ -1142,16 +923,7 @@ module basics::postLib_language_test
                 VIETNAMESE_LANGUAGE
             );
 
-            let (
-                _ipfsDoc,
-                _commentId,
-                _author,
-                _rating,
-                language,
-                _isDeleted,
-            ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
-
-            assert!(language == 3, 1);
+            assert!(postLib::getCommentLanguage(post_meta_data, 1, 1) == VIETNAMESE_LANGUAGE, 1);
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
