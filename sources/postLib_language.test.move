@@ -51,7 +51,6 @@ module basics::postLib_language_test
                 _ipfsDoc,
                 _postId,
                 _postType,
-                _postTime,
                 _author,
                 _rating,
                 _communityId,
@@ -102,7 +101,6 @@ module basics::postLib_language_test
                 _ipfsDoc,
                 _postId,
                 _postType,
-                _postTime,
                 _author,
                 _rating,
                 _communityId,
@@ -153,7 +151,6 @@ module basics::postLib_language_test
                 _ipfsDoc,
                 _postId,
                 _postType,
-                _postTime,
                 _author,
                 _rating,
                 _communityId,
@@ -204,7 +201,6 @@ module basics::postLib_language_test
                 _ipfsDoc,
                 _postId,
                 _postType,
-                _postTime,
                 _author,
                 _rating,
                 _communityId,
@@ -292,7 +288,6 @@ module basics::postLib_language_test
                 _ipfsDoc,
                 _postId,
                 _postType,
-                _postTime,
                 _author,
                 _rating,
                 _communityId,
@@ -359,7 +354,6 @@ module basics::postLib_language_test
                 _ipfsDoc,
                 _postId,
                 _postType,
-                _postTime,
                 _author,
                 _rating,
                 _communityId,
@@ -466,7 +460,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _replyId,
-                _postTime,
                 _author,
                 _rating,
                 _parentReplyMetaDataKey,
@@ -522,7 +515,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _replyId,
-                _postTime,
                 _author,
                 _rating,
                 _parentReplyMetaDataKey,
@@ -578,7 +570,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _replyId,
-                _postTime,
                 _author,
                 _rating,
                 _parentReplyMetaDataKey,
@@ -634,7 +625,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _replyId,
-                _postTime,
                 _author,
                 _rating,
                 _parentReplyMetaDataKey,
@@ -705,7 +695,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _replyId,
-                _postTime,
                 _author,
                 _rating,
                 _parentReplyMetaDataKey,
@@ -777,7 +766,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _replyId,
-                _postTime,
                 _author,
                 _rating,
                 _parentReplyMetaDataKey,
@@ -886,7 +874,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _commentId,
-                _postTime,
                 _author,
                 _rating,
                 language,
@@ -935,7 +922,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _commentId,
-                _postTime,
                 _author,
                 _rating,
                 language,
@@ -993,7 +979,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _commentId,
-                _postTime,
                 _author,
                 _rating,
                 language,
@@ -1052,7 +1037,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _commentId,
-                _postTime,
                 _author,
                 _rating,
                 language,
@@ -1178,7 +1162,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _commentId,
-                _postTime,
                 _author,
                 _rating,
                 language,
@@ -1252,7 +1235,6 @@ module basics::postLib_language_test
             let (
                 _ipfsDoc,
                 _commentId,
-                _postTime,
                 _author,
                 _rating,
                 language,

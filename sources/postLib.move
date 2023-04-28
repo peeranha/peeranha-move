@@ -1700,12 +1700,30 @@ module basics::postLib {
     // }
 
     #[test_only]
-    public fun getPostData(postMetaData: &PostMetaData, post: &Post): (vector<u8>, ID, u8, u64, ID, i64Lib::I64, ID, u8, u64, u64, u64, bool, vector<u64>) {
+    public fun isDeletedPost(postMetaData: &PostMetaData): (bool) {
+        postMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun isDeletedReply(postMetaData: &PostMetaData, replyMetaDataKey: u64): (bool) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun isDeletedComment(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): bool {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        commentMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun getPostData(postMetaData: &PostMetaData, post: &Post): (vector<u8>, ID, u8, ID, i64Lib::I64, ID, u8, u64, u64, u64, bool, vector<u64>) {
+        checkMatchItemId(object::id(post), postMetaData.postId);
+
         (
             commonLib::getIpfsHash(post.ipfsDoc),
             postMetaData.postId,
             postMetaData.postType,
-            postMetaData.postTime,
             postMetaData.author,
             postMetaData.rating,
             postMetaData.communityId,
@@ -1724,13 +1742,13 @@ module basics::postLib {
     }
 
     #[test_only]
-    public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, u64, ID, i64Lib::I64, u64, u8, bool, bool, bool) {
+    public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u64, u8, bool, bool, bool) {
         let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        checkMatchItemId(object::id(reply), replyMetaData.replyId);
 
         (
             commonLib::getIpfsHash(reply.ipfsDoc),
             replyMetaData.replyId,
-            replyMetaData.postTime,
             replyMetaData.author,
             replyMetaData.rating,
             replyMetaData.parentReplyMetaDataKey,
@@ -1746,13 +1764,13 @@ module basics::postLib {
     }
 
     #[test_only]
-    public fun getCommentData(postMetaData: &mut PostMetaData, comment: &Comment, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, ID, u64, ID, i64Lib::I64, u8, bool) {
+    public fun getCommentData(postMetaData: &mut PostMetaData, comment: &Comment, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u8, bool) {
         let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        checkMatchItemId(object::id(comment), commentMetaData.commentId);
 
         (
             commonLib::getIpfsHash(comment.ipfsDoc),
             commentMetaData.commentId,
-            commentMetaData.postTime,
             commentMetaData.author,
             commentMetaData.rating,
             commentMetaData.language,

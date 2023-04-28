@@ -12,6 +12,9 @@ module basics::postLib_test
     use sui::object::{Self /*, ID*/};
     use sui::clock::{Self, /*Clock*/};
 
+    // use std::debug;
+    // debug::print(community);
+
     // TODO: add enum PostType      //export
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
@@ -50,7 +53,6 @@ module basics::postLib_test
                 ipfsDoc,
                 postId,
                 postType,
-                postTime,
                 author,
                 rating,
                 communityId,
@@ -65,7 +67,6 @@ module basics::postLib_test
             assert!(postType == EXPERT_POST, 1);
             assert!(postId == object::id(post), 12);
             assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
-            assert!(postTime == 0, 3);
             assert!(author == object::id(user), 4);
             assert!(rating == i64Lib::zero(), 5);
             assert!(communityId == object::id(community), 6);
@@ -99,7 +100,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, scenario);
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -115,7 +116,6 @@ module basics::postLib_test
             let (
                 ipfsDoc,
                 replyId,
-                postTime,
                 author,
                 rating,
                 parentReplyMetaDataKey,
@@ -127,7 +127,6 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
             assert!(replyId == object::id(reply), 11);
-            assert!(postTime == 0, 2);
             assert!(author == object::id(user), 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(parentReplyMetaDataKey == 0, 5);
@@ -158,7 +157,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 0, scenario);
+            create_comment(&time, post_meta_data, 0, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -174,7 +173,6 @@ module basics::postLib_test
             let (
                 ipfsDoc,
                 commentId,
-                postTime,
                 author,
                 rating,
                 language,
@@ -183,7 +181,6 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
             assert!(commentId == object::id(comment), 11);
-            assert!(postTime == 0, 2);
             assert!(author == object::id(user), 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(language == ENGLISH_LANGUAGE, 5);
@@ -211,7 +208,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, scenario);
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -219,7 +216,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 1, scenario);
+            create_comment(&time, post_meta_data, 1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -235,7 +232,6 @@ module basics::postLib_test
             let (
                 ipfsDoc,
                 commentId,
-                postTime,
                 author,
                 rating,
                 language,
@@ -244,7 +240,6 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
             assert!(commentId == object::id(comment), 11);
-            assert!(postTime == 0, 2);
             assert!(author == object::id(user), 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(language == ENGLISH_LANGUAGE, 5);
@@ -300,7 +295,6 @@ module basics::postLib_test
                 ipfsDoc,
                 postId,
                 postType,
-                postTime,
                 author,
                 rating,
                 communityId,
@@ -315,7 +309,6 @@ module basics::postLib_test
             assert!(postType == EXPERT_POST, 1);
             assert!(postId == object::id(post), 12);
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000005", 2);
-            assert!(postTime == 0, 3);
             assert!(author == object::id(user), 4);
             assert!(rating == i64Lib::zero(), 5);
             assert!(communityId == object::id(community), 6);
@@ -348,7 +341,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, scenario);
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -378,7 +371,6 @@ module basics::postLib_test
             let (
                 ipfsDoc,
                 replyId,
-                postTime,
                 author,
                 rating,
                 parentReplyMetaDataKey,
@@ -390,7 +382,6 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000004", 1);
             assert!(replyId == object::id(reply), 11);
-            assert!(postTime == 0, 2);
             assert!(author == object::id(user), 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(parentReplyMetaDataKey == 0, 5);
@@ -421,7 +412,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 0, scenario);
+            create_comment(&time, post_meta_data, 0, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -451,7 +442,6 @@ module basics::postLib_test
             let (
                 ipfsDoc,
                 commentId,
-                postTime,
                 author,
                 rating,
                 language,
@@ -460,7 +450,6 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000003", 1);
             assert!(commentId == object::id(comment), 11);
-            assert!(postTime == 0, 2);
             assert!(author == object::id(user), 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(language == ENGLISH_LANGUAGE, 5);
@@ -488,7 +477,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, scenario);
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -496,7 +485,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 1, scenario);
+            create_comment(&time, post_meta_data, 1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -526,7 +515,6 @@ module basics::postLib_test
             let (
                 ipfsDoc,
                 commentId,
-                postTime,
                 author,
                 rating,
                 language,
@@ -535,7 +523,6 @@ module basics::postLib_test
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000002", 1);
             assert!(commentId == object::id(comment), 11);
-            assert!(postTime == 0, 2);
             assert!(author == object::id(user), 3);
             assert!(rating == i64Lib::zero(), 4);
             assert!(language == ENGLISH_LANGUAGE, 5);
@@ -585,7 +572,6 @@ module basics::postLib_test
                 _ipfsDoc,
                 _postId,
                 _postType,
-                _postTime,
                 _author,
                 _rating,
                 _communityId,
@@ -621,7 +607,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, scenario);
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -651,7 +637,6 @@ module basics::postLib_test
             let (
                 _ipfsDoc,
                 _replyId,
-                _postTime,
                 _author,
                 _rating,
                 _parentReplyMetaDataKey,
@@ -685,7 +670,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 0, scenario);
+            create_comment(&time, post_meta_data, 0, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -715,7 +700,6 @@ module basics::postLib_test
             let (
                 _ipfsDoc,
                 _commentId,
-                _postTime,
                 _author,
                 _rating,
                 _language,
@@ -746,7 +730,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_reply(post_meta_data, &time, scenario);
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -754,7 +738,7 @@ module basics::postLib_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 1, scenario);
+            create_comment(&time, post_meta_data, 1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -784,7 +768,6 @@ module basics::postLib_test
             let (
                 _ipfsDoc,
                 _commentId,
-                _postTime,
                 _author,
                 _rating,
                 _language,
@@ -803,7 +786,7 @@ module basics::postLib_test
     }
 
     #[test]
-    fun test_create_two_post() {
+    fun test_create_edit_delete_two_post() {    // one user
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -812,69 +795,41 @@ module basics::postLib_test
         };
 
         test_scenario::next_tx(scenario, USER2);
-        {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
-            let user_rating_collection = &mut user_rating_collection_val;
-            let user_roles_collection = &mut user_roles_collection_val;
-            let user = &mut user_val;
-            let community = &mut community_val;
-
-            postLib::createPost(
-                user_rating_collection,
-                user_roles_collection,
-                &time,
-                user,
-                community,
-                x"0000000000000000000000000000000000000000000000000000000000000002",
-                EXPERT_POST,
-                vector<u64>[4, 5],
-                ENGLISH_LANGUAGE,
-                test_scenario::ctx(scenario)
-            );
-
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        {   
+            create_post(&time, x"0000000000000000000000000000000000000000000000000000000000000002", scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let community = &mut community_val;
+            let period_reward_container = &mut period_reward_container_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let post_val = test_scenario::take_from_sender<Post>(scenario);
             let post = &mut post_val;
-            let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
-            let community_val = test_scenario::take_shared<Community>(scenario);
-            let community = &mut community_val;
 
             let (
                 ipfsDoc,
                 postId,
-                postType,
-                postTime,
+                _postType,
                 author,
-                rating,
-                communityId,
-                language,
-                officialReplyMetaDataKey,
-                bestReplyMetaDataKey,
-                deletedReplyCount,
-                isDeleted,
-                tags,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                _deletedReplyCount,
+                _isDeleted,
+                _tags,
             ) = postLib::getPostData(post_meta_data, post);
 
-            assert!(postType == EXPERT_POST, 1);
             assert!(postId == object::id(post), 12);
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000002", 2);
-            assert!(postTime == 0, 3);
             assert!(author == object::id(user), 4);
-            assert!(rating == i64Lib::zero(), 5);
-            assert!(communityId == object::id(community), 6);
-            assert!(language == ENGLISH_LANGUAGE, 13);
-            assert!(officialReplyMetaDataKey == 0, 7);
-            assert!(bestReplyMetaDataKey == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
-            assert!(isDeleted == false, 10);
-            assert!(tags == vector<u64>[4, 5], 11);
 
             // check first post
             let post_meta_data_val2 = test_scenario::take_shared<PostMetaData>(scenario);
@@ -885,63 +840,411 @@ module basics::postLib_test
             let (
                 ipfsDoc2,
                 postId2,
-                postType2,
-                postTime2,
+                _postType2,
                 author2,
-                rating2,
-                communityId2,
-                language2,
-                officialReplyMetaDataKey2,
-                bestReplyMetaDataKey2,
-                deletedReplyCount2,
-                isDeleted2,
-                tags2,
+                _rating2,
+                _communityId2,
+                _language2,
+                _officialReplyMetaDataKey2,
+                _bestReplyMetaDataKey2,
+                _deletedReplyCount2,
+                _isDeleted2,
+                _tags2,
             ) = postLib::getPostData(post_meta_data2, post2);
 
-            assert!(postType2 == EXPERT_POST, 1);
             assert!(postId2 == object::id(post2), 12);
             assert!(ipfsDoc2 == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
-            assert!(postTime2 == 0, 3);
             assert!(author2 == object::id(user), 4);
-            assert!(rating2 == i64Lib::zero(), 5);
-            assert!(communityId2 == object::id(community), 6);
-            assert!(language2 == ENGLISH_LANGUAGE, 13);
-            assert!(officialReplyMetaDataKey2 == 0, 7);
-            assert!(bestReplyMetaDataKey2 == 0, 8);
-            assert!(deletedReplyCount2 == 0, 9);
-            assert!(isDeleted2 == false, 10);
-            assert!(tags2 == vector<u64>[1, 2], 11);
+
+            // edit Post
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000008",
+                EXPERT_POST,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post2,
+                post_meta_data2,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000009",
+                EXPERT_POST,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+
+            let (
+                ipfsDoc3,
+                postId3,
+                _postType,
+                _author,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                _deletedReplyCount,
+                _isDeleted,
+                _tags,
+            ) = postLib::getPostData(post_meta_data, post);
+
+            assert!(postId3 == object::id(post), 12);
+            assert!(ipfsDoc3 == x"0000000000000000000000000000000000000000000000000000000000000008", 2);
+
+            let (
+                ipfsDoc4,
+                postId4,
+                _postType,
+                _author,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                _deletedReplyCount,
+                _isDeleted,
+                _tags,
+            ) = postLib::getPostData(post_meta_data2, post2);
+
+            // delete
+
+            postLib::deletePost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data,
+                test_scenario::ctx(scenario)
+            );
+            postLib::deletePost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data2,
+                test_scenario::ctx(scenario)
+            );
+            assert!(postId4 == object::id(post2), 12);
+            assert!(ipfsDoc4 == x"0000000000000000000000000000000000000000000000000000000000000009", 3);
+
+            // delete
+
+            assert!(postLib::isDeletedPost(post_meta_data) == true, 12);
+            assert!(postLib::isDeletedPost(post_meta_data) == true, 12);
+
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, post_val2);
-            test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_shared(community_val);
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_shared(post_meta_data_val2);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);
     }
 
-/*
     #[test]
-    fun test_create_two_reply() {   // by different users
+    fun test_create_edit_delete_two_reply() {   // different users
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
         {
-            time = clock::create_for_testing(test_scenario::ctx(scenario));
+            time = init_postLib_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            init_postLib_test(&time, scenario);
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
+            test_scenario::return_shared(post_meta_data_val);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
-            userLib_test::create_user(scenario);
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
+            let user = &mut user_val;
+
+            let (
+                ipfsDoc,
+                replyId,
+                author,
+                _rating,
+                _parentReplyMetaDataKey,
+                _language,
+                _isFirstReply,
+                _isQuickReply,
+                _isDeleted,
+            ) = postLib::getReplyData(post_meta_data, reply, 1);
+
+            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+            assert!(replyId == object::id(reply), 11);
+            assert!(author == object::id(user), 3);
+
+            // edit
+
+            postLib::authorEditReply(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                reply,
+                1,
+                x"0000000000000000000000000000000000000000000000000000000000000004",
+                false,
+                ENGLISH_LANGUAGE
+            );
+
+            let (
+                ipfsDoc,
+                replyId,
+                author,
+                _rating,
+                _parentReplyMetaDataKey,
+                _language,
+                _isFirstReply,
+                _isQuickReply,
+                isDeleted,
+            ) = postLib::getReplyData(post_meta_data, reply, 1);
+
+            assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000004", 1);
+            assert!(replyId == object::id(reply), 11);
+            assert!(author == object::id(user), 3);
+            assert!(isDeleted == false, 9);
+
+            // delete
+
+            postLib::deleteReply(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data,
+                1,
+                test_scenario::ctx(scenario)
+            );
+            
+            assert!(postLib::isDeletedReply(post_meta_data, 1) == true, 9);
+
+            test_scenario::return_to_sender(scenario, reply_val);
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
+            let user = &mut user_val;
+
+            let (
+                ipfsDoc,
+                replyId,
+                author,
+                _rating,
+                _parentReplyMetaDataKey,
+                _language,
+                _isFirstReply,
+                _isQuickReply,
+                _isDeleted,
+            ) = postLib::getReplyData(post_meta_data, reply, 2);
+
+            assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
+            assert!(replyId == object::id(reply), 11);
+            assert!(author == object::id(user), 3);
+
+            // edit
+
+            postLib::authorEditReply(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                reply,
+                2,
+                x"0000000000000000000000000000000000000000000000000000000000000011",
+                false,
+                ENGLISH_LANGUAGE
+            );
+
+            let (
+                ipfsDoc,
+                replyId,
+                author,
+                _rating,
+                _parentReplyMetaDataKey,
+                _language,
+                _isFirstReply,
+                _isQuickReply,
+                isDeleted,
+            ) = postLib::getReplyData(post_meta_data, reply, 2);
+
+            assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000011", 12);
+            assert!(replyId == object::id(reply), 11);
+            assert!(author == object::id(user), 3);
+            assert!(isDeleted == false, 9);
+
+            // delete
+
+            postLib::deleteReply(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data,
+                2,
+                test_scenario::ctx(scenario)
+            );
+            
+            assert!(postLib::isDeletedReply(post_meta_data, 2) == true, 9);
+
+            test_scenario::return_to_sender(scenario, reply_val);
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_edit_delete_two_comment_to_post() {   // different users
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(&time, post_meta_data, 0, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(&time, post_meta_data, 0, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
+            let comment = &mut comment_val;
+
+            let (
+                ipfsDoc,
+                commentId,
+                author,
+                rating,
+                language,
+                isDeleted,
+            ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
+
+            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+            assert!(commentId == object::id(comment), 11);
+            assert!(author == object::id(user), 3);
+            assert!(rating == i64Lib::zero(), 4);
+            assert!(language == ENGLISH_LANGUAGE, 5);
+            assert!(isDeleted == false, 9);
+
+            // edit
+            postLib::editComment(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                comment,
+                0,
+                1,
+                x"0000000000000000000000000000000000000000000000000000000000000003",
+                ENGLISH_LANGUAGE
+            );
+
+            let (
+                ipfsDoc2,
+                commentId2,
+                author2,
+                _rating2,
+                _language2,
+                isDeleted2,
+            ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
+
+            assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000003", 1);
+            assert!(commentId2 == object::id(comment), 11);
+            assert!(author2 == object::id(user), 3);
+            assert!(isDeleted2 == false, 9);
+
+            // delete
+
+            postLib::deleteComment(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post_meta_data,
+                0,
+                1,
+                test_scenario::ctx(scenario)
+            );
+
+            assert!(postLib::isDeletedComment(post_meta_data, 0, 1) == true, 10);
+
+            test_scenario::return_to_sender(scenario, comment_val);
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -953,67 +1256,270 @@ module basics::postLib_test
             let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
+            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
+            let comment = &mut comment_val;
 
-            postLib::createReply(
+            let (
+                ipfsDoc,
+                commentId,
+                author,
+                rating,
+                language,
+                isDeleted,
+            ) = postLib::getCommentData(post_meta_data, comment, 0, 2);
+
+            assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
+            assert!(commentId == object::id(comment), 11);
+            assert!(author == object::id(user), 3);
+            assert!(rating == i64Lib::zero(), 4);
+            assert!(language == ENGLISH_LANGUAGE, 5);
+            assert!(isDeleted == false, 9);
+
+            // edit
+            postLib::editComment(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                comment,
+                0,
+                2,
+                x"0000000000000000000000000000000000000000000000000000000000000014",
+                ENGLISH_LANGUAGE
+            );
+
+            let (
+                ipfsDoc2,
+                commentId2,
+                author2,
+                _rating2,
+                _language2,
+                isDeleted2,
+            ) = postLib::getCommentData(post_meta_data, comment, 0, 2);
+
+            assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000014", 14);
+            assert!(commentId2 == object::id(comment), 11);
+            assert!(author2 == object::id(user), 3);
+            assert!(isDeleted2 == false, 9);
+
+            // delete
+
+            postLib::deleteComment(
                 user_rating_collection,
                 user_roles_collection,
                 period_reward_container,
-                &time,
                 user,
                 post_meta_data,
                 0,
-                x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc",
-                false,
-                ENGLISH_LANGUAGE,
+                2,
                 test_scenario::ctx(scenario)
             );
 
+            assert!(postLib::isDeletedComment(post_meta_data, 0, 2) == true, 10);
+
+            test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_edit_delete_two_comment_to_reply() {   // different users
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let reply = &mut reply_val;
-            let user_val = test_scenario::take_from_sender<User>(scenario);
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(&time, post_meta_data, 1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(&time, post_meta_data, 2, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
+            let comment = &mut comment_val;
 
             let (
                 ipfsDoc,
-                replyId,
-                postTime,
+                commentId,
                 author,
                 rating,
-                parentReplyMetaDataKey,
                 language,
-                isFirstReply,
-                isQuickReply,
                 isDeleted,
-            ) = postLib::getReplyData(post_meta_data, reply, 1);
+            ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
-            assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
-            assert!(replyId == object::id(reply), 11);
-            assert!(postTime == 0, 2);
+            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+            assert!(commentId == object::id(comment), 11);
             assert!(author == object::id(user), 3);
             assert!(rating == i64Lib::zero(), 4);
-            assert!(parentReplyMetaDataKey == 0, 5);
             assert!(language == ENGLISH_LANGUAGE, 5);
-            assert!(isFirstReply == false, 6);
-            assert!(isQuickReply == false, 7);
             assert!(isDeleted == false, 9);
 
-            test_scenario::return_to_sender(scenario, reply_val);
-            test_scenario::return_to_sender(scenario, user_val);
+            // edit
+            postLib::editComment(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                comment,
+                1,
+                1,
+                x"0000000000000000000000000000000000000000000000000000000000000003",
+                ENGLISH_LANGUAGE
+            );
+
+            let (
+                ipfsDoc2,
+                commentId2,
+                author2,
+                _rating2,
+                _language2,
+                isDeleted2,
+            ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
+
+            assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000003", 1);
+            assert!(commentId2 == object::id(comment), 11);
+            assert!(author2 == object::id(user), 3);
+            assert!(isDeleted2 == false, 9);
+
+            // delete
+
+            postLib::deleteComment(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post_meta_data,
+                1,
+                1,
+                test_scenario::ctx(scenario)
+            );
+
+            assert!(postLib::isDeletedComment(post_meta_data, 1, 1) == true, 10);
+
+            test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
+            let comment = &mut comment_val;
+
+            let (
+                ipfsDoc,
+                commentId,
+                author,
+                rating,
+                language,
+                isDeleted,
+            ) = postLib::getCommentData(post_meta_data, comment, 2, 1);
+
+            assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
+            assert!(commentId == object::id(comment), 11);
+            assert!(author == object::id(user), 3);
+            assert!(rating == i64Lib::zero(), 4);
+            assert!(language == ENGLISH_LANGUAGE, 5);
+            assert!(isDeleted == false, 9);
+
+            // edit
+            postLib::editComment(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                comment,
+                2,
+                1,
+                x"0000000000000000000000000000000000000000000000000000000000000014",
+                ENGLISH_LANGUAGE
+            );
+
+            let (
+                ipfsDoc2,
+                commentId2,
+                author2,
+                _rating2,
+                _language2,
+                isDeleted2,
+            ) = postLib::getCommentData(post_meta_data, comment, 2, 1);
+
+            assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000014", 14);
+            assert!(commentId2 == object::id(comment), 11);
+            assert!(author2 == object::id(user), 3);
+            assert!(isDeleted2 == false, 9);
+
+            // delete
+
+            postLib::deleteComment(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post_meta_data,
+                2,
+                1,
+                test_scenario::ctx(scenario)
+            );
+
+            assert!(postLib::isDeletedComment(post_meta_data, 2, 1) == true, 10);
+
+            test_scenario::return_to_sender(scenario, comment_val);
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);
-    } 
-*/ 
+    }
 
     // ====== Support functions ======
 
@@ -1047,7 +1553,7 @@ module basics::postLib_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            create_post(&time, scenario);
+            create_post(&time, x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", scenario);
         };
 
         time
@@ -1081,7 +1587,7 @@ module basics::postLib_test
     }
        
     #[test_only]
-    public fun create_post(time: &clock::Clock, scenario: &mut Scenario) {
+    public fun create_post(time: &clock::Clock, ipfsHash: vector<u8>, scenario: &mut Scenario) {
         let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
@@ -1094,7 +1600,7 @@ module basics::postLib_test
             time,
             user,
             community,
-            x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+            ipfsHash,
             EXPERT_POST,
             vector<u64>[1, 2],
             ENGLISH_LANGUAGE,
@@ -1105,7 +1611,7 @@ module basics::postLib_test
     }
 
     #[test_only]
-    public fun create_reply(postMetadata: &mut PostMetaData, time: &clock::Clock, scenario: &mut Scenario) {
+    public fun create_reply(time: &clock::Clock, postMetadata: &mut PostMetaData, ipfsHash: vector<u8>, scenario: &mut Scenario) {
         let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
@@ -1120,7 +1626,7 @@ module basics::postLib_test
             user,
             postMetadata,
             0,
-            x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc",
+            ipfsHash,
             false,
             ENGLISH_LANGUAGE,
             test_scenario::ctx(scenario)
@@ -1130,7 +1636,7 @@ module basics::postLib_test
     }
 
     #[test_only]
-    public fun create_comment(postMetadata: &mut PostMetaData, time: &clock::Clock, parentReplyMetaDataKey: u64, scenario: &mut Scenario) {
+    public fun create_comment(time: &clock::Clock, postMetadata: &mut PostMetaData, parentReplyMetaDataKey: u64, ipfsHash: vector<u8>, scenario: &mut Scenario) {
         let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
@@ -1143,7 +1649,7 @@ module basics::postLib_test
             user,
             postMetadata,
             parentReplyMetaDataKey,
-            x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
+            ipfsHash,
             ENGLISH_LANGUAGE,
             test_scenario::ctx(scenario)
         );
