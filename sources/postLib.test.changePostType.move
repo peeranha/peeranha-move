@@ -1,694 +1,803 @@
-//
-// done
-// edit post type (without ratings)
-//
-/*
 #[test_only]
 module basics::postLib_test_changePostType
 {
-    use basics::communityLib;
-    use basics::postLib;
-    use basics::userLib;
-    use basics::i64Lib;
+    use basics::postLib::{Self, Post, PostMetaData};
+    use basics::userLib_test;
+    use basics::communityLib_test;
+    use basics::communityLib::{Community};
+    use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
+    use basics::accessControl::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
+    use sui::clock::{Self};
 
-    // TODO: add enum PostType      //import
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
     const TUTORIAL: u8 = 2;
-    const DOCUMENTATION: u8 = 3;
-    const USER: address = @0xA1;
 
-    fun change_name(        // todo: change name
-        usersRatingCollection: &mut userLib::UsersRatingCollection,
-        communityCollection: &mut communityLib::CommunityCollection,
-        postCollection: &mut postLib::PostCollection,
-        scenario: &mut Scenario,
-        post_type: u8
-    ) {        // name from tests solidity
-        userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
-        communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
-        postLib::create_post_with_type(postCollection, communityCollection, userRatingCollection, post_type, test_scenario::ctx(scenario));
-    }
+    const ENGLISH_LANGUAGE: u8 = 0;
 
+    const USER1: address = @0xA1;
+    const USER2: address = @0xA2;
 
-    #[test, expected_failure(abort_code = postLib::E_POST_NOT_EXIST)]
-    fun test_change_post_type_post_does_not_exist() {
-        let scenario_val = test_scenario::begin(USER);
+    #[test]
+    fun test_edit_expert_post_to_common() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
         let scenario = &mut scenario_val;
         {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
+            time = init_postLib_test(EXPERT_POST, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER);
+        test_scenario::next_tx(scenario, USER2);
         {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            userLib::create_user(userRatingCollection, test_scenario::ctx(scenario));
-            communityLib::create_community(communityCollection, test_scenario::ctx(scenario));
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
 
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
+            assert!(postLib::getPostType(post_meta_data) == EXPERT_POST, 1);
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
                 COMMON_POST,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
                 test_scenario::ctx(scenario)
             );
+            
+            assert!(postLib::getPostType(post_meta_data) == COMMON_POST, 2);
 
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
-        };
-        test_scenario::end(scenario_val);  
-    }
-
-    #[test, expected_failure(abort_code = postLib::E_POST_DELETED)]
-    fun test_change_post_type_post_has_been_deleted() {
-        let scenario_val = test_scenario::begin(USER);
-        let scenario = &mut scenario_val;
-        {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER);
-        {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, EXPERT_POST);
-            postLib::deletePost(
-                postCollection,
-                userRatingCollection,
-                1,
-                test_scenario::ctx(scenario)
-            );
-
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
-                COMMON_POST,
-                test_scenario::ctx(scenario)
-            );
-
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
-        };
+        clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);  
     }
 
     #[test]
-    fun test_change_post_type_expert_to_common() {
-        let scenario_val = test_scenario::begin(USER);
+    fun test_edit_expert_post_to_tutorial() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
         let scenario = &mut scenario_val;
         {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
+            time = init_postLib_test(EXPERT_POST, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER);
+        test_scenario::next_tx(scenario, USER2);
         {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, EXPERT_POST);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
 
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
-                COMMON_POST,
-                test_scenario::ctx(scenario)
-            );
+            assert!(postLib::getPostType(post_meta_data) == EXPERT_POST, 1);
 
-            let (
-                postType,
-                ipfsDoc,
-                _postTime,
-                author,
-                rating,
-                communityId,
-                officialReply,
-                bestReply,
-                deletedReplyCount,
-                isDeleted,
-                tags,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = postLib::getPostData(postCollection, 1);
-
-            
-            assert!(postType == COMMON_POST, 0);
-            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 0);
-            assert!(author == USER, 0);
-            assert!(rating == i64Lib::zero(), 0);
-            assert!(communityId == 1, 0);
-            assert!(officialReply == 0, 0);
-            assert!(bestReply == 0, 0);
-            assert!(deletedReplyCount == 0, 0);
-            assert!(isDeleted == false, 0);
-            assert!(tags == vector<u64>[1, 2], 0);
-            assert!(properties == vector<u8>[], 0);
-            assert!(historyVotes == vector<u8>[], 0);
-            assert!(votedUsers == vector<address>[], 0);
-            
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
-        };
-        test_scenario::end(scenario_val);  
-    }
-
-    #[test]
-    fun test_change_post_type_expert_to_tutorial() {
-        let scenario_val = test_scenario::begin(USER);
-        let scenario = &mut scenario_val;
-        {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
-        };
-
-        test_scenario::next_tx(scenario, USER);
-        {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, EXPERT_POST);
-
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
                 TUTORIAL,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
                 test_scenario::ctx(scenario)
             );
+            
+            assert!(postLib::getPostType(post_meta_data) == TUTORIAL, 2);
 
-            let (
-                postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = postLib::getPostData(postCollection, 1);
-
-            assert!(postType == TUTORIAL, 0);
-
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_edit_common_post_to_expert() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            assert!(postLib::getPostType(post_meta_data) == COMMON_POST, 1);
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                EXPERT_POST,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+            
+            assert!(postLib::getPostType(post_meta_data) == EXPERT_POST, 2);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_edit_common_post_to_tutorial() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            assert!(postLib::getPostType(post_meta_data) == COMMON_POST, 1);
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                TUTORIAL,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+            
+            assert!(postLib::getPostType(post_meta_data) == TUTORIAL, 2);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_edit_tutorial_post_to_expert() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(TUTORIAL, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            assert!(postLib::getPostType(post_meta_data) == TUTORIAL, 1);
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                EXPERT_POST,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+            
+            assert!(postLib::getPostType(post_meta_data) == EXPERT_POST, 2);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_edit_tutorial_post_to_common() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(TUTORIAL, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            assert!(postLib::getPostType(post_meta_data) == TUTORIAL, 1);
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                COMMON_POST,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+            
+            assert!(postLib::getPostType(post_meta_data) == COMMON_POST, 2);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_edit_expert_post_to_common_with_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                COMMON_POST,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+            
+            assert!(postLib::getPostType(post_meta_data) == COMMON_POST, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_edit_common_post_to_expert_with_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                EXPERT_POST,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+            
+            assert!(postLib::getPostType(post_meta_data) == EXPERT_POST, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);  
     }
 
     #[test, expected_failure(abort_code = postLib::E_ERROR_POST_TYPE)]
-    fun test_change_post_type_expert_to_tutorial_post_has_reply() {
-        let scenario_val = test_scenario::begin(USER);
+    fun test_edit_expert_post_to_tutorial_with_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
         let scenario = &mut scenario_val;
         {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
+            time = init_postLib_test(EXPERT_POST, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER);
+        test_scenario::next_tx(scenario, USER2);
         {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, EXPERT_POST);
-            postLib::create_reply(postCollection, test_scenario::ctx(scenario));
-
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
-                TUTORIAL,
-                test_scenario::ctx(scenario)
-            );
-
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
-        };
-        test_scenario::end(scenario_val);  
-    }
-
-    #[test]
-    fun test_change_post_type_expert_to_tutorial_post_had_reply() {
-        let scenario_val = test_scenario::begin(USER);
-        let scenario = &mut scenario_val;
-        {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
-        };
-
-        test_scenario::next_tx(scenario, USER);
-        {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, EXPERT_POST);
-            postLib::create_reply(postCollection, test_scenario::ctx(scenario));
-            postLib::deleteReply(
-                postCollection,
-                userRatingCollection,
-                1,
-                1,
-                test_scenario::ctx(scenario)
-            );
-
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
-                TUTORIAL,
-                test_scenario::ctx(scenario)
-            );
-
-            let (
-                postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = postLib::getPostData(postCollection, 1);
-
-            assert!(postType == TUTORIAL, 0);
-
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
-        };
-        test_scenario::end(scenario_val);  
-    }
-
-    #[test]
-    fun test_change_post_type_common_to_expert() {
-        let scenario_val = test_scenario::begin(USER);
-        let scenario = &mut scenario_val;
-        {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
-        };
-
-        test_scenario::next_tx(scenario, USER);
-        {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, COMMON_POST);
-
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
-                EXPERT_POST,
-                test_scenario::ctx(scenario)
-            );
-
-            let (
-                postType,
-                ipfsDoc,
-                _postTime,
-                author,
-                rating,
-                communityId,
-                officialReply,
-                bestReply,
-                deletedReplyCount,
-                isDeleted,
-                tags,
-                properties,
-                historyVotes,
-                votedUsers
-            ) = postLib::getPostData(postCollection, 1);
-
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
             
-            assert!(postType == EXPERT_POST, 0);
-            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 0);
-            assert!(author == USER, 0);
-            assert!(rating == i64Lib::zero(), 0);
-            assert!(communityId == 1, 0);
-            assert!(officialReply == 0, 0);
-            assert!(bestReply == 0, 0);
-            assert!(deletedReplyCount == 0, 0);
-            assert!(isDeleted == false, 0);
-            assert!(tags == vector<u64>[1, 2], 0);
-            assert!(properties == vector<u8>[], 0);
-            assert!(historyVotes == vector<u8>[], 0);
-            assert!(votedUsers == vector<address>[], 0);
-            
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
-        };
-        test_scenario::end(scenario_val);  
-    }
+            create_reply(post_meta_data, &time, scenario);
 
-    #[test]
-    fun test_change_post_type_common_to_tutorial() {
-        let scenario_val = test_scenario::begin(USER);
-        let scenario = &mut scenario_val;
-        {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
+            test_scenario::return_shared(post_meta_data_val);
         };
 
-        test_scenario::next_tx(scenario, USER);
+        test_scenario::next_tx(scenario, USER2);
         {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, COMMON_POST);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
 
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
                 TUTORIAL,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
                 test_scenario::ctx(scenario)
             );
 
-            let (
-                postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = postLib::getPostData(postCollection, 1);
-
-            assert!(postType == TUTORIAL, 0);
-
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
+
+        clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);  
     }
 
     #[test, expected_failure(abort_code = postLib::E_ERROR_POST_TYPE)]
-    fun test_change_post_type_common_to_tutorial_post_has_reply() {
-        let scenario_val = test_scenario::begin(USER);
+    fun test_edit_common_post_to_tutorial_with_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
         let scenario = &mut scenario_val;
         {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
+            time = init_postLib_test(COMMON_POST, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER);
+        test_scenario::next_tx(scenario, USER2);
         {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, COMMON_POST);
-            postLib::create_reply(postCollection, test_scenario::ctx(scenario));
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, scenario);
 
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
                 TUTORIAL,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
                 test_scenario::ctx(scenario)
             );
 
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
+
+        clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);  
     }
 
     #[test]
-    fun test_change_post_type_common_to_tutorial_post_had_reply() {
-        let scenario_val = test_scenario::begin(USER);
+    fun test_edit_expert_post_to_tutorial_with_deleted_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
         let scenario = &mut scenario_val;
         {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
+            time = init_postLib_test(EXPERT_POST, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER);
+        test_scenario::next_tx(scenario, USER2);
         {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, COMMON_POST);
-            postLib::create_reply(postCollection, test_scenario::ctx(scenario));
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
             postLib::deleteReply(
-                postCollection,
-                userRatingCollection,
-                1,
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data,
                 1,
                 test_scenario::ctx(scenario)
             );
 
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
                 TUTORIAL,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
                 test_scenario::ctx(scenario)
             );
 
-            let (
-                postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = postLib::getPostData(postCollection, 1);
+            assert!(postLib::getPostType(post_meta_data) == TUTORIAL, 1);
 
-            assert!(postType == TUTORIAL, 0);
-
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
+
+        clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);  
     }
 
     #[test]
-    fun test_change_post_type_tutorial_to_expert_post() {
-        let scenario_val = test_scenario::begin(USER);
+    fun test_edit_common_post_to_tutorial_with_deleted_reply() {
+          let scenario_val = test_scenario::begin(USER1);
+        let time;
         let scenario = &mut scenario_val;
         {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
-            userLib::init_test(test_scenario::ctx(scenario));
+            time = init_postLib_test(COMMON_POST, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER);
+        test_scenario::next_tx(scenario, USER2);
         {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, TUTORIAL);
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, scenario);
 
-            postLib::editPost(
-                postCollection,
-                communityCollection,
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::deleteReply(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data,
                 1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
-                EXPERT_POST,
                 test_scenario::ctx(scenario)
             );
 
-            let (
-                postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = postLib::getPostData(postCollection, 1);
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                TUTORIAL,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
 
-            assert!(postType == EXPERT_POST, 0);
+            assert!(postLib::getPostType(post_meta_data) == TUTORIAL, 1);
 
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
-        test_scenario::end(scenario_val);  
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val); 
     }
 
-    #[test]
-    fun test_change_post_type_tutorial_to_common_post() {
-        let scenario_val = test_scenario::begin(USER);
-        let scenario = &mut scenario_val;
+    
+
+    // ====== Support functions ======
+
+    #[test_only]
+    fun init_postLib_test(postType: u8, scenario: &mut Scenario): clock::Clock {
+        let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            communityLib::init_test(test_scenario::ctx(scenario));
-            postLib::init_test(test_scenario::ctx(scenario));
             userLib::init_test(test_scenario::ctx(scenario));
+            accessControl::init_test(test_scenario::ctx(scenario));
         };
 
-        test_scenario::next_tx(scenario, USER);
+        test_scenario::next_tx(scenario, USER1);
         {
-            let community_val = test_scenario::take_shared<communityLib::CommunityCollection>(scenario);
-            let communityCollection = &mut community_val;
-            let post_val = test_scenario::take_shared<postLib::PostCollection>(scenario);
-            let postCollection = &mut post_val;
-            let user_val = test_scenario::take_shared<userLib::UsersRatingCollection>(scenario);
-            let userRatingCollection = &mut user_val;
-            change_name(userRatingCollection, communityCollection, postCollection, scenario, TUTORIAL);
-
-            postLib::editPost(
-                postCollection,
-                communityCollection,
-                1,
-                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
-                vector<u64>[1, 2],
-                1,
-                COMMON_POST,
-                test_scenario::ctx(scenario)
-            );
-
-            let (
-                postType,
-                _ipfsDoc,
-                _postTime,
-                _author,
-                _rating,
-                _communityId,
-                _officialReply,
-                _bestReply,
-                _deletedReplyCount,
-                _isDeleted,
-                _tags,
-                _properties,
-                _historyVotes,
-                _votedUsers
-            ) = postLib::getPostData(postCollection, 1);
-
-            assert!(postType == COMMON_POST, 0);
-
-            test_scenario::return_shared(community_val);
-            test_scenario::return_shared(post_val);
-            test_scenario::return_shared(user_val);
+            userLib_test::create_user(scenario);
         };
-        test_scenario::end(scenario_val);  
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            communityLib_test::grant_protocol_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            communityLib_test::create_community(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            create_post(&time, postType, scenario);
+        };
+
+        time
+    }
+
+    #[test_only]
+    fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Community) {
+        let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let period_reward_container_val = test_scenario::take_shared<PeriodRewardContainer>(scenario);
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let community_val = test_scenario::take_shared<Community>(scenario);
+
+        (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val)
+    }
+
+    #[test_only]
+    fun return_all_shared(
+        user_rating_collection_val: UsersRatingCollection,
+        user_roles_collection_val: UserRolesCollection,
+        period_reward_container_val:PeriodRewardContainer,
+        user_val: User,
+        community_val: Community,
+        scenario: &mut Scenario
+    ) {
+        test_scenario::return_shared(user_rating_collection_val);
+        test_scenario::return_shared(user_roles_collection_val);
+        test_scenario::return_shared(period_reward_container_val);
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(community_val);
+    }
+       
+    #[test_only]
+    public fun create_post(time: &clock::Clock, postType: u8, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user = &mut user_val;
+        let community = &mut community_val;
+
+        postLib::createPost(
+            user_rating_collection,
+            user_roles_collection,
+            time,
+            user,
+            community,
+            x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+            postType,
+            vector<u64>[1, 2],
+            ENGLISH_LANGUAGE,
+            test_scenario::ctx(scenario)
+        );
+
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+
+    #[test_only]
+    public fun create_reply(postMetadata: &mut PostMetaData, time: &clock::Clock, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let period_reward_container = &mut period_reward_container_val;
+        let user = &mut user_val;
+        
+        postLib::createReply(
+            user_rating_collection,
+            user_roles_collection,
+            period_reward_container,
+            time,
+            user,
+            postMetadata,
+            0,
+            x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc",
+            false,
+            ENGLISH_LANGUAGE,
+            test_scenario::ctx(scenario)
+        );
+
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
     }
 }
-*/

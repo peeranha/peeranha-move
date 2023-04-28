@@ -13,7 +13,6 @@ module basics::postLib_language_test
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
     const TUTORIAL: u8 = 2;
-    const DOCUMENTATION: u8 = 3;
 
     const ENGLISH_LANGUAGE: u8 = 0;
     const CHINESE_LANGUAGE: u8 = 1;
@@ -37,15 +36,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let post_val = test_scenario::take_from_sender<Post>(scenario);
-            let user_val = test_scenario::take_from_sender<User>(scenario);
-            let community_val = test_scenario::take_shared<Community>(scenario);
 
             assert!(postLib::getPostLanguage(post_meta_data) == ENGLISH_LANGUAGE, 1);
 
-            test_scenario::return_to_sender(scenario, post_val);
-            test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_shared(community_val);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -66,15 +59,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let post_val = test_scenario::take_from_sender<Post>(scenario);
-            let user_val = test_scenario::take_from_sender<User>(scenario);
-            let community_val = test_scenario::take_shared<Community>(scenario);
 
             assert!(postLib::getPostLanguage(post_meta_data) == CHINESE_LANGUAGE, 1);
-
-            test_scenario::return_to_sender(scenario, post_val);
-            test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_shared(community_val);
+            
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -95,15 +82,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let post_val = test_scenario::take_from_sender<Post>(scenario);
-            let user_val = test_scenario::take_from_sender<User>(scenario);
-            let community_val = test_scenario::take_shared<Community>(scenario);
 
             assert!(postLib::getPostLanguage(post_meta_data) == SPANISH_LANGUAGE, 1);
-
-            test_scenario::return_to_sender(scenario, post_val);
-            test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_shared(community_val);
+            
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -124,15 +105,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let post_val = test_scenario::take_from_sender<Post>(scenario);
-            let user_val = test_scenario::take_from_sender<User>(scenario);
-            let community_val = test_scenario::take_shared<Community>(scenario);
 
             assert!(postLib::getPostLanguage(post_meta_data) == VIETNAMESE_LANGUAGE, 1);
-
-            test_scenario::return_to_sender(scenario, post_val);
-            test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_shared(community_val);
+            
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -316,13 +291,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let user_val = test_scenario::take_from_sender<User>(scenario);
 
             assert!(postLib::getReplyLanguage(post_meta_data, 1) == ENGLISH_LANGUAGE, 1);
 
-            test_scenario::return_to_sender(scenario, reply_val);
-            test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -353,13 +324,11 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let user_val = test_scenario::take_from_sender<User>(scenario);
+            
 
             assert!(postLib::getReplyLanguage(post_meta_data, 1) == CHINESE_LANGUAGE, 1);
 
-            test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_to_sender(scenario, reply_val);
+            
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -390,13 +359,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let user_val = test_scenario::take_from_sender<User>(scenario);
-
+            
             assert!(postLib::getReplyLanguage(post_meta_data, 1) == SPANISH_LANGUAGE, 1);
 
-            test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_to_sender(scenario, reply_val);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -427,13 +392,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let user_val = test_scenario::take_from_sender<User>(scenario);
-
+            
             assert!(postLib::getReplyLanguage(post_meta_data, 1) == VIETNAMESE_LANGUAGE, 1);
-
-            test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_to_sender(scenario, reply_val);
+            
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -507,7 +468,6 @@ module basics::postLib_language_test
             );
 
             assert!(postLib::getReplyLanguage(post_meta_data, 1) == CHINESE_LANGUAGE, 1);
-
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, reply_val);
@@ -643,11 +603,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
 
             assert!(postLib::getCommentLanguage(post_meta_data, 0, 1) == ENGLISH_LANGUAGE, 1);
 
-            test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -676,11 +634,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
 
             assert!(postLib::getCommentLanguage(post_meta_data, 0, 1) == CHINESE_LANGUAGE, 1);
 
-            test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -717,13 +673,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
-            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
 
             assert!(postLib::getCommentLanguage(post_meta_data, 1, 1) == SPANISH_LANGUAGE, 1);
 
-            test_scenario::return_to_sender(scenario, comment_val);
-            test_scenario::return_to_sender(scenario, reply_val);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -760,13 +712,9 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
-            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
 
             assert!(postLib::getCommentLanguage(post_meta_data, 1, 1) == VIETNAMESE_LANGUAGE, 1);
 
-            test_scenario::return_to_sender(scenario, comment_val);
-            test_scenario::return_to_sender(scenario, reply_val);
             test_scenario::return_shared(post_meta_data_val);
         };
 

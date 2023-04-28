@@ -624,7 +624,7 @@ module basics::postLib {
             /*false*/
         );
 
-        changePostType(usersRatingCollection, periodRewardContainer, postMetaData, newPostType, ctx);                      // TODO: add tests
+        changePostType(usersRatingCollection, periodRewardContainer, postMetaData, newPostType, ctx);
         changePostCommunity(usersRatingCollection, periodRewardContainer, postMetaData, newCommunity, ctx);                // TODO: add tests
 
         if (postMetaData.language != language) {
@@ -1735,6 +1735,11 @@ module basics::postLib {
     public fun getCommentLanguage(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): u8 {
         let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
         commentMetaData.language
+    }
+
+    #[test_only]
+    public fun getPostType(postMetaData: &PostMetaData): u8 {
+        postMetaData.postType
     }
 
     #[test_only]
