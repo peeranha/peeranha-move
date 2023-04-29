@@ -319,6 +319,144 @@ module basics::postLib_test_changePostType
         test_scenario::end(scenario_val);  
     }
 
+    #[test, expected_failure(abort_code = postLib::E_INVALID_POST_TYPE)]
+    fun test_edit_expert_post_to_invalid_post_type() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                3,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_INVALID_POST_TYPE)]
+    fun test_edit_common_post_to_invalid_post_type() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                3,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_INVALID_POST_TYPE)]
+    fun test_edit_tutorial_post_to_invalid_post_type() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(TUTORIAL, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                3,
+                vector<u64>[2, 3],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
     #[test]
     fun test_edit_expert_post_to_common_with_reply() {
         let scenario_val = test_scenario::begin(USER1);
