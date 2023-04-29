@@ -102,7 +102,7 @@ module basics::communityLib {
                 };
                 j = j + 5;
             };
-            i = i +1;
+            i = i + 1;
         };
 
         let communityTags = table::new(ctx);
@@ -112,7 +112,7 @@ module basics::communityLib {
                 id: object::new(ctx),
                 ipfsDoc: commonLib::getIpfsDoc(*vector::borrow(&tags, tagId), vector::empty<u8>())
             });
-            tagId = tagId +1;
+            tagId = tagId + 1;
         };
 
         let community = Community {
@@ -157,7 +157,7 @@ module basics::communityLib {
         let tagsCount = table::length(&community.tags);
         while(i <= tagsCount) {
             assert!(commonLib::getIpfsHash(table::borrow(&community.tags, i).ipfsDoc) != ipfsHash, E_REQUIRE_TAGS_WITH_UNIQUE_NAME);
-            i = i +1;
+            i = i + 1;
         };
 
         event::emit(CreateTagEvent {userId: userId, tagKey: tagsCount + 1, communityId: communityId});
@@ -207,7 +207,7 @@ module basics::communityLib {
     }
 
     public entry fun checkTags(community: &Community, tags: vector<u64>) {
-        let i = 1;
+        let i = 0;
         while(i < vector::length(&mut tags)) {
             let tagId = *vector::borrow(&tags, i);
             getTag(community, tagId);
