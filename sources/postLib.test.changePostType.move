@@ -756,7 +756,7 @@ module basics::postLib_test_changePostType
 
     #[test]
     fun test_edit_common_post_to_tutorial_with_deleted_reply() {
-          let scenario_val = test_scenario::begin(USER1);
+        let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
         {
@@ -828,7 +828,7 @@ module basics::postLib_test_changePostType
     // ====== Support functions ======
 
     #[test_only]
-    fun init_postLib_test(postType: u8, scenario: &mut Scenario): clock::Clock {
+    public fun init_postLib_test(postType: u8, scenario: &mut Scenario): clock::Clock {
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
