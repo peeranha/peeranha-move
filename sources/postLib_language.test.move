@@ -18,7 +18,7 @@ module basics::postLib_language_test
     const CHINESE_LANGUAGE: u8 = 1;
     const SPANISH_LANGUAGE: u8 = 2;
     const VIETNAMESE_LANGUAGE: u8 = 3;
-    const LANGUAGE_LENGTH: u8 = 4;
+    const INVALID_LANGUAGE: u8 = 4;
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
@@ -121,7 +121,7 @@ module basics::postLib_language_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(4, scenario);
+            time = init_postLib_test(INVALID_LANGUAGE, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -257,7 +257,7 @@ module basics::postLib_language_test
                 x"0000000000000000000000000000000000000000000000000000000000000005",
                 EXPERT_POST,
                 vector<u64>[2, 3],
-                4,
+                INVALID_LANGUAGE,
                 test_scenario::ctx(scenario)
             );
 
@@ -416,7 +416,7 @@ module basics::postLib_language_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            create_reply(post_meta_data, &time, 4, scenario);
+            create_reply(post_meta_data, &time, INVALID_LANGUAGE, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
         };
@@ -570,7 +570,7 @@ module basics::postLib_language_test
                 1,
                 x"0000000000000000000000000000000000000000000000000000000000000004",
                 false,
-                4
+                INVALID_LANGUAGE
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -735,7 +735,7 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 0, 4, scenario);
+            create_comment(post_meta_data, &time, 0, INVALID_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -764,7 +764,7 @@ module basics::postLib_language_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            create_comment(post_meta_data, &time, 1, 4, scenario);
+            create_comment(post_meta_data, &time, 1, INVALID_LANGUAGE, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -919,7 +919,7 @@ module basics::postLib_language_test
                 0,
                 1,
                 x"0000000000000000000000000000000000000000000000000000000000000005",
-                4
+                INVALID_LANGUAGE
             );
 
             test_scenario::return_to_sender(scenario, comment_val);
@@ -976,7 +976,7 @@ module basics::postLib_language_test
                 1,
                 1,
                 x"0000000000000000000000000000000000000000000000000000000000000005",
-                4
+                INVALID_LANGUAGE
             );
 
             test_scenario::return_to_sender(scenario, comment_val);
