@@ -730,6 +730,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 isDeleted,
                 _tags,
+                _historyVotes,
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(isDeleted == true, 10);
