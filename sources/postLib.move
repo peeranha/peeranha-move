@@ -1601,9 +1601,9 @@ module basics::postLib {
         let historyVotesSize = vec_map::size(&historyVotes);
         while(index < historyVotesSize) {
             let (_, value) = vec_map::get_entry_by_idx(&historyVotes, index);
-            if (value == &1) {
+            if (value == &3) {
                 positive = positive + 1;
-            } else if (value == &3) {
+            } else if (value == &1) {
                 negative = negative + 1;
             };
             index = index +1;
