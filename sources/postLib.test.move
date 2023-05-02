@@ -62,6 +62,7 @@ module basics::postLib_test
                 deletedReplyCount,
                 isDeleted,
                 tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(postType == EXPERT_POST, 1);
@@ -123,6 +124,7 @@ module basics::postLib_test
                 isFirstReply,
                 isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
@@ -177,6 +179,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -236,6 +239,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -304,6 +308,7 @@ module basics::postLib_test
                 deletedReplyCount,
                 isDeleted,
                 tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(postType == EXPERT_POST, 1);
@@ -378,6 +383,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 _isDeleted,
                 tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(postId == object::id(post), 12);
@@ -444,6 +450,7 @@ module basics::postLib_test
                 isFirstReply,
                 isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000004", 1);
@@ -512,6 +519,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000003", 1);
@@ -585,6 +593,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000002", 1);
@@ -647,6 +656,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 isDeleted,
                 _tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(isDeleted == true, 10);
@@ -783,6 +793,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(isDeleted == true, 9);
@@ -843,6 +854,7 @@ module basics::postLib_test
                 _rating,
                 _language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(isDeleted == true, 9);
@@ -911,6 +923,7 @@ module basics::postLib_test
                 _rating,
                 _language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(isDeleted == true, 9);
@@ -964,6 +977,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 _isDeleted,
                 _tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(postId == object::id(post), 12);
@@ -989,6 +1003,7 @@ module basics::postLib_test
                 _deletedReplyCount2,
                 _isDeleted2,
                 _tags2,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data2, post2);
 
             assert!(postId2 == object::id(post2), 12);
@@ -1039,6 +1054,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 _isDeleted,
                 _tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(postId3 == object::id(post), 12);
@@ -1057,6 +1073,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 _isDeleted,
                 _tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data2, post2);
 
             // delete
@@ -1146,6 +1163,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 _isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -1176,6 +1194,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000004", 1);
@@ -1225,6 +1244,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 _isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 2);
 
             assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
@@ -1255,6 +1275,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 2);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000011", 12);
@@ -1330,6 +1351,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -1359,6 +1381,7 @@ module basics::postLib_test
                 _rating2,
                 _language2,
                 isDeleted2,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000003", 1);
@@ -1405,6 +1428,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 2);
 
             assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
@@ -1434,6 +1458,7 @@ module basics::postLib_test
                 _rating2,
                 _language2,
                 isDeleted2,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 2);
 
             assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000014", 14);
@@ -1525,6 +1550,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -1554,6 +1580,7 @@ module basics::postLib_test
                 _rating2,
                 _language2,
                 isDeleted2,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000003", 1);
@@ -1600,6 +1627,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 2, 1);
 
             assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
@@ -1629,6 +1657,7 @@ module basics::postLib_test
                 _rating2,
                 _language2,
                 isDeleted2,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 2, 1);
 
             assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000014", 14);
