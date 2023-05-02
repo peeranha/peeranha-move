@@ -604,7 +604,7 @@ module basics::postLib_test
     }
 
     #[test]
-    fun test_delete_post() {  // delete post
+    fun test_delete_post() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -660,7 +660,80 @@ module basics::postLib_test
         test_scenario::end(scenario_val);  
     }
 
-    #[test] // delete post
+    #[test]
+    fun test_delete_post_with_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+            
+            postLib::deletePost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data,
+                test_scenario::ctx(scenario)
+            );
+
+            let (
+                _ipfsDoc,
+                _postId,
+                _postType,
+                _author,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                _deletedReplyCount,
+                isDeleted,
+                _tags,
+            ) = postLib::getPostData(post_meta_data, post);
+
+            assert!(isDeleted == true, 10);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
     fun test_delete_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
