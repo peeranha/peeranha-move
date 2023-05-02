@@ -1,0 +1,1170 @@
+#[test_only]
+module basics::postLib_test_votes
+{
+    use sui::object::{Self};
+    use basics::postLib::{Self, PostMetaData};
+    use basics::userLib_test;
+    use basics::communityLib_test;
+    use basics::postLib_test_changePostType;
+    use basics::communityLib::{Community};
+    use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
+    use basics::accessControl::{Self, UserRolesCollection};
+    use sui::test_scenario::{Self, Scenario};
+    use sui::clock::{Self};
+
+    const ENGLISH_LANGUAGE: u8 = 0;
+
+    const EXPERT_POST: u8 = 0;
+
+    const UPVOTE_FLAG: bool = true;
+    const DOWNVOTE_FLAG: bool = false;
+
+    const DOWNVOTE: u8 = 1;
+    const NONE_VOTE: u8 = 2;
+    const UPVOTE: u8 = 3;
+
+    const USER1: address = @0xA1;
+    const USER2: address = @0xA2;
+
+    #[test]
+    fun test_upvote_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, UPVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getPostHistoryVotes(post_meta_data);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == UPVOTE, 1);
+            
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_downvote_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getPostHistoryVotes(post_meta_data);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == DOWNVOTE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_upvote_downvoted_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, UPVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getPostHistoryVotes(post_meta_data);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == UPVOTE, 1);
+            
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_downvote_upvoted_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, UPVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getPostHistoryVotes(post_meta_data);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == DOWNVOTE, 1);
+            
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_cancel_upvote_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, UPVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, UPVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getPostHistoryVotes(post_meta_data);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == NONE_VOTE, 1);
+            
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_cancel_downvote_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getPostHistoryVotes(post_meta_data);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == NONE_VOTE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_POST_DELETED)]
+    fun test_upvote_deleted_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            postLib::deletePost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, UPVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_POST_DELETED)]
+    fun test_downvote_deleted_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            postLib::deletePost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_ERROR_VOTE_POST)]
+    fun test_upvote_own_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, UPVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_ERROR_VOTE_POST)]
+    fun test_downvote_own_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_upvote_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getReplyHistoryVotes(post_meta_data, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == UPVOTE, 1);
+            
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_downvote_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getReplyHistoryVotes(post_meta_data, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == DOWNVOTE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_upvote_downvoted_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getReplyHistoryVotes(post_meta_data, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == UPVOTE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_downvote_upvoted_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getReplyHistoryVotes(post_meta_data, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == DOWNVOTE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_cancel_upvote_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getReplyHistoryVotes(post_meta_data, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == NONE_VOTE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_cancel_downvote_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getReplyHistoryVotes(post_meta_data, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == NONE_VOTE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_REPLY_DELETED)]
+    fun test_upvote_deleted_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            delete_reply(post_meta_data, 1, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_REPLY_DELETED)]
+    fun test_downvote_deleted_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            delete_reply(post_meta_data, 1, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+     #[test, expected_failure(abort_code = postLib::E_ERROR_VOTE_REPLY)]
+    fun test_upvote_own_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_ERROR_VOTE_REPLY)]
+    fun test_downvote_own_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_upvote_comment() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(post_meta_data, 1, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_comment(post_meta_data, 1, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getCommentHistoryVotes(post_meta_data, 1, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == UPVOTE, 1);
+            
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_downvote_comment() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test_changePostType::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(post_meta_data, 1, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_comment(post_meta_data, 1, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getCommentHistoryVotes(post_meta_data, 1, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == DOWNVOTE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+    
+    // ====== Support functions ======
+
+    #[test_only]
+    public fun init_postLib_test(postType: u8, scenario: &mut Scenario): clock::Clock {
+        let time = clock::create_for_testing(test_scenario::ctx(scenario));
+        {
+            userLib::init_test(test_scenario::ctx(scenario));
+            accessControl::init_test(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            communityLib_test::grant_protocol_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            communityLib_test::create_community(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            postLib_test_changePostType::create_post(&time, postType, scenario);
+        };
+
+        time
+    }
+
+    #[test_only]
+    fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Community) {
+        let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let period_reward_container_val = test_scenario::take_shared<PeriodRewardContainer>(scenario);
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let community_val = test_scenario::take_shared<Community>(scenario);
+
+        (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val)
+    }
+
+    #[test_only]
+    fun return_all_shared(
+        user_rating_collection_val: UsersRatingCollection,
+        user_roles_collection_val: UserRolesCollection,
+        period_reward_container_val:PeriodRewardContainer,
+        user_val: User,
+        community_val: Community,
+        scenario: &mut Scenario
+    ) {
+        test_scenario::return_shared(user_rating_collection_val);
+        test_scenario::return_shared(user_roles_collection_val);
+        test_scenario::return_shared(period_reward_container_val);
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(community_val);
+    }
+
+    #[test_only]
+    public fun create_comment(postMetadata: &mut PostMetaData, parentReplyMetaDataKey: u64, time: &clock::Clock, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user = &mut user_val;
+
+        postLib::createComment(
+            user_rating_collection,
+            user_roles_collection,
+            time,
+            user,
+            postMetadata,
+            parentReplyMetaDataKey,
+            x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82",
+            ENGLISH_LANGUAGE,
+            test_scenario::ctx(scenario)
+        );
+
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+
+    #[test_only]
+    public fun vote_post(postMetadata: &mut PostMetaData, isUpvote: bool, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let period_reward_container = &mut period_reward_container_val;
+        let user = &mut user_val;
+
+        postLib::votePost(
+            user_rating_collection,
+            user_roles_collection,
+            period_reward_container,
+            user,
+            postMetadata,
+            isUpvote,
+            test_scenario::ctx(scenario)
+        );
+
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+
+    #[test_only]
+    public fun vote_reply(postMetadata: &mut PostMetaData, replyMetaDataKey: u64, isUpvote: bool, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let period_reward_container = &mut period_reward_container_val;
+        let user = &mut user_val;
+
+        postLib::voteReply(
+            user_rating_collection,
+            user_roles_collection,
+            period_reward_container,
+            user,
+            postMetadata,
+            replyMetaDataKey,
+            isUpvote,
+            test_scenario::ctx(scenario)
+        );
+
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+
+    #[test_only]
+    public fun vote_comment(postMetadata: &mut PostMetaData, replyMetaDataKey: u64, commentMetaDataKey: u64, isUpvote: bool, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user = &mut user_val;
+
+        postLib::voteComment(
+            user_rating_collection,
+            user_roles_collection,
+            user,
+            postMetadata,
+            replyMetaDataKey,
+            commentMetaDataKey,
+            isUpvote
+        );
+
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+
+    #[test_only]
+    public fun delete_reply(postMetadata: &mut PostMetaData, replyMetaDataKey: u64, time: &clock::Clock, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let period_reward_container = &mut period_reward_container_val;
+        let user = &mut user_val;
+
+        postLib::deleteReply(
+            user_rating_collection,
+            user_roles_collection,
+            period_reward_container,
+            time,
+            user,
+            postMetadata,
+            replyMetaDataKey,
+            test_scenario::ctx(scenario)
+        );
+
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+}

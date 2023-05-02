@@ -101,9 +101,9 @@ module basics::postLib {
     const TYPE_CONTENT_REPLY: u8 = 1;
     const TYPE_CONTENT_COMMENT: u8 = 2;
 
-    const UPVOTE: u8 = 1;
+    const DOWNVOTE: u8 = 1;
     const NONE_VOTE: u8 = 2;
-    const DOWNVOTE: u8 = 3;
+    const UPVOTE: u8 = 3;
 
     struct Post has key {
         id: UID,
@@ -1119,11 +1119,11 @@ module basics::postLib {
         isUpvote: bool,
         ctx: &mut TxContext
     ) {
-        assert!(!postMetaData.isDeleted, E_POST_DELETED);   // test
+        assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let postType = postMetaData.postType;
         let voteUserId = object::id(voteUser);
         let communityId = postMetaData.communityId;
-        assert!(voteUserId != postMetaData.author, E_ERROR_VOTE_POST);   // test
+        assert!(voteUserId != postMetaData.author, E_ERROR_VOTE_POST);
         
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut postMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, voteUserId);
@@ -1724,7 +1724,24 @@ module basics::postLib {
     }
 
     #[test_only]
-    public fun getPostData(postMetaData: &PostMetaData, post: &Post): (vector<u8>, ID, u8, ID, i64Lib::I64, ID, u8, u64, u64, u64, bool, vector<u64>) {
+    public fun getPostHistoryVotes(postMetaData: &PostMetaData): VecMap<ID, u8> {
+        postMetaData.historyVotes
+    }
+
+    #[test_only]
+    public fun getReplyHistoryVotes(postMetaData: &PostMetaData, replyMetaDataKey: u64): VecMap<ID, u8> {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.historyVotes
+    }
+
+    #[test_only]
+    public fun getCommentHistoryVotes(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): VecMap<ID, u8> {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        commentMetaData.historyVotes
+    }
+
+    #[test_only]
+    public fun getPostData(postMetaData: &PostMetaData, post: &Post): (vector<u8>, ID, u8, ID, i64Lib::I64, ID, u8, u64, u64, u64, bool, vector<u64>, VecMap<ID, u8>) {
         checkMatchItemId(object::id(post), postMetaData.postId);
 
         (
@@ -1740,16 +1757,16 @@ module basics::postLib {
             postMetaData.deletedReplyCount,
             postMetaData.isDeleted,
             postMetaData.tags,
+            postMetaData.historyVotes, 
         )
         // todo
         // replies: Table<u64, ReplyMetaData>,
         // comments: Table<u64, CommentMetaData>,
         // properties: VecMap<u8, vector<u8>>,
-        // historyVotes: VecMap<ID, u8>, 
     }
 
     #[test_only]
-    public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u64, u8, bool, bool, bool) {
+    public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u64, u8, bool, bool, bool, VecMap<ID, u8>) {
         let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
         checkMatchItemId(object::id(reply), replyMetaData.replyId);
 
@@ -1763,15 +1780,15 @@ module basics::postLib {
             replyMetaData.isFirstReply,
             replyMetaData.isQuickReply,
             replyMetaData.isDeleted,
+            replyMetaData.historyVotes,
         )
         // add
         // comments: Table<u64, CommentMetaData>,
         // properties: VecMap<u8, vector<u8>>,
-        // historyVotes: VecMap<ID, u8>,
     }
 
     #[test_only]
-    public fun getCommentData(postMetaData: &mut PostMetaData, comment: &Comment, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u8, bool) {
+    public fun getCommentData(postMetaData: &mut PostMetaData, comment: &Comment, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u8, bool, VecMap<ID, u8>) {
         let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
         checkMatchItemId(object::id(comment), commentMetaData.commentId);
 
@@ -1782,10 +1799,10 @@ module basics::postLib {
             commentMetaData.rating,
             commentMetaData.language,
             commentMetaData.isDeleted,
+            commentMetaData.historyVotes,
         )
         // add
         // properties: VecMap<u8, vector<u8>>,
-        // historyVotes: VecMap<ID, u8>,
     }
 
     ///
@@ -1986,16 +2003,16 @@ module basics::postLib {
         let isCancel: bool = false;
         
         if (isUpvote) {
-            if (history == UPVOTE) {
+            if (history == DOWNVOTE) {
                 let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
-                *userHistoryVote = DOWNVOTE;
+                *userHistoryVote = UPVOTE;
                 ratingChange = i64Lib::from(2);
             } else if (history == NONE_VOTE) {
                 if (isExistVote) {
                    let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
-                    *userHistoryVote = DOWNVOTE;
+                    *userHistoryVote = UPVOTE;
                 } else {
-                    vec_map::insert(historyVotes, userId, DOWNVOTE);
+                    vec_map::insert(historyVotes, userId, UPVOTE);
                 };
                 ratingChange = i64Lib::from(1);
             } else {
@@ -2005,7 +2022,7 @@ module basics::postLib {
                 isCancel = true;
             };
         } else {
-            if (history == 1) {
+            if (history == DOWNVOTE) {
                 let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
                 *userHistoryVote = NONE_VOTE;
                 ratingChange = i64Lib::from(1);
@@ -2013,14 +2030,14 @@ module basics::postLib {
             } else if (history == NONE_VOTE) {
                 if (isExistVote) {
                     let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
-                    *userHistoryVote = UPVOTE;
+                    *userHistoryVote = DOWNVOTE;
                 } else {
-                    vec_map::insert(historyVotes, userId, UPVOTE);
+                    vec_map::insert(historyVotes, userId, DOWNVOTE);
                 };
                 ratingChange = i64Lib::neg_from(1);
             } else {
                 let userHistoryVote = vec_map::get_mut(historyVotes, &userId);
-                *userHistoryVote = UPVOTE;
+                *userHistoryVote = DOWNVOTE;
                 ratingChange = i64Lib::neg_from(2);
             }
         };
@@ -2039,8 +2056,8 @@ module basics::postLib {
         let isExist = vec_map::contains(&historyVotes, &userId);
 
         if (isExist) {
-            let voteVolue = vec_map::get(&historyVotes, &userId);
-            (*voteVolue, true)
+            let voteValue = vec_map::get(&historyVotes, &userId);
+            (*voteValue, true)
         } else {
             (NONE_VOTE, false)
         }
