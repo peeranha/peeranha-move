@@ -62,6 +62,7 @@ module basics::postLib_test
                 deletedReplyCount,
                 isDeleted,
                 tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(postType == EXPERT_POST, 1);
@@ -123,6 +124,7 @@ module basics::postLib_test
                 isFirstReply,
                 isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
@@ -177,6 +179,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -236,6 +239,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -304,6 +308,7 @@ module basics::postLib_test
                 deletedReplyCount,
                 isDeleted,
                 tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(postType == EXPERT_POST, 1);
@@ -318,6 +323,73 @@ module basics::postLib_test
             assert!(deletedReplyCount == 0, 9);
             assert!(isDeleted == false, 10);
             assert!(tags == vector<u64>[2, 3], 11);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_edit_post_without_tag() {  // edit Ipfs
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                EXPERT_POST,
+                vector<u64>[],
+                ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario)
+            );
+
+            let (
+                ipfsDoc,
+                postId,
+                _postType,
+                author,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                _deletedReplyCount,
+                _isDeleted,
+                tags,
+                _historyVotes
+            ) = postLib::getPostData(post_meta_data, post);
+
+            assert!(postId == object::id(post), 12);
+            assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000005", 2);
+            assert!(author == object::id(user), 4);
+            assert!(tags == vector<u64>[1, 2], 11);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
@@ -378,6 +450,7 @@ module basics::postLib_test
                 isFirstReply,
                 isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000004", 1);
@@ -446,6 +519,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000003", 1);
@@ -519,6 +593,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000002", 1);
@@ -538,7 +613,7 @@ module basics::postLib_test
     }
 
     #[test]
-    fun test_delete_post() {  // delete post
+    fun test_delete_post() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -581,6 +656,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 isDeleted,
                 _tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(isDeleted == true, 10);
@@ -594,7 +670,81 @@ module basics::postLib_test
         test_scenario::end(scenario_val);  
     }
 
-    #[test] // delete post
+    #[test]
+    fun test_delete_post_with_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+            
+            postLib::deletePost(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                &time,
+                user,
+                post_meta_data,
+                test_scenario::ctx(scenario)
+            );
+
+            let (
+                _ipfsDoc,
+                _postId,
+                _postType,
+                _author,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                _deletedReplyCount,
+                isDeleted,
+                _tags,
+                _historyVotes,
+            ) = postLib::getPostData(post_meta_data, post);
+
+            assert!(isDeleted == true, 10);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
     fun test_delete_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
@@ -644,6 +794,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(isDeleted == true, 9);
@@ -704,6 +855,7 @@ module basics::postLib_test
                 _rating,
                 _language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(isDeleted == true, 9);
@@ -772,6 +924,7 @@ module basics::postLib_test
                 _rating,
                 _language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(isDeleted == true, 9);
@@ -825,6 +978,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 _isDeleted,
                 _tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(postId == object::id(post), 12);
@@ -850,6 +1004,7 @@ module basics::postLib_test
                 _deletedReplyCount2,
                 _isDeleted2,
                 _tags2,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data2, post2);
 
             assert!(postId2 == object::id(post2), 12);
@@ -900,6 +1055,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 _isDeleted,
                 _tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data, post);
 
             assert!(postId3 == object::id(post), 12);
@@ -918,6 +1074,7 @@ module basics::postLib_test
                 _deletedReplyCount,
                 _isDeleted,
                 _tags,
+                _historyVotes
             ) = postLib::getPostData(post_meta_data2, post2);
 
             // delete
@@ -1007,6 +1164,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 _isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -1037,6 +1195,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 1);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000004", 1);
@@ -1086,6 +1245,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 _isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 2);
 
             assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
@@ -1116,6 +1276,7 @@ module basics::postLib_test
                 _isFirstReply,
                 _isQuickReply,
                 isDeleted,
+                _historyVotes
             ) = postLib::getReplyData(post_meta_data, reply, 2);
 
             assert!(ipfsDoc == x"0000000000000000000000000000000000000000000000000000000000000011", 12);
@@ -1191,6 +1352,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -1220,6 +1382,7 @@ module basics::postLib_test
                 _rating2,
                 _language2,
                 isDeleted2,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 1);
 
             assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000003", 1);
@@ -1266,6 +1429,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 2);
 
             assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
@@ -1295,6 +1459,7 @@ module basics::postLib_test
                 _rating2,
                 _language2,
                 isDeleted2,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 0, 2);
 
             assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000014", 14);
@@ -1386,6 +1551,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
@@ -1415,6 +1581,7 @@ module basics::postLib_test
                 _rating2,
                 _language2,
                 isDeleted2,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
 
             assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000003", 1);
@@ -1461,6 +1628,7 @@ module basics::postLib_test
                 rating,
                 language,
                 isDeleted,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 2, 1);
 
             assert!(ipfsDoc == x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", 1);
@@ -1490,6 +1658,7 @@ module basics::postLib_test
                 _rating2,
                 _language2,
                 isDeleted2,
+                _historyVotes,
             ) = postLib::getCommentData(post_meta_data, comment, 2, 1);
 
             assert!(ipfsDoc2 == x"0000000000000000000000000000000000000000000000000000000000000014", 14);
