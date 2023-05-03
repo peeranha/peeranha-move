@@ -1,4 +1,4 @@
 if [ -f .env ]; then
   export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 fi
-sui client call --function grantProtocolAdminRole --module accessControl --package $PACKAGE --args $DEFAULT_ADMIN_CAP $USER_ROLES_COLLECTION $USER --gas-budget 2000000000
+sui client call --function grantProtocolAdminRole --module accessControlLib --package $PACKAGE --args $DEFAULT_ADMIN_CAP $USER_ROLES_COLLECTION $USER --gas-budget 2000000000

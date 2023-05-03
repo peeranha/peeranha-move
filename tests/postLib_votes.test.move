@@ -6,7 +6,7 @@ module basics::postLib_votes_test
     use basics::postLib_changePostType_test;
     use basics::communityLib::{Community};
     use basics::userLib::{User, UsersRatingCollection, PeriodRewardContainer};
-    use basics::accessControl::{UserRolesCollection};
+    use basics::accessControlLib::{UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
 

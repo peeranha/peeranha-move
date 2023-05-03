@@ -7,7 +7,7 @@ module basics::postLib_votes_rating_test
     use basics::postLib_votes_test;
     use basics::communityLib::{Community};
     use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
-    use basics::accessControl::{UserRolesCollection};
+    use basics::accessControlLib::{UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
     use basics::i64Lib;

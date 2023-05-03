@@ -4,7 +4,7 @@ module basics::userLib_test
     use basics::communityLib::{Self, Community};
     use basics::userLib::{Self, User, UsersRatingCollection};
     use basics::followCommunityLib::{Self};
-    use basics::accessControl::{Self, UserRolesCollection, DefaultAdminCap};
+    use basics::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
     use sui::test_scenario::{Self, Scenario};
     use sui::object::{Self, ID};
     // use std::debug;
@@ -108,7 +108,7 @@ module basics::userLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -151,7 +151,7 @@ module basics::userLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -198,7 +198,7 @@ module basics::userLib_test
         let default_admin_cap = &mut default_admin_cap_val;
         let user_val = test_scenario::take_from_sender<User>(scenario);
         let user = &mut user_val;
-        accessControl::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user));
+        accessControlLib::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user));
         
         communityLib::createCommunity(
             user_roles_collection,

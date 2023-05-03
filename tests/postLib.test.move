@@ -7,7 +7,7 @@ module basics::postLib_test
     use basics::i64Lib;
     use basics::communityLib::{/*Self,*/ Community};
     use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
-    use basics::accessControl::{Self, UserRolesCollection/*, DefaultAdminCap*/};
+    use basics::accessControlLib::{Self, UserRolesCollection/*, DefaultAdminCap*/};
     use sui::test_scenario::{Self, Scenario};
     use sui::object::{Self /*, ID*/};
     use sui::clock::{Self, /*Clock*/};
@@ -1697,7 +1697,7 @@ module basics::postLib_test
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);

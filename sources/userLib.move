@@ -4,7 +4,7 @@ module basics::userLib {
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
-    use basics::accessControl;
+    use basics::accessControlLib;
     // use std::debug;
     use basics::i64Lib;
     use sui::table::{Self, Table};
@@ -86,7 +86,7 @@ module basics::userLib {
     struct UsersRatingCollection has key {
         id: UID,
         usersCommunityRating: Table<ID, UserCommunityRating>,
-        // roles: accessControl::Role,
+        // roles: accessControlLib::Role,
     }
 
     struct PeriodRewardContainer has key {   // Container || Collection??
@@ -147,7 +147,7 @@ module basics::userLib {
         transfer::share_object(UsersRatingCollection {
             id: object::new(ctx),
             usersCommunityRating: table::new(ctx),
-            // roles: accessControl::initRole()
+            // roles: accessControlLib::initRole()
         });
 
         transfer::share_object(PeriodRewardContainer {
@@ -220,14 +220,14 @@ module basics::userLib {
         event::emit(UpdateUserEvent {userId: userId});
     }
 
-    public entry fun grantRole(userRolesCollection: &mut accessControl::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
+    public entry fun grantRole(userRolesCollection: &mut accessControlLib::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
         let adminId = object::id(admin);
-        accessControl::grantRole(userRolesCollection, adminId, userId, role)
+        accessControlLib::grantRole(userRolesCollection, adminId, userId, role)
     }
 
-    public entry fun revokeRole(userRolesCollection: &mut accessControl::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
+    public entry fun revokeRole(userRolesCollection: &mut accessControlLib::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
         let adminId = object::id(admin);
-        accessControl::revokeRole(userRolesCollection, adminId, userId, role)
+        accessControlLib::revokeRole(userRolesCollection, adminId, userId, role)
     }
 
     public(friend) fun getUserFollowedCommunities(user: &User): &vector<ID> {
@@ -514,7 +514,7 @@ module basics::userLib {
     public fun checkActionRole(
         user: &mut User,
         userCommunityRating: &UserCommunityRating,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         actionCallerId: ID,  // need? user -> owner
         dataUserId: ID,
         communityId: ID,
@@ -538,17 +538,17 @@ module basics::userLib {
             return
         };
 
-        accessControl::checkHasRole(userRolesCollection, actionCallerId, actionRole, communityId);
+        accessControlLib::checkHasRole(userRolesCollection, actionCallerId, actionRole, communityId);
         checkRatingAndEnergy(user, userCommunityRating, actionCallerId, dataUserId, communityId, action);
     }
 
     public fun hasModeratorRole(
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         userId: ID,
         communityId: ID
     ): bool {
-        let communityModeratorRole = accessControl::getCommunityRole(accessControl::get_community_moderator_role(), communityId);
-        let isModerator = accessControl::hasRole(userRolesCollection, communityModeratorRole, userId) || accessControl::hasRole(userRolesCollection, accessControl::get_protocol_admin_role(), userId);
+        let communityModeratorRole = accessControlLib::getCommunityRole(accessControlLib::get_community_moderator_role(), communityId);
+        let isModerator = accessControlLib::hasRole(userRolesCollection, communityModeratorRole, userId) || accessControlLib::hasRole(userRolesCollection, accessControlLib::get_protocol_admin_role(), userId);
         if (isModerator) {
             true
         } else {

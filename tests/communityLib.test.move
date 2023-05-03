@@ -5,7 +5,7 @@ module basics::communityLib_test
     use basics::userLib::{Self, User};
     use std::vector;
     use basics::userLib_test::{Self};
-    use basics::accessControl::{Self, UserRolesCollection, DefaultAdminCap};
+    use basics::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
     use sui::test_scenario::{Self, Scenario};
     use sui::object::{Self/*, ID*/};
 
@@ -22,7 +22,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -70,7 +70,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -117,7 +117,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -178,7 +178,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -231,7 +231,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -282,7 +282,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -336,7 +336,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -389,7 +389,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -435,7 +435,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -482,7 +482,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -551,7 +551,7 @@ module basics::communityLib_test
         let scenario = &mut scenario_val;
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -578,7 +578,7 @@ module basics::communityLib_test
             let user_roles_collection = &mut user_roles_collection_val;
             let default_admin_cap_val = test_scenario::take_from_sender<DefaultAdminCap>(scenario);
             let default_admin_cap = &mut default_admin_cap_val;
-            accessControl::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user2));
+            accessControlLib::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user2));
 
             test_scenario::return_to_sender(scenario, default_admin_cap_val);
             test_scenario::return_shared(user_roles_collection_val);
@@ -652,7 +652,7 @@ module basics::communityLib_test
         let default_admin_cap = &mut default_admin_cap_val;
         let user_val = test_scenario::take_from_sender<User>(scenario);
         let user = &mut user_val;
-        accessControl::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user));
+        accessControlLib::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user));
 
         test_scenario::return_to_sender(scenario, user_val);
         test_scenario::return_to_sender(scenario, default_admin_cap_val);

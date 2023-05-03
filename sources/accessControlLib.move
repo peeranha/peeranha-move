@@ -1,4 +1,4 @@
-module basics::accessControl {
+module basics::accessControlLib {
     use sui::tx_context::{Self, TxContext};
     use std::vector;
     use sui::event;
@@ -160,6 +160,7 @@ module basics::accessControl {
         grantRole_(userRolesCollection, role, userId);
     }
 
+    /// only default admin can call
     public entry fun grantProtocolAdminRole(_: &DefaultAdminCap, userRolesCollection: &mut UserRolesCollection, userId: ID) {
         grantRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }

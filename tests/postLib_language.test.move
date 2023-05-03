@@ -6,7 +6,7 @@ module basics::postLib_language_test
     use basics::communityLib_test;
     use basics::communityLib::{Community};
     use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
-    use basics::accessControl::{Self, UserRolesCollection};
+    use basics::accessControlLib::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
 
@@ -996,7 +996,7 @@ module basics::postLib_language_test
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
-            accessControl::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);

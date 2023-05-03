@@ -6,7 +6,7 @@ module basics::postLib {
     use sui::tx_context::{Self, TxContext};
     use sui::vec_map::{Self, VecMap};
     use std::vector;
-    use basics::accessControl;
+    use basics::accessControlLib;
     use basics::communityLib;
     use basics::commonLib;
     use basics::userLib;
@@ -269,7 +269,7 @@ module basics::postLib {
 
     public entry fun createPost(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         time: &Clock,
         user: &mut userLib::User,
         community: &communityLib::Community,
@@ -293,7 +293,7 @@ module basics::postLib {
             userId,
             communityId,
             userLib::get_action_publication_post(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             /*true*/
         );
 
@@ -339,7 +339,7 @@ module basics::postLib {
 
     public entry fun createReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
@@ -366,8 +366,8 @@ module basics::postLib {
             communityId,
             userLib::get_action_publication_reply(),
             if (parentReplyMetaDataKey == 0 && isOfficialReply)     //parentReplyMetaDataKey need?
-                accessControl::get_action_role_community_admin() else
-                accessControl::get_action_role_none()
+                accessControlLib::get_action_role_community_admin() else
+                accessControlLib::get_action_role_none()
             /*true*/
         );
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
@@ -447,7 +447,7 @@ module basics::postLib {
 
     public entry fun createComment(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -499,7 +499,7 @@ module basics::postLib {
             dataUser,
             postMetaData.communityId,
             userLib::get_action_publication_comment(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             /*true*/
         );
 
@@ -513,7 +513,7 @@ module basics::postLib {
 
     public entry fun authorEditPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         post: &mut Post,
@@ -547,7 +547,7 @@ module basics::postLib {
 
     public entry fun moderatorEditPostMetaData(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -579,7 +579,7 @@ module basics::postLib {
 
     fun editPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -605,8 +605,8 @@ module basics::postLib {
                 userLib::get_action_edit_item() else
                 userLib::get_action_none(),
             if (userId == postMetaDataAuthor)
-                accessControl::get_action_role_none() else
-                accessControl::get_action_role_admin_or_community_moderator(),
+                accessControlLib::get_action_role_none() else
+                accessControlLib::get_action_role_admin_or_community_moderator(),
             /*false*/
         );
 
@@ -628,7 +628,7 @@ module basics::postLib {
 
     public entry fun authorEditReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         reply: &mut Reply,
@@ -656,7 +656,7 @@ module basics::postLib {
 
     public entry fun moderatorEditReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
@@ -677,7 +677,7 @@ module basics::postLib {
 
     fun editReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
@@ -702,8 +702,8 @@ module basics::postLib {
             postMetaData.communityId,
             userLib::get_action_edit_item(),
             if (isOfficialReply)
-                accessControl::get_action_role_community_admin() else
-                accessControl::get_action_role_none(),
+                accessControlLib::get_action_role_community_admin() else
+                accessControlLib::get_action_role_none(),
             /*false*/
         );
 
@@ -716,7 +716,7 @@ module basics::postLib {
 
     public entry fun editComment(
         usersRatingCollection: &userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         comment: &mut Comment,
@@ -744,7 +744,7 @@ module basics::postLib {
             commentMetaData.author,
             postMetaData.communityId,
             userLib::get_action_edit_item(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             /*false*/
         );
 
@@ -756,7 +756,7 @@ module basics::postLib {
 
     public entry fun deletePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
@@ -777,7 +777,7 @@ module basics::postLib {
             postAuthor,
             communityId,
             userLib::get_action_delete_item(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             /*false*/
         );
 
@@ -836,7 +836,7 @@ module basics::postLib {
 
     public entry fun deleteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
@@ -867,7 +867,7 @@ module basics::postLib {
             replyMetaData.author,
             communityId,
             userLib::get_action_delete_item(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             /*false*/
         );
         
@@ -953,7 +953,7 @@ module basics::postLib {
 
     public entry fun deleteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -974,7 +974,7 @@ module basics::postLib {
             commentMetaData.author,
             communityId,
             userLib::get_action_delete_item(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             /*false*/
         );
 
@@ -995,7 +995,7 @@ module basics::postLib {
 
     public entry fun changeStatusBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postAuthor: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -1056,7 +1056,7 @@ module basics::postLib {
             postMetaData.author,
             communityId,
             userLib::get_action_best_reply(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             //false
         );
 
@@ -1103,7 +1103,7 @@ module basics::postLib {
 
     public entry fun votePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -1130,7 +1130,7 @@ module basics::postLib {
                     if(i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) 
                         userLib::get_action_upvote_post() else 
                         userLib::get_action_downvote_post(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             /*false*/
         );
 
@@ -1168,7 +1168,7 @@ module basics::postLib {
 
     public entry fun voteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -1196,7 +1196,7 @@ module basics::postLib {
                     if(i64Lib::compare(&ratingChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) 
                         userLib::get_action_upvote_reply() else 
                         userLib::get_action_downvote_reply(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             /*false*/
         );
 
@@ -1262,7 +1262,7 @@ module basics::postLib {
 
     public entry fun voteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        userRolesCollection: &accessControl::UserRolesCollection,
+        userRolesCollection: &accessControlLib::UserRolesCollection,
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         parentReplyMetaDataKey: u64,
@@ -1288,7 +1288,7 @@ module basics::postLib {
             if(isCancel) 
                 userLib::get_action_cancel_vote() else  
                 userLib::get_action_vote_comment(),
-            accessControl::get_action_role_none(),
+            accessControlLib::get_action_role_none(),
             /*false*/
         );
         commentMetaData.rating = i64Lib::add(&commentMetaData.rating, &ratingChange);
