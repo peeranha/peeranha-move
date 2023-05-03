@@ -1118,7 +1118,7 @@ module basics::postLib {
         
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut postMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, voteUserId);
-        userLib::checkActionRole(
+        userLib::checkActionRole(      // test
             voteUser,
             voteUserCommunityRating,
             userRolesCollection,
@@ -1176,12 +1176,11 @@ module basics::postLib {
         isUpvote: bool,
         ctx: &mut TxContext
     ) {
-        // E_POST_DELETED           // test
         let postType = postMetaData.postType;
         let voteUserId = object::id(voteUser);
         let communityId = postMetaData.communityId;
-        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey); // test exist/deleted
-        assert!(voteUserId != replyMetaData.author, E_ERROR_VOTE_REPLY); // test
+        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey); // test deleted post + exist/deleted reply
+        assert!(voteUserId != replyMetaData.author, E_ERROR_VOTE_REPLY);
 
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut replyMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
@@ -1273,13 +1272,13 @@ module basics::postLib {
     //    E_POST_DELETED;           // test
         let voteUserId = object::id(voteUser);
         let communityId = postMetaData.communityId;
-        let commentMetaData = getMutableCommentMetaDataSafe(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);   // test exist /deleted
+        let commentMetaData = getMutableCommentMetaDataSafe(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);   // test deleted post  exist/deleted reply
         assert!(voteUserId != commentMetaData.author, E_ERROR_VOTE_COMMENT);   // test
         
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut commentMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         
-        userLib::checkActionRole(
+        userLib::checkActionRole(       // test
             voteUser,
             voteUserCommunityRating,
             userRolesCollection,
