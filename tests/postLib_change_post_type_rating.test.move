@@ -24,22 +24,27 @@ module basics::postLib_changePostType_rating_test
     const START_USER_RATING: u64 = 10;
 
     //expert post
+    const DOWNVOTE_EXPERT_POST: u64 = 1;         // negative
     const UPVOTED_EXPERT_POST: u64 = 5;
     const DOWNVOTED_EXPERT_POST: u64 = 2;       // negative
 
     //common post
+    const DOWNVOTE_COMMON_POST: u64 = 1;        // negative
     const UPVOTED_COMMON_POST: u64 = 1;
     const DOWNVOTED_COMMON_POST: u64 = 1;       // negative
 
     //tutorial
+    const DOWNVOTE_TUTORIAL: u64 = 1;           // negative
     const UPVOTED_TUTORIAL: u64 = 5;
     const DOWNVOTED_TUTORIAL: u64 = 2;          // negative
 
     //expert reply
+    const DOWNVOTE_EXPERT_REPLY: u64 = 1;       // negative
     const UPVOTED_EXPERT_REPLY: u64 = 10;
     const DOWNVOTED_EXPERT_REPLY: u64 = 2;      // negative
 
-    //common reply 
+    //common reply
+    const DOWNVOTE_COMMON_REPLY: u64 = 1;       // negative
     const UPVOTED_COMMON_REPLY: u64 = 1;
     const DOWNVOTED_COMMON_REPLY: u64 = 1;      // negative
 
@@ -78,13 +83,13 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
-            let voteUserId = object::id(user);
+            let votedUserId = object::id(user);
 
-            let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_POST));
-            let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_POST));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVotedUserRating == votedUserRating, 0);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -125,13 +130,13 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
-            let voteUserId = object::id(user);
+            let votedUserId = object::id(user);
 
-            let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_TUTORIAL));
-            let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_TUTORIAL));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVotedUserRating == votedUserRating, 0);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -172,13 +177,13 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
-            let voteUserId = object::id(user);
+            let votedUserId = object::id(user);
 
-            let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_POST));
-            let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_POST));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVotedUserRating == votedUserRating, 0);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -219,13 +224,13 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
-            let voteUserId = object::id(user);
+            let votedUserId = object::id(user);
 
-            let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_TUTORIAL));
-            let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_TUTORIAL));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVotedUserRating == votedUserRating, 0);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -266,13 +271,13 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
-            let voteUserId = object::id(user);
+            let votedUserId = object::id(user);
 
-            let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_POST));
-            let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_POST));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVotedUserRating == votedUserRating, 0);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -313,13 +318,13 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
-            let voteUserId = object::id(user);
+            let votedUserId = object::id(user);
 
-            let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_POST));
-            let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_POST));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVotedUserRating == votedUserRating, 0);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -360,13 +365,31 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
+            let votedUserId = object::id(user);
+
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_POST));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let communityId = object::id(community);
             let voteUserId = object::id(user);
 
             let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_POST));
+            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_COMMON_POST));
             let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVoteUserRating == voteUserRating, 1);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -407,13 +430,31 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
+            let votedUserId = object::id(user);
+
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_TUTORIAL));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let communityId = object::id(community);
             let voteUserId = object::id(user);
 
             let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_TUTORIAL));
+            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_TUTORIAL));
             let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVoteUserRating == voteUserRating, 1);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -454,13 +495,31 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
+            let votedUserId = object::id(user);
+
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_POST));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let communityId = object::id(community);
             let voteUserId = object::id(user);
 
             let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_POST));
+            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_EXPERT_POST));
             let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVoteUserRating == voteUserRating, 1);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -501,13 +560,31 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
+            let votedUserId = object::id(user);
+
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_TUTORIAL));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let communityId = object::id(community);
             let voteUserId = object::id(user);
 
             let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_TUTORIAL));
+            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_TUTORIAL));
             let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVoteUserRating == voteUserRating, 1);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -548,13 +625,31 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
+            let votedUserId = object::id(user);
+
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_POST));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let communityId = object::id(community);
             let voteUserId = object::id(user);
 
             let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_POST));
+            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_EXPERT_POST));
             let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVoteUserRating == voteUserRating, 1);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -595,13 +690,31 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
+            let votedUserId = object::id(user);
+
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_POST));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let communityId = object::id(community);
             let voteUserId = object::id(user);
 
             let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_POST));
+            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_COMMON_POST));
             let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVoteUserRating == voteUserRating, 1);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -650,13 +763,13 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
-            let voteUserId = object::id(user);
+            let votedUserId = object::id(user);
 
-            let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_REPLY));
-            let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_REPLY));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVotedUserRating == votedUserRating, 0);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -705,13 +818,13 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
-            let voteUserId = object::id(user);
+            let votedUserId = object::id(user);
 
-            let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_REPLY));
-            let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_REPLY));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVotedUserRating == votedUserRating, 0);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -760,13 +873,31 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
+            let votedUserId = object::id(user);
+
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_REPLY));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let communityId = object::id(community);
             let voteUserId = object::id(user);
 
             let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_REPLY));
+            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_COMMON_REPLY));
             let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVoteUserRating == voteUserRating, 1);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
@@ -815,13 +946,31 @@ module basics::postLib_changePostType_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             let communityId = object::id(community);
+            let votedUserId = object::id(user);
+
+            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
+            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_REPLY));
+            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let communityId = object::id(community);
             let voteUserId = object::id(user);
 
             let voteUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, voteUserId);
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_REPLY));
+            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_EXPERT_REPLY));
             let voteUserRating = userLib::getUserRating(voteUserCommunityRating, communityId);
             
-            assert!(expectedVoteUserRating == voteUserRating, 0);
+            assert!(expectedVoteUserRating == voteUserRating, 1);
 
             return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
