@@ -147,7 +147,7 @@ module basics::postLib_test
     }
 
     #[test]
-    fun test_create_comment_to_post() {
+    fun test_create_comment_to_own_post() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -199,7 +199,7 @@ module basics::postLib_test
     }
 
     #[test]
-    fun test_create_comment_to_reply() {
+    fun test_create_comment_to_own_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -208,6 +208,66 @@ module basics::postLib_test
         };
 
         test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(&time, post_meta_data, 1, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let comment_val = test_scenario::take_from_sender<Comment>(scenario);
+            let comment = &mut comment_val;
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
+
+            let (
+                ipfsDoc,
+                commentId,
+                author,
+                rating,
+                language,
+                isDeleted,
+                _historyVotes,
+            ) = postLib::getCommentData(post_meta_data, comment, 1, 1);
+
+            assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
+            assert!(commentId == object::id(comment), 11);
+            assert!(author == object::id(user), 3);
+            assert!(rating == i64Lib::zero(), 4);
+            assert!(language == ENGLISH_LANGUAGE, 5);
+            assert!(isDeleted == false, 9);
+
+            test_scenario::return_to_sender(scenario, comment_val);
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_comment_to_reply_own_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;

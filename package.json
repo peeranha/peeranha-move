@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "sui move build",
-    "test": "sui move test --statistics --ignore_compile_warnings",
+    "test": "sui move test",
+    "test2": "sui move test --statistics --ignore_compile_warnings",
     "deploy": "sui client publish ./ --gas-budget 3000000000",
     "deploy2": "sui client publish ./ --gas-budget 200000000 --skip-dependency-verification",
     "version": "sui --version"

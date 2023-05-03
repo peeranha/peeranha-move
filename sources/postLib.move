@@ -486,7 +486,10 @@ module basics::postLib {
             table::add(&mut postMetaData.comments, commentMetaDataKey, commentMetaData);
         } else {
             let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, parentReplyMetaDataKey);
-            dataUser = replyMetaData.author;
+            // allow user create comment to own reply and create comment to stranger reply in own post without check rating
+            if (dataUser != userId) {
+                dataUser = replyMetaData.author;
+            };
             commentMetaDataKey = table::length(&replyMetaData.comments) + 1;
             table::add(&mut replyMetaData.comments, commentMetaDataKey, commentMetaData);
         };
@@ -782,9 +785,9 @@ module basics::postLib {
         );
 
         let postType = postMetaData.postType;
-        let time: u64 = commonLib::getTimestamp(time);
+        let currentTime: u64 = commonLib::getTimestamp(time);
         let changeUserRating: i64Lib::I64 = i64Lib::zero();
-        if (time - postMetaData.postTime < DELETE_TIME || userId == postAuthor) {
+        if (currentTime - postMetaData.postTime < DELETE_TIME || userId == postAuthor) {
             let typeRating: StructRating = getTypesRating(postType);
 
             let (positive, negative) = getHistoryInformations(postMetaData.historyVotes);
@@ -803,13 +806,13 @@ module basics::postLib {
         userLib::updateRating(
             userCommunityRating,
             periodRewardContainer,
-            userId,
+            postAuthor,
             changeUserRating,
             communityId,
             ctx
         );
 
-        if (time - postMetaData.postTime < DELETE_TIME || userId == postAuthor) {
+        if (currentTime - postMetaData.postTime < DELETE_TIME || userId == postAuthor) {
             let replyCount = table::length(&postMetaData.replies);
             let replyMetaDataKey = 1;
 
@@ -875,11 +878,10 @@ module basics::postLib {
         assert!(userId != replyMetaData.author || !isBestReplyMetaData, E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY);
         
         let time: u64 = commonLib::getTimestamp(time);
-        let isDeductReplyRating = time - replyMetaData.postTime < DELETE_TIME || userId == replyMetaData.author;
         userLib::updateRating(
             userCommunityRating,
             periodRewardContainer,
-            object::id(user),
+            replyMetaData.author,
             if(userId == replyMetaData.author) 
                 i64Lib::neg_from(DELETE_OWN_REPLY) else 
                 i64Lib::neg_from(MODERATOR_DELETE_REPLY),
@@ -887,8 +889,8 @@ module basics::postLib {
             ctx
         );
         
-        replyMetaData.isDeleted = true;
         let parentReplyMetaDataKey = replyMetaData.parentReplyMetaDataKey;
+        let isDeductReplyRating = time - replyMetaData.postTime < DELETE_TIME || userId == replyMetaData.author;
         if (isDeductReplyRating) {
             deductReplyRating(
                 userCommunityRating,
@@ -900,6 +902,7 @@ module basics::postLib {
                 ctx
             );
         };
+        replyMetaData.isDeleted = true;
         event::emit(DeleteReplyEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey});
     }
 
