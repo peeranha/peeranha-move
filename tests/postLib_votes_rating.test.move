@@ -12,8 +12,6 @@ module basics::postLib_votes_rating_test
     use sui::clock::{Self};
     use basics::i64Lib;
 
-    use std::debug;
-
 
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;

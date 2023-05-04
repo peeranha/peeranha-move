@@ -812,7 +812,7 @@ module basics::postLib {
             ctx
         );
 
-        if (currentTime - postMetaData.postTime < DELETE_TIME || userId == postAuthor) {
+        if (currentTime - postMetaData.postTime < DELETE_TIME) {
             let replyCount = table::length(&postMetaData.replies);
             let replyMetaDataKey = 1;
 
