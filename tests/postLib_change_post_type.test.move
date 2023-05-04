@@ -4,9 +4,9 @@ module basics::postLib_changePostType_test
     use basics::postLib::{Self, Post, PostMetaData};
     use basics::userLib_test;
     use basics::communityLib_test;
-    use basics::communityLib::{Community};
-    use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
-    use basics::accessControlLib::{Self, UserRolesCollection};
+    use basics::postLib_test;
+    use basics::userLib::{Self};
+    use basics::accessControlLib::{Self};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
 
@@ -518,37 +518,10 @@ module basics::postLib_changePostType_test
 
         time
     }
-
-    #[test_only]
-    fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Community) {
-        let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
-        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
-        let period_reward_container_val = test_scenario::take_shared<PeriodRewardContainer>(scenario);
-        let user_val = test_scenario::take_from_sender<User>(scenario);
-        let community_val = test_scenario::take_shared<Community>(scenario);
-
-        (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val)
-    }
-
-    #[test_only]
-    fun return_all_shared(
-        user_rating_collection_val: UsersRatingCollection,
-        user_roles_collection_val: UserRolesCollection,
-        period_reward_container_val:PeriodRewardContainer,
-        user_val: User,
-        community_val: Community,
-        scenario: &mut Scenario
-    ) {
-        test_scenario::return_shared(user_rating_collection_val);
-        test_scenario::return_shared(user_roles_collection_val);
-        test_scenario::return_shared(period_reward_container_val);
-        test_scenario::return_to_sender(scenario, user_val);
-        test_scenario::return_shared(community_val);
-    }
        
     #[test_only]
     public fun create_post(time: &clock::Clock, postType: u8, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let user = &mut user_val;
@@ -567,12 +540,12 @@ module basics::postLib_changePostType_test
             test_scenario::ctx(scenario)
         );
 
-        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
     }
 
     #[test_only]
     public fun create_reply(postMetadata: &mut PostMetaData, time: &clock::Clock, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let period_reward_container = &mut period_reward_container_val;
@@ -592,12 +565,12 @@ module basics::postLib_changePostType_test
             test_scenario::ctx(scenario)
         );
 
-        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
     }
 
     #[test_only]
     public fun delete_reply(postMetadata: &mut PostMetaData, replyMetaDataKey: u64, time: &clock::Clock, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let period_reward_container = &mut period_reward_container_val;
@@ -614,12 +587,12 @@ module basics::postLib_changePostType_test
             test_scenario::ctx(scenario)
         );
 
-        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
     }
 
     #[test_only]
     public fun change_post_type(post_meta_data: &mut PostMetaData, postType: u8, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let period_reward_container = &mut period_reward_container_val;
@@ -644,6 +617,6 @@ module basics::postLib_changePostType_test
         );
 
         test_scenario::return_to_sender(scenario, post_val);
-        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
     }
 }

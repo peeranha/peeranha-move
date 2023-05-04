@@ -3,13 +3,12 @@ module basics::postLib_changePostType_rating_test
 {
     use sui::object::{Self};
     use basics::postLib::{PostMetaData};
+    use basics::postLib_test;
     use basics::postLib_votes_test;
-    use basics::communityLib::{Community};
-    use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
-    use basics::accessControlLib::{UserRolesCollection};
+    use basics::userLib::{Self};
     use basics::i64Lib;
     use basics::postLib_changePostType_test;
-    use sui::test_scenario::{Self, Scenario};
+    use sui::test_scenario::{Self};
     use sui::clock::{Self};
 
     const EXPERT_POST: u8 = 0;
@@ -78,7 +77,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -91,7 +90,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -125,7 +124,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -138,7 +137,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -172,7 +171,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -185,7 +184,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -219,7 +218,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -232,7 +231,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -266,7 +265,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -279,7 +278,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -313,7 +312,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -326,7 +325,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -360,7 +359,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -373,12 +372,12 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -391,7 +390,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -425,7 +424,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -438,12 +437,12 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -456,7 +455,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -490,7 +489,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -503,12 +502,12 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -521,7 +520,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -555,7 +554,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -568,12 +567,12 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -586,7 +585,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -620,7 +619,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -633,12 +632,12 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -651,7 +650,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -685,7 +684,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -698,12 +697,12 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -716,7 +715,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -758,7 +757,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -771,7 +770,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -813,7 +812,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -826,7 +825,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -868,7 +867,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -881,12 +880,12 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -899,7 +898,7 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -941,7 +940,7 @@ module basics::postLib_changePostType_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -954,12 +953,12 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -972,39 +971,10 @@ module basics::postLib_changePostType_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);  
-    }
-
-    // ====== Support functions ======
-
-    #[test_only]
-    fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Community) {
-        let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
-        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
-        let period_reward_container_val = test_scenario::take_shared<PeriodRewardContainer>(scenario);
-        let user_val = test_scenario::take_from_sender<User>(scenario);
-        let community_val = test_scenario::take_shared<Community>(scenario);
-
-        (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val)
-    }
-
-    #[test_only]
-    fun return_all_shared(
-        user_rating_collection_val: UsersRatingCollection,
-        user_roles_collection_val: UserRolesCollection,
-        period_reward_container_val:PeriodRewardContainer,
-        user_val: User,
-        community_val: Community,
-        scenario: &mut Scenario
-    ) {
-        test_scenario::return_shared(user_rating_collection_val);
-        test_scenario::return_shared(user_roles_collection_val);
-        test_scenario::return_shared(period_reward_container_val);
-        test_scenario::return_to_sender(scenario, user_val);
-        test_scenario::return_shared(community_val);
     }
 }
