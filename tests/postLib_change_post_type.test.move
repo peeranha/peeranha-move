@@ -19,6 +19,7 @@ module basics::postLib_changePostType_test
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
+    const USER3: address = @0xA3;
 
     #[test]
     fun test_change_expert_post_to_common() {
@@ -501,6 +502,11 @@ module basics::postLib_changePostType_test
         };
 
         test_scenario::next_tx(scenario, USER2);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
         {
             userLib_test::create_user(scenario);
         };
