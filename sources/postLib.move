@@ -1451,7 +1451,7 @@ module basics::postLib {
         postMetaData.postType = newPostType;
     }
 
-    fun changePostCommunity(
+    public entry fun changePostCommunity(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postMetaData: &mut PostMetaData,
