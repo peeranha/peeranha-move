@@ -1,7 +1,6 @@
 #[test_only]
 module basics::postLib_first_quick_reply_rating_test
 {
-    use sui::object::{Self};
     use basics::postLib::{PostMetaData};
     use basics::postLib_test;
     use basics::postLib_votes_test;
@@ -74,12 +73,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(QUICK_EXPERT_REPLY));
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -113,15 +109,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(
                 &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(FIRST_EXPERT_REPLY)),
                 &i64Lib::from(QUICK_EXPERT_REPLY)
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -163,12 +156,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(QUICK_COMMON_REPLY));
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -202,15 +192,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(
                 &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(FIRST_COMMON_REPLY)),
                 &i64Lib::from(QUICK_COMMON_REPLY)
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -260,10 +247,7 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating =  i64Lib::sub(
                 &i64Lib::add(
                     &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(FIRST_EXPERT_REPLY)),
@@ -271,7 +255,7 @@ module basics::postLib_first_quick_reply_rating_test
                 ),
                 &i64Lib::from(DELETE_OWN_REPLY)
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -321,10 +305,7 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating =  i64Lib::sub(
                 &i64Lib::add(
                     &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(FIRST_COMMON_REPLY)),
@@ -332,7 +313,7 @@ module basics::postLib_first_quick_reply_rating_test
                 ),
                 &i64Lib::from(DELETE_OWN_REPLY)
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -382,15 +363,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(
                 &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(QUICK_EXPERT_REPLY)),
                 &i64Lib::from(UPVOTED_EXPERT_REPLY),
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -440,15 +418,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(
                 &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(QUICK_COMMON_REPLY)),
                 &i64Lib::from(UPVOTED_COMMON_REPLY),
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -490,15 +465,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(
                 &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(FIRST_EXPERT_REPLY)),
                 &i64Lib::add(&i64Lib::from(QUICK_EXPERT_REPLY), &i64Lib::from(UPVOTED_EXPERT_REPLY)),
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -540,15 +512,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(
                 &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(FIRST_COMMON_REPLY)),
                 &i64Lib::add(&i64Lib::from(QUICK_COMMON_REPLY), &i64Lib::from(UPVOTED_COMMON_REPLY)),
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -590,12 +559,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_REPLY));
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -637,12 +603,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_REPLY));
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -692,15 +655,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(
                 &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(FIRST_EXPERT_REPLY)),
                 &i64Lib::add(&i64Lib::from(QUICK_EXPERT_REPLY), &i64Lib::from(UPVOTED_EXPERT_REPLY)),
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -750,15 +710,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::add(
                 &i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(FIRST_COMMON_REPLY)),
                 &i64Lib::add(&i64Lib::from(QUICK_COMMON_REPLY), &i64Lib::from(UPVOTED_COMMON_REPLY)),
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -800,12 +757,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::from(START_USER_RATING);
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -847,12 +801,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::from(START_USER_RATING);
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -894,12 +845,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating =  i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DELETE_OWN_REPLY));
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -941,12 +889,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating =  i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DELETE_OWN_REPLY));
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -996,12 +941,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_REPLY));
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -1051,12 +993,9 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_REPLY));
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -1106,15 +1045,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::sub(
                 &i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DELETE_OWN_REPLY)),
                 &i64Lib::from(DOWNVOTED_EXPERT_REPLY)
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
@@ -1164,15 +1100,12 @@ module basics::postLib_first_quick_reply_rating_test
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
-            let communityId = object::id(community);
-            let votedUserId = object::id(user);
 
-            let votedUserCommunityRating = userLib::getUserCommunityRating(user_rating_collection, votedUserId);
             let expectedVotedUserRating = i64Lib::sub(
                 &i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DELETE_OWN_REPLY)),
                 &i64Lib::from(DOWNVOTED_COMMON_REPLY)
             );
-            let votedUserRating = userLib::getUserRating(votedUserCommunityRating, communityId);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 

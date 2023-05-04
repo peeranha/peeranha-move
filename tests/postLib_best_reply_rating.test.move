@@ -1,14 +1,12 @@
 #[test_only]
 module basics::postLib_best_reply_rating_test
 {
-    use sui::object::{Self};
     use basics::postLib::{Self, PostMetaData};
     use basics::postLib_test;
+    use basics::postLib_votes_rating_test;
     use sui::test_scenario::{Self};
-    use basics::communityLib::{Community};
-    use basics::userLib::{Self, User, UsersRatingCollection};
+    use basics::userLib::{User};
     use sui::clock::{Self};
-    use basics::i64Lib;
 
 
     // use std::debug;
@@ -70,7 +68,7 @@ module basics::postLib_best_reply_rating_test
             //     &i64Lib::from(QUICK_EXPERT_REPLY)
             // );
             
-            let _replyAuthorRating = getUserRating(user_rating_collection, user, community);
+            let _replyAuthorRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
 
             // assert!(expectedVoteUserRating == voteUserRating, 0);
 
@@ -297,16 +295,4 @@ module basics::postLib_best_reply_rating_test
         test_scenario::end(scenario_val);
     }
     */
-
-    #[test_only]
-    public fun getUserRating(
-        user_rating_collection: &mut UsersRatingCollection,
-        user: &mut User,
-        community: &mut Community,
-    ): i64Lib::I64 {
-        let communityId = object::id(community);
-        let userId = object::id(user);
-        let userCommunityRating = userLib::getUserCommunityRating(user_rating_collection, userId);
-        userLib::getUserRating(userCommunityRating, communityId)
-    }
 }
