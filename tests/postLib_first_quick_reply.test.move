@@ -23,7 +23,7 @@ module basics::postLib_first_quick_reply_test
 
     
     #[test]
-    fun test_create_first_reply_to_expert_post() {     //  first reply after delete previous reply to expert post
+    fun test_create_first_reply_to_expert_post() {     //  first/quick reply to expert post
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -63,6 +63,75 @@ module basics::postLib_first_quick_reply_test
             assert!(isQuickReply == true, 2);
 
             test_scenario::return_to_sender(scenario, reply_val);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_create_first_reply_to_common_post() {     //  first/quick reply to commom post
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_changePostType_test::init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
+
+            let (
+                _ipfsDoc,
+                _replyId,
+                _author,
+                _rating,
+                _parentReplyMetaDataKey,
+                _language,
+                isFirstReply,
+                isQuickReply,
+                _isDeleted,
+                _historyVotes
+            ) = postLib::getReplyData(post_meta_data, reply, 1);
+
+            assert!(isFirstReply == true, 1);
+            assert!(isQuickReply == true, 2);
+
+            test_scenario::return_to_sender(scenario, reply_val);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_create_first_reply_after_delete_previos_reply_to_expert_post() {     //  first/quick reply after delete previous reply to expert post
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -114,7 +183,7 @@ module basics::postLib_first_quick_reply_test
     }
 
     #[test]
-    fun test_create_first_reply_to_common_post() {     //  first reply after delete previous reply to commom post
+    fun test_create_first_reply_after_delete_previos_reply_to_common_post() {     //  first/quick reply after delete previous reply to commom post
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -127,33 +196,6 @@ module basics::postLib_first_quick_reply_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
-            test_scenario::return_shared(post_meta_data_val);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
-        {
-            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
-            let post_meta_data = &mut post_meta_data_val;
-            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
-            let reply = &mut reply_val;
-
-            let (
-                _ipfsDoc,
-                _replyId,
-                _author,
-                _rating,
-                _parentReplyMetaDataKey,
-                _language,
-                isFirstReply,
-                isQuickReply,
-                _isDeleted,
-                _historyVotes
-            ) = postLib::getReplyData(post_meta_data, reply, 1);
-
-            assert!(isFirstReply == true, 1);
-            assert!(isQuickReply == true, 2);
-
-            test_scenario::return_to_sender(scenario, reply_val);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -203,8 +245,6 @@ module basics::postLib_first_quick_reply_test
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);  
     }
-
-   
     // ====== Support functions ======
 
     #[test_only]
