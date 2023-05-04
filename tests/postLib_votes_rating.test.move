@@ -1481,9 +1481,9 @@ module basics::postLib_votes_rating_test
 
     #[test_only]
     public fun getUserRating(
-        user_rating_collection: &mut UsersRatingCollection,
-        user: &mut User,
-        community: &mut Community,
+        user_rating_collection: &UsersRatingCollection,
+        user: &User,
+        community: &Community,
     ): i64Lib::I64 {
         let communityId = object::id(community);
         let userId = object::id(user);
