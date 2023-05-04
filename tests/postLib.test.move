@@ -823,7 +823,7 @@ module basics::postLib_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let period_reward_container = &mut period_reward_container_val;
@@ -1753,7 +1753,7 @@ module basics::postLib_test
     // ====== Support functions ======
 
     #[test_only]
-    fun init_postLib_test(scenario: &mut Scenario): clock::Clock {
+    public fun init_postLib_test(scenario: &mut Scenario): clock::Clock {
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
@@ -1789,7 +1789,7 @@ module basics::postLib_test
     }
 
     #[test_only]
-    fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Community) {
+    public fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Community) {
         let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let period_reward_container_val = test_scenario::take_shared<PeriodRewardContainer>(scenario);
@@ -1800,7 +1800,7 @@ module basics::postLib_test
     }
 
     #[test_only]
-    fun return_all_shared(
+    public fun return_all_shared(
         user_rating_collection_val: UsersRatingCollection,
         user_roles_collection_val: UserRolesCollection,
         period_reward_container_val:PeriodRewardContainer,

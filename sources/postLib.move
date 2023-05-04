@@ -1723,6 +1723,11 @@ module basics::postLib {
     }
 
     #[test_only]
+    public fun getBestReplyMetaDataKey(postMetaData: &PostMetaData): u64 {
+        postMetaData.bestReplyMetaDataKey
+    }
+
+    #[test_only]
     public fun getPostHistoryVotes(postMetaData: &PostMetaData): VecMap<ID, u8> {
         postMetaData.historyVotes
     }
