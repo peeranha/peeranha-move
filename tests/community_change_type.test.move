@@ -21,6 +21,8 @@ module basics::postLib_change_post_community_test
 
     const START_USER_RATING: u64 = 10;
 
+    const ENGLISH_LANGUAGE: u8 = 0;
+
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
     const USER3: address = @0xA3;
@@ -35,11 +37,11 @@ module basics::postLib_change_post_community_test
             time = init_community_change_type_test(EXPERT_POST, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            change_post_community(post_meta_data, scenario);
+            change_post_community(post_meta_data, EXPERT_POST, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -92,11 +94,11 @@ module basics::postLib_change_post_community_test
             time = init_community_change_type_test(COMMON_POST, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            change_post_community(post_meta_data, scenario);
+            change_post_community(post_meta_data, COMMON_POST, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -149,11 +151,11 @@ module basics::postLib_change_post_community_test
             time = init_community_change_type_test(TUTORIAL, scenario);
         };
 
-        test_scenario::next_tx(scenario, USER1);
+        test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            change_post_community(post_meta_data, scenario);
+            change_post_community(post_meta_data, TUTORIAL, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -246,15 +248,16 @@ module basics::postLib_change_post_community_test
     }
 
     #[test_only]
-    public fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Community, Community) {
+    public fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Post, Community, Community) {
         let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let period_reward_container_val = test_scenario::take_shared<PeriodRewardContainer>(scenario);
         let user_val = test_scenario::take_from_sender<User>(scenario);
+        let post_val = test_scenario::take_from_sender<Post>(scenario);
         let community_val = test_scenario::take_shared<Community>(scenario);
         let community_val2 = test_scenario::take_shared<Community>(scenario);
 
-        (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, community_val2)
+        (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, post_val, community_val, community_val2)
     }
 
     #[test_only]
@@ -263,6 +266,7 @@ module basics::postLib_change_post_community_test
         user_roles_collection_val: UserRolesCollection,
         period_reward_container_val:PeriodRewardContainer,
         user_val: User,
+        post_val: Post,
         community_val: Community,
         community_val2: Community,
         scenario: &mut Scenario
@@ -271,25 +275,37 @@ module basics::postLib_change_post_community_test
         test_scenario::return_shared(user_roles_collection_val);
         test_scenario::return_shared(period_reward_container_val);
         test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_to_sender(scenario, post_val);
         test_scenario::return_shared(community_val);
         test_scenario::return_shared(community_val2);
     }
     
     #[test_only]
-    fun change_post_community(post_meta_data: &mut PostMetaData, scenario: &mut Scenario) {
-        let (user_rating_collection_val, _user_roles_collection_val, period_reward_container_val, _user_val, _community_val, community_val2) = init_all_shared(scenario);
-        let user_rating_collection = &mut user_rating_collection_val;
-        let period_reward_container = &mut period_reward_container_val;
-        let community2 = &mut community_val2;
+    fun change_post_community(post_meta_data: &mut PostMetaData, postType: u8, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, post_val, _community_val, community_val2) = init_all_shared(scenario);
 
-        postLib::changePostCommunity(
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let period_reward_container = &mut period_reward_container_val;
+        let user = &mut user_val;
+        let post = &mut post_val;
+
+        let community2 = &mut community_val2;
+        postLib::authorEditPost(
             user_rating_collection,
+            user_roles_collection,
             period_reward_container,
+            user,
+            post,
             post_meta_data,
             community2,
+            x"0000000000000000000000000000000000000000000000000000000000000005",
+            postType,
+            vector<u64>[2, 3],
+            ENGLISH_LANGUAGE,
             test_scenario::ctx(scenario)
         );
 
-        return_all_shared(user_rating_collection_val, _user_roles_collection_val, period_reward_container_val, _user_val, _community_val, community_val2, scenario);
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, post_val, _community_val, community_val2, scenario);
     }
 }
