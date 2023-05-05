@@ -76,7 +76,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
 
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_EXPERT_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -112,7 +112,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
 
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_COMMON_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -148,7 +148,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
 
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_TUTORIAL));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_TUTORIAL);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -184,7 +184,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DOWNVOTED_EXPERT_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -199,7 +199,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_EXPERT_POST));
+            let expectedVoteUserRating = i64Lib::from(START_USER_RATING - DOWNVOTE_EXPERT_POST);
             let voteUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
@@ -235,7 +235,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DOWNVOTED_COMMON_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -250,7 +250,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_COMMON_POST));
+            let expectedVoteUserRating = i64Lib::from(START_USER_RATING - DOWNVOTE_COMMON_POST);
             let voteUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
@@ -286,7 +286,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_TUTORIAL));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DOWNVOTED_TUTORIAL);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -301,7 +301,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_TUTORIAL));
+            let expectedVoteUserRating = i64Lib::from(START_USER_RATING - DOWNVOTE_TUTORIAL);
             let voteUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
@@ -345,7 +345,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_EXPERT_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -389,7 +389,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_COMMON_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -433,7 +433,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_TUTORIAL));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_TUTORIAL);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -477,7 +477,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DOWNVOTED_EXPERT_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -521,7 +521,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_POST));
+            let expectedVotedUserRating =i64Lib::from(START_USER_RATING - DOWNVOTED_COMMON_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -565,7 +565,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_TUTORIAL));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DOWNVOTED_TUTORIAL);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -697,7 +697,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_REPLY));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_EXPERT_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -741,7 +741,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_REPLY));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_COMMON_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -785,7 +785,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_REPLY));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DOWNVOTED_EXPERT_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -800,7 +800,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_EXPERT_REPLY));
+            let expectedVoteUserRating = i64Lib::from(START_USER_RATING - DOWNVOTE_EXPERT_REPLY);
             let voteUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVoteUserRating == voteUserRating, 0);
@@ -844,7 +844,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_REPLY));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DOWNVOTED_COMMON_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -859,7 +859,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVoteUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTE_COMMON_REPLY));
+            let expectedVoteUserRating = i64Lib::from(START_USER_RATING - DOWNVOTE_COMMON_REPLY);
             let voteUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVoteUserRating == voteUserRating, 0);
@@ -911,7 +911,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_EXPERT_REPLY));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_EXPERT_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -963,7 +963,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::add(&i64Lib::from(START_USER_RATING), &i64Lib::from(UPVOTED_COMMON_REPLY));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING + UPVOTED_COMMON_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -1015,7 +1015,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_EXPERT_REPLY));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DOWNVOTED_EXPERT_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -1067,7 +1067,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DOWNVOTED_COMMON_REPLY));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DOWNVOTED_COMMON_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -1215,7 +1215,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DELETE_OWN_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -1267,7 +1267,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DELETE_OWN_REPLY));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
 
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -1319,7 +1319,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DELETE_OWN_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -1379,7 +1379,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::from(START_USER_RATING), &i64Lib::from(DELETE_OWN_POST));
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_POST);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -1439,11 +1439,7 @@ module basics::postLib_votes_rating_test
             let community = &mut community_val;
             let user = &mut user_val;
             
-            let expectedVotedUserRating = i64Lib::sub(&i64Lib::sub(
-                    &i64Lib::from(START_USER_RATING),
-                    &i64Lib::from(DELETE_OWN_POST)
-                ), &i64Lib::from(DELETE_OWN_REPLY)
-            );
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_POST - DELETE_OWN_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
