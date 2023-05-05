@@ -386,7 +386,6 @@ module basics::postLib {
             };
         };
 
-        let replyUID = object::new(ctx);
         let isFirstReply = false;
         let isQuickReply = false;
         let timestamp: u64 = commonLib::getTimestamp(time);
@@ -419,7 +418,7 @@ module basics::postLib {
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
         };
         let replyMetaData = ReplyMetaData {
-            id: replyUID,
+            id: object::new(ctx),
             replyId: object::id(&reply),
             postTime: timestamp,
             author: userId,
@@ -797,7 +796,7 @@ module basics::postLib {
             };
         };
         if (bestReplyMetaDataKey != 0) {
-            changeUserRating = i64Lib::sub(&changeUserRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY));
+            changeUserRating = i64Lib::sub(&changeUserRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY));
         };
 
         changeUserRating = i64Lib::sub(&changeUserRating, if(userId == postAuthor)
@@ -876,10 +875,11 @@ module basics::postLib {
         
         // admin can delete best reply
         assert!(userId != replyMetaData.author || !isBestReplyMetaData, E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY);
-        
+
+        let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
         let time: u64 = commonLib::getTimestamp(time);
         userLib::updateRating(
-            userCommunityRating,
+            replyAuthorCommunityRating,
             periodRewardContainer,
             replyMetaData.author,
             if(userId == replyMetaData.author) 
@@ -893,7 +893,7 @@ module basics::postLib {
         let isDeductReplyRating = time - replyMetaData.postTime < DELETE_TIME || userId == replyMetaData.author;
         if (isDeductReplyRating) {
             deductReplyRating(
-                userCommunityRating,
+                replyAuthorCommunityRating,
                 periodRewardContainer,
                 replyMetaData,
                 postType,
@@ -928,7 +928,7 @@ module basics::postLib {
                 changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_QUICK_REPLY));
             };
             if (isBestReply && postType != TUTORIAL) {// -=? in solidity "+= -"
-                changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY));
+                changeReplyAuthorRating = i64Lib::sub(&changeReplyAuthorRating, &getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY));
             };
         };
 
