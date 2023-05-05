@@ -701,7 +701,7 @@ module basics::userLib {
     public fun getUserRating(userCommunityRating: &UserCommunityRating, communityId: ID): i64Lib::I64 {   // public?  + user &mut?
         let position = vec_map::get_idx_opt(&userCommunityRating.userRating, &communityId);
         if (option::is_none(&position)) {
-            i64Lib::from(START_USER_RATING)
+            i64Lib::from(0)
         } else {
             *vec_map::get(&userCommunityRating.userRating, &communityId)
         }
