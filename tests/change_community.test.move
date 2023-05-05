@@ -1,11 +1,11 @@
 #[test_only]
-module basics::postLib_change_post_community_test
+module basics::postLib_change_community_test
 {
     use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
     use basics::accessControlLib::{Self, UserRolesCollection};
     use basics::communityLib::{Community};
     use basics::postLib::{Self, Post, PostMetaData};
-    use basics::postLib_changePostType_test;
+    use basics::postLib_change_post_type_test;
     use basics::userLib_test;
     use basics::communityLib_test;
     use sui::test_scenario::{Self, Scenario};
@@ -227,7 +227,7 @@ module basics::postLib_change_post_community_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            postLib_changePostType_test::create_post(&time, postType, scenario);
+            postLib_change_post_type_test::create_post(&time, postType, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);

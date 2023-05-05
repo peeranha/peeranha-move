@@ -4,7 +4,7 @@ module basics::postLib_votes_test
     use sui::object::{Self};
     use basics::postLib::{Self, PostMetaData};
     use basics::postLib_test;
-    use basics::postLib_changePostType_test;
+    use basics::postLib_change_post_type_test;
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
 
@@ -28,7 +28,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -68,7 +68,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -108,7 +108,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -158,7 +158,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -208,7 +208,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -258,7 +258,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -308,7 +308,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -355,7 +355,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -402,7 +402,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -425,7 +425,7 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -448,14 +448,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -495,14 +495,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -541,14 +541,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -595,14 +595,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -649,14 +649,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -703,14 +703,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -757,14 +757,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -772,7 +772,7 @@ module basics::postLib_votes_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::delete_reply(post_meta_data, 1, &time, scenario);
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -794,14 +794,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -809,7 +809,7 @@ module basics::postLib_votes_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::delete_reply(post_meta_data, 1, &time, scenario);
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -831,14 +831,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -860,14 +860,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -889,14 +889,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -944,14 +944,14 @@ module basics::postLib_votes_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 

@@ -1,5 +1,5 @@
 #[test_only]
-module basics::postLib_changePostType_test
+module basics::postLib_change_post_type_test
 {
     use basics::postLib::{Self, Post, PostMetaData};
     use basics::userLib_test;
