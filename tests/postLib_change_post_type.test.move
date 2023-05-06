@@ -5,8 +5,9 @@ module basics::postLib_changePostType_test
     use basics::userLib_test;
     use basics::communityLib_test;
     use basics::postLib_test;
-    use basics::userLib::{Self};
-    use basics::accessControlLib::{Self};
+    use basics::userLib::{Self, UsersRatingCollection, PeriodRewardContainer, User};
+    use basics::communityLib::{Community};
+    use basics::accessControlLib::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
 
@@ -618,5 +619,54 @@ module basics::postLib_changePostType_test
 
         test_scenario::return_to_sender(scenario, post_val);
         postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+
+    #[test_only]
+    public fun change_post_type_all_params(
+        user_rating_collection: &mut UsersRatingCollection,
+        user_roles_collection: &mut UserRolesCollection,
+        period_reward_container: &mut PeriodRewardContainer,
+        user: &mut User,
+        post_meta_data: &mut PostMetaData,
+        community: &mut Community,
+        postType: u8,
+        scenario: &mut Scenario
+    ) {
+        // let user_rating_collection = &mut user_rating_collection_val;
+        let post_val = test_scenario::take_from_sender<Post>(scenario);
+        let post = &mut post_val;
+
+        let (
+            ipfsDoc,
+            _postId,
+            _postType,
+            _author,
+            _rating,
+            _communityId,
+            language,
+            _officialReplyMetaDataKey,
+            _bestReplyMetaDataKey,
+            _deletedReplyCount,
+            _isDeleted,
+            tags,
+            _historyVotes
+        ) = postLib::getPostData(post_meta_data, post);
+
+        postLib::authorEditPost(
+            user_rating_collection,
+            user_roles_collection,
+            period_reward_container,
+            user,
+            post,
+            post_meta_data,
+            community,
+            ipfsDoc,
+            postType,
+            tags,
+            language,
+            test_scenario::ctx(scenario)
+        );
+
+        test_scenario::return_to_sender(scenario, post_val);
     }
 }

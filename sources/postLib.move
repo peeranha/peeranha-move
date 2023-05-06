@@ -1423,8 +1423,8 @@ module basics::postLib {
                 };
             };
             if (bestReplyMetaDataKey == replyMetaDataKey) {
-                changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.acceptReply, &oldTypeRating.acceptReply));
-                changePostAuthorRating = i64Lib::add(&changePostAuthorRating, &i64Lib::sub(&newTypeRating.acceptedReply, &oldTypeRating.acceptedReply));
+                changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.acceptedReply, &oldTypeRating.acceptedReply));
+                changePostAuthorRating = i64Lib::add(&changePostAuthorRating, &i64Lib::sub(&newTypeRating.acceptReply, &oldTypeRating.acceptReply));
             };
 
             let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
@@ -1495,15 +1495,15 @@ module basics::postLib {
                 };
             };
             if (bestReplyMetaDataKey == replyMetaDataKey) {
-                changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptReply);
-                changePostAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptedReply);
+                changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptedReply);
+                changePostAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptReply);
             };
 
             let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
             userLib::updateRating(
                 replyAuthorCommunityRating,
                 periodRewardContainer,
-                postMetaData.author,
+                replyMetaData.author,
                 i64Lib::mul(&changeReplyAuthorRating, &i64Lib::neg_from(1)),
                 oldCommunityId,
                 ctx
@@ -1511,7 +1511,7 @@ module basics::postLib {
             userLib::updateRating(
                 replyAuthorCommunityRating,
                 periodRewardContainer,
-                postMetaData.author,
+                replyMetaData.author,
                 changeReplyAuthorRating,
                 newCommunityId,
                 ctx
