@@ -5,9 +5,9 @@ module basics::postLib_changePostType_rating_test
     use basics::userLib::{User};
     use basics::postLib_test;
     use basics::postLib_votes_test;
+    use basics::postLib_change_post_type_test;
     use basics::postLib_votes_rating_test;
     use basics::i64Lib;
-    use basics::postLib_change_post_type_test;
     use sui::test_scenario::{Self};
     use sui::clock::{Self};
     // use std::debug;
@@ -927,7 +927,7 @@ module basics::postLib_changePostType_rating_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(EXPERT_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -972,7 +972,7 @@ module basics::postLib_changePostType_rating_test
             assert!(expectedPostAuthorIdRating == postAuthorRating, 0);
             assert!(expectedReplyAuthorIdRating == replyAuthorRating, 0);
 
-            postLib_changePostType_test::change_post_type_all_params(
+            postLib_change_post_type_test::change_post_type_all_params(
                 user_rating_collection,
                 user_roles_collection,
                 period_reward_container,
@@ -1009,7 +1009,7 @@ module basics::postLib_changePostType_rating_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(COMMON_POST, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(COMMON_POST, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1054,7 +1054,7 @@ module basics::postLib_changePostType_rating_test
             assert!(expectedPostAuthorIdRating == postAuthorRating, 0);
             assert!(expectedReplyAuthorIdRating == replyAuthorRating, 0);
 
-            postLib_changePostType_test::change_post_type_all_params(
+            postLib_change_post_type_test::change_post_type_all_params(
                 user_rating_collection,
                 user_roles_collection,
                 period_reward_container,
