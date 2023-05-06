@@ -1451,7 +1451,7 @@ module basics::postLib_votes_rating_test
         test_scenario::end(scenario_val);  
     }
 
-   
+    
     // ====== Support functions ======
 
     #[test_only]

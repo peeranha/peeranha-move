@@ -1074,6 +1074,42 @@ module basics::postLib_first_quick_reply_rating_test
         test_scenario::end(scenario_val);  
     }
 
+    #[test]
+    fun test_create_reply_to_own_post_rating() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+
+            let expectedVotedUserRating = i64Lib::from(0);
+            let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
    
     // ====== Support functions ======
 
