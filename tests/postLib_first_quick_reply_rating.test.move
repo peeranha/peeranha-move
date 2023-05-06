@@ -7,7 +7,7 @@ module basics::postLib_first_quick_reply_rating_test
     use basics::postLib_votes_rating_test;
     use basics::userLib_test;
     use basics::communityLib_test;
-    use basics::postLib_changePostType_test;
+    use basics::postLib_change_post_type_test;
     use basics::userLib::{Self};
     use basics::accessControlLib::{Self};
     use sui::test_scenario::{Self, Scenario};
@@ -55,7 +55,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -63,7 +63,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -99,7 +99,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -135,7 +135,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -143,7 +143,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -179,7 +179,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -215,7 +215,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -223,7 +223,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::delete_reply(post_meta_data, 1, &time, scenario);
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -231,7 +231,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -267,7 +267,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -275,7 +275,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::delete_reply(post_meta_data, 1, &time, scenario);
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -283,7 +283,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -319,7 +319,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -327,7 +327,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -371,7 +371,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -379,7 +379,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -423,7 +423,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -467,7 +467,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -511,7 +511,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -555,7 +555,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -599,7 +599,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -651,7 +651,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -703,7 +703,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -747,7 +747,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -791,7 +791,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -799,7 +799,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::delete_reply(post_meta_data, 1, &time, scenario);
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -835,7 +835,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -843,7 +843,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::delete_reply(post_meta_data, 1, &time, scenario);
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -879,7 +879,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -931,7 +931,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -983,7 +983,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -999,7 +999,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::delete_reply(post_meta_data, 1, &time, scenario);
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -1035,7 +1035,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -1051,7 +1051,7 @@ module basics::postLib_first_quick_reply_rating_test
         {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
-            postLib_changePostType_test::delete_reply(post_meta_data, 1, &time, scenario);
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -1112,7 +1112,7 @@ module basics::postLib_first_quick_reply_rating_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            postLib_changePostType_test::create_post(&time, postType, scenario);
+            postLib_change_post_type_test::create_post(&time, postType, scenario);
         };
 
         time

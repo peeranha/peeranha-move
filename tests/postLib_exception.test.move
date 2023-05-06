@@ -6,7 +6,7 @@ module basics::postLib_exception_test
     use basics::commonLib;
     use basics::communityLib_test;
     use basics::postLib_votes_test;
-    use basics::postLib_changePostType_test;
+    use basics::postLib_change_post_type_test;
     // use basics::i64Lib;
     use basics::communityLib::{Self, Community};
     use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
@@ -388,7 +388,7 @@ module basics::postLib_exception_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = postLib_changePostType_test::init_postLib_test(TUTORIAL, scenario);
+            time = postLib_change_post_type_test::init_postLib_test(TUTORIAL, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -396,7 +396,7 @@ module basics::postLib_exception_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            postLib_changePostType_test::create_reply(post_meta_data, &time, scenario);
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
         };
