@@ -632,7 +632,6 @@ module basics::postLib_change_post_type_test
         postType: u8,
         scenario: &mut Scenario
     ) {
-        // let user_rating_collection = &mut user_rating_collection_val;
         let post_val = test_scenario::take_from_sender<Post>(scenario);
         let post = &mut post_val;
 
