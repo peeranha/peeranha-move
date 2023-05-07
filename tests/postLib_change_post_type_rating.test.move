@@ -1084,4 +1084,78 @@ module basics::postLib_changePostType_rating_test
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);
     }
+
+    /*
+    #[test]
+    fun test_mark_own_best_reply_expert_to_common() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_test::create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let period_reward_container = &mut period_reward_container_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            postLib::changeStatusBestReply(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post_meta_data,
+                1,
+                test_scenario::ctx(scenario)
+            );
+            postLib_change_post_type_test::change_post_type_all_params(
+                user_rating_collection,
+                user_roles_collection,
+                period_reward_container,
+                user,
+                post_meta_data,
+                community,
+                COMMON_POST,
+                scenario
+            );
+
+            postLib::addUserRating(
+                user_rating_collection,
+                period_reward_container,
+                user,
+                community,
+                20,
+                true,
+                test_scenario::ctx(scenario)
+            );
+
+            let expectedAuthorIdRating = i64Lib::from(0);
+            let authorRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+    debug::print(&authorRating);
+
+            assert!(expectedAuthorIdRating == authorRating, 0);
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+    */
 }
