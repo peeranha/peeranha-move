@@ -1184,7 +1184,7 @@ module basics::postLib_votes_rating_test
     }
 
     #[test]
-    fun test_delete_upvoted_post_rating() {
+    fun test_delete_upvoted_expert_post_rating() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -1228,7 +1228,139 @@ module basics::postLib_votes_rating_test
     }
 
     #[test]
-    fun test_delete_upvoted_reply_rating() {
+    fun test_delete_upvoted_common_post_rating() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_post(post_meta_data, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            delete_post(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_POST);
+            let votedUserRating = getUserRating(user_rating_collection, user, community);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_delete_downvoted_expert_post_rating() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            delete_post(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_POST - DOWNVOTED_EXPERT_POST);
+            let votedUserRating = getUserRating(user_rating_collection, user, community);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_delete_downvoted_common_post_rating() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            delete_post(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_POST - DOWNVOTED_COMMON_POST);
+            let votedUserRating = getUserRating(user_rating_collection, user, community);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_delete_upvoted_expert_reply_rating() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -1268,6 +1400,162 @@ module basics::postLib_votes_rating_test
             let user = &mut user_val;
             
             let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_REPLY);
+            let votedUserRating = getUserRating(user_rating_collection, user, community);
+
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_delete_upvoted_common_reply_rating() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_reply(post_meta_data, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_REPLY);
+            let votedUserRating = getUserRating(user_rating_collection, user, community);
+
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_delete_downvoted_expert_reply_rating() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_REPLY - DOWNVOTED_EXPERT_REPLY);
+            let votedUserRating = getUserRating(user_rating_collection, user, community);
+
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_delete_downvoted_common_reply_rating() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(COMMON_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_REPLY - DOWNVOTED_COMMON_REPLY);
             let votedUserRating = getUserRating(user_rating_collection, user, community);
 
             assert!(expectedVotedUserRating == votedUserRating, 0);
@@ -1451,7 +1739,66 @@ module basics::postLib_votes_rating_test
         test_scenario::end(scenario_val);  
     }
 
-    
+    #[test]
+    fun test_delete_post_with_deleted_downvoted_reply_rating() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_change_post_type_test::create_reply(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_change_post_type_test::delete_reply(post_meta_data, 1, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            delete_post(post_meta_data, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            
+            let expectedVotedUserRating = i64Lib::from(START_USER_RATING - DELETE_OWN_POST - DELETE_OWN_REPLY - DOWNVOTED_EXPERT_REPLY);
+            let votedUserRating = getUserRating(user_rating_collection, user, community);
+            
+            assert!(expectedVotedUserRating == votedUserRating, 0);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
     // ====== Support functions ======
 
     #[test_only]

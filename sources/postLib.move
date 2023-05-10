@@ -1422,7 +1422,7 @@ module basics::postLib {
                     changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.quickReply, &oldTypeRating.quickReply));
                 };
             };
-            if (bestReplyMetaDataKey == replyMetaDataKey) {
+            if (bestReplyMetaDataKey == replyMetaDataKey && postMetaData.author != replyMetaData.author) {
                 changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &i64Lib::sub(&newTypeRating.acceptedReply, &oldTypeRating.acceptedReply));
                 changePostAuthorRating = i64Lib::add(&changePostAuthorRating, &i64Lib::sub(&newTypeRating.acceptReply, &oldTypeRating.acceptReply));
             };
@@ -1494,7 +1494,7 @@ module basics::postLib {
                     changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.quickReply);
                 };
             };
-            if (bestReplyMetaDataKey == replyMetaDataKey) {
+            if (bestReplyMetaDataKey == replyMetaDataKey && postMetaData.author != replyMetaData.author) {
                 changeReplyAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptedReply);
                 changePostAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptReply);
             };
