@@ -225,6 +225,11 @@ module basics::postLib_change_community_test
             userLib_test::create_user(scenario);
         };
 
+        test_scenario::next_tx(scenario, USER2);
+        {
+            postLib_change_post_type_test::create_post(&time, postType, scenario);
+        };
+
         test_scenario::next_tx(scenario, USER1);
         {
             postLib_change_post_type_test::create_post(&time, postType, scenario);
