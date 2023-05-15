@@ -2,7 +2,7 @@
 module basics::postLib_change_community_test
 {
     use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
-    use basics::accessControlLib::{Self, UserRolesCollection};
+    use basics::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
     use basics::communityLib::{Community};
     use basics::postLib::{Self, Post, PostMetaData};
     use basics::postLib_change_post_type_test;
@@ -26,6 +26,10 @@ module basics::postLib_change_community_test
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
     const USER3: address = @0xA3;
+    const USER4: address = @0xA4;
+    const USER5: address = @0xA5;
+
+    const COMMUNITY_ADMIN_ROLE: vector<u8> = vector<u8>[3];
 
     
     #[test]
@@ -239,6 +243,70 @@ module basics::postLib_change_community_test
         {
             communityLib_test::create_community(scenario);
         };
+
+        test_scenario::next_tx(scenario, USER4);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER5);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        let user5_val;
+        test_scenario::next_tx(scenario, USER5);
+        {
+            user5_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (_user_rating_collection_val, user_roles_collection_val, _period_reward_container_val, user_val, _community_val, _community2_val) = init_all_shared(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user5 = &mut user5_val;
+
+            let default_admin_cap_val = test_scenario::take_from_sender<DefaultAdminCap>(scenario);
+            let default_admin_cap = &mut default_admin_cap_val;
+
+            accessControlLib::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user5));
+            
+            test_scenario::return_to_sender(scenario, default_admin_cap_val);
+            return_all_shared(_user_rating_collection_val, user_roles_collection_val, _period_reward_container_val, user_val, _community_val, _community2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER5);
+        {
+            test_scenario::return_to_sender(scenario, user5_val);
+        };
+
+        let user4_val;
+        test_scenario::next_tx(scenario, USER4);
+        {
+            user4_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (_user_rating_collection_val, user_roles_collection_val, _period_reward_container_val, user_val, _community_val, _community2_val) = init_all_shared(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user4 = &mut user4_val;
+
+            let default_admin_cap_val = test_scenario::take_from_sender<DefaultAdminCap>(scenario);
+            let default_admin_cap = &mut default_admin_cap_val;
+
+            accessControlLib::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user4));
+            
+            test_scenario::return_to_sender(scenario, default_admin_cap_val);
+
+            return_all_shared(_user_rating_collection_val, user_roles_collection_val, _period_reward_container_val, user_val, _community_val, _community2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER4);
+        {
+            test_scenario::return_to_sender(scenario, user4_val);
+        };
+        
 
         time
     }

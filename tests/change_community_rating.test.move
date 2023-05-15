@@ -55,6 +55,8 @@ module basics::postLib_change_community_rating_test
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
     const USER3: address = @0xA3;
+    const USER4: address = @0xA4;
+    const USER5: address = @0xA5;
 
     #[test]
     fun test_create_quick_reply_to_expert_post_with_changed_community() {
@@ -699,6 +701,98 @@ module basics::postLib_change_community_rating_test
 
             postLib_change_community_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val,  community_val, community2_val, scenario);
         };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_two_downvote_and_one_upvote_expert_post_with_changed_community_rating() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_community_test::init_community_change_type_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val2 = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data_val1 = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data1 = &mut post_meta_data_val1;
+            postLib_votes_test::vote_post(post_meta_data1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val1);
+            test_scenario::return_shared(post_meta_data_val2);
+        };
+
+        test_scenario::next_tx(scenario, USER4);
+        {
+            let post_meta_data_val2 = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data_val1 = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data1 = &mut post_meta_data_val1;
+            postLib_votes_test::vote_post(post_meta_data1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val1);
+            test_scenario::return_shared(post_meta_data_val2);
+        };
+
+        test_scenario::next_tx(scenario, USER5);
+        {
+            let post_meta_data_val2 = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data_val1 = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data1 = &mut post_meta_data_val1;
+            postLib_votes_test::vote_post(post_meta_data1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val1);
+            test_scenario::return_shared(post_meta_data_val2);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val2 = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data_val1 = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data1 = &mut post_meta_data_val1;
+            postLib_change_community_test::change_post_community(post_meta_data1, scenario);
+            test_scenario::return_shared(post_meta_data_val1);
+            test_scenario::return_shared(post_meta_data_val2);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, community2_val) = postLib_change_community_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let community2 = &mut community2_val;
+            let user = &mut user_val;
+
+            let expectedVotedUserNewCommunityRating = &i64Lib::zero();
+            let votedUserNewCommunityRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community2);
+            let expectedVotedUserOldCommunityRating = &i64Lib::from(START_USER_RATING - DOWNVOTE_EXPERT_POST);
+            let votedUseOldCommunityrRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+            
+            assert!(expectedVotedUserOldCommunityRating == &votedUseOldCommunityrRating, 0);
+            assert!(expectedVotedUserNewCommunityRating == &votedUserNewCommunityRating, 1);
+
+            postLib_change_community_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val,  community_val, community2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER5);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, community2_val) = postLib_change_community_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let community2 = &mut community2_val;
+            let user = &mut user_val;
+
+            let expectedVotedUserNewCommunityRating = &i64Lib::zero();
+            let votedUserNewCommunityRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community2);
+            let expectedVotedUserOldCommunityRating = &i64Lib::zero();
+            let votedUseOldCommunityrRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+            
+            assert!(expectedVotedUserOldCommunityRating == &votedUseOldCommunityrRating, 0);
+            assert!(expectedVotedUserNewCommunityRating == &votedUserNewCommunityRating, 1);
+
+            postLib_change_community_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val,  community_val, community2_val, scenario);
+        };
+
 
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);  
