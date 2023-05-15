@@ -13,8 +13,8 @@ module basics::accessControlLib {
     // ====== Errors ======
 
     const E_ACCESS_CONTROL_MISSING_ROLE: u64 = 201;
-    const E_ACCESS_CONTROL_CAN_ONLY_RENOUNCE_ROLE_FOR_SELF: u64 = 202;
-    const E_ACCESS_CONTROL_CAN_NOT_GIVE_DEFAULT_ADMIN_ROLE: u64 = 203;
+    // const E_ACCESS_CONTROL_CAN_ONLY_RENOUNCE_ROLE_FOR_SELF: u64 = 202;
+    const E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE: u64 = 203;
     const E_NOT_ALLOWED_NOT_ADMIN: u64 = 204;
     const E_NOT_ALLOWED_NOT_BOT: u64 = 205;
     const E_NOT_ALLOWED_NOT_DISPATHER: u64 = 206;
@@ -25,7 +25,7 @@ module basics::accessControlLib {
 
     // ====== Constant ======
 
-    const DEFAULT_ADMIN_ROLE: vector<u8> = vector<u8>[1];
+    // const DEFAULT_ADMIN_ROLE: vector<u8> = vector<u8>[1];
     const PROTOCOL_ADMIN_ROLE: vector<u8> = vector<u8>[2];
     const COMMUNITY_ADMIN_ROLE: vector<u8> = vector<u8>[3];
     const COMMUNITY_MODERATOR_ROLE: vector<u8> = vector<u8>[4];
@@ -153,7 +153,7 @@ module basics::accessControlLib {
     }
 
     public(friend) fun grantRole(userRolesCollection: &mut UserRolesCollection, adminId: ID, userId: ID, role: vector<u8>) {
-        assert!(role != DEFAULT_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_DEFAULT_ADMIN_ROLE);
+        assert!(role != PROTOCOL_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE);
 
         let adminRole = getRoleAdmin(userRolesCollection, role);
         onlyRole(userRolesCollection, adminRole, adminId);
@@ -166,7 +166,7 @@ module basics::accessControlLib {
     }
 
     public(friend) fun revokeRole(userRolesCollection: &mut UserRolesCollection, adminId: ID, userId: ID, role: vector<u8>) {
-        assert!(role != DEFAULT_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_DEFAULT_ADMIN_ROLE);
+        assert!(role != PROTOCOL_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE);
 
         let adminRole = getRoleAdmin(userRolesCollection, role);
         onlyRole(userRolesCollection, adminRole, adminId);

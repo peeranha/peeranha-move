@@ -4,7 +4,7 @@ module basics::communityLib_test
     use basics::communityLib::{Self, Community};
     use basics::userLib::{Self, User};
     use std::vector;
-    use basics::userLib_test::{Self};
+    use basics::userLib_test;
     use basics::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
     use sui::test_scenario::{Self, Scenario};
     use sui::object::{Self/*, ID*/};
@@ -276,6 +276,92 @@ module basics::communityLib_test
         test_scenario::end(scenario_val);        
     }
 
+    #[test, expected_failure(abort_code = communityLib::E_TAG_DOES_NOT_EXIST)]
+    fun test_update_not_exist_tag() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        {
+            userLib::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_community(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
+
+            communityLib::updateTag(user_roles_collection, user, community, 8, x"0000000000000000000000000000000000000000000000000000000000000007");
+
+            test_scenario::return_shared(community_val);
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(user_roles_collection_val);
+        };
+
+        test_scenario::end(scenario_val);        
+    }
+
+    #[test, expected_failure(abort_code = communityLib::E_TAG_ID_CAN_NOT_BE_0)]
+    fun test_update_0_tag() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        {
+            userLib::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_community(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
+
+            communityLib::updateTag(user_roles_collection, user, community, 0, x"0000000000000000000000000000000000000000000000000000000000000007");
+
+            test_scenario::return_shared(community_val);
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(user_roles_collection_val);
+        };
+
+        test_scenario::end(scenario_val);        
+    }
+
     #[test]
     fun test_update_created_tag() {
         let scenario_val = test_scenario::begin(USER1);
@@ -330,7 +416,7 @@ module basics::communityLib_test
         test_scenario::end(scenario_val);
     }
 
-        #[test]
+    #[test]
     fun test_update_first_tag() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
@@ -382,7 +468,6 @@ module basics::communityLib_test
         test_scenario::end(scenario_val);
     }
 
-    // #[test, expected_failure(abort_code = communityLib::E_COMMUNITY_IS_FROZEN)]
     #[test]
     fun test_freeze_community() {
         let scenario_val = test_scenario::begin(USER1);
@@ -643,6 +728,8 @@ module basics::communityLib_test
 
         test_scenario::end(scenario_val);        
     }
+
+    // ====== Support functions ======
 
     #[test_only]
     public fun grant_protocol_admin_role(scenario: &mut Scenario) {

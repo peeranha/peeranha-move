@@ -48,15 +48,16 @@ module basics::userLib_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let user = test_scenario::take_from_sender<User>(scenario);
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
 
-            let (ipfsDoc, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(&mut user);
+            let (ipfsDoc, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(energy == 1000, 1);
             assert!(lastUpdatePeriod == 0, 1);
             assert!(followedCommunities == vector<ID>[], 1);
 
-            test_scenario::return_to_sender(scenario, user);
+            test_scenario::return_to_sender(scenario, user_val);
         };
 
         test_scenario::end(scenario_val);

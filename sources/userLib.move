@@ -161,7 +161,7 @@ module basics::userLib {
         init(ctx)
     }
 
-    public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
+    public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {  // add check isExist??
         // let owner = tx_context::sender(ctx);
         createUserPrivate(usersRatingCollection, ipfsDoc, ctx)
     }
