@@ -13,7 +13,6 @@ module basics::accessControlLib {
     // ====== Errors ======
 
     const E_ACCESS_CONTROL_MISSING_ROLE: u64 = 201;
-    // const E_ACCESS_CONTROL_CAN_ONLY_RENOUNCE_ROLE_FOR_SELF: u64 = 202;
     const E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE: u64 = 203;
     const E_NOT_ALLOWED_NOT_ADMIN: u64 = 204;
     const E_NOT_ALLOWED_NOT_BOT: u64 = 205;
@@ -25,7 +24,6 @@ module basics::accessControlLib {
 
     // ====== Constant ======
 
-    // const DEFAULT_ADMIN_ROLE: vector<u8> = vector<u8>[1];
     const PROTOCOL_ADMIN_ROLE: vector<u8> = vector<u8>[2];
     const COMMUNITY_ADMIN_ROLE: vector<u8> = vector<u8>[3];
     const COMMUNITY_MODERATOR_ROLE: vector<u8> = vector<u8>[4];
@@ -80,15 +78,6 @@ module basics::accessControlLib {
             id: object::new(ctx),
             roles: table::new(ctx)
         };
-        // give DEFAULT_ADMIN_ROLE ?
-
-        // grantRole_(&mut roles, DEFAULT_ADMIN_ROLE, tx_context::sender(ctx));
-        // grantRole_(&mut roles, PROTOCOL_ADMIN_ROLE, tx_context::sender(ctx));
-        // setRoleAdmin_(&mut roles, PROTOCOL_ADMIN_ROLE, DEFAULT_ADMIN_ROLE);
-        
-        
-        // _setRoleAdmin(BOT_ROLE, PROTOCOL_ADMIN_ROLE);
-        // _setRoleAdmin(DISPATCHER_ROLE, PROTOCOL_ADMIN_ROLE);
         transfer::share_object(roles);
 
         transfer::transfer(
@@ -130,16 +119,6 @@ module basics::accessControlLib {
     public fun checkRole(userRolesCollection: &UserRolesCollection, role: vector<u8>, userId: ID) {
         if (!hasRole(userRolesCollection, role, userId)) {
             abort E_ACCESS_CONTROL_MISSING_ROLE
-            // revert(
-            //     string(
-            //         abi.encodePacked(
-            //             "AccessControl: account ",
-            //             StringsUpgradeable.toHexString(uint160(account), 20),
-            //             " is missing role ",
-            //             StringsUpgradeable.toHexString(uint256(role), 32)
-            //         )
-            //     )
-            // );
         }
     }
 
