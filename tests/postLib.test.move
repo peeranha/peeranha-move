@@ -1840,6 +1840,30 @@ module basics::postLib_test
     }
 
     #[test_only]
+    public fun create_standart_post(time: &clock::Clock, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user = &mut user_val;
+        let community = &mut community_val;
+
+        postLib::createPost(
+            user_rating_collection,
+            user_roles_collection,
+            time,
+            user,
+            community,
+            x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+            EXPERT_POST,
+            vector<u64>[1, 2],
+            ENGLISH_LANGUAGE,
+            test_scenario::ctx(scenario)
+        );
+
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+
+    #[test_only]
     public fun create_reply(time: &clock::Clock, postMetadata: &mut PostMetaData, ipfsHash: vector<u8>, scenario: &mut Scenario) {
         let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
@@ -1865,6 +1889,34 @@ module basics::postLib_test
     }
 
     #[test_only]
+    public fun create_standart_reply(time: &clock::Clock, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let period_reward_container = &mut period_reward_container_val;
+        let user = &mut user_val;
+        let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+        let post_meta_data = &mut post_meta_data_val;
+        
+        postLib::createReply(
+            user_rating_collection,
+            user_roles_collection,
+            period_reward_container,
+            time,
+            user,
+            post_meta_data,
+            0,
+            x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+            false,
+            ENGLISH_LANGUAGE,
+            test_scenario::ctx(scenario)
+        );
+
+        test_scenario::return_shared(post_meta_data_val);
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+
+    #[test_only]
     public fun create_comment(time: &clock::Clock, postMetadata: &mut PostMetaData, parentReplyMetaDataKey: u64, ipfsHash: vector<u8>, scenario: &mut Scenario) {
         let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
@@ -1883,6 +1935,31 @@ module basics::postLib_test
             test_scenario::ctx(scenario)
         );
 
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+    }
+
+    #[test_only]
+    public fun create_standart_comment(time: &clock::Clock, parentReplyMetaDataKey: u64, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user = &mut user_val;
+        let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+        let post_meta_data = &mut post_meta_data_val;
+
+        postLib::createComment(
+            user_rating_collection,
+            user_roles_collection,
+            time,
+            user,
+            post_meta_data,
+            parentReplyMetaDataKey,
+            x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+            ENGLISH_LANGUAGE,
+            test_scenario::ctx(scenario)
+        );
+
+        test_scenario::return_shared(post_meta_data_val);
         return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
     }
 }

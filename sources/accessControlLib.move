@@ -12,7 +12,7 @@ module basics::accessControlLib {
 
     // ====== Errors ======
 
-    const E_ACCESS_CONTROL_MISSING_ROLE: u64 = 201;
+    const E_ACCESS_CONTROL_MISSING_ROLE: u64 = 201;                      // test all error
     // const E_ACCESS_CONTROL_CAN_ONLY_RENOUNCE_ROLE_FOR_SELF: u64 = 202;
     const E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE: u64 = 203;
     const E_NOT_ALLOWED_NOT_ADMIN: u64 = 204;
