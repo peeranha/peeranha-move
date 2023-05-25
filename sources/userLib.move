@@ -5,7 +5,6 @@ module basics::userLib {
     use sui::tx_context::{Self, TxContext};
     use std::vector;
     use basics::accessControlLib;
-    // use std::debug;
     use basics::i64Lib;
     use sui::table::{Self, Table};
     use basics::commonLib;
@@ -18,7 +17,6 @@ module basics::userLib {
     const E_USER_EXIST: u64 = 9;
     const E_USER_DOES_NOT_EXIST: u64 = 10;
     const E_USER_NOT_FOUND: u64 = 13;
-    // const E_NOT_ALLOWED_EDIT: u64 = 14;
     const E_NOT_ALLOWED_DELETE: u64 = 15;
     const E_NOT_ALLOWED_VOTE_POST: u64 = 16;
     const E_NOT_ALLOWED_VOTE_REPLY: u64 = 17;
@@ -114,14 +112,12 @@ module basics::userLib {
         energy: u64,
         lastUpdatePeriod: u64,
         followedCommunities: vector<ID>,
-        userRatingId: ID,   // nned?
-        // TODO: add roles                       // add userRatingCollection, periodRewardContainer, achievementsContainer ?
+        userRatingId: ID,   // need?
     }
 
     struct UserCommunityRating has key, store {    // shared
         id: UID,
         userRating: VecMap<ID, i64Lib::I64>,               // key - communityId         // vecMap??
-        // uint16[] rewardPeriods; // periods when the rating was changed               // add?
         userPeriodRewards: VecMap<u64, UserPeriodRewards>,  // key - period             // vecMap??
     }
 
@@ -176,13 +172,11 @@ module basics::userLib {
     }
 
     public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {  // add check isExist??
-        // let owner = tx_context::sender(ctx);
         createUserPrivate(usersRatingCollection, ipfsDoc, ctx)
     }
 
     fun createUserPrivate(usersRatingCollection: &mut UsersRatingCollection, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
-        // assert!(!isExists(userRatingCollection, userAddress), E_USER_EXIST); // TODO: TEST     new transfer ???
 
         let owner = tx_context::sender(ctx);
         let userCommunityRating = UserCommunityRating {
@@ -205,12 +199,6 @@ module basics::userLib {
             user, owner
         );
     }
-
-    // public fun createIfDoesNotExist(usersRatingCollection: &mut UsersRatingCollection, userAddress: address) {       // new transfer ???
-    //     if (!isExists(userRatingCollection, userAddress)) {
-    //         createUserPrivate(userRatingCollection, userAddress, DEFAULT_IPFS);
-    //     }
-    // }
 
     public entry fun updateUser(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
         let _userAddress = tx_context::sender(ctx);  // del
@@ -260,24 +248,6 @@ module basics::userLib {
         1000
     }
 
-    // public fun isExists(usersRatingCollection: &mut UsersRatingCollection, userAddress: address): bool { 
-    //     let position = vec_map::get_idx_opt(&mut userRatingCollection.users, &userAddress);
-    //     !option::is_none(&position)
-    // }
-
-    // public fun getUser(usersRatingCollection: &mut UsersRatingCollection, userAddress: address): User {
-    //     let position = vec_map::get_idx_opt(&mut userRatingCollection.users, &userAddress);
-    //     if (option::is_none(&position)) {
-    //         abort E_USER_DOES_NOT_EXIST
-    //     } else {
-    //         // TODO: add
-    //         // let user = vec_map::get(&userRatingCollection.users, &userAddress);
-    //         // user
-    //         let user = vec_map::get_mut(&mut userRatingCollection.users, &userAddress);
-    //         *user
-    //     }
-    // }
-
     /*plug*/
     public fun updateRating(userCommunityRating: &mut UserCommunityRating, _periodRewardContainer: &mut PeriodRewardContainer, _userId: ID, rating: i64Lib::I64, communityId: ID, _ctx: &mut TxContext) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
@@ -292,238 +262,6 @@ module basics::userLib {
         *userRating = i64Lib::add(&*userRating, &rating);
     }
 
-    /*
-    public fun updateRating(userCommunityRating: &mut UserCommunityRating, periodRewardContainer: &mut PeriodRewardContainer, userId: ID, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
-        if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
-            return;
-        
-        updateRatingBase(userCommunityRating, periodRewardContainer, userId, rating, communityId, ctx);
-    }
-    
-    public fun updateRatingBase(userCommunityRating: &mut UserCommunityRating, periodRewardContainer: &mut PeriodRewardContainer, userId: ID, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
-        let currentPeriod: u64 = commonLib::getPeriod();
-
-        // let userCommunityRating = &mut user.userCommunityRating; // del transfer
-        // Initialize user rating in the community if this is the first rating change
-        let position = vec_map::get_idx_opt(&mut userCommunityRating.userRating, &communityId);
-        if (option::is_none(&position)) {
-            vec_map::insert(&mut userCommunityRating.userRating, communityId, i64Lib::from(START_USER_RATING));
-        };
-        // let copyUserCommunityRating = *userCommunityRating;      // del transfer
-        
-        let pastPeriodsCount: u64 = vec_map::size(&mut userCommunityRating.userPeriodRewards);      // move down?
-
-        if (!vec_map::contains(&periodRewardContainer.periodRewardShares, &currentPeriod)) {
-            vec_map::insert(&mut periodRewardContainer.periodRewardShares, currentPeriod, PeriodRewardShares { id: object::new(ctx), totalRewardShares: 0, activeUsersInPeriod: vector::empty<ID>() });
-        };
-
-        let isFirstTransactionInPeriod = false;
-        // If this is the first user rating change in any community
-        
-        ////
-        // TODO: add split 1 f (pastPeriodsCount == 0 || *vector::borrow(&copyUserCommunityRating.rewardPeriods, pastPeriodsCount - 1) != currentPeriod) {
-        // mb back to 1 if
-        ////
-        if (pastPeriodsCount == 0) {
-            isFirstTransactionInPeriod = true;
-        } else {
-            let (key, _) = vec_map::get_entry_by_idx(&userCommunityRating.userPeriodRewards, pastPeriodsCount - 1);
-            if (key != &currentPeriod) {
-                isFirstTransactionInPeriod = true;
-            }
-        };
-
-        if (isFirstTransactionInPeriod) {
-            let periodRewardShares = vec_map::get_mut(&mut periodRewardContainer.periodRewardShares, &currentPeriod);
-            vector::push_back(&mut periodRewardShares.activeUsersInPeriod, userId);     // new transfer ??? user.owner or user.ID?
-            pushUserRewardPeriods(userCommunityRating, currentPeriod, communityId);         // TODO: add, what?
-        } else {  // rewrite
-            pastPeriodsCount = pastPeriodsCount - 1;
-            isFirstTransactionInPeriod = pushUserRewardCommunity(userCommunityRating, currentPeriod, communityId);
-        };
-
-        let _previousPeriod = 0;    // TODO: add Unused parameter 'previousPeriod'. Consider removing or prefixing with an underscore: '_previousPeriod'?
-        if (pastPeriodsCount > 0) {
-            let (key, _) = vec_map::get_entry_by_idx(&userCommunityRating.userPeriodRewards, pastPeriodsCount - 1);
-            _previousPeriod = *key;
-        } else {
-            // this means that there is no other previous period
-            _previousPeriod = currentPeriod;
-        };
-
-        
-        updateUserPeriodRating(periodRewardContainer, userCommunityRating, userId, rating, communityId, currentPeriod, _previousPeriod, isFirstTransactionInPeriod);
-
-        changeUserRating(userCommunityRating, communityId, rating);
-
-        // if (rating > 0) {    // todo add
-        //     AchievementLib.updateUserAchievements(userContext.achievementsContainer, userAddr, AchievementCommonLib.AchievementsType.Rating, int64(userCommunityRating.userRating[communityId].rating));
-        // }
-    }
-
-    fun changeUserRating(userCommunityRating: &mut UserCommunityRating, communityId: ID, rating: i64Lib::I64) {
-        let userRating = vec_map::get_mut(&mut userCommunityRating.userRating, &communityId);
-        *userRating = i64Lib::add(&*userRating, &rating);
-    }
-
-
-    fun pushUserRewardPeriods(userCommunityRating: &mut UserCommunityRating, currentPeriod: u64, communityId: ID) {
-        let mapPeriodRating: VecMap<ID, PeriodRating> = vec_map::empty();
-        vec_map::insert(&mut mapPeriodRating, communityId, PeriodRating{ ratingToReward: 0, penalty: 0 });
-
-        vec_map::insert(&mut userCommunityRating.userPeriodRewards, currentPeriod, UserPeriodRewards{ periodRating: mapPeriodRating});
-    }
-
-    fun pushUserRewardCommunity(userCommunityRating: &mut UserCommunityRating, currentPeriod: u64, communityId: ID): bool { // TODO: add name
-        let userPeriodRewards = vec_map::get_mut(&mut userCommunityRating.userPeriodRewards, &currentPeriod);
-        if (!vec_map::contains(&userPeriodRewards.periodRating, &communityId)) {
-            vec_map::insert(&mut userPeriodRewards.periodRating, communityId, PeriodRating{ ratingToReward: 0, penalty: 0 });
-            true
-        } else {
-            false
-        }
-    }
-
-    fun getPeriodRating(userCommunityRating: &mut UserCommunityRating, period: u64, communityId: ID): &mut PeriodRating {
-        // let (isExist, positionCarentPeriod) = vector::index_of(&user.userCommunityRating.rewardPeriods, &period);   // userPeriodRewards
-        // if (!isExist) abort 97; // todo!!!!
-        // let userPeriodRewards = vector::borrow_mut(&mut user.userCommunityRating.userPeriodRewards, positionCarentPeriod);
-
-        let userPeriodRewards = vec_map::get_mut(&mut userCommunityRating.userPeriodRewards, &period);
-
-        // let (isExistRewardCommunities, positionRewardCommunities) = vector::index_of(&userPeriodRewards.rewardCommunities, &communityId);
-        // if (!isExistRewardCommunities) abort 98;  // todo!!!!??
-        // vector::borrow_mut(&mut userPeriodRewards.periodRating, positionRewardCommunities)
-
-        vec_map::get_mut(&mut userPeriodRewards.periodRating, &communityId)
-    }
-
-    fun updatePeriodRating(userCommunityRating: &mut UserCommunityRating, period: u64, communityId: ID, penalty: u64, ratingToReward: u64) {
-        let periodRating = getPeriodRating(userCommunityRating, period, communityId);
-        if (penalty != 0)
-            periodRating.penalty = penalty;
-        if (ratingToReward != 0)
-            periodRating.ratingToReward = ratingToReward;
-    }
-
-    fun updateUserPeriodRating(periodRewardContainer: &mut PeriodRewardContainer, userCommunityRating: &mut UserCommunityRating, userId: ID, rating: i64Lib::I64, communityId: ID, currentPeriod: u64, previousPeriod: u64, isFirstTransactionInPeriod: bool ) {
-        // RewardLib.PeriodRating storage currentPeriodRating = userCommunityRating.userPeriodRewards[currentPeriod].periodRating[communityId];
-        // bool isFirstTransactionInPeriod = !currentPeriodRating.isActive;
-        let currentPeriodRating: PeriodRating = *getPeriodRating(userCommunityRating, currentPeriod, communityId);
-
-        let dataUpdateUserRatingCurrentPeriod: DataUpdateUserRating = DataUpdateUserRating {
-            ratingToReward: currentPeriodRating.ratingToReward,
-            penalty: currentPeriodRating.penalty,
-            changeRating: i64Lib::zero(),
-            ratingToRewardChange: i64Lib::zero()
-        };
-
-        if (currentPeriod == previousPeriod) {   //first period rating?
-            dataUpdateUserRatingCurrentPeriod.changeRating = rating;
-
-        } else {
-            let previousPeriodRating: &mut PeriodRating = getPeriodRating(userCommunityRating, previousPeriod, communityId);
-
-            let dataUpdateUserRatingPreviousPeriod: DataUpdateUserRating = DataUpdateUserRating {
-                ratingToReward: previousPeriodRating.ratingToReward,
-                penalty: previousPeriodRating.penalty,
-                changeRating: i64Lib::zero(),
-                ratingToRewardChange: i64Lib::zero()
-            };
-
-            if (previousPeriod != currentPeriod - 1) {
-                if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
-                    dataUpdateUserRatingCurrentPeriod.changeRating = i64Lib::sub(&i64Lib::add(&rating, &i64Lib::from(dataUpdateUserRatingPreviousPeriod.ratingToReward)), &i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty));
-                } else {
-                    dataUpdateUserRatingCurrentPeriod.changeRating = rating;
-                }
-            } else {
-                if (isFirstTransactionInPeriod && dataUpdateUserRatingPreviousPeriod.penalty > dataUpdateUserRatingPreviousPeriod.ratingToReward) {
-                    dataUpdateUserRatingCurrentPeriod.changeRating = i64Lib::sub(&i64Lib::from(dataUpdateUserRatingPreviousPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty));
-                };
-
-                // int32 differentRatingCurrentPeriod;
-                if (i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getGreaterThan() && dataUpdateUserRatingPreviousPeriod.penalty > 0) {
-                    if (dataUpdateUserRatingPreviousPeriod.ratingToReward == 0) {
-                        dataUpdateUserRatingCurrentPeriod.changeRating = i64Lib::add(&dataUpdateUserRatingCurrentPeriod.changeRating, &rating);
-                    } else {
-                        let differentRatingPreviousPeriod: i64Lib::I64 = i64Lib::sub(&rating, &i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty));       // name
-                        if (i64Lib::compare(&differentRatingPreviousPeriod, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&differentRatingPreviousPeriod, &i64Lib::zero()) == i64Lib::getEual()) { // differentRatingPreviousPeriod >= 0
-                            dataUpdateUserRatingPreviousPeriod.changeRating = i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty);
-                            dataUpdateUserRatingCurrentPeriod.changeRating = differentRatingPreviousPeriod;
-                        } else {
-                            dataUpdateUserRatingPreviousPeriod.changeRating = rating;
-                        };
-                    };
-                } else if (i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getLessThan() && dataUpdateUserRatingPreviousPeriod.ratingToReward > dataUpdateUserRatingPreviousPeriod.penalty) {
-
-                    let differentRatingCurrentPeriod = i64Lib::sub(&i64Lib::from(dataUpdateUserRatingCurrentPeriod.penalty), &rating);   // penalty is always positive, we need add rating to penalty
-                    if (i64Lib::compare(&differentRatingCurrentPeriod, &i64Lib::from(dataUpdateUserRatingCurrentPeriod.ratingToReward)) == i64Lib::getGreaterThan()) {
-                        dataUpdateUserRatingCurrentPeriod.changeRating = i64Lib::sub(&dataUpdateUserRatingCurrentPeriod.changeRating, &i64Lib::sub(&i64Lib::from(dataUpdateUserRatingCurrentPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingCurrentPeriod.penalty)));  // - current ratingToReward
-                        dataUpdateUserRatingPreviousPeriod.changeRating = i64Lib::sub(&rating, &dataUpdateUserRatingCurrentPeriod.changeRating);                                       // + previous penalty
-                        if (i64Lib::compare(&i64Lib::from(dataUpdateUserRatingPreviousPeriod.ratingToReward), &i64Lib::sub(&i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty), &dataUpdateUserRatingPreviousPeriod.changeRating)) == i64Lib::getLessThan()) {
-                            let extraPenalty: i64Lib::I64 = i64Lib::sub(&i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty), &i64Lib::sub(&i64Lib::from(dataUpdateUserRatingPreviousPeriod.ratingToReward), &dataUpdateUserRatingPreviousPeriod.changeRating));
-                            dataUpdateUserRatingPreviousPeriod.changeRating = i64Lib::add(&dataUpdateUserRatingPreviousPeriod.changeRating, &extraPenalty);  // - extra previous penalty
-                            dataUpdateUserRatingCurrentPeriod.changeRating = i64Lib::sub(&dataUpdateUserRatingCurrentPeriod.changeRating, &extraPenalty);   // + extra current penalty
-                        }
-                    } else {
-                        dataUpdateUserRatingCurrentPeriod.changeRating = rating;
-                        // dataUpdateUserRatingCurrentPeriod.changeRating += 0;
-                    };
-                } else {
-                    dataUpdateUserRatingCurrentPeriod.changeRating = i64Lib::add(&dataUpdateUserRatingCurrentPeriod.changeRating, &rating);
-                };
-            };
-
-            if (i64Lib::compare(&dataUpdateUserRatingPreviousPeriod.changeRating, &i64Lib::zero()) != i64Lib::getEual()) {
-                if (i64Lib::compare(&dataUpdateUserRatingPreviousPeriod.changeRating, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-                    previousPeriodRating.penalty = previousPeriodRating.penalty - i64Lib::as_u64(&dataUpdateUserRatingPreviousPeriod.changeRating);
-                } else {
-                    previousPeriodRating.penalty = previousPeriodRating.penalty + i64Lib::as_u64(&i64Lib::mul(&dataUpdateUserRatingPreviousPeriod.changeRating, &i64Lib::neg_from(1)));     // previousPeriodRating.penalty += -dataUpdateUserRatingPreviousPeriod.changeRating;
-                };
-
-                dataUpdateUserRatingPreviousPeriod.ratingToRewardChange = getRatingToRewardChange(i64Lib::sub(&i64Lib::from(dataUpdateUserRatingPreviousPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty)), i64Lib::add(&i64Lib::sub(&i64Lib::from(dataUpdateUserRatingPreviousPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingPreviousPeriod.penalty)), &dataUpdateUserRatingPreviousPeriod.changeRating));
-                if (i64Lib::compare(&dataUpdateUserRatingPreviousPeriod.ratingToRewardChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-                    let periodRewardShares = getMutableTotalRewardShares(periodRewardContainer, previousPeriod);
-                    periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares + i64Lib::as_u64(&getRewardShare(userId, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange));
-                } else {
-                    let periodRewardShares = getMutableTotalRewardShares(periodRewardContainer, previousPeriod);
-                    periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares - i64Lib::as_u64(&i64Lib::mul(&getRewardShare(userId, previousPeriod, dataUpdateUserRatingPreviousPeriod.ratingToRewardChange), &i64Lib::neg_from(1)));
-                };
-            };
-        };      // +
-
-        if (i64Lib::compare(&dataUpdateUserRatingCurrentPeriod.changeRating, &i64Lib::zero()) != i64Lib::getEual()) {
-            dataUpdateUserRatingCurrentPeriod.ratingToRewardChange = getRatingToRewardChange(i64Lib::sub(&i64Lib::from(dataUpdateUserRatingCurrentPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingCurrentPeriod.penalty)), i64Lib::add(&i64Lib::sub(&i64Lib::from(dataUpdateUserRatingCurrentPeriod.ratingToReward), &i64Lib::from(dataUpdateUserRatingCurrentPeriod.penalty)), &dataUpdateUserRatingCurrentPeriod.changeRating));
-            if (i64Lib::compare(&dataUpdateUserRatingCurrentPeriod.ratingToRewardChange, &i64Lib::zero()) == i64Lib::getGreaterThan()) {    // neg?   i64Lib::compare(&dataUpdateUserRatingCurrentPeriod.ratingToRewardChange, &i64Lib::zero()) == i64Lib::getGreaterThan()  //
-                let periodRewardShares = getMutableTotalRewardShares(periodRewardContainer, currentPeriod);
-                periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares + i64Lib::as_u64(&getRewardShare(userId, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange));
-            } else {
-                let periodRewardShares = getMutableTotalRewardShares(periodRewardContainer, currentPeriod);
-                periodRewardShares.totalRewardShares = periodRewardShares.totalRewardShares - i64Lib::as_u64(&i64Lib::mul(&getRewardShare(userId, currentPeriod, dataUpdateUserRatingCurrentPeriod.ratingToRewardChange), &i64Lib::neg_from(1)));
-            };
-
-            let _changeRating: i64Lib::I64 = i64Lib::zero();     // TODD: add Unused assignment or binding for local 'changeRating'. Consider removing, replacing with '_', or prefixing with '_' (e.g., '_changeRating')
-            if (i64Lib::compare(&dataUpdateUserRatingCurrentPeriod.changeRating, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-                _changeRating = i64Lib::sub(&dataUpdateUserRatingCurrentPeriod.changeRating, &i64Lib::from(dataUpdateUserRatingCurrentPeriod.penalty));
-                if (i64Lib::compare(&_changeRating, &i64Lib::zero()) != i64Lib::getLessThan()) {
-                    updatePeriodRating(userCommunityRating, currentPeriod, communityId, 0, i64Lib::as_u64(&_changeRating) + currentPeriodRating.ratingToReward);
-                } else {
-                    updatePeriodRating(userCommunityRating, currentPeriod, communityId, i64Lib::as_u64(&i64Lib::mul(&_changeRating, &i64Lib::neg_from(1))), currentPeriodRating.ratingToReward);
-                };
-
-            } else if (i64Lib::compare(&dataUpdateUserRatingCurrentPeriod.changeRating, &i64Lib::zero()) == i64Lib::getLessThan()) {
-                _changeRating = i64Lib::add(&i64Lib::from(dataUpdateUserRatingCurrentPeriod.ratingToReward), &dataUpdateUserRatingCurrentPeriod.changeRating);
-                if (i64Lib::compare(&_changeRating, &i64Lib::zero()) != i64Lib::getGreaterThan()) {
-                    updatePeriodRating(userCommunityRating, currentPeriod, communityId, i64Lib::as_u64(&i64Lib::mul(&_changeRating, &i64Lib::neg_from(1))) + currentPeriodRating.penalty, 0);
-                } else {
-                    updatePeriodRating(userCommunityRating, currentPeriod, communityId, currentPeriodRating.penalty, i64Lib::as_u64(&_changeRating));
-                };
-            };
-        };
-    }
-    */
-
     // TODO: add UserLib.Action action + add field UserLib.ActionRole actionRole
     public fun checkActionRole(
         user: &mut User,
@@ -537,17 +275,6 @@ module basics::userLib {
         //createUserIfDoesNotExist: bool  // new transfer ???
     ) 
     {
-        // TODO: add 
-        // require(msg.sender == address(userContext.peeranhaContent) || msg.sender == address(userContext.peeranhaCommunity), "internal_call_unauthorized");
-       
-        /*
-        if (createUserIfDoesNotExist) {                     // new transfer ??? commented
-            createIfDoesNotExist(userRatingCollection, actionCaller);
-        } else {
-            checkUser(userRatingCollection, actionCaller);        // need?
-        }; 
-        */
-
         if (hasModeratorRole(userRolesCollection, actionCallerId, communityId)) {
             return
         };
@@ -621,7 +348,6 @@ module basics::userLib {
             energy = ENERGY_POST_COMMENT;
 
         } else if (action == ACTION_EDIT_ITEM) {
-            // assert!(actionCaller == dataUser, E_NOT_ALLOWED_EDIT);
             ratingAllowed = i64Lib::neg_from(MINIMUM_RATING);
             message = E_LOW_RATING_EDIT_ITEM;
             energy = ENERGY_MODIFY_ITEM;
@@ -701,10 +427,6 @@ module basics::userLib {
         user.energy = userEnergy - energy;
     }
 
-    // fun checkUser(usersRatingCollection: &mut UsersRatingCollection, addr: address) {
-    //     assert!(isExists(userRatingCollection, addr), E_USER_NOT_FOUND);
-    // }
-
     fun getMutableTotalRewardShares(periodRewardContainer: &mut PeriodRewardContainer, period: u64): &mut PeriodRewardShares {
         if (vec_map::contains(&periodRewardContainer.periodRewardShares, &period)) {
             vec_map::get_mut(&mut periodRewardContainer.periodRewardShares, &period)
@@ -720,12 +442,6 @@ module basics::userLib {
         } else {
             *vec_map::get(&userCommunityRating.userRating, &communityId)
         }
-    }
-
-    // TODO: add usersRatingCollection: &mut UsersRatingCollection 1-st argument
-    fun getRewardShare(_userId: ID, _period: u64, rating: i64Lib::I64): i64Lib::I64 { // FIX
-        // TODO: add
-        /*return CommonLib.toInt32FromUint256(userContext.peeranhaToken.getBoost(userAddr, period)) * */ rating
     }
 
     fun getRatingToRewardChange(previosRatingToReward: i64Lib::I64, newRatingToReward: i64Lib::I64): i64Lib::I64 {
@@ -746,32 +462,6 @@ module basics::userLib {
     public fun getMutableUserCommunityRating(usersRatingCollection: &mut UsersRatingCollection, userId: ID): &mut UserCommunityRating {
         table::borrow_mut(&mut usersRatingCollection.usersCommunityRating, userId)
     }
-
-    // public entry fun mass_mint(recipients: vector<address>, ctx: &mut TxContext) {
-    //     assert!(tx_context::sender(ctx) == CREATOR, EAuthFail);
-    //     let i = 0;
-    //     while (!vector::is_empty(recipients)) {
-    //         let recipient = vector::pop_back(&mut recipients);
-    //         let id = tx_context::new_id(ctx);
-    //         let creation_date = tx_context::epoch(); // Sui epochs are 24 hours
-    //         transfer(CoolAsset { id, creation_date }, recipient)
-    //     }
-    // }
-
-    // public entry fun printUsersRatingCollection(usersRatingCollection: &mut UsersRatingCollection) {
-    //     debug::print(userRatingCollection);
-    // }
-
-    // public entry fun printUser(usersRatingCollection: &mut UsersRatingCollection, owner: address) {
-    //     let (isExist, position) = vector::index_of(&mut userRatingCollection.userAddress, &owner);
-    //     debug::print(&isExist);
-    //     debug::print(&position);
-
-    //     if (isExist) {
-    //         let user = vector::borrow(&mut userRatingCollection.users, position);
-    //         debug::print(user);
-    //     }
-    // }
 
     public fun get_action_none(): u8 {
         ACTION_NONE

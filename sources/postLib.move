@@ -11,10 +11,8 @@ module basics::postLib {
     use basics::commonLib;
     use basics::userLib;
     use basics::i64Lib;
-    // use sui::dynamic_object_field as ofield;
 
     use sui::table::{Self, Table};
-    // use sui::bag::{Self, Bag};
 
     // ====== Errors ======
 
@@ -27,10 +25,6 @@ module basics::postLib {
     const E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_POST: u64 = 41;
 
     const E_NOT_ALLOWED_EDIT_NOT_AUTHOR: u64 = 42;
-
-    // const E_YOU_CAN_NOT_EDIT_THIS_REPLY_IT_IS_NOT_YOUR: u64 = 43;
-
-    // const E_YOU_CAN_NOT_EDIT_THIS_COMMENT_IT_IS_NOT_YOUR: u64 = 44;
 
     const E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY: u64 = 45;
 
@@ -262,10 +256,6 @@ module basics::postLib {
         commentMetaDataKey: u64,
         voteDirection: u8,
     }
-
-    // event TranslationCreated(address indexed user, uint256 indexed postId, uint16 replyMetaDataKey, uint8 commentMetaDataKey, Language language);
-    // event TranslationEdited(address indexed user, uint256 indexed postId, uint16 replyMetaDataKey, uint8 commentMetaDataKey, Language language);
-    // event TranslationDeleted(address indexed user, uint256 indexed postId, uint16 replyMetaDataKey, uint8 commentMetaDataKey, Language language);
 
     public entry fun createPost(
         usersRatingCollection: &userLib::UsersRatingCollection,
@@ -559,7 +549,6 @@ module basics::postLib {
         language: u8,
         ctx: &mut TxContext
     ) {
-        // fix
         let _newCommunityId = object::id(newCommunity);
         // if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
         //     abort E_ERROR_CHANGE_COMMUNITY_ID;  // test
@@ -639,7 +628,6 @@ module basics::postLib {
         isOfficialReply: bool,
         language: u8,
     ) {
-        // checkMatchItemId(object::id(reply), replyMetaData.replyId);                           // todo????        // test
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
         if (commonLib::getIpfsHash(reply.ipfsDoc) != ipfsHash)
             reply.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -1652,16 +1640,6 @@ module basics::postLib {
     ): u64 {
         return table::length(&postMetaData.replies) - postMetaData.deletedReplyCount
     }
-
-    // public fun getReply(postCollection: &mut PostCollection, postId: u64, replyMetaDataKey: u64): &mut Reply {
-    //     let post = getPost(postCollection, postId);
-    //     return getReplyContainer(post, replyMetaDataKey)
-    // }
-
-    // public fun getComment(postCollection: &mut PostCollection, postId: u64, replyMetaDataKey: u64, commentMetaDataKey: u64): &mut Comment {
-    //     let post = getPost(postCollection, postId);
-    //     return getCommentContainer(post, replyMetaDataKey, commentMetaDataKey)
-    // }
 
     #[test_only]
     public fun isDeletedPost(postMetaData: &PostMetaData): (bool) {
