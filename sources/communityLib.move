@@ -202,11 +202,11 @@ module basics::communityLib {
         event::emit(UnfreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
-    public entry fun onlyNotFrezenCommunity(community: &Community) {
+    public fun onlyNotFrezenCommunity(community: &Community) {
         assert!(!community.isFrozen, E_COMMUNITY_IS_FROZEN);
     }
 
-    public entry fun checkTags(community: &Community, tags: vector<u64>) {
+    public fun checkTags(community: &Community, tags: vector<u64>) {
         let i = 0;
         while(i < vector::length(&mut tags)) {
             let tagId = *vector::borrow(&tags, i);

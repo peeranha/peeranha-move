@@ -814,4 +814,104 @@ module basics::communityLib_test
         test_scenario::return_shared(user_roles_collection_val);
         test_scenario::return_to_sender(scenario, user_val);
     }
+
+    #[test_only]
+    public fun update_common_community(scenario: &mut Scenario) {
+        let community_val = test_scenario::take_shared<Community>(scenario);
+        let community = &mut community_val;
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+
+        communityLib::updateCommunity(user_roles_collection, user, community, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1");
+
+        test_scenario::return_shared(community_val);
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun update_common_documentation(scenario: &mut Scenario) {
+        let community_val = test_scenario::take_shared<Community>(scenario);
+        let community = &mut community_val;
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+
+        communityLib::updateDocumentationTree(user_roles_collection, user, community, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83");
+
+        test_scenario::return_shared(community_val);
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun create_common_tag(scenario: &mut Scenario) {
+        let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
+
+            communityLib::createTag(user_roles_collection, user, community, x"0000000000000000000000000000000000000000000000000000000000000006", test_scenario::ctx(scenario));
+
+            test_scenario::return_shared(community_val);
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun update_common_tag(scenario: &mut Scenario) {
+        let community_val = test_scenario::take_shared<Community>(scenario);
+        let community = &mut community_val;
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+
+        communityLib::updateTag(user_roles_collection, user, community, 2, x"0000000000000000000000000000000000000000000000000000000000000007");
+
+        test_scenario::return_shared(community_val);
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun freeze_common_community(scenario: &mut Scenario) {
+        let community_val = test_scenario::take_shared<Community>(scenario);
+        let community = &mut community_val;
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+
+        communityLib::freezeCommunity(user_roles_collection, user, community);
+        let (_ipfsDoc, _documentation, isFrozen) = communityLib::getCommunityData(community);
+        assert!(isFrozen == true, 3);
+
+        test_scenario::return_shared(community_val);
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun unfreeze_common_community(scenario: &mut Scenario) {
+        let community_val = test_scenario::take_shared<Community>(scenario);
+        let community = &mut community_val;
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+
+        communityLib::unfreezeCommunity(user_roles_collection, user, community);
+        let (_ipfsDoc, _documentation, isFrozen) = communityLib::getCommunityData(community);
+        assert!(isFrozen == false, 3);
+
+        test_scenario::return_shared(community_val);
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
 }
