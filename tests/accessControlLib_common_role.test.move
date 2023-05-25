@@ -26,7 +26,7 @@ module basics::accessControlLib_common_role_test
     // ====== grant/revoke role ======
     
     #[test]
-    fun test_defaul_admin_cap() {
+    fun test_init() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -36,8 +36,13 @@ module basics::accessControlLib_common_role_test
         test_scenario::next_tx(scenario, USER1);
         {
             let default_admin_cap_val = test_scenario::take_from_sender<DefaultAdminCap>(scenario);
-            
             test_scenario::return_to_sender(scenario, default_admin_cap_val);
+
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let admin_role_for_bot = accessControlLib::getRoleAdmin(user_roles_collection, BOT_ROLE);
+            assert!(admin_role_for_bot == PROTOCOL_ADMIN_ROLE, 2);
+            test_scenario::return_shared(user_roles_collection_val);
         };
 
         test_scenario::end(scenario_val);

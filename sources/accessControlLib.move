@@ -75,11 +75,12 @@ module basics::accessControlLib {
     }
 
     fun init(ctx: &mut TxContext) {
-        let roles = UserRolesCollection {
+        let userRolesCollection = UserRolesCollection {
             id: object::new(ctx),
             roles: table::new(ctx)
         };
-        transfer::share_object(roles);
+        setRoleAdmin(&mut userRolesCollection, BOT_ROLE, PROTOCOL_ADMIN_ROLE);
+        transfer::share_object(userRolesCollection);
 
         transfer::transfer(
             DefaultAdminCap {
