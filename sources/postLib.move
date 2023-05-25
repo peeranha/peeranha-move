@@ -99,6 +99,11 @@ module basics::postLib {
     const NONE_VOTE: u8 = 2;
     const UPVOTE: u8 = 3;
 
+    const MESSENGER_TYPE_UNKNOWN: u8 = 0;
+    const MESSENGER_TYPE_TELEGRAM: u8 = 1;
+    const MESSENGER_TYPE_DISCORD: u8 = 2;
+    const MESSENGER_TYPE_SLACK: u8 = 3;
+
     struct Post has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
@@ -110,6 +115,7 @@ module basics::postLib {
         postType: u8,
         postTime: u64,
         author: ID,
+        authorMetaData: vector<u8>,
         rating: i64Lib::I64,
         communityId: ID,
         language: u8,
@@ -136,6 +142,7 @@ module basics::postLib {
         replyId: ID,
         postTime: u64,
         author: ID,
+        authorMetaData: vector<u8>,
         rating: i64Lib::I64,
         parentReplyMetaDataKey: u64,
         language: u8,
@@ -257,7 +264,36 @@ module basics::postLib {
         voteDirection: u8,
     }
 
-    public entry fun createPost(
+    public entry fun createPostByBot(
+        roles: &mut accessControlLib::UserRolesCollection,
+        time: &Clock,
+        user: &mut userLib::User,
+        community: &communityLib::Community,
+        ipfsHash: vector<u8>, 
+        postType: u8,
+        tags: vector<u64>,
+        messengerType: u8,
+        handle: vector<u8>,
+        ctx: &mut TxContext
+    ) {
+        let userId = object::id(user);
+        accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
+        let authorMetaData = vector[messengerType];
+        vector::append<u8>(&mut authorMetaData, handle);
+        createPost(
+            time,
+            commonLib::get_bot_address(),
+            community,
+            ipfsHash, 
+            postType,
+            tags,
+            ENGLISH_LANGUAGE,
+            authorMetaData,
+            ctx
+        )
+    }
+
+    public entry fun createPostByUser(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
         time: &Clock,
@@ -270,10 +306,8 @@ module basics::postLib {
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
-        let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, object::id(user));
-        
-        communityLib::onlyNotFrezenCommunity(community);
-        communityLib::checkTags(community, tags);
+        let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
+
         let communityId = object::id(community);
         userLib::checkActionRole(                               // test
             user,
@@ -286,6 +320,34 @@ module basics::postLib {
             accessControlLib::get_action_role_none(),
             /*true*/
         );
+
+        createPost(
+            time,
+            userId,
+            community,
+            ipfsHash, 
+            postType,
+            tags,
+            language,
+            vector::empty<u8>(),
+            ctx
+        )
+    }
+
+    fun createPost(
+        time: &Clock,
+        userId: ID,
+        community: &communityLib::Community,
+        ipfsHash: vector<u8>, 
+        postType: u8,
+        tags: vector<u64>,
+        language: u8,
+        authorMetaData: vector<u8>,
+        ctx: &mut TxContext
+    ) {
+        communityLib::onlyNotFrezenCommunity(community);
+        communityLib::checkTags(community, tags);
+        let communityId = object::id(community);
 
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
@@ -303,6 +365,7 @@ module basics::postLib {
             postType: postType,
             postTime: commonLib::getTimestamp(time),
             author: userId,
+            authorMetaData: authorMetaData,
             rating: i64Lib::zero(),
             communityId: communityId,
             officialReplyMetaDataKey: 0,
@@ -327,7 +390,41 @@ module basics::postLib {
         );
     }
 
-    public entry fun createReply(
+    public entry fun createReplyByBot(
+        roles: &mut accessControlLib::UserRolesCollection,
+        usersRatingCollection: &mut userLib::UsersRatingCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        time: &Clock,
+        user: &mut userLib::User,
+        postMetaData: &mut PostMetaData,
+        parentReplyMetaDataKey: u64,
+        ipfsHash: vector<u8>,
+        isOfficialReply: bool,
+        messengerType: u8,
+        handle: vector<u8>,
+        ctx: &mut TxContext
+    ) {
+        let userId = object::id(user);
+        accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
+        let authorMetaData = vector[messengerType];
+        vector::append<u8>(&mut authorMetaData, handle);
+
+        createReply(
+            usersRatingCollection,
+            periodRewardContainer,
+            time,
+            commonLib::get_bot_address(),
+            postMetaData,
+            parentReplyMetaDataKey,
+            ipfsHash,
+            isOfficialReply,
+            ENGLISH_LANGUAGE,
+            authorMetaData,
+            ctx
+        )
+    }
+
+    public entry fun createReplyByUser(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
@@ -340,12 +437,9 @@ module basics::postLib {
         language: u8,
         ctx: &mut TxContext
     ) {
-        assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let userId = object::id(user);
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
 
-        assert!(postMetaData.postType != TUTORIAL, E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL);
-        assert!(parentReplyMetaDataKey == 0, E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST);
         let communityId = postMetaData.communityId;
         userLib::checkActionRole(                       // test
             user,
@@ -355,11 +449,43 @@ module basics::postLib {
             postMetaData.author,
             communityId,
             userLib::get_action_publication_reply(),
-            if (parentReplyMetaDataKey == 0 && isOfficialReply)     //parentReplyMetaDataKey need?
+            if (isOfficialReply)
                 accessControlLib::get_action_role_community_admin() else
                 accessControlLib::get_action_role_none()
             /*true*/
         );
+
+        createReply(
+            usersRatingCollection,
+            periodRewardContainer,
+            time,
+            userId,
+            postMetaData,
+            parentReplyMetaDataKey,
+            ipfsHash,
+            isOfficialReply,
+            language,
+            vector::empty<u8>(),
+            ctx
+        )
+    }
+
+    fun createReply(
+        usersRatingCollection: &mut userLib::UsersRatingCollection,
+        periodRewardContainer: &mut userLib::PeriodRewardContainer,
+        time: &Clock,
+        userId: ID,
+        postMetaData: &mut PostMetaData,
+        parentReplyMetaDataKey: u64,
+        ipfsHash: vector<u8>,
+        isOfficialReply: bool,
+        language: u8,
+        authorMetaData: vector<u8>,
+        ctx: &mut TxContext
+    ) {
+        assert!(!postMetaData.isDeleted, E_POST_DELETED);
+        assert!(postMetaData.postType != TUTORIAL, E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL);
+        assert!(parentReplyMetaDataKey == 0, E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
@@ -369,7 +495,9 @@ module basics::postLib {
             while (replyMetaDataKey <= countReplies) {
                 let replyContainer = getReplyMetaData(postMetaData, replyMetaDataKey);
                 assert!(
-                    userId != replyContainer.author || replyContainer.isDeleted,
+                    (userId != replyContainer.author && userId != commonLib::get_bot_address()) ||
+                    replyContainer.authorMetaData != authorMetaData ||
+                    replyContainer.isDeleted,
                     E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_POST
                 );
                 replyMetaDataKey = replyMetaDataKey + 1;
@@ -393,12 +521,13 @@ module basics::postLib {
                 isQuickReply = true;
                 changeUserRating = i64Lib::add(&changeUserRating, &getUserRatingChangeForReplyAction(postMetaData.postType, RESOURCE_ACTION_QUICK_REPLY));
             };
+            let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
             userLib::updateRating(
                 userCommunityRating,
                 periodRewardContainer,
                 userId,
                 changeUserRating,
-                communityId,
+                postMetaData.communityId,
                 ctx
             );
         };
@@ -412,6 +541,7 @@ module basics::postLib {
             replyId: object::id(&reply),
             postTime: timestamp,
             author: userId,
+            authorMetaData: authorMetaData,
             rating: i64Lib::zero(),
             parentReplyMetaDataKey: parentReplyMetaDataKey,
             language: language,

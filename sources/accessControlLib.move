@@ -59,7 +59,7 @@ module basics::accessControlLib {
 
     struct RoleAdminChanged has copy, drop {
         role: vector<u8>,
-        previousAdminRole: vector<u8>,
+        previousAdminRole: vector<u8>,      // set??
         adminRole: vector<u8>,
     }
 

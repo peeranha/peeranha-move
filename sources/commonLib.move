@@ -8,6 +8,10 @@ module basics::commonLib {
 
     const E_INVALIT_IPFSHASH: u64 = 30;
 
+    // ====== Constant ======
+
+    const BOT_BYTES_ADDRESS: vector<u8> = vector[1];
+
     struct IpfsHash has store, copy, drop {
       hash: vector<u8>,
       hash2: vector<u8> // Not currently used and added for the future compatibility
@@ -41,5 +45,9 @@ module basics::commonLib {
 
     public fun getZeroId(): ID {
         object::id_from_address(@0x0)
+    }
+
+    public fun get_bot_address(): ID {
+        object::id_from_bytes(BOT_BYTES_ADDRESS)
     }
 }
