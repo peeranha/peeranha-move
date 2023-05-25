@@ -10,7 +10,7 @@ module basics::commonLib {
 
     // ====== Constant ======
 
-    const BOT_BYTES_ADDRESS: vector<u8> = vector[1];
+    const BOT_BYTES_ADDRESS: vector<u8> = vector[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1];
 
     struct IpfsHash has store, copy, drop {
       hash: vector<u8>,
