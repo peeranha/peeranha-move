@@ -24,20 +24,20 @@ module basics::userLib {
     const E_NOT_ALLOWED_ACTION: u64 = 21;
     const E_LOW_ENERGY: u64 = 22;
     const E_MUST_BE_0_RATING: u64 = 23;
-    const E_LOW_RATING_CREATE_POST: u64 = 24;       //
-    const E_LOW_RATING_CREATE_REPLY: u64 = 25;      //
+    const E_LOW_RATING_CREATE_POST: u64 = 24;
+    const E_LOW_RATING_CREATE_REPLY: u64 = 25;
     const E_LOW_RATING_CREATE_COMMENT: u64 = 26;
-    const E_LOW_RATING_EDIT_ITEM: u64 = 27;         //
-    const E_LOW_RATING_DELETE_ITEM: u64 = 28;       //
+    const E_LOW_RATING_EDIT_ITEM: u64 = 27;
+    const E_LOW_RATING_DELETE_ITEM: u64 = 28;
     const E_LOW_RATING_UPVOTE_POST: u64 = 29;
     const E_LOW_RATING_UPVOTE_REPLY: u64 = 30;
-    const E_LOW_RATING_VOTE_COMMENT: u64 = 31;      //
+    const E_LOW_RATING_VOTE_COMMENT: u64 = 31;
     const E_LOW_RATING_DOWNVOTE_POST: u64 = 32;
     const E_LOW_RATING_DOWNVOTE_REPLY: u64 = 33;
     const E_LOW_RATING_CANCEL_VOTE: u64 = 34;
-    const E_LOW_RATING_MARK_BEST_REPLY: u64 = 35;       //
-    const E_LOW_RATING_UPDATE_PROFILE: u64 = 36;        //
-    const E_LOW_RATING_FOLLOW_COMMUNITY: u64 = 37;
+    const E_LOW_RATING_MARK_BEST_REPLY: u64 = 35;
+    const E_LOW_RATING_UPDATE_PROFILE: u64 = 36;    // never call
+    const E_LOW_RATING_FOLLOW_COMMUNITY: u64 = 37;  // never call
     const E_CHECK_FUNCTION_getMutableTotalRewardShare: u64 = 100; // todo
 
     // ====== Enum ======

@@ -2,15 +2,13 @@
 module basics::accessControlLib_action_common_user_negative_rating_test
 {
     use basics::userLib;
-    // use basics::postLib::{Self, Post, PostMetaData, Comment};
+    use basics::postLib::{Self, Post, PostMetaData, Comment};
+    use basics::followCommunityLib;
     use sui::clock;
     use basics::userLib_test;
     use basics::communityLib_test;
     use basics::postLib_test;
-
-    // use basics::postLib_votes_rating_test;
-
-    // use basics::postLib_votes_test;
+    use basics::postLib_votes_test;
     use basics::accessControlLib_common_role_test;
     use basics::accessControlLib;
     use sui::test_scenario::{Self, Scenario};
@@ -35,7 +33,7 @@ module basics::accessControlLib_action_common_user_negative_rating_test
 
     // ====== community admin action ======
 
-    #[test/*, expected_failure(abort_code = userLib::E_LOW_RATING_UPDATE_PROFILE)*/]
+    #[test]
     fun test_common_user_negative_update_profile() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
@@ -46,27 +44,14 @@ module basics::accessControlLib_action_common_user_negative_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            updateRating(800, false, scenario);
+            updateRating(RATING, false, scenario);
         };
-
-        // test_scenario::next_tx(scenario, USER2);
-        // {
-        //     updateRating(150, true, scenario);
-        // };
-
-        // test_scenario::next_tx(scenario, USER2);
-        // {
-        //     updateRating(RATING, false, scenario);
-        // };
 
         test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user = &mut user_val;
             let user_rating_collection = &mut user_rating_collection_val;
-            
-            // let votedUserRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, &mut community_val);
-            // debug::print(&votedUserRating);
             
             userLib::updateUser(user_rating_collection, user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", test_scenario::ctx(scenario));
 
@@ -76,7 +61,6 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);
     }
-    /*
     
     #[test, expected_failure(abort_code = userLib::E_LOW_RATING_CREATE_POST)]
     fun test_common_user_negative_rating_create_post() {
@@ -90,6 +74,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             postLib_test::create_standart_post(&time, scenario);
         };
 
@@ -109,6 +97,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             postLib_test::create_standart_post(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             updateRating(RATING, false, scenario);
         };
 
@@ -210,6 +202,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             postLib_test::create_standart_post(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             updateRating(RATING, false, scenario);
         };
 
@@ -247,7 +243,6 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         let time;
         {
             time = init_accessControlLib_user2_is_common_negative_rating(scenario);
-            updateRating(RATING, false, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -304,6 +299,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             postLib_test::create_standart_reply(&time, scenario);
         };
 
@@ -379,6 +378,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             postLib_test::create_standart_reply(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             updateRating(RATING, false, scenario);
         };
 
@@ -492,7 +495,24 @@ module basics::accessControlLib_action_common_user_negative_rating_test
                 1,
                 test_scenario::ctx(scenario)
             );
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
 
             postLib::moderatorEditReply(
                 user_rating_collection,
@@ -613,7 +633,7 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::end(scenario_val);
     }
 
-    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_MARK_BEST_REPLY)]
+    #[test, expected_failure(abort_code = postLib::E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY)]
     fun test_common_user_negative_rating_set_own_best_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
@@ -682,6 +702,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             postLib_test::create_standart_reply(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             updateRating(RATING, false, scenario);
         };
 
@@ -783,6 +807,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             postLib_test::create_standart_comment(&time, 0, scenario);
         };
 
@@ -812,6 +840,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             postLib_test::create_standart_comment(&time, 1, scenario);
         };
 
@@ -836,6 +868,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             postLib_test::create_standart_comment(&time, 0, scenario);
         };
 
@@ -865,6 +901,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             postLib_test::create_standart_comment(&time, 1, scenario);
         };
 
@@ -888,8 +928,17 @@ module basics::accessControlLib_action_common_user_negative_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            updateRating(RATING, false, scenario);
+            updateRating(100, true, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             postLib_test::create_standart_comment(&time, 0, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            updateRating(RATING + 100, false, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1065,7 +1114,7 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::end(scenario_val);
     }
 
-    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_UPVOTE_POST)]
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_CANCEL_VOTE)]
     fun test_common_user_negative_rating_cancel_vote_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
@@ -1180,7 +1229,7 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::end(scenario_val);
     }
 
-    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_UPVOTE_REPLY)]
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_CANCEL_VOTE)]
     fun test_common_user_negative_rating_cancel_vote_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
@@ -1305,7 +1354,7 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::end(scenario_val);
     }
 
-    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_VOTE_COMMENT)]
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_CANCEL_VOTE)]
     fun test_common_user_negative_rating_cancel_vote_comment() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
@@ -1405,6 +1454,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             communityLib_test::create_community(scenario);
         };
 
@@ -1424,6 +1477,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             communityLib_test::update_common_community(scenario);
         };
 
@@ -1443,6 +1500,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             communityLib_test::update_common_documentation(scenario);
         };
 
@@ -1462,6 +1523,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             communityLib_test::create_common_tag(scenario);
         };
 
@@ -1481,6 +1546,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             communityLib_test::update_common_tag(scenario);
         };
 
@@ -1500,6 +1569,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             communityLib_test::freeze_common_community(scenario);
         };
 
@@ -1519,6 +1592,10 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             communityLib_test::freeze_common_community(scenario);
         };
 
@@ -1531,7 +1608,77 @@ module basics::accessControlLib_action_common_user_negative_rating_test
         test_scenario::end(scenario_val);
     }
 
-    */
+    #[test]
+    fun test_common_user_negative_rating_follow_community() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common_negative_rating(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            
+            followCommunityLib::followCommunity(user_rating_collection, user, community);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::end(scenario_val);
+        clock::destroy_for_testing(time);
+    }
+
+    #[test]
+    fun test_common_user_negative_rating_unfollow_community() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common_negative_rating(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            
+            followCommunityLib::followCommunity(user_rating_collection, user, community);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            
+            followCommunityLib::unfollowCommunity(user_rating_collection, user, community);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::end(scenario_val);
+        clock::destroy_for_testing(time);
+    }
 
     // ====== Support functions ======
 

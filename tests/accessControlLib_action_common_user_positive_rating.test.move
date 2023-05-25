@@ -3,6 +3,7 @@ module basics::accessControlLib_action_common_user_positive_rating_test
 {
     use basics::userLib;
     use basics::postLib::{Self, Post, PostMetaData};
+    use basics::followCommunityLib;
     use sui::clock::{Self};
     use basics::userLib_test;
     use basics::communityLib_test;
@@ -27,29 +28,6 @@ module basics::accessControlLib_action_common_user_positive_rating_test
     const DISPATCHER_ROLE: vector<u8> = vector<u8>[6];
 
     // ====== community admin action ======
-
-    #[test]
-    fun test_common_user_positive_update_profile() {
-        let scenario_val = test_scenario::begin(USER1);
-        let scenario = &mut scenario_val;
-        let time;
-        {
-            time = init_accessControlLib_user2_is_common(scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER2);
-        {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
-            let user = &mut user_val;
-            let user_rating_collection = &mut user_rating_collection_val;
-            userLib::updateUser(user_rating_collection, user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", test_scenario::ctx(scenario));
-
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
-        };
-
-        clock::destroy_for_testing(time);
-        test_scenario::end(scenario_val);
-    }
 
     #[test]
     fun test_common_user_positive_rating_create_post() {
@@ -840,6 +818,29 @@ module basics::accessControlLib_action_common_user_positive_rating_test
         test_scenario::end(scenario_val);
     }
 
+    #[test]
+    fun test_common_user_positive_update_profile() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user = &mut user_val;
+            let user_rating_collection = &mut user_rating_collection_val;
+            userLib::updateUser(user_rating_collection, user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", test_scenario::ctx(scenario));
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
     #[test, expected_failure(abort_code = userLib::E_NOT_ALLOWED_DELETE)]
     fun test_common_user_positive_rating_delete_not_own_comment_to_reply() {
         let scenario_val = test_scenario::begin(USER1);
@@ -1321,6 +1322,68 @@ module basics::accessControlLib_action_common_user_positive_rating_test
 
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_common_user_negative_rating_follow_community() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            
+            followCommunityLib::followCommunity(user_rating_collection, user, community);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::end(scenario_val);
+        clock::destroy_for_testing(time);
+    }
+
+    #[test]
+    fun test_common_user_negative_rating_unfollow_community() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            
+            followCommunityLib::followCommunity(user_rating_collection, user, community);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            
+            followCommunityLib::unfollowCommunity(user_rating_collection, user, community);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        test_scenario::end(scenario_val);
+        clock::destroy_for_testing(time);
     }
 
 
