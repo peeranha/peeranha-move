@@ -1255,6 +1255,22 @@ module basics::accessControlLib_common_role_test
     }
 
     #[test_only]
+    public fun grant_himself_community_admin_role(community: &mut Community, scenario: &mut Scenario) {
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+        let userId = object::id(user);
+
+        let roleTemplate = COMMUNITY_ADMIN_ROLE;
+        vector::append<u8>(&mut roleTemplate, object::id_to_bytes(&object::id(community)));
+        userLib::grantRole(user_roles_collection, user, userId, roleTemplate);
+
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
     public fun grant_community_moderator_role(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) {
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let user_roles_collection = &mut user_roles_collection_val;

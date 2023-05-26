@@ -23,7 +23,21 @@ module basics::userLib {
     const E_NOT_ALLOWED_VOTE_COMMENT: u64 = 18;
     const E_NOT_ALLOWED_ACTION: u64 = 21;
     const E_LOW_ENERGY: u64 = 22;
-    const E_CHECK_FUNCTION_getRatingAndEnergyForAction: u64 = 99;
+    const E_MUST_BE_0_RATING: u64 = 23;
+    const E_LOW_RATING_CREATE_POST: u64 = 24;
+    const E_LOW_RATING_CREATE_REPLY: u64 = 25;
+    const E_LOW_RATING_CREATE_COMMENT: u64 = 26;
+    const E_LOW_RATING_EDIT_ITEM: u64 = 27;
+    const E_LOW_RATING_DELETE_ITEM: u64 = 28;
+    const E_LOW_RATING_UPVOTE_POST: u64 = 29;
+    const E_LOW_RATING_UPVOTE_REPLY: u64 = 30;
+    const E_LOW_RATING_VOTE_COMMENT: u64 = 31;
+    const E_LOW_RATING_DOWNVOTE_POST: u64 = 32;
+    const E_LOW_RATING_DOWNVOTE_REPLY: u64 = 33;
+    const E_LOW_RATING_CANCEL_VOTE: u64 = 34;
+    const E_LOW_RATING_MARK_BEST_REPLY: u64 = 35;
+    const E_LOW_RATING_UPDATE_PROFILE: u64 = 36;    // never call
+    const E_LOW_RATING_FOLLOW_COMMUNITY: u64 = 37;  // never call
     const E_CHECK_FUNCTION_getMutableTotalRewardShare: u64 = 100; // todo
 
     // ====== Enum ======
@@ -306,17 +320,22 @@ module basics::userLib {
         dataUser: ID,
         action: u8
     ): (i64Lib::I64, u64, u64) { // ratingAllowed, message, energy
-        let ratingAllowed: i64Lib::I64 = i64Lib::zero();
-        let message: u64 = E_CHECK_FUNCTION_getRatingAndEnergyForAction;
-        let energy: u64 = 0;
+        let ratingAllowed: i64Lib::I64 = i64Lib::neg_from(MINIMUM_RATING);
+        let message: u64;
+        let energy: u64;
 
         if (action == ACTION_NONE) {
+            ratingAllowed = i64Lib::zero();
+            message = E_MUST_BE_0_RATING;
+            energy = 0;
         } else if (action == ACTION_PUBLICATION_POST) {
             ratingAllowed = i64Lib::from(POST_QUESTION_ALLOWED);
+            message = E_LOW_RATING_CREATE_POST; 
             energy = ENERGY_POST_QUESTION;
 
         } else if (action == ACTION_PUBLICATION_REPLY) {
             ratingAllowed = i64Lib::from(POST_REPLY_ALLOWED);
+            message = E_LOW_RATING_CREATE_REPLY;
             energy = ENERGY_POST_ANSWER;
 
         } else if (action == ACTION_PUBLICATION_COMMENT) {
@@ -325,55 +344,65 @@ module basics::userLib {
             } else {
                 ratingAllowed = i64Lib::from(POST_COMMENT_ALLOWED);
             };
+            message = E_LOW_RATING_CREATE_COMMENT;
             energy = ENERGY_POST_COMMENT;
 
         } else if (action == ACTION_EDIT_ITEM) {
             ratingAllowed = i64Lib::neg_from(MINIMUM_RATING);
+            message = E_LOW_RATING_EDIT_ITEM;
             energy = ENERGY_MODIFY_ITEM;
 
         } else if (action == ACTION_DELETE_ITEM) {
             assert!(actionCaller == dataUser, E_NOT_ALLOWED_DELETE);
             ratingAllowed = i64Lib::zero();
+            message = E_LOW_RATING_DELETE_ITEM; // delete own item?
             energy = ENERGY_DELETE_ITEM;
 
         } else if (action == ACTION_UPVOTE_POST) {
             assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_POST);
             ratingAllowed = i64Lib::from(UPVOTE_POST_ALLOWED);
+            message = E_LOW_RATING_UPVOTE_POST;
             energy = ENERGY_UPVOTE_QUESTION;
 
         } else if (action == ACTION_UPVOTE_REPLY) {
             assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_REPLY);
             ratingAllowed = i64Lib::from(UPVOTE_REPLY_ALLOWED);
+            message = E_LOW_RATING_UPVOTE_REPLY;
             energy = ENERGY_UPVOTE_ANSWER;
 
         } else if (action == ACTION_VOTE_COMMENT) {
             assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_COMMENT);
             ratingAllowed = i64Lib::from(VOTE_COMMENT_ALLOWED);
+            message = E_LOW_RATING_VOTE_COMMENT;
             energy = ENERGY_VOTE_COMMENT;
 
         } else if (action == ACTION_DOWNVOTE_POST) {
-            assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_POST);
+            assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_POST);     // NEED?
             ratingAllowed = i64Lib::from(DOWNVOTE_POST_ALLOWED);
+            message = E_LOW_RATING_DOWNVOTE_POST;
             energy = ENERGY_DOWNVOTE_QUESTION;
 
         } else if (action == ACTION_DOWNVOTE_REPLY) {
-            assert!(actionCaller != dataUser, DOWNVOTE_REPLY_ALLOWED);
+            assert!(actionCaller != dataUser, DOWNVOTE_REPLY_ALLOWED);      // NEED?
             ratingAllowed = i64Lib::from(DOWNVOTE_REPLY_ALLOWED);
+            message = E_LOW_RATING_DOWNVOTE_REPLY;
             energy = ENERGY_DOWNVOTE_ANSWER;
 
         } else if (action == ACTION_CANCEL_VOTE) {
             ratingAllowed = i64Lib::from(CANCEL_VOTE);
+            message = E_LOW_RATING_CANCEL_VOTE;
             energy = ENERGY_FORUM_VOTE_CANCEL;
 
-        } else if (action == ACTION_BEST_REPLY) {
-            ratingAllowed = i64Lib::neg_from(MINIMUM_RATING);
+        } else if (action == ACTION_BEST_REPLY) {       // test neg rating?
+            message = E_LOW_RATING_MARK_BEST_REPLY;
             energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
         } else if (action == ACTION_UPDATE_PROFILE) {
             energy = ENERGY_UPDATE_PROFILE;
+            message = E_LOW_RATING_UPDATE_PROFILE;
 
         } else if (action == ACTION_FOLLOW_COMMUNITY) {
-            ratingAllowed = i64Lib::neg_from(MINIMUM_RATING);
+            message = E_LOW_RATING_FOLLOW_COMMUNITY;
             energy = ENERGY_FOLLOW_COMMUNITY;
 
         } else {

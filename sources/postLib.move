@@ -355,7 +355,7 @@ module basics::postLib {
             postMetaData.author,
             communityId,
             userLib::get_action_publication_reply(),
-            if (parentReplyMetaDataKey == 0 && isOfficialReply)     //parentReplyMetaDataKey need?
+            if (isOfficialReply)
                 accessControlLib::get_action_role_community_admin() else
                 accessControlLib::get_action_role_none()
             /*true*/
@@ -644,6 +644,7 @@ module basics::postLib {
         event::emit(EditReplyEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey});
     }
 
+    //moderatorEditReply -> moderatorEditReplyMetaData
     public entry fun moderatorEditReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -675,7 +676,7 @@ module basics::postLib {
         language: u8,
     ) {
         let userId = object::id(user);
-        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey); // test moderator or checkMatchItemId exist deleted
+        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey); // add checkMatchItemId for authorEditReply?
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
@@ -683,16 +684,19 @@ module basics::postLib {
             replyMetaData.language = language;
         };
 
-        userLib::checkActionRole(               // test
+        let replyMetaDataAuthor = replyMetaData.author;
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
             userId,
-            replyMetaData.author,
+            replyMetaDataAuthor,
             postMetaData.communityId,
-            userLib::get_action_edit_item(),
-            if (isOfficialReply)
-                accessControlLib::get_action_role_community_admin() else
+            if (userId == replyMetaDataAuthor)
+                userLib::get_action_edit_item() else
+                userLib::get_action_none(),
+            if (isOfficialReply || userId != replyMetaDataAuthor)
+                accessControlLib::get_action_role_admin_or_community_moderator() else
                 accessControlLib::get_action_role_none(),
             /*false*/
         );
