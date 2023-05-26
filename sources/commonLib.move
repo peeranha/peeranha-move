@@ -47,7 +47,7 @@ module basics::commonLib {
         object::id_from_address(@0x0)
     }
 
-    public fun get_bot_address(): ID {
+    public fun get_bot_id(): ID {
         object::id_from_bytes(BOT_BYTES_ADDRESS)
     }
 

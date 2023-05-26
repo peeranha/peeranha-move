@@ -28,7 +28,7 @@ module basics::followCommunityLib {
         user: &mut userLib::User,
         community: &communityLib::Community
     ) {
-        communityLib::onlyNotFrezenCommunity(community);
+        communityLib::onlyNotFrozenCommunity(community);
         let userId = object::id(user);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
@@ -59,7 +59,7 @@ module basics::followCommunityLib {
         user: &mut userLib::User,
         community: &communityLib::Community
     ) {
-        communityLib::onlyNotFrezenCommunity(community);
+        communityLib::onlyNotFrozenCommunity(community);
         let userId = object::id(user);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 

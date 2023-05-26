@@ -132,7 +132,7 @@ module basics::communityLib {
     public entry fun updateCommunity(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_admin_or_community_admin(), object::id(community));
-        onlyNotFrezenCommunity(community);  // test
+        onlyNotFrozenCommunity(community);  // test
 
         community.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
         event::emit(UpdateCommunityEvent {userId: userId, communityId: object::id(community)});
@@ -141,7 +141,7 @@ module basics::communityLib {
     public entry fun updateDocumentationTree(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_community_admin(), object::id(community));
-        onlyNotFrezenCommunity(community);  // test
+        onlyNotFrozenCommunity(community);  // test
 
         community.documentation = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
         event::emit(SetDocumentationTree {userId: userId, communityId: object::id(community)});
@@ -152,7 +152,7 @@ module basics::communityLib {
         let communityId = object::id(community);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_admin_or_community_admin(), communityId);
 
-        onlyNotFrezenCommunity(community);  // test
+        onlyNotFrozenCommunity(community);  // test
         let i = 1;
         let tagsCount = table::length(&community.tags);
         while(i <= tagsCount) {
@@ -172,7 +172,7 @@ module basics::communityLib {
         let communityId = object::id(community);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_admin_or_community_admin(), communityId);
 
-        onlyNotFrezenCommunity(community);  // test + polygon
+        onlyNotFrozenCommunity(community);  // test + polygon
         let tag = getMutableTag(community, tagId);
         // CHECK 81 ERROR (E_REQUIRE_TAGS_WITH_UNIQUE_NAME)?
 
@@ -185,7 +185,7 @@ module basics::communityLib {
         let communityId = object::id(community);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_admin_or_community_admin(), communityId);
 
-        onlyNotFrezenCommunity(community);  // test
+        onlyNotFrozenCommunity(community);  // test
         community.isFrozen = true;
         event::emit(FreezeCommunityEvent {userId: userId, communityId: communityId});
     }
@@ -202,7 +202,7 @@ module basics::communityLib {
         event::emit(UnfreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
-    public fun onlyNotFrezenCommunity(community: &Community) {
+    public fun onlyNotFrozenCommunity(community: &Community) {
         assert!(!community.isFrozen, E_COMMUNITY_IS_FROZEN);
     }
 

@@ -281,7 +281,7 @@ module basics::postLib {
 
         createPost(
             time,
-            commonLib::get_bot_address(),
+            commonLib::get_bot_id(),
             community,
             ipfsHash, 
             postType,
@@ -344,7 +344,7 @@ module basics::postLib {
         authorMetaData: vector<u8>,
         ctx: &mut TxContext
     ) {
-        communityLib::onlyNotFrezenCommunity(community);
+        communityLib::onlyNotFrozenCommunity(community);
         communityLib::checkTags(community, tags);
         let communityId = object::id(community);
 
@@ -409,7 +409,7 @@ module basics::postLib {
             usersRatingCollection,
             periodRewardContainer,
             time,
-            commonLib::get_bot_address(),
+            commonLib::get_bot_id(),
             postMetaData,
             parentReplyMetaDataKey,
             ipfsHash,
@@ -491,7 +491,7 @@ module basics::postLib {
             while (replyMetaDataKey <= countReplies) {
                 let replyContainer = getReplyMetaData(postMetaData, replyMetaDataKey);
                 assert!(
-                    (userId != replyContainer.author && userId != commonLib::get_bot_address()) ||
+                    (userId != replyContainer.author && userId != commonLib::get_bot_id()) ||
                     replyContainer.authorMetaData != authorMetaData ||
                     replyContainer.isDeleted,
                     E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_POST
@@ -1579,7 +1579,7 @@ module basics::postLib {
         let newCommunityId = object::id(community);
         if (postMetaData.communityId == newCommunityId) return;
 
-        communityLib::onlyNotFrezenCommunity(community);
+        communityLib::onlyNotFrozenCommunity(community);
         let oldCommunityId: ID = postMetaData.communityId;
         let postType: u8 = postMetaData.postType;
         let typeRating: StructRating = getTypesRating(postType);

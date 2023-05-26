@@ -76,7 +76,7 @@ module basics::postLib_bot_test
             assert!(postType == EXPERT_POST, 1);
             assert!(postId == object::id(post), 12);
             assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 2);
-            assert!(author == commonLib::get_bot_address(), 4);
+            assert!(author == commonLib::get_bot_id(), 4);
             assert!(rating == i64Lib::zero(), 5);
             assert!(communityId == object::id(community), 6);
             assert!(language == ENGLISH_LANGUAGE, 13);
@@ -133,7 +133,7 @@ module basics::postLib_bot_test
 
             assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
             assert!(replyId == object::id(reply), 11);
-            assert!(author == commonLib::get_bot_address(), 4);
+            assert!(author == commonLib::get_bot_id(), 4);
             assert!(rating == i64Lib::zero(), 4);
             assert!(parentReplyMetaDataKey == 0, 5);
             assert!(language == ENGLISH_LANGUAGE, 5);
@@ -194,7 +194,7 @@ module basics::postLib_bot_test
 
             assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
             assert!(replyId == object::id(reply), 11);
-            assert!(author == commonLib::get_bot_address(), 4);
+            assert!(author == commonLib::get_bot_id(), 4);
             assert!(rating == i64Lib::zero(), 4);
             assert!(parentReplyMetaDataKey == 0, 5);
             assert!(language == ENGLISH_LANGUAGE, 5);
@@ -219,7 +219,7 @@ module basics::postLib_bot_test
 
             assert!(ipfsDoc2 == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
             assert!(replyId2 == object::id(reply2), 11);
-            assert!(author2 == commonLib::get_bot_address(), 4);
+            assert!(author2 == commonLib::get_bot_id(), 4);
             assert!(rating2 == i64Lib::zero(), 4);
             assert!(parentReplyMetaDataKey2 == 0, 5);
             assert!(language2 == ENGLISH_LANGUAGE, 5);
