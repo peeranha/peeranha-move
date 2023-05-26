@@ -295,7 +295,7 @@ module basics::accessControlLib_action_community_admin_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            postLib::createReplyByUser(
+            postLib::createReply(
                 user_rating_collection,
                 user_roles_collection,
                 period_reward_container,

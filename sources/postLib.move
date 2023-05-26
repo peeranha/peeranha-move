@@ -279,7 +279,7 @@ module basics::postLib {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
 
-        createPost(
+        createPostPrivate(
             time,
             commonLib::get_bot_id(),
             community,
@@ -292,7 +292,7 @@ module basics::postLib {
         )
     }
 
-    public entry fun createPostByUser(
+    public entry fun createPost(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
         time: &Clock,
@@ -320,7 +320,7 @@ module basics::postLib {
             /*true*/
         );
 
-        createPost(
+        createPostPrivate(
             time,
             userId,
             community,
@@ -333,7 +333,7 @@ module basics::postLib {
         )
     }
 
-    fun createPost(
+    fun createPostPrivate(
         time: &Clock,
         userId: ID,
         community: &communityLib::Community,
@@ -405,7 +405,7 @@ module basics::postLib {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
 
-        createReply(
+        createReplyPrivate(
             usersRatingCollection,
             periodRewardContainer,
             time,
@@ -420,7 +420,7 @@ module basics::postLib {
         )
     }
 
-    public entry fun createReplyByUser(
+    public entry fun createReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
@@ -451,7 +451,7 @@ module basics::postLib {
             /*true*/
         );
 
-        createReply(
+        createReplyPrivate(
             usersRatingCollection,
             periodRewardContainer,
             time,
@@ -466,7 +466,7 @@ module basics::postLib {
         )
     }
 
-    fun createReply(
+    fun createReplyPrivate(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
