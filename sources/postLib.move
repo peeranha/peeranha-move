@@ -278,8 +278,7 @@ module basics::postLib {
     ) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
-        let authorMetaData = vector[messengerType];
-        vector::append<u8>(&mut authorMetaData, handle);
+
         createPost(
             time,
             commonLib::get_bot_address(),
@@ -288,7 +287,7 @@ module basics::postLib {
             postType,
             tags,
             ENGLISH_LANGUAGE,
-            authorMetaData,
+            commonLib::compose_messenger_sender_property(messengerType, handle),
             ctx
         )
     }
@@ -391,23 +390,20 @@ module basics::postLib {
     }
 
     public entry fun createReplyByBot(
-        roles: &mut accessControlLib::UserRolesCollection,
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        roles: &mut accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         parentReplyMetaDataKey: u64,
         ipfsHash: vector<u8>,
-        isOfficialReply: bool,
         messengerType: u8,
         handle: vector<u8>,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
-        let authorMetaData = vector[messengerType];
-        vector::append<u8>(&mut authorMetaData, handle);
 
         createReply(
             usersRatingCollection,
@@ -417,9 +413,9 @@ module basics::postLib {
             postMetaData,
             parentReplyMetaDataKey,
             ipfsHash,
-            isOfficialReply,
+            false,
             ENGLISH_LANGUAGE,
-            authorMetaData,
+            commonLib::compose_messenger_sender_property(messengerType, handle),
             ctx
         )
     }
@@ -1858,6 +1854,11 @@ module basics::postLib {
     }
 
     #[test_only]
+    public fun getPostAuthorMetaData(postMetaData: &PostMetaData): (vector<u8>) {
+        postMetaData.authorMetaData
+    }
+
+    #[test_only]
     public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u64, u8, bool, bool, bool, VecMap<ID, u8>) {
         let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
         checkMatchItemId(object::id(reply), replyMetaData.replyId);
@@ -1877,6 +1878,12 @@ module basics::postLib {
         // add
         // comments: Table<u64, CommentMetaData>,
         // properties: VecMap<u8, vector<u8>>,
+    }
+
+    #[test_only]
+    public fun getReplyAuthorMetaData(postMetaData: &PostMetaData, replyMetaDataKey: u64): (vector<u8>) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.authorMetaData
     }
 
     #[test_only]

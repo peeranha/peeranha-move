@@ -50,4 +50,10 @@ module basics::commonLib {
     public fun get_bot_address(): ID {
         object::id_from_bytes(BOT_BYTES_ADDRESS)
     }
+
+    public fun compose_messenger_sender_property(messengerType: u8, handle: vector<u8>): vector<u8> {
+        let authorMetaData = vector[messengerType];
+        vector::append<u8>(&mut authorMetaData, handle);
+        authorMetaData
+    }
 }
