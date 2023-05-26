@@ -6,6 +6,7 @@ module basics::userLib {
     // use std::debug;
     use basics::i64Lib;
     use basics::communityLib;
+    use basics::accessControl;
     use basics::commonLib;
     use sui::vec_map::{Self, VecMap};
     use std::option;
@@ -84,6 +85,7 @@ module basics::userLib {
         id: UID,
         users: VecMap<address, User>,               // key - userAddress        
         periodRewardContainer: PeriodRewardContainer,
+        roles: accessControl::Role,
     }
 
     struct User has store, drop, copy {     // copy?
@@ -144,7 +146,8 @@ module basics::userLib {
             users: vec_map::empty(),
             periodRewardContainer: PeriodRewardContainer {
                 periodRewardShares: vec_map::empty(),
-            }
+            },
+            roles: accessControl::initRole()
         });
     }
 
