@@ -528,7 +528,7 @@ module basics::postLib_change_post_type_test
         let user = &mut user_val;
         let community = &mut community_val;
 
-        postLib::createPost(
+        postLib::createPostByUser(
             user_rating_collection,
             user_roles_collection,
             time,
@@ -552,7 +552,7 @@ module basics::postLib_change_post_type_test
         let period_reward_container = &mut period_reward_container_val;
         let user = &mut user_val;
         
-        postLib::createReply(
+        postLib::createReplyByUser(
             user_rating_collection,
             user_roles_collection,
             period_reward_container,

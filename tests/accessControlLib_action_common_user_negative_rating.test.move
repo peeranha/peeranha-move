@@ -339,7 +339,7 @@ module basics::accessControlLib_action_common_user_negative_rating_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            postLib::createReply(
+            postLib::createReplyByUser(
                 user_rating_collection,
                 user_roles_collection,
                 period_reward_container,

@@ -77,6 +77,8 @@ module basics::postLib_test
             assert!(deletedReplyCount == 0, 9);
             assert!(isDeleted == false, 10);
             assert!(tags == vector<u64>[1, 2], 11);
+            let authorMetaData = postLib::getPostAuthorMetaData(post_meta_data);
+            assert!(authorMetaData == vector<u8>[], 11);
 
             test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -136,6 +138,8 @@ module basics::postLib_test
             assert!(isFirstReply == false, 6);
             assert!(isQuickReply == false, 7);
             assert!(isDeleted == false, 9);
+            let authorMetaData = postLib::getReplyAuthorMetaData(post_meta_data, 1);
+            assert!(authorMetaData == vector<u8>[], 11);
 
             test_scenario::return_to_sender(scenario, reply_val);
             test_scenario::return_to_sender(scenario, user_val);
@@ -1814,7 +1818,7 @@ module basics::postLib_test
         test_scenario::return_to_sender(scenario, user_val);
         test_scenario::return_shared(community_val);
     }
-       
+
     #[test_only]
     public fun create_post(time: &clock::Clock, ipfsHash: vector<u8>, scenario: &mut Scenario) {
         let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
@@ -1823,7 +1827,7 @@ module basics::postLib_test
         let user = &mut user_val;
         let community = &mut community_val;
 
-        postLib::createPost(
+        postLib::createPostByUser(
             user_rating_collection,
             user_roles_collection,
             time,
@@ -1847,7 +1851,7 @@ module basics::postLib_test
         let user = &mut user_val;
         let community = &mut community_val;
 
-        postLib::createPost(
+        postLib::createPostByUser(
             user_rating_collection,
             user_roles_collection,
             time,
@@ -1871,7 +1875,7 @@ module basics::postLib_test
         let period_reward_container = &mut period_reward_container_val;
         let user = &mut user_val;
         
-        postLib::createReply(
+        postLib::createReplyByUser(
             user_rating_collection,
             user_roles_collection,
             period_reward_container,
@@ -1898,7 +1902,7 @@ module basics::postLib_test
         let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
         let post_meta_data = &mut post_meta_data_val;
         
-        postLib::createReply(
+        postLib::createReplyByUser(
             user_rating_collection,
             user_roles_collection,
             period_reward_container,
