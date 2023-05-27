@@ -675,7 +675,7 @@ module basics::postLib {
         language: u8,
         ctx: &mut TxContext
     ) {
-        let _newCommunityId = object::id(newCommunity);
+        // let newCommunityId = object::id(newCommunity);
         // if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
         //     abort E_ERROR_CHANGE_COMMUNITY_ID;  // test
 
@@ -754,6 +754,8 @@ module basics::postLib {
         isOfficialReply: bool,
         language: u8,
     ) {
+        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
+        checkMatchItemId(object::id(reply), replyMetaData.replyId);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
         if (commonLib::getIpfsHash(reply.ipfsDoc) != ipfsHash)
             reply.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -802,8 +804,8 @@ module basics::postLib {
         language: u8,
     ) {
         let userId = object::id(user);
-        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey); // add checkMatchItemId for authorEditReply?
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
+        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         if (replyMetaData.language != language) {
