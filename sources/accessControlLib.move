@@ -16,12 +16,13 @@ module basics::accessControlLib {
     // const E_ACCESS_CONTROL_CAN_ONLY_RENOUNCE_ROLE_FOR_SELF: u64 = 202;
     const E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE: u64 = 203;
     const E_NOT_ALLOWED_NOT_ADMIN: u64 = 204;
-    const E_NOT_ALLOWED_NOT_BOT: u64 = 205;
-    const E_NOT_ALLOWED_NOT_DISPATHER: u64 = 206;
+    const E_NOT_ALLOWED_NOT_BOT_ROLE: u64 = 205;                             // test
+    const E_NOT_ALLOWED_NOT_DISPATHER_ROLE: u64 = 206;
     const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR: u64 = 207;
     const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN: u64 = 208;
     const E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN: u64 = 209;
     const E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR: u64 = 210;
+    const E_NOT_ALLOWED_NOT_MINT_NFT_ROLE: u64 = 211;                          // test
 
     // ====== Constant ======
 
@@ -30,6 +31,7 @@ module basics::accessControlLib {
     const COMMUNITY_MODERATOR_ROLE: vector<u8> = vector<u8>[4];
     const BOT_ROLE: vector<u8> = vector<u8>[5];
     const DISPATCHER_ROLE: vector<u8> = vector<u8>[6];
+    const MINT_NFT_ROLE: vector<u8> = vector<u8>[7];
 
     // ====== Enum ======
 
@@ -41,6 +43,7 @@ module basics::accessControlLib {
     const ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN: u8 = 5;
     const ACTION_ROLE_COMMUNITY_ADMIN: u8 = 6;
     const ACTION_ROLE_COMMUNITY_MODERATOR: u8 = 7;
+    const ACTION_ROLE_MINT_NFT: u8 = 8;
 
     struct RoleData has store {
         members: VecMap<ID, bool>,
@@ -239,9 +242,9 @@ module basics::accessControlLib {
         } else if (actionRole == ACTION_ROLE_ADMIN && !isAdmin) {
             errorType = E_NOT_ALLOWED_NOT_ADMIN
         } else if (actionRole == ACTION_ROLE_BOT && !hasRole(userRolesCollection, BOT_ROLE, userId)) {
-            errorType = E_NOT_ALLOWED_NOT_BOT
+            errorType = E_NOT_ALLOWED_NOT_BOT_ROLE
         } else if (actionRole == ACTION_ROLE_DISPATCHER && !hasRole(userRolesCollection, DISPATCHER_ROLE, userId)) {
-            errorType = E_NOT_ALLOWED_NOT_DISPATHER
+            errorType = E_NOT_ALLOWED_NOT_DISPATHER_ROLE
         } else if (actionRole == ACTION_ROLE_ADMIN_OR_COMMUNITY_MODERATOR && 
             !(isAdmin || (isCommunityModerator))) {
             errorType = E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR
@@ -251,6 +254,8 @@ module basics::accessControlLib {
             errorType = E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN
         } else if (actionRole == ACTION_ROLE_COMMUNITY_MODERATOR && !isCommunityModerator) {
             errorType = E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR
+        } else if (actionRole == ACTION_ROLE_MINT_NFT) {
+            errorType = E_NOT_ALLOWED_NOT_MINT_NFT_ROLE
         } else {
             return
         };
@@ -295,6 +300,10 @@ module basics::accessControlLib {
 
     public fun get_action_role_community_moderator(): u8 {
         ACTION_ROLE_COMMUNITY_MODERATOR
+    }
+
+    public fun get_action_role_mint_nft(): u8 {
+        ACTION_ROLE_MINT_NFT
     }
 
     // ====== get role ======

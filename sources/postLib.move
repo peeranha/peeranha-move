@@ -11,7 +11,6 @@ module basics::postLib {
     use basics::commonLib;
     use basics::userLib;
     use basics::i64Lib;
-
     use sui::table::{Self, Table};
 
     // ====== Errors ======
