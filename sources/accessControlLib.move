@@ -58,18 +58,18 @@ module basics::accessControlLib {
 
     // ====== Events ======
 
-    struct RoleAdminChanged has copy, drop {
+    struct RoleAdminChangedEvent has copy, drop {
         role: vector<u8>,
         previousAdminRole: vector<u8>,      // set??
         adminRole: vector<u8>,
     }
 
-    struct RoleGranted has copy, drop {
+    struct RoleGrantedEvent has copy, drop {
         role: vector<u8>,
         userId: ID,
     }
 
-    struct RoleRevoked has copy, drop {
+    struct RoleRevokedEvent has copy, drop {
         role: vector<u8>,
         userId: ID,
     }
@@ -171,7 +171,7 @@ module basics::accessControlLib {
             });
         };
 
-        event::emit(RoleAdminChanged{role, previousAdminRole, adminRole});
+        event::emit(RoleAdminChangedEvent{role, previousAdminRole, adminRole});
     }
 
     // Internal function without access restriction.
@@ -196,7 +196,7 @@ module basics::accessControlLib {
                 let status = vec_map::get_mut(&mut role_.members, &userId);
                 *status = true;
             };
-            event::emit(RoleGranted{role, userId});    // , _msgSender()????
+            event::emit(RoleGrantedEvent{role, userId});    // , _msgSender()????
         }
     }     
     
@@ -215,7 +215,7 @@ module basics::accessControlLib {
                 let status = vec_map::get_mut(&mut role_.members, &userId);
                 *status = false;
             };
-            event::emit(RoleRevoked{role, userId});    // , _msgSender() ??
+            event::emit(RoleRevokedEvent{role, userId});    // , _msgSender() ??
         }
     }
 
