@@ -6,6 +6,7 @@ module basics::userLib {
     use std::vector;
     use basics::accessControlLib;
     use basics::i64Lib;
+    use basics::nftLib;
     use sui::table::{Self, Table};
     use basics::commonLib;
     use sui::vec_map::{Self, VecMap};
@@ -260,6 +261,11 @@ module basics::userLib {
 
         let userRating = vec_map::get_mut(&mut userCommunityRating.userRating, &communityId);
         *userRating = i64Lib::add(&*userRating, &rating);
+
+        if (i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
+            let achievementsTypesArray: vector<u8> = vector[nftLib::getAchievementTypeRating(), nftLib::getAchievementTypeSoulRating()];
+            // nftLib::mint(...);
+        }
     }
 
     // TODO: add UserLib.Action action + add field UserLib.ActionRole actionRole

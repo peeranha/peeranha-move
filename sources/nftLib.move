@@ -6,6 +6,7 @@ module basics::nftLib {
     use sui::url::{Self, Url};
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
+    use std::vector;
     use std::string;
     use sui::object::{Self, ID, UID};
     use sui::event;
@@ -16,7 +17,8 @@ module basics::nftLib {
 
     // ====== Errors ======
 
-    const E_MAX_NFT_COUNT: u64 = 31;
+    const E_MAX_NFT_COUNT: u64 = 300;
+    const E_YOU_CAN_NOT_TRANSFER_SOUL_BOUND_NFT: u64 = 301;
 
     // ====== Constant ======
     
@@ -30,12 +32,12 @@ module basics::nftLib {
 
     struct AchievementCollection has key {
         id: UID,
-        achievements: Table<u64, Achievement>,
+        achievements: VecMap<u64, Achievement>,
     }
 
     struct Achievement has store {
         maxCount: u32,
-        factCount: u64,
+        factCount: u32,
         lowerBound: u64,
         name: vector<u8>,
         description: vector<u8>,
@@ -54,6 +56,7 @@ module basics::nftLib {
         description: string::String,
         /// URL for the token
         url: Url,
+        achievementType: u8,
         // TODO: allow custom attributes
     }
 
@@ -74,7 +77,7 @@ module basics::nftLib {
     fun init(ctx: &mut TxContext) {
         let achievementCollection = AchievementCollection {
             id: object::new(ctx),
-            achievements: table::new(ctx),
+            achievements: vec_map::empty(),
         };
         transfer::share_object(achievementCollection);
     }
@@ -126,64 +129,74 @@ module basics::nftLib {
             userAchievementsIssued: table::new(ctx)
         };
 
-        let achievementKey = table::length(&achievementCollection.achievements) + 1;
-        table::add(&mut achievementCollection.achievements, achievementKey, achievement);
+        let achievementKey = vec_map::size(&achievementCollection.achievements) + 1;
+        vec_map::insert(&mut achievementCollection.achievements, achievementKey, achievement);
         event::emit(ConfigureNewAchievementNFTEvent{achievementId: achievementKey});
     }
 
 
     /// Create a new nft
-    public(friend) fun mint_to_sender(
+    public(friend) fun mint(
         achievementCollection: &mut AchievementCollection,
         currentValue: u64,
         communityId: ID,
-        userAchievementType: u8,
+        userAchievementsTypes: vector<u8>,
         ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
 
         let achievementId = 1;
-        let achievementLength = table::length(&achievementCollection.achievements);
+        let achievementLength = vec_map::size(&achievementCollection.achievements);
         while(achievementId <= achievementLength) {
-            let achievement = table::borrow_mut<u64, Achievement>(&mut achievementCollection.achievements, achievementId);
-            if (userAchievementType == achievement.achievementsType) {
-        //      if(achievementsTypes[j] == achievementConfig.achievementsType) {
-                if (
-                    achievement.communityId != communityId &&
-                    achievement.communityId != commonLib::getZeroId()
-                ) continue;
-                // if (!AchievementCommonLib.isAchievementAvailable(achievementConfig.maxCount, achievementConfig.factCount)) continue;
-                if (achievement.lowerBound > currentValue) continue;
-                let isIssued = table::borrow_mut<address, bool>(&mut achievement.userAchievementsIssued, sender);
-                if (*isIssued) continue; //already issued
+            let achievement = vec_map::get_mut<u64, Achievement>(&mut achievementCollection.achievements, &achievementId);
+            
+            let achievementTypeId = 0;
+            let userAchievementsTypesLength = vector::length(&userAchievementsTypes);
+            while (achievementTypeId < userAchievementsTypesLength) {
+                let userAchievementType = *vector::borrow(&userAchievementsTypes, achievementTypeId);
+                if (userAchievementType == achievement.achievementsType) {
+                    if (
+                        achievement.communityId != communityId &&
+                        achievement.communityId != commonLib::getZeroId()
+                    ) continue;
+                    if (!is_achievement_available(achievement.maxCount, achievement.factCount)) continue;
+                    if (achievement.lowerBound > currentValue) continue;
+                    let isIssued = table::borrow_mut<address, bool>(&mut achievement.userAchievementsIssued, sender);
+                    if (*isIssued) continue; //already issued
 
-                *isIssued = true;
-                achievement.factCount = achievement.factCount + 1;
+                    *isIssued = true;
+                    achievement.factCount = achievement.factCount + 1;
 
-                let nft = NFT {
-                    id: object::new(ctx),
-                    name: string::utf8(achievement.name),
-                    description: string::utf8(achievement.description),
-                    url: url::new_unsafe_from_bytes(achievement.url)
+                    let nft = NFT {
+                        id: object::new(ctx),
+                        name: string::utf8(achievement.name),
+                        description: string::utf8(achievement.description),
+                        url: url::new_unsafe_from_bytes(achievement.url),
+                        achievementType: userAchievementType,
+                    };
+
+                    event::emit(NFTTransferEvent {
+                        object_id: object::id(&nft),
+                        from: @0x0,
+                        to: sender,
+                    });
+
+                    transfer::public_transfer(nft, sender);
                 };
-
-                event::emit(NFTTransferEvent {
-                    object_id: object::id(&nft),
-                    from: @0x0,
-                    to: sender,
-                });
-
-                transfer::public_transfer(nft, sender);
-            // }
             };
             achievementId = achievementId + 1;
         };        
+    }
+
+    fun is_achievement_available(maxCount: u32, factCount: u32): (bool) {
+        maxCount > factCount || (maxCount == 0 && factCount < POOL_NFT)
     }
 
     /// Transfer `nft` to `recipient`
     public entry fun transfer(
         nft: NFT, recipient: address, ctx: &mut TxContext
     ) {
+        assert!(nft.achievementType != ACHIEVEMENT_TYPE_SOUL_RATING, E_YOU_CAN_NOT_TRANSFER_SOUL_BOUND_NFT);
         let sender = tx_context::sender(ctx);
         event::emit(NFTTransferEvent {
             object_id: object::id(&nft),
@@ -205,7 +218,19 @@ module basics::nftLib {
 
     /// Permanently delete `nft`
     public entry fun burn(nft: NFT, _: &mut TxContext) {
-        let NFT { id, name: _, description: _, url: _ } = nft;
+        let NFT { id, name: _, description: _, url: _, achievementType: _} = nft;
         object::delete(id)
+    }
+
+    public fun getAchievementTypeRating(): (u8) {
+        ACHIEVEMENT_TYPE_RATING
+    }
+
+    public fun getAchievementTypeManual(): (u8) {
+        ACHIEVEMENT_TYPE_MANUAL
+    }
+
+    public fun getAchievementTypeSoulRating(): (u8) {
+        ACHIEVEMENT_TYPE_SOUL_RATING
     }
 }
