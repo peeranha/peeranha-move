@@ -49,11 +49,13 @@ module basics::accessControlLib {
 
     struct UserRolesCollection has key {
         id: UID,
-        roles: Table<vector<u8>, RoleData>            // role
+        roles: Table<vector<u8>, RoleData>,            // role
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct DefaultAdminCap has key {
         id: UID,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     // ====== Events ======
@@ -77,14 +79,16 @@ module basics::accessControlLib {
     fun init(ctx: &mut TxContext) {
         let userRolesCollection = UserRolesCollection {
             id: object::new(ctx),
-            roles: table::new(ctx)
+            roles: table::new(ctx),
+            properties: vec_map::empty(),
         };
         setRoleAdmin(&mut userRolesCollection, BOT_ROLE, PROTOCOL_ADMIN_ROLE);
         transfer::share_object(userRolesCollection);
 
         transfer::transfer(
             DefaultAdminCap {
-               id: object::new(ctx), 
+                id: object::new(ctx),
+                properties: vec_map::empty(),
             }, tx_context::sender(ctx)
         );
     }

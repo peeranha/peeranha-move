@@ -98,12 +98,14 @@ module basics::userLib {
     struct UsersRatingCollection has key {
         id: UID,
         usersCommunityRating: Table<ID, UserCommunityRating>,
+        properties: VecMap<u8, vector<u8>>,
         // roles: accessControlLib::Role,
     }
 
     struct PeriodRewardContainer has key {   // Container || Collection??
         id: UID,
         periodRewardShares: VecMap<u64, PeriodRewardShares>,          // key - period   // VecMap? table/bag
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct User has key {
@@ -113,12 +115,14 @@ module basics::userLib {
         lastUpdatePeriod: u64,
         followedCommunities: vector<ID>,
         userRatingId: ID,   // need?
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct UserCommunityRating has key, store {    // shared
         id: UID,
         userRating: VecMap<ID, i64Lib::I64>,               // key - communityId         // vecMap??
         userPeriodRewards: VecMap<u64, UserPeriodRewards>,  // key - period             // vecMap??
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct DataUpdateUserRating has drop {
@@ -141,6 +145,7 @@ module basics::userLib {
         id: UID,                                // uid need??
         totalRewardShares: u64,
         activeUsersInPeriod: vector<ID>,       // Id ??
+        properties: VecMap<u8, vector<u8>>,
     }
 
     // ====== Events ======
@@ -157,12 +162,13 @@ module basics::userLib {
         transfer::share_object(UsersRatingCollection {
             id: object::new(ctx),
             usersCommunityRating: table::new(ctx),
-            // roles: accessControlLib::initRole()
+            properties: vec_map::empty(),
         });
 
         transfer::share_object(PeriodRewardContainer {
             id: object::new(ctx),
-            periodRewardShares: vec_map::empty()
+            periodRewardShares: vec_map::empty(),
+            properties: vec_map::empty(),
         });
     }
 
@@ -183,6 +189,7 @@ module basics::userLib {
             id: object::new(ctx),
             userRating: vec_map::empty(),
             userPeriodRewards: vec_map::empty(),
+            properties: vec_map::empty(),
         };
         let user = User {
             id: object::new(ctx),
@@ -190,7 +197,8 @@ module basics::userLib {
             energy: getStatusEnergy(),
             lastUpdatePeriod: commonLib::getPeriod(),
             followedCommunities: vector::empty<ID>(),
-            userRatingId: object::id(&userCommunityRating)
+            userRatingId: object::id(&userCommunityRating),
+            properties: vec_map::empty(),
         };
 
         table::add(&mut usersRatingCollection.usersCommunityRating, object::id(&user), userCommunityRating);

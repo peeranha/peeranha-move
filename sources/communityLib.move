@@ -10,6 +10,7 @@ module basics::communityLib {
     use basics::userLib;
     // friend basics::commonLib;
     use sui::table::{Self, Table};
+    use sui::vec_map::{Self, VecMap};
 
     // ====== Errors ======
 
@@ -29,11 +30,13 @@ module basics::communityLib {
         documentation: commonLib::IpfsHash,
         isFrozen: bool,
         tags: Table<u64, Tag>,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct Tag has key, store {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     // ====== Events ======
@@ -110,7 +113,8 @@ module basics::communityLib {
         while(tagId < tagsLength) {
             table::add(&mut communityTags, tagId + 1, Tag {
                 id: object::new(ctx),
-                ipfsDoc: commonLib::getIpfsDoc(*vector::borrow(&tags, tagId), vector::empty<u8>())
+                ipfsDoc: commonLib::getIpfsDoc(*vector::borrow(&tags, tagId), vector::empty<u8>()),
+                properties: vec_map::empty(),
             });
             tagId = tagId + 1;
         };
@@ -121,6 +125,7 @@ module basics::communityLib {
             documentation: commonLib::getIpfsDoc(vector::empty<u8>(), vector::empty<u8>()),
             isFrozen: false,
             tags: communityTags,
+            properties: vec_map::empty(),
         };
 
         let communityId = object::id(&community);
@@ -163,7 +168,8 @@ module basics::communityLib {
         event::emit(CreateTagEvent {userId: userId, tagKey: tagsCount + 1, communityId: communityId});
         table::add(&mut community.tags, tagsCount + 1, Tag {
             id: object::new(ctx),
-            ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>())
+            ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         });
     }
 
