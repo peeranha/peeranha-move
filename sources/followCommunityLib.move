@@ -23,7 +23,8 @@ module basics::followCommunityLib {
         communityId: ID
     }
 
-    public entry fun followCommunity(       // test
+    /// @notice User follows the community
+    public entry fun followCommunity(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         user: &mut userLib::User,
         community: &communityLib::Community
@@ -54,7 +55,8 @@ module basics::followCommunityLib {
         event::emit(FollowCommunityEvent{userId: userId, communityId: community_id});
     }
 
-    public entry fun unfollowCommunity(     // test
+    /// @notice User follows the community
+    public entry fun unfollowCommunity(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         user: &mut userLib::User,
         community: &communityLib::Community

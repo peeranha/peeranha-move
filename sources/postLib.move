@@ -106,36 +106,50 @@ module basics::postLib {
 
     struct Post has key {
         id: UID,
+        /// IPFS hash of document with post information
         ipfsDoc: commonLib::IpfsHash,
+        /// Properties for the post
         properties: VecMap<u8, vector<u8>>,
     }
 
     struct PostMetaData has key {       // shared
         id: UID,
         postId: ID,
+        /// Post type of the post meta data
         postType: u8,
+        /// Post type of the post meta data
         postTime: u64,
+        /// Author of the post meta data
         author: ID,
+        /// Information the post author when create bot
+        /// Defaut value - vector::empty<u8>()
+        /// For bot - messenger type + handle
         authorMetaData: vector<u8>,
+        /// Rating of the post meta data
         rating: i64Lib::I64,
+        /// Community Id for the post meta data
         communityId: ID,
         language: u8,
 
         officialReplyMetaDataKey: u64,
         bestReplyMetaDataKey: u64,
         deletedReplyCount: u64,
+        /// Status of the community
         isDeleted: bool,
 
         tags: vector<u64>,
         replies: Table<u64, ReplyMetaData>,
         comments: Table<u64, CommentMetaData>,
+        /// Properties for the post
         properties: VecMap<u8, vector<u8>>,
         historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
     }
 
     struct Reply has key {
         id: UID,
+        /// IPFS hash of document with reply information
         ipfsDoc: commonLib::IpfsHash,
+        /// Properties for the reply
         properties: VecMap<u8, vector<u8>>,
     }
 
@@ -160,7 +174,9 @@ module basics::postLib {
 
     struct Comment has key {
         id: UID,
+        /// IPFS hash of document with comment information
         ipfsDoc: commonLib::IpfsHash,
+        /// Properties for the comment
         properties: VecMap<u8, vector<u8>>,
     }
 

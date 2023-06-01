@@ -108,11 +108,14 @@ module basics::userLib {
 
     struct User has key {
         id: UID,
+        /// IPFS hash of document with user information
         ipfsDoc: commonLib::IpfsHash,
+        /// Energy for the tag
         energy: u64,
         lastUpdatePeriod: u64,
         followedCommunities: vector<ID>,
         userRatingId: ID,   // need?
+        /// Properties for the user
         properties: VecMap<u8, vector<u8>>,
     }
 
