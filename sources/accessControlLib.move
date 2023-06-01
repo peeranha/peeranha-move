@@ -44,32 +44,34 @@ module basics::accessControlLib {
 
     struct RoleData has store {
         members: VecMap<ID, bool>,
-        adminRole: vector<u8>
+        adminRole: vector<u8>,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct UserRolesCollection has key {
         id: UID,
-        roles: Table<vector<u8>, RoleData>            // role
+        roles: Table<vector<u8>, RoleData>,            // role
     }
 
     struct DefaultAdminCap has key {
         id: UID,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     // ====== Events ======
 
-    struct RoleAdminChanged has copy, drop {
+    struct RoleAdminChangedEvent has copy, drop {
         role: vector<u8>,
         previousAdminRole: vector<u8>,      // set??
         adminRole: vector<u8>,
     }
 
-    struct RoleGranted has copy, drop {
+    struct RoleGrantedEvent has copy, drop {
         role: vector<u8>,
         userId: ID,
     }
 
-    struct RoleRevoked has copy, drop {
+    struct RoleRevokedEvent has copy, drop {
         role: vector<u8>,
         userId: ID,
     }
@@ -77,14 +79,15 @@ module basics::accessControlLib {
     fun init(ctx: &mut TxContext) {
         let userRolesCollection = UserRolesCollection {
             id: object::new(ctx),
-            roles: table::new(ctx)
+            roles: table::new(ctx),
         };
         setRoleAdmin(&mut userRolesCollection, BOT_ROLE, PROTOCOL_ADMIN_ROLE);
         transfer::share_object(userRolesCollection);
 
         transfer::transfer(
             DefaultAdminCap {
-               id: object::new(ctx), 
+                id: object::new(ctx),
+                properties: vec_map::empty(),
             }, tx_context::sender(ctx)
         );
     }
@@ -167,11 +170,12 @@ module basics::accessControlLib {
         } else {
             table::add(&mut userRolesCollection.roles, role, RoleData {
                 members: vec_map::empty(),
-                adminRole: adminRole
+                adminRole: adminRole,
+                properties: vec_map::empty(),
             });
         };
 
-        event::emit(RoleAdminChanged{role, previousAdminRole, adminRole});
+        event::emit(RoleAdminChangedEvent{role, previousAdminRole, adminRole});
     }
 
     // Internal function without access restriction.
@@ -182,7 +186,8 @@ module basics::accessControlLib {
 
                 table::add(&mut userRolesCollection.roles, role, RoleData {
                     members: vec_map::empty(),
-                    adminRole: vector::empty<u8>()
+                    adminRole: vector::empty<u8>(),
+                    properties: vec_map::empty(),
                 });
 
                 // vec_map::insert(&mut roles.roles.members, account, true)
@@ -196,7 +201,7 @@ module basics::accessControlLib {
                 let status = vec_map::get_mut(&mut role_.members, &userId);
                 *status = true;
             };
-            event::emit(RoleGranted{role, userId});    // , _msgSender()????
+            event::emit(RoleGrantedEvent{role, userId});    // , _msgSender()????
         }
     }     
     
@@ -215,7 +220,7 @@ module basics::accessControlLib {
                 let status = vec_map::get_mut(&mut role_.members, &userId);
                 *status = false;
             };
-            event::emit(RoleRevoked{role, userId});    // , _msgSender() ??
+            event::emit(RoleRevokedEvent{role, userId});    // , _msgSender() ??
         }
     }
 

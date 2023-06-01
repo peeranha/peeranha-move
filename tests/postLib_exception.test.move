@@ -116,7 +116,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -169,7 +169,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -222,7 +222,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -275,7 +275,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -362,7 +362,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -424,7 +424,7 @@ module basics::postLib_exception_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            postLib::createReplyByUser(
+            postLib::createReply(
                 user_rating_collection,
                 user_roles_collection,
                 period_reward_container,
@@ -832,7 +832,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -1120,6 +1120,63 @@ module basics::postLib_exception_test
                 post_meta_data,
                 test_scenario::ctx(scenario)
             );
+            
+            postLib::authorEditReply(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                reply,
+                1,
+                x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc",
+                false,
+                ENGLISH_LANGUAGE
+            );
+
+            test_scenario::return_to_sender(scenario, reply_val);
+            test_scenario::return_shared(post_meta_data_val);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_ITEM_ID_NOT_MATCHING)]
+    fun test_edit_reply_reply_and_replyMetaData_not_match() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_reply(&time, post_meta_data, x"5ed5a3e1e862b992ef0bb085979d26615694fbec5106a6cfe2fdf8ac8eb9aedc", scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
             
             postLib::authorEditReply(
                 user_rating_collection,
@@ -2550,7 +2607,7 @@ module basics::postLib_exception_test
         let user = &mut user_val;
         let community = &mut community_val;
 
-        postLib::createPostByUser(
+        postLib::createPost(
             user_rating_collection,
             user_roles_collection,
             time,
@@ -2574,7 +2631,7 @@ module basics::postLib_exception_test
         let period_reward_container = &mut period_reward_container_val;
         let user = &mut user_val;
 
-        postLib::createReplyByUser(
+        postLib::createReply(
             user_rating_collection,
             user_roles_collection,
             period_reward_container,

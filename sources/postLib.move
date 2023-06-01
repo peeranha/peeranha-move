@@ -107,6 +107,7 @@ module basics::postLib {
     struct Post has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct PostMetaData has key {       // shared
@@ -135,6 +136,7 @@ module basics::postLib {
     struct Reply has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct ReplyMetaData has key, store {
@@ -159,7 +161,7 @@ module basics::postLib {
     struct Comment has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
-
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct CommentMetaData has key, store {
@@ -279,7 +281,7 @@ module basics::postLib {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
 
-        createPost(
+        createPostPrivate(
             time,
             commonLib::get_bot_id(),
             community,
@@ -292,7 +294,7 @@ module basics::postLib {
         )
     }
 
-    public entry fun createPostByUser(
+    public entry fun createPost(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
         time: &Clock,
@@ -320,7 +322,7 @@ module basics::postLib {
             /*true*/
         );
 
-        createPost(
+        createPostPrivate(
             time,
             userId,
             community,
@@ -333,7 +335,7 @@ module basics::postLib {
         )
     }
 
-    fun createPost(
+    fun createPostPrivate(
         time: &Clock,
         userId: ID,
         community: &communityLib::Community,
@@ -357,6 +359,7 @@ module basics::postLib {
         let post = Post {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         };
         let postMetaData = PostMetaData {
             id: object::new(ctx),
@@ -405,7 +408,7 @@ module basics::postLib {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
 
-        createReply(
+        createReplyPrivate(
             usersRatingCollection,
             periodRewardContainer,
             time,
@@ -420,7 +423,7 @@ module basics::postLib {
         )
     }
 
-    public entry fun createReplyByUser(
+    public entry fun createReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
@@ -451,7 +454,7 @@ module basics::postLib {
             /*true*/
         );
 
-        createReply(
+        createReplyPrivate(
             usersRatingCollection,
             periodRewardContainer,
             time,
@@ -466,7 +469,7 @@ module basics::postLib {
         )
     }
 
-    fun createReply(
+    fun createReplyPrivate(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
@@ -531,6 +534,7 @@ module basics::postLib {
         let reply = Reply {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         };
         let replyMetaData = ReplyMetaData {
             id: object::new(ctx),
@@ -579,6 +583,7 @@ module basics::postLib {
         let comment = Comment {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         };
         let commentId = object::id(&comment);
         let commentMetaData = CommentMetaData {
@@ -675,7 +680,7 @@ module basics::postLib {
         language: u8,
         ctx: &mut TxContext
     ) {
-        let _newCommunityId = object::id(newCommunity);
+        // let newCommunityId = object::id(newCommunity);
         // if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
         //     abort E_ERROR_CHANGE_COMMUNITY_ID;  // test
 
@@ -754,6 +759,8 @@ module basics::postLib {
         isOfficialReply: bool,
         language: u8,
     ) {
+        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
+        checkMatchItemId(object::id(reply), replyMetaData.replyId);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
         if (commonLib::getIpfsHash(reply.ipfsDoc) != ipfsHash)
             reply.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -802,8 +809,8 @@ module basics::postLib {
         language: u8,
     ) {
         let userId = object::id(user);
-        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey); // add checkMatchItemId for authorEditReply?
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
+        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         if (replyMetaData.language != language) {

@@ -1035,7 +1035,7 @@ module basics::postLib_language_test
         let user = &mut user_val;
         let community = &mut community_val;
 
-        postLib::createPostByUser(
+        postLib::createPost(
             user_rating_collection,
             user_roles_collection,
             time,
@@ -1059,7 +1059,7 @@ module basics::postLib_language_test
         let period_reward_container = &mut period_reward_container_val;
         let user = &mut user_val;
         
-        postLib::createReplyByUser(
+        postLib::createReply(
             user_rating_collection,
             user_roles_collection,
             period_reward_container,
