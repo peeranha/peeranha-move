@@ -44,13 +44,13 @@ module basics::accessControlLib {
 
     struct RoleData has store {
         members: VecMap<ID, bool>,
-        adminRole: vector<u8>
+        adminRole: vector<u8>,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct UserRolesCollection has key {
         id: UID,
         roles: Table<vector<u8>, RoleData>,            // role
-        properties: VecMap<u8, vector<u8>>,
     }
 
     struct DefaultAdminCap has key {
@@ -80,7 +80,6 @@ module basics::accessControlLib {
         let userRolesCollection = UserRolesCollection {
             id: object::new(ctx),
             roles: table::new(ctx),
-            properties: vec_map::empty(),
         };
         setRoleAdmin(&mut userRolesCollection, BOT_ROLE, PROTOCOL_ADMIN_ROLE);
         transfer::share_object(userRolesCollection);
@@ -171,7 +170,8 @@ module basics::accessControlLib {
         } else {
             table::add(&mut userRolesCollection.roles, role, RoleData {
                 members: vec_map::empty(),
-                adminRole: adminRole
+                adminRole: adminRole,
+                properties: vec_map::empty(),
             });
         };
 
@@ -186,7 +186,8 @@ module basics::accessControlLib {
 
                 table::add(&mut userRolesCollection.roles, role, RoleData {
                     members: vec_map::empty(),
-                    adminRole: vector::empty<u8>()
+                    adminRole: vector::empty<u8>(),
+                    properties: vec_map::empty(),
                 });
 
                 // vec_map::insert(&mut roles.roles.members, account, true)

@@ -97,9 +97,7 @@ module basics::userLib {
 
     struct UsersRatingCollection has key {
         id: UID,
-        usersCommunityRating: Table<ID, UserCommunityRating>,
-        properties: VecMap<u8, vector<u8>>,
-        // roles: accessControlLib::Role,
+        usersCommunityRating: Table<ID, UserCommunityRating>,   // key - userID
     }
 
     struct PeriodRewardContainer has key {   // Container || Collection??
@@ -162,7 +160,6 @@ module basics::userLib {
         transfer::share_object(UsersRatingCollection {
             id: object::new(ctx),
             usersCommunityRating: table::new(ctx),
-            properties: vec_map::empty(),
         });
 
         transfer::share_object(PeriodRewardContainer {
