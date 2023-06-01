@@ -25,61 +25,77 @@ module basics::communityLib {
 
     struct Community has key {
         id: UID,
+        /// IPFS hash of document with community information
         ipfsDoc: commonLib::IpfsHash,
+        /// Docomentation of the community
         documentation: commonLib::IpfsHash,
+        // status of the community
         isFrozen: bool,
+        /// Tags for the community
         tags: Table<u64, Tag>,
     }
 
     struct Tag has key, store {
         id: UID,
+        /// IPFS hash of document with tag information
         ipfsDoc: commonLib::IpfsHash,
     }
 
     // ====== Events ======
 
     struct CreateCommunityEvent has copy, drop {
+        /// The transaction sender 
         userId: ID,
+        /// The Object ID of the community
         communityId: ID,
     }
 
     struct UpdateCommunityEvent has copy, drop {
+        /// The transaction sender 
         userId: ID,
+        /// The Object ID of the community
         communityId: ID,
     }
 
-
     struct SetDocumentationTree has copy, drop {
+        /// The transaction sender 
         userId: ID,
+        /// Set documentation for the community
         communityId: ID,
     }
 
     struct CreateTagEvent has copy, drop {
+        /// The transaction sender 
         userId: ID,
+        /// The tag key of the new tag
         tagKey: u64,
+        /// The Object ID of the community
         communityId: ID,
     }
 
     struct UpdateTagEvent has copy, drop {
+        /// The transaction sender 
         userId: ID,
+        /// The tag key of the updated tag
         tagKey: u64,
+        /// The Object ID of the community
         communityId: ID,
     }
 
     struct FreezeCommunityEvent has copy, drop {
+        /// The transaction sender 
         userId: ID,
+        /// The Object ID of the frozen community
         communityId: ID,
     }
 
     struct UnfreezeCommunityEvent has copy, drop {
+        /// The transaction sender 
         userId: ID,
+        /// The Object ID of the unfrozen community
         communityId: ID,
     }
 
-    ///
-    // tags: vector<Tag> -> tags: vector<vector<u8>>.
-    // error "Expected primitive or object type. Got: vector<0x0::communityLib::Tag>"
-    ///
     public entry fun createCommunity(
         roles: &mut accessControlLib::UserRolesCollection,
         user: &userLib::User,
