@@ -107,6 +107,7 @@ module basics::postLib {
     struct Post has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct PostMetaData has key {       // shared
@@ -135,6 +136,7 @@ module basics::postLib {
     struct Reply has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct ReplyMetaData has key, store {
@@ -159,7 +161,7 @@ module basics::postLib {
     struct Comment has key {
         id: UID,
         ipfsDoc: commonLib::IpfsHash,
-
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct CommentMetaData has key, store {
@@ -357,6 +359,7 @@ module basics::postLib {
         let post = Post {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         };
         let postMetaData = PostMetaData {
             id: object::new(ctx),
@@ -531,6 +534,7 @@ module basics::postLib {
         let reply = Reply {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         };
         let replyMetaData = ReplyMetaData {
             id: object::new(ctx),
@@ -579,6 +583,7 @@ module basics::postLib {
         let comment = Comment {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         };
         let commentId = object::id(&comment);
         let commentMetaData = CommentMetaData {
