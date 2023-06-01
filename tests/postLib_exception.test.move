@@ -116,7 +116,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -169,7 +169,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -222,7 +222,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -275,7 +275,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -362,7 +362,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -424,7 +424,7 @@ module basics::postLib_exception_test
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             
-            postLib::createReplyByUser(
+            postLib::createReply(
                 user_rating_collection,
                 user_roles_collection,
                 period_reward_container,
@@ -832,7 +832,7 @@ module basics::postLib_exception_test
             let user = &mut user_val;
             let community = &mut community_val;
 
-            postLib::createPostByUser(
+            postLib::createPost(
                 user_rating_collection,
                 user_roles_collection,
                 &time,
@@ -2607,7 +2607,7 @@ module basics::postLib_exception_test
         let user = &mut user_val;
         let community = &mut community_val;
 
-        postLib::createPostByUser(
+        postLib::createPost(
             user_rating_collection,
             user_roles_collection,
             time,
@@ -2631,7 +2631,7 @@ module basics::postLib_exception_test
         let period_reward_container = &mut period_reward_container_val;
         let user = &mut user_val;
 
-        postLib::createReplyByUser(
+        postLib::createReply(
             user_rating_collection,
             user_roles_collection,
             period_reward_container,
