@@ -9,23 +9,6 @@ module basics::userLib_test
     use sui::object::{Self, ID};
     // use std::debug;
 
-    const ENERGY_DOWNVOTE_QUESTION: u64 = 5;
-    const ENERGY_DOWNVOTE_ANSWER: u64 = 3;
-    const ENERGY_DOWNVOTE_COMMENT: u64 = 2;
-    const ENERGY_UPVOTE_QUESTION: u64 = 1;
-    const ENERGY_UPVOTE_ANSWER: u64 = 1;
-    const ENERGY_VOTE_COMMENT: u64 = 1;
-    const ENERGY_FORUM_VOTE_CANCEL: u64 = 1;
-    const ENERGY_POST_QUESTION: u64 = 10;
-    const ENERGY_POST_ANSWER: u64 = 6;
-    const ENERGY_POST_COMMENT: u64 = 4;
-    const ENERGY_MODIFY_ITEM: u64 = 2;
-    const ENERGY_DELETE_ITEM: u64 = 2;
-
-    const ENERGY_MARK_REPLY_AS_CORRECT: u64 = 1;
-    const ENERGY_UPDATE_PROFILE: u64 = 1;
-    const ENERGY_FOLLOW_COMMUNITY: u64 = 1;
-
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
 
@@ -51,10 +34,8 @@ module basics::userLib_test
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
 
-            let (ipfsDoc, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(user);
+            let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
-            assert!(energy == 1000, 1);
-            assert!(lastUpdatePeriod == 0, 1);
             assert!(followedCommunities == vector<ID>[], 1);
 
             test_scenario::return_to_sender(scenario, user_val);
@@ -88,10 +69,8 @@ module basics::userLib_test
             let user_rating_collection = &mut user_rating_collection_val;
             userLib::updateUser(user_rating_collection, user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", test_scenario::ctx(scenario));
 
-            let (ipfsDoc, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(user);
+            let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
-            assert!(energy == 1000 - ENERGY_UPDATE_PROFILE, 3);
-            assert!(lastUpdatePeriod == 0, 4);
             assert!(followedCommunities == vector<ID>[], 5);
 
             test_scenario::return_to_sender(scenario, user_val);
@@ -132,10 +111,8 @@ module basics::userLib_test
             let community = &mut community_val;
             followCommunityLib::followCommunity(user_rating_collection, user, community);
 
-            let (ipfsDoc, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(user);
+            let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
-            assert!(energy == 1000 - ENERGY_FOLLOW_COMMUNITY, 3);
-            assert!(lastUpdatePeriod == 0, 4);
             assert!(followedCommunities == vector<ID>[object::id(community)], 5);
             
             test_scenario::return_to_sender(scenario, user_val);
@@ -177,10 +154,8 @@ module basics::userLib_test
             followCommunityLib::followCommunity(user_rating_collection, user, community);
             followCommunityLib::unfollowCommunity(user_rating_collection, user, community);
 
-            let (ipfsDoc, energy, lastUpdatePeriod, followedCommunities) = userLib::getUserData(user);
+            let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
-            assert!(energy == 1000 - ENERGY_FOLLOW_COMMUNITY * 2, 3);
-            assert!(lastUpdatePeriod == 0, 4);
             assert!(followedCommunities == vector<ID>[], 5);
 
             test_scenario::return_to_sender(scenario, user_val);

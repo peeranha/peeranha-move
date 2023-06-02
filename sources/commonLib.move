@@ -34,11 +34,6 @@ module basics::commonLib {
         clock::timestamp_ms(time)
     }
 
-
-    public fun getPeriod(): u64 {    // TODO: add
-        0
-    }
-
     public fun getErrorInvalidIpfsHash(): u64 {
         E_INVALIT_IPFSHASH
     }

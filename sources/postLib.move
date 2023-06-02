@@ -411,7 +411,6 @@ module basics::postLib {
     public entry fun createReplyByBot(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         roles: &mut accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -426,7 +425,6 @@ module basics::postLib {
 
         createReplyPrivate(
             usersRatingCollection,
-            periodRewardContainer,
             time,
             commonLib::get_bot_id(),
             postMetaData,
@@ -442,7 +440,6 @@ module basics::postLib {
     public entry fun createReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -472,7 +469,6 @@ module basics::postLib {
 
         createReplyPrivate(
             usersRatingCollection,
-            periodRewardContainer,
             time,
             userId,
             postMetaData,
@@ -487,7 +483,6 @@ module basics::postLib {
 
     fun createReplyPrivate(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         userId: ID,
         postMetaData: &mut PostMetaData,
@@ -539,11 +534,8 @@ module basics::postLib {
             let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
             userLib::updateRating(
                 userCommunityRating,
-                periodRewardContainer,
-                userId,
                 changeUserRating,
                 postMetaData.communityId,
-                ctx
             );
         };
 
@@ -653,7 +645,6 @@ module basics::postLib {
     public entry fun authorEditPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         post: &mut Post,
         postMetaData: &mut PostMetaData,
@@ -662,7 +653,6 @@ module basics::postLib {
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
-        ctx: &mut TxContext
     ) {
         checkMatchItemId(object::id(post), postMetaData.postId);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
@@ -672,14 +662,12 @@ module basics::postLib {
         editPost(
             usersRatingCollection,
             userRolesCollection,
-            periodRewardContainer,
             user,
             postMetaData,
             newCommunity,
             newPostType,
             tags,
             language,
-            ctx
         );
         event::emit(EditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
@@ -687,14 +675,12 @@ module basics::postLib {
     public entry fun moderatorEditPostMetaData(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newCommunity: &communityLib::Community,
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
-        ctx: &mut TxContext
     ) {
         // let newCommunityId = object::id(newCommunity);
         // if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
@@ -703,14 +689,12 @@ module basics::postLib {
         editPost(
             usersRatingCollection,
             userRolesCollection,
-            periodRewardContainer,
             user,
             postMetaData,
             newCommunity,
             newPostType,
             tags,
             language,
-            ctx
         );
         event::emit(ModeratorEditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
@@ -718,14 +702,12 @@ module basics::postLib {
     fun editPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newCommunity: &communityLib::Community,
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
-        ctx: &mut TxContext
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let userId = object::id(user);
@@ -748,8 +730,8 @@ module basics::postLib {
             /*false*/
         );
 
-        changePostType(usersRatingCollection, periodRewardContainer, postMetaData, newPostType, ctx);
-        changePostCommunity(usersRatingCollection, periodRewardContainer, postMetaData, newCommunity, ctx);
+        changePostType(usersRatingCollection, postMetaData, newPostType);
+        changePostCommunity(usersRatingCollection, postMetaData, newCommunity);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         if (postMetaData.language != language) {
@@ -900,11 +882,9 @@ module basics::postLib {
     public entry fun deletePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
-        ctx: &mut TxContext
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let communityId = postMetaData.communityId;
@@ -945,11 +925,8 @@ module basics::postLib {
             &i64Lib::from(MODERATOR_DELETE_POST));
         userLib::updateRating(
             userCommunityRating,
-            periodRewardContainer,
-            postAuthor,
             changeUserRating,
             communityId,
-            ctx
         );
 
         if (currentTime - postMetaData.postTime < DELETE_TIME) {
@@ -962,12 +939,10 @@ module basics::postLib {
 
                 deductReplyRating(
                     replyAuthorCommunityRating,
-                    periodRewardContainer,
                     replyMetaData,
                     postType,
                     bestReplyMetaDataKey == replyMetaDataKey,
                     communityId,
-                    ctx
                 );
                 replyMetaDataKey = replyMetaDataKey + 1;
             }
@@ -980,12 +955,10 @@ module basics::postLib {
     public entry fun deleteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
-        ctx: &mut TxContext
     ) {
         let userId = object::id(user);
         let communityId = postMetaData.communityId;
@@ -1021,13 +994,10 @@ module basics::postLib {
         let time: u64 = commonLib::getTimestamp(time);
         userLib::updateRating(
             replyAuthorCommunityRating,
-            periodRewardContainer,
-            replyMetaData.author,
             if(userId == replyMetaData.author) 
                 i64Lib::neg_from(DELETE_OWN_REPLY) else 
                 i64Lib::neg_from(MODERATOR_DELETE_REPLY),
             communityId,
-            ctx
         );
         
         let parentReplyMetaDataKey = replyMetaData.parentReplyMetaDataKey;
@@ -1035,12 +1005,10 @@ module basics::postLib {
         if (isDeductReplyRating) {
             deductReplyRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
                 replyMetaData,
                 postType,
                 parentReplyMetaDataKey == 0 && isBestReplyMetaData,
                 communityId,
-                ctx
             );
         };
         replyMetaData.isDeleted = true;
@@ -1050,12 +1018,10 @@ module basics::postLib {
 
     fun deductReplyRating(
         userCommunityRating: &mut userLib::UserCommunityRating,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         replyMetaData: &ReplyMetaData,
         postType: u8,
         isBestReply: bool,
         communityId: ID,
-        ctx: &mut TxContext
     ) {
         if (replyMetaData.isDeleted)    // test rating
             return;
@@ -1086,11 +1052,8 @@ module basics::postLib {
         if (i64Lib::compare(&changeReplyAuthorRating, &i64Lib::zero()) != i64Lib::getEual()) {
             userLib::updateRating(
                 userCommunityRating,
-                periodRewardContainer,
-                replyMetaData.author,
                 changeReplyAuthorRating,
                 communityId,
-                ctx
             );
         };
     }
@@ -1098,12 +1061,10 @@ module basics::postLib {
     public entry fun deleteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         parentReplyKey: u64,
         commentMetaDataKey: u64,
-        ctx: &mut TxContext
     ) {
         let userId = object::id(user);
         let communityId = postMetaData.communityId;
@@ -1125,11 +1086,8 @@ module basics::postLib {
         if (userId != commentMetaData.author) {
             userLib::updateRating(
                 userCommunityRating,
-                periodRewardContainer,
-                object::id(user),
                 i64Lib::neg_from(MODERATOR_DELETE_COMMENT),
                 communityId,
-                ctx
             );
         };
 
@@ -1140,11 +1098,9 @@ module basics::postLib {
     public entry fun changeStatusBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postAuthor: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newBestReplyMetaDataKey: u64,
-        ctx: &mut TxContext
     ) {
         let newBestReplyMetaData = getReplyMetaDataSafe(postMetaData, newBestReplyMetaDataKey);
         let communityId = postMetaData.communityId;
@@ -1153,13 +1109,11 @@ module basics::postLib {
         if (postMetaData.bestReplyMetaDataKey == newBestReplyMetaDataKey) {
             updateRatingForBestReply(
                 usersRatingCollection,
-                periodRewardContainer,
                 postMetaData.author,
                 newBestReplyMetaData.author,
                 postMetaData.postType,
                 false,
                 communityId,
-                ctx
             );
             postMetaData.bestReplyMetaDataKey = 0;
         } else {
@@ -1168,25 +1122,21 @@ module basics::postLib {
                 let oldBestReplyMetaData = getReplyMetaDataSafe(postMetaData, bestReplyMetaDataKey);
                 updateRatingForBestReply(
                     usersRatingCollection,
-                    periodRewardContainer,
                     postMetaData.author,
                     oldBestReplyMetaData.author,
                     postMetaData.postType,
                     false,
                     communityId,
-                    ctx
                 );
             };
 
             updateRatingForBestReply(
                 usersRatingCollection,
-                periodRewardContainer,
                 postMetaData.author,
                 newBestReplyMetaData.author,
                 postMetaData.postType,
                 true,
                 communityId,
-                ctx
             );
             postMetaData.bestReplyMetaDataKey = newBestReplyMetaDataKey;
         };
@@ -1210,37 +1160,29 @@ module basics::postLib {
     
     fun updateRatingForBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postAuthorAddress: ID,
         replyAuthorAddress: ID,
         postType: u8,
         isMark: bool,
         communityId: ID,
-        ctx: &mut TxContext
     ) {
         if (postAuthorAddress != replyAuthorAddress) {
             let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postAuthorAddress);
             userLib::updateRating(
                 postAuthorCommunityRating,
-                periodRewardContainer,
-                postAuthorAddress,
                 if (isMark)
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY), &i64Lib::neg_from(1)),
                 communityId,
-                ctx
             );
 
             let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyAuthorAddress);
             userLib::updateRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
-                replyAuthorAddress,
                 if (isMark)
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY), &i64Lib::neg_from(1)),
                 communityId,
-                ctx
             );
         }
     }
@@ -1248,11 +1190,9 @@ module basics::postLib {
     public entry fun votePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         isUpvote: bool,
-        ctx: &mut TxContext
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let postType = postMetaData.postType;
@@ -1280,7 +1220,6 @@ module basics::postLib {
 
         vote(
             usersRatingCollection,
-            periodRewardContainer,
             voteUserId,
             postMetaData.author,
             postType,
@@ -1288,7 +1227,6 @@ module basics::postLib {
             ratingChange,
             TYPE_CONTENT_POST,
             communityId,
-            ctx
         );
         postMetaData.rating = i64Lib::add(&postMetaData.rating, &ratingChange);
 
@@ -1313,12 +1251,10 @@ module basics::postLib {
     public entry fun voteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
         isUpvote: bool,
-        ctx: &mut TxContext
     ) {
         let postType = postMetaData.postType;
         let voteUserId = object::id(voteUser);
@@ -1368,16 +1304,12 @@ module basics::postLib {
         let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
         userLib::updateRating(
             replyAuthorCommunityRating,
-            periodRewardContainer,
-            replyMetaData.author,
             changeReplyAuthorRating,
             communityId,
-            ctx
         );
 
         vote(
             usersRatingCollection,
-            periodRewardContainer,
             voteUserId,
             replyMetaData.author,
             postType,
@@ -1385,7 +1317,6 @@ module basics::postLib {
             ratingChange,
             TYPE_CONTENT_REPLY,
             communityId,
-            ctx
         );
         
         let voteDirection;
@@ -1458,7 +1389,6 @@ module basics::postLib {
 
     fun vote(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUserId: ID,
         votedUserId: ID,
         postType: u8,
@@ -1466,7 +1396,6 @@ module basics::postLib {
         ratingChanged: i64Lib::I64,
         typeContent: u8,
         communityId: ID,
-        ctx: &mut TxContext
     ) {
         // TODO: add why warning - Unused assignment or binding for local '_authorRating'. Consider removing, replacing with '_', or prefixing with '_'
         let voteUserRating = i64Lib::zero();
@@ -1501,30 +1430,22 @@ module basics::postLib {
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         userLib::updateRating(
             voteUserCommunityRating,
-            periodRewardContainer,
-            voteUserId,
             voteUserRating,
             communityId,
-            ctx
         );
 
         let votedUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, votedUserId);
         userLib::updateRating(
             votedUserCommunityRating,
-            periodRewardContainer,
-            votedUserId,
             _authorRating,
             communityId,
-            ctx
         );
     }
 
     fun changePostType(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postMetaData: &mut PostMetaData,
         newPostType: u8,
-        ctx: &mut TxContext
     ) {
         if (postMetaData.postType == newPostType) return;
 
@@ -1571,22 +1492,16 @@ module basics::postLib {
             let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
             userLib::updateRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
-                replyMetaData.author,
                 changeReplyAuthorRating,
                 postMetaData.communityId,
-                ctx
             );
             replyMetaDataKey = replyMetaDataKey + 1;
         };
         let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postMetaData.author);
         userLib::updateRating(
             postAuthorCommunityRating,
-            periodRewardContainer,
-            postMetaData.author,
             changePostAuthorRating,
             postMetaData.communityId,
-            ctx
         );
 
         postMetaData.postType = newPostType;
@@ -1594,10 +1509,8 @@ module basics::postLib {
 
     fun changePostCommunity(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postMetaData: &mut PostMetaData,
         community: &communityLib::Community,
-        ctx: &mut TxContext
     ) {
         let newCommunityId = object::id(community);
         if (postMetaData.communityId == newCommunityId) return;
@@ -1643,19 +1556,13 @@ module basics::postLib {
             let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
             userLib::updateRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
-                replyMetaData.author,
                 i64Lib::mul(&changeReplyAuthorRating, &i64Lib::neg_from(1)),
                 oldCommunityId,
-                ctx
             );
             userLib::updateRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
-                replyMetaData.author,
                 changeReplyAuthorRating,
                 newCommunityId,
-                ctx
             );
             replyMetaDataKey = replyMetaDataKey + 1;
         };
@@ -1663,19 +1570,13 @@ module basics::postLib {
         let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postMetaData.author);
         userLib::updateRating(
             postAuthorCommunityRating,
-            periodRewardContainer,
-            postMetaData.author,
             i64Lib::mul(&changePostAuthorRating, &i64Lib::neg_from(1)),
             oldCommunityId,
-            ctx
         );
         userLib::updateRating(
             postAuthorCommunityRating,
-            periodRewardContainer,
-            postMetaData.author,
             changePostAuthorRating,
             newCommunityId,
-            ctx
         );
         postMetaData.communityId = newCommunityId;
     }
