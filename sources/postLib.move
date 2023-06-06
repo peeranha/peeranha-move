@@ -14,57 +14,57 @@ module basics::postLib {
 
     use sui::table::{Self, Table};
 
-    // ====== Errors ======
+    // ====== Errors. Available values 100 - 199 ======
 
-    const E_INVALID_POST_TYPE: u64 = 31;
+    const E_INVALID_POST_TYPE: u64 = 100;
 
-    const E_INVALID_RESOURCE_TYPE: u64 = 32;
+    const E_INVALID_RESOURCE_TYPE: u64 = 101;
 
-    const E_ITEM_ID_CAN_NOT_BE_0: u64 = 40;
+    const E_ITEM_ID_CAN_NOT_BE_0: u64 = 102;
 
-    const E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_POST: u64 = 41;
+    const E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_POST: u64 = 103;
 
-    const E_NOT_ALLOWED_EDIT_NOT_AUTHOR: u64 = 42;
+    const E_NOT_ALLOWED_EDIT_NOT_AUTHOR: u64 = 104;
 
-    const E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY: u64 = 45;
+    const E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY: u64 = 105;
 
-    const E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL: u64 = 46;
+    const E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL: u64 = 106;
 
-    const E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST: u64 = 47;       // name
+    const E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST: u64 = 107;       // name
 
-    const E_THIS_POST_TYPE_IS_ALREADY_SET: u64 = 49;        // deleted
+    const E_THIS_POST_TYPE_IS_ALREADY_SET: u64 = 108;        // deleted
 
-    const E_ERROR_POST_TYPE: u64 = 50;      ///
+    const E_ERROR_POST_TYPE: u64 = 109;      ///
 
-    const E_ERROR_VOTE_COMMENT: u64 = 51;
+    const E_ERROR_VOTE_COMMENT: u64 = 110;
 
-    const E_ERROR_VOTE_REPLY: u64 = 52;
+    const E_ERROR_VOTE_REPLY: u64 = 111;
 
-    const E_ERROR_VOTE_POST: u64 = 53;
+    const E_ERROR_VOTE_POST: u64 = 112;
 
-    const E_POST_NOT_EXIST: u64 = 55;
+    const E_POST_NOT_EXIST: u64 = 113;
 
-    const E_REPLY_NOT_EXIST: u64 = 56;
+    const E_REPLY_NOT_EXIST: u64 = 114;
 
-    const E_COMMENT_NOT_EXIST: u64 = 57;
+    const E_COMMENT_NOT_EXIST: u64 = 115;
 
-    const E_POST_DELETED: u64 = 58;
+    const E_POST_DELETED: u64 = 116;
 
-    const E_REPLY_DELETED: u64 = 59;
+    const E_REPLY_DELETED: u64 = 117;
 
-    const E_COMMENT_DELETED: u64 = 60;
+    const E_COMMENT_DELETED: u64 = 118;
 
-    const E_ERROR_CHANGE_COMMUNITY_ID: u64 = 61;
+    const E_ERROR_CHANGE_COMMUNITY_ID: u64 = 119;
 
-    const E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY: u64 = 64;
+    const E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY: u64 = 120;
 
-    const E_WRONG_SIGNER: u64 = 64;
+    const E_WRONG_SIGNER: u64 = 121;
 
-    const E_ITEM_ID_NOT_MATCHING: u64 = 65;
+    const E_ITEM_ID_NOT_MATCHING: u64 = 122;
 
-    const E_AT_LEAST_ONE_TAG_IS_REQUIRED: u64 = 86;
+    const E_AT_LEAST_ONE_TAG_IS_REQUIRED: u64 = 123;
 
-    const E_INVALID_LANGUAGE: u64 = 67;
+    const E_INVALID_LANGUAGE: u64 = 124;
 
     // 98, 99 - getPeriodRating  ???
 
