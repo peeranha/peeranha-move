@@ -106,97 +106,123 @@ module basics::postLib {
 
     struct Post has key {
         id: UID,
-        /// IPFS hash of document with post information
+        /// `IPFS hash` of document with `post` information
         ipfsDoc: commonLib::IpfsHash,
-        /// Properties for the post
+        /// Properties for the `post`
         properties: VecMap<u8, vector<u8>>,
     }
 
     struct PostMetaData has key {       // shared
         id: UID,
+        /// `Post object id` for the `post meta data`
         postId: ID,
-        /// Post type of the post meta data
+        /// `Post type` of the `post meta data`
         postType: u8,
-        /// Post type of the post meta data
+        /// `Created time` of the `post meta data`
         postTime: u64,
-        /// Author of the post meta data
+        /// `Author` of the `post meta data`
         author: ID,
-        /// Information the post author when create bot
+        /// Information the `post author` when create `bot`
         /// Defaut value - vector::empty<u8>()
-        /// For bot - messenger type + handle
+        /// For bot - messenger `type` + `handle`
         authorMetaData: vector<u8>,
-        /// Rating of the post meta data
+        /// `Rating` of the `post meta data`
         rating: i64Lib::I64,
-        /// Community Id for the post meta data
+        /// `Community Id` for the `post meta data`
         communityId: ID,
+        /// Current `language` for the `post meta data`
         language: u8,
 
+        /// `Oficial reply meta data key` in `replies` for the `post meta data`
         officialReplyMetaDataKey: u64,
+        /// `Best reply meta data key` in replies for the `post meta data`
         bestReplyMetaDataKey: u64,
+        /// Deleted `reply` count 
         deletedReplyCount: u64,
-        /// Status of the community
+        /// Status of the `post meta data`
         isDeleted: bool,
 
+        /// `Tags key` in `Community->tags` for the `post meta data`
         tags: vector<u64>,
+        /// `Replies meta data` for the `post meta data`. Table key - `reply meta data key`
         replies: Table<u64, ReplyMetaData>,
+        /// `Comments meta data` for the `post meta data`. Table key - `comment meta data key`
         comments: Table<u64, CommentMetaData>,
-        /// Properties for the post
+        /// Properties for the `post meta data`
         properties: VecMap<u8, vector<u8>>,
-        historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
+        /// Users vote for the `post meta data`. VecMap key - `user object id`. downVote = 1, NONE = 2, upVote = 3.
+        historyVotes: VecMap<ID, u8>,      // rewrite look getForumItemRatingChange
     }
 
     struct Reply has key {
         id: UID,
-        /// IPFS hash of document with reply information
+        /// `IPFS hash` of document with `reply` information
         ipfsDoc: commonLib::IpfsHash,
-        /// Properties for the reply
+        /// Properties for the `reply`
         properties: VecMap<u8, vector<u8>>,
     }
 
     struct ReplyMetaData has key, store {
         id: UID,
+        /// `Reply object id` for the `reply meta data`
         replyId: ID,
+        /// `Created time` of the `reply meta data`
         postTime: u64,
+        /// `Author` of the `reply meta data`
         author: ID,
+        /// Information the `post author` when create bot
+        /// Defaut value - vector::empty<u8>()
+        /// For bot - messenger `type` + `handle`
         authorMetaData: vector<u8>,
+        /// `Rating` of the `reply meta data`
         rating: i64Lib::I64,
+        /// `Parent reply meta data key` for the `reply meta data` (reply to reply).
         parentReplyMetaDataKey: u64,
+        /// Current `language` for the `reply meta data`
         language: u8,
 
+        /// Status of the `reply meta data`. First for `post`
         isFirstReply: bool,
+        /// Status of the `reply meta data`. The `reply` created less than 15 minutes after created `post`.
         isQuickReply: bool,
+        /// Status of the `reply meta data`
         isDeleted: bool,
 
+        /// `Comments meta data` for the `reply meta data`. Table key - `comment meta data key`
         comments: Table<u64, CommentMetaData>,
+        /// Properties for the `reply meta data`
         properties: VecMap<u8, vector<u8>>,
-        historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
+        /// Users' Vote for the `reply meta data`. VecMap key - user object id. downVote = 1, NONE = 2, upVote = 3.
+        historyVotes: VecMap<ID, u8>,       // rewrite look getForumItemRatingChange
     }
 
     struct Comment has key {
         id: UID,
-        /// IPFS hash of document with comment information
+        /// `IPFS hash` of document with `comment` information
         ipfsDoc: commonLib::IpfsHash,
-        /// Properties for the comment
+        /// `Properties` for the `comment`
         properties: VecMap<u8, vector<u8>>,
     }
 
     struct CommentMetaData has key, store {
         id: UID,
+        /// `Comment object id` for the `comment meta data`
         commentId: ID,
+        /// `Created time` of the `comment meta data`
         postTime: u64,
+        /// `Author` of the `comment meta data`
         author: ID,
+        /// `Rating` of the `comment meta data`
         rating: i64Lib::I64,
+        /// Current `language` for the `comment meta data`
         language: u8,
 
+        /// Status of the `comment meta data`
         isDeleted: bool,
+        /// `Properties` for the `comment meta data`
         properties: VecMap<u8, vector<u8>>,
-        historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
-    }
-
-    struct UserRatingChange {
-        user: userLib::User,
-        userCommunityRating: userLib::UserCommunityRating,
-        rating: i64Lib::I64
+        /// `Users' Vote for the `comment meta data`. VecMap key - `user object id`. downVote = 1, NONE = 2, upVote = 3.
+        historyVotes: VecMap<ID, u8>,       // rewrite look getForumItemRatingChange
     }
 
     // ====== Events ======
@@ -282,6 +308,7 @@ module basics::postLib {
         voteDirection: u8,
     }
 
+    /// Publication `post` by `bot`
     public entry fun createPostByBot(
         roles: &mut accessControlLib::UserRolesCollection,
         time: &Clock,
@@ -310,6 +337,7 @@ module basics::postLib {
         )
     }
 
+    /// Publication `post` by `user`
     public entry fun createPost(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -351,6 +379,7 @@ module basics::postLib {
         )
     }
 
+    /// Publication `post`
     fun createPostPrivate(
         time: &Clock,
         userId: ID,
@@ -408,6 +437,7 @@ module basics::postLib {
         );
     }
 
+    /// Publication `reply` by `bot`
     public entry fun createReplyByBot(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         roles: &mut accessControlLib::UserRolesCollection,
@@ -437,6 +467,7 @@ module basics::postLib {
         )
     }
 
+    /// Publication `reply` by `user`
     public entry fun createReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -481,6 +512,7 @@ module basics::postLib {
         )
     }
 
+    /// Publication `reply` by `user`
     fun createReplyPrivate(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         time: &Clock,
@@ -572,6 +604,7 @@ module basics::postLib {
         );
     }
 
+    /// Publication `comment`
     public entry fun createComment(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -642,6 +675,7 @@ module basics::postLib {
         event::emit(CreateCommentEvent{userId: userId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyMetaDataKey, commentMetaDataKey: commentMetaDataKey});
     }
 
+    /// `Author` edit own `post`
     public entry fun authorEditPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -672,6 +706,7 @@ module basics::postLib {
         event::emit(EditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
 
+    /// `Moderator` edit `post meta data` (post type/community/tags/language)
     public entry fun moderatorEditPostMetaData(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -699,6 +734,7 @@ module basics::postLib {
         event::emit(ModeratorEditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
 
+    /// Edit the `post`
     fun editPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -746,6 +782,7 @@ module basics::postLib {
         event::emit(EditPostEvent{userId: userId, postMetaDataId: object::id(postMetaData)});
     }
 
+    /// `Author` edit own `reply`
     public entry fun authorEditReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -775,7 +812,8 @@ module basics::postLib {
         event::emit(EditReplyEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey});
     }
 
-    //moderatorEditReply -> moderatorEditReplyMetaData
+    // moderatorEditReply -> moderatorEditReplyMetaData
+    /// `Moderator` edit `reply`(isOfficialReply/language)
     public entry fun moderatorEditReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -797,6 +835,7 @@ module basics::postLib {
         event::emit(ModeratorEditReplyEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey});
     }
 
+    /// Edit `reply`
     fun editReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -839,6 +878,7 @@ module basics::postLib {
         };
     }
 
+    /// `Author` edit `comment`
     public entry fun editComment(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -879,6 +919,7 @@ module basics::postLib {
         event::emit(EditCommentEvent{userId: userId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyKey, commentMetaDataKey: commentMetaDataKey});
     }
 
+    /// `Author` and `moderator` delete `post`
     public entry fun deletePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -952,6 +993,7 @@ module basics::postLib {
         event::emit(DeletePostEvent{userId: userId, postMetaDataId: object::id(postMetaData)});
     }
 
+    /// `Author` and `moderator` delete `reply`
     public entry fun deleteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -1016,6 +1058,7 @@ module basics::postLib {
     }
 
 
+    /// When delete the `reply` take `rating` from the `author`
     fun deductReplyRating(
         userCommunityRating: &mut userLib::UserCommunityRating,
         replyMetaData: &ReplyMetaData,
@@ -1058,6 +1101,7 @@ module basics::postLib {
         };
     }
 
+    /// `Author` and `moderator` delete `comment`
     public entry fun deleteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -1095,6 +1139,7 @@ module basics::postLib {
         event::emit(DeleteCommentEvent{userId: userId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyKey, commentMetaDataKey: commentMetaDataKey});
     }
 
+    /// Change status `best reply`
     public entry fun changeStatusBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -1158,6 +1203,7 @@ module basics::postLib {
     }
 
     
+    /// Recalculation `post author` and `reply author` `rating` when change `status best reply`
     fun updateRatingForBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         postAuthorAddress: ID,
@@ -1187,6 +1233,7 @@ module basics::postLib {
         }
     }
 
+    /// Vote for `post`
     public entry fun votePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -1248,6 +1295,7 @@ module basics::postLib {
         event::emit(VoteItem{userId: voteUserId, postMetaDataId: object::id(postMetaData), replyMetaDataKey: 0, commentMetaDataKey: 0, voteDirection: voteDirection});
     }
 
+    /// Vote for `reply`
     public entry fun voteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -1336,6 +1384,7 @@ module basics::postLib {
         event::emit(VoteItem{userId: voteUserId, postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey, commentMetaDataKey: 0, voteDirection: voteDirection});
     }
 
+    /// Vote for `comment`
     public entry fun voteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -1387,6 +1436,7 @@ module basics::postLib {
         event::emit(VoteItem{userId: voteUserId, postMetaDataId: object::id(postMetaData), replyMetaDataKey: parentReplyMetaDataKey, commentMetaDataKey: commentMetaDataKey, voteDirection: voteDirection});
     }
 
+    /// Recalculation `users' rating` after voting per a `reply` or `post`
     fun vote(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         voteUserId: ID,
@@ -1442,6 +1492,7 @@ module basics::postLib {
         );
     }
 
+    /// Change `postType` for the `post` and recalculation `rating` for all `users` who were active in the `post`
     fun changePostType(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         postMetaData: &mut PostMetaData,
@@ -1507,6 +1558,7 @@ module basics::postLib {
         postMetaData.postType = newPostType;
     }
 
+    /// Change `communityId` for the `post` and recalculation `rating` for all `users` who were active in the `post`
     fun changePostCommunity(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         postMetaData: &mut PostMetaData,
@@ -1581,6 +1633,7 @@ module basics::postLib {
         postMetaData.communityId = newCommunityId;
     }
 
+    /// Check overlap `item object id` and `itemMetaData.itemId` (for post/reply/comment)
     fun checkMatchItemId(
         itemId: ID,
         savedItemId: ID
@@ -1591,6 +1644,7 @@ module basics::postLib {
         ); 
     }
 
+    /// Get constants `rating` depends on `post type` (upvotedPost, downvotedPost, upvotedReply, downvotedReply, firstReply, quickReply, acceptedReply, acceptReply)
     fun getTypesRating(        //name?
         postType: u8
     ): StructRating {
@@ -1605,6 +1659,7 @@ module basics::postLib {
         }
     }
 
+    /// Get count upvotes/downvotes for the `item meta data`
     fun getHistoryInformations(
         historyVotes: VecMap<ID, u8>
     ): (u64, u64) {
@@ -1624,6 +1679,7 @@ module basics::postLib {
         (positive, negative)
     }
 
+    /// Get the mutable `reply meta data`
     public fun getMutableReplyMetaData(postMetaData: &mut PostMetaData, replyMetaDataKey: u64): &mut ReplyMetaData {
         assert!(replyMetaDataKey >= 0, E_ITEM_ID_CAN_NOT_BE_0);
         assert!(table::length(&postMetaData.replies) >= replyMetaDataKey, E_REPLY_NOT_EXIST);
@@ -1631,6 +1687,7 @@ module basics::postLib {
         replyMetaData
     }
 
+    /// Get the mutable `reply meta data` + (check status deleted for `post/reply`)
     public fun getMutableReplyMetaDataSafe(postMetaData: &mut PostMetaData, replyMetaDataKey: u64): &mut ReplyMetaData {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let replyMetaData = getMutableReplyMetaData(postMetaData, replyMetaDataKey);
@@ -1638,6 +1695,7 @@ module basics::postLib {
         replyMetaData
     }
 
+    /// Get the `reply meta data`
     public fun getReplyMetaData(postMetaData: &PostMetaData, replyMetaDataKey: u64): &ReplyMetaData {
         assert!(replyMetaDataKey > 0, E_ITEM_ID_CAN_NOT_BE_0);
         assert!(table::length(&postMetaData.replies) >= replyMetaDataKey, E_REPLY_NOT_EXIST);
@@ -1645,6 +1703,7 @@ module basics::postLib {
         replyMetaData
     }
 
+    /// Get the `reply meta data` + (check status deleted for `post/reply`)
     public fun getReplyMetaDataSafe(postMetaData: &PostMetaData, replyMetaDataKey: u64): &ReplyMetaData {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
@@ -1652,6 +1711,7 @@ module basics::postLib {
         replyMetaData
     }
 
+    /// Get the mutable `comment meta data`
     public fun getMutableCommentMetaData(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &mut CommentMetaData {
         assert!(commentMetaDataKey > 0, E_ITEM_ID_CAN_NOT_BE_0);
         if (parentReplyMetaDataKey == 0) {
@@ -1667,6 +1727,7 @@ module basics::postLib {
         }
     }
 
+    /// Get the mutable `comment meta data` + (check status deleted for `post/reply/comment`)
     public fun getMutableCommentMetaDataSafe(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &mut CommentMetaData {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let commentMetaData = getMutableCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
@@ -1674,10 +1735,12 @@ module basics::postLib {
         commentMetaData
     }
 
+    /// Get the `comment meta data`
     public fun getCommentMetaData(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &CommentMetaData {
         getMutableCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey)
     }
 
+    /// Get the `comment meta data` + (check status deleted for post/reply/comment)
     public fun getCommentMetaDataSafe(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &CommentMetaData {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
@@ -1685,6 +1748,7 @@ module basics::postLib {
         commentMetaData
     }
 
+    /// Get active `reply` count for the `post` (created replies - deleted replies)
     fun getActiveReplyCount(
         postMetaData: &PostMetaData
     ): u64 {
@@ -1896,6 +1960,7 @@ module basics::postLib {
 
     const MODERATOR_DELETE_COMMENT: u64 = 1;    // negative
 
+    /// Get constants rating for expert post type (upvotedPost, downvotedPost, upvotedReply, downvotedReply, firstReply, quickReply, acceptedReply, acceptReply)
     fun getExpertRating(): StructRating {
         StructRating {
             upvotedPost: i64Lib::from(UPVOTED_EXPERT_POST),
@@ -1910,6 +1975,7 @@ module basics::postLib {
         }
     }
 
+    /// Get constants rating for common post type (upvotedPost, downvotedPost, upvotedReply, downvotedReply, firstReply, quickReply, acceptedReply, acceptReply)
     fun getCommonRating(): StructRating {
         StructRating {
             upvotedPost: i64Lib::from(UPVOTED_COMMON_POST),
@@ -1924,6 +1990,7 @@ module basics::postLib {
         }
     }
 
+    /// Get constants rating for tutorial post type (upvotedPost, downvotedPost, upvotedReply, downvotedReply, firstReply, quickReply, acceptedReply, acceptReply)
     fun getTutorialRating(): StructRating {
         StructRating {
             upvotedPost: i64Lib::from(UPVOTED_TUTORIAL),

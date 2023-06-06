@@ -26,82 +26,82 @@ module basics::communityLib {
 
     struct Community has key {
         id: UID,
-        /// IPFS hash of document with community information
+        /// `IPFS hash` of document with `community` information
         ipfsDoc: commonLib::IpfsHash,
-        /// Docomentation of the community
+        /// `Docomentation` of the `community`
         documentation: commonLib::IpfsHash,
-        /// Frozen status of the community
+        /// Frozen status of the `community`
         isFrozen: bool,
-        /// Tags for the community
+        /// `Tags` for the `community`. Table key - `tag key`.
         tags: Table<u64, Tag>,
-        /// Properties for the community
+        /// `Properties` for the `community`
         properties: VecMap<u8, vector<u8>>,
     }
 
     struct Tag has key, store {
         id: UID,
-        /// IPFS hash of document with tag information
+        /// `IPFS hash` of document with `tag` information
         ipfsDoc: commonLib::IpfsHash,
-        /// Properties for the tag
+        /// `Properties` for the `tag`
         properties: VecMap<u8, vector<u8>>,
     }
 
     // ====== Events ======
 
     struct CreateCommunityEvent has copy, drop {
-        /// The transaction sender 
+        /// The transaction `sender`
         userId: ID,
-        /// The Object ID of the community
+        /// The `object ID` of the `community`
         communityId: ID,
     }
 
     struct UpdateCommunityEvent has copy, drop {
-        /// The transaction sender 
+        /// The transaction `sender`
         userId: ID,
-        /// The Object ID of the community
+        /// The `object ID` of the `community`
         communityId: ID,
     }
 
     struct SetDocumentationTree has copy, drop {
-        /// The transaction sender 
+        /// The transaction `sender`
         userId: ID,
-        /// Set documentation for the community
+        /// Set `documentation` for the `community`
         communityId: ID,
     }
 
     struct CreateTagEvent has copy, drop {
-        /// The transaction sender 
+        /// The transaction `sender `
         userId: ID,
-        /// The tag key of the new tag
+        /// The `tag key` of the new `tag`
         tagKey: u64,
-        /// The Object ID of the community
+        /// The `object ID` of the `community`
         communityId: ID,
     }
 
     struct UpdateTagEvent has copy, drop {
-        /// The transaction sender 
+        /// The transaction `sender`
         userId: ID,
-        /// The tag key of the updated tag
+        /// The `tag key` of the updated `tag`
         tagKey: u64,
-        /// The Object ID of the community
+        /// The `object ID` of the `community`
         communityId: ID,
     }
 
     struct FreezeCommunityEvent has copy, drop {
-        /// The transaction sender 
+        /// The transaction `sender`
         userId: ID,
-        /// The Object ID of the frozen community
+        /// The `object ID` of the frozen community
         communityId: ID,
     }
 
     struct UnfreezeCommunityEvent has copy, drop {
-        /// The transaction sender 
+        /// The transaction `sender`
         userId: ID,
-        /// The Object ID of the unfrozen community
+        /// The `object ID` of the unfrozen `community`
         communityId: ID,
     }
 
-    /// Create new community info record
+    /// Create new `community` info record
     public entry fun createCommunity(
         roles: &mut accessControlLib::UserRolesCollection,
         user: &userLib::User,
@@ -153,7 +153,7 @@ module basics::communityLib {
         transfer::share_object(community);
     }
 
-    /// Update community info record
+    /// Update `community` info record
     public entry fun updateCommunity(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_admin_or_community_admin(), object::id(community));
@@ -163,7 +163,7 @@ module basics::communityLib {
         event::emit(UpdateCommunityEvent {userId: userId, communityId: object::id(community)});
     }
 
-    /// Update documentation ipfs tree
+    /// Update `documentation ipfs` tree
     public entry fun updateDocumentationTree(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_community_admin(), object::id(community));
@@ -173,7 +173,7 @@ module basics::communityLib {
         event::emit(SetDocumentationTree {userId: userId, communityId: object::id(community)});
     }
 
-    /// Create new tag info record
+    /// Create new `tag` info record
     public entry fun createTag(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         let userId = object::id(user);
         let communityId = object::id(community);
@@ -194,7 +194,7 @@ module basics::communityLib {
             properties: vec_map::empty(),
         });
     }
-    /// Update tag info record
+    /// Update `tag` info record
     public entry fun updateTag(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, tagId: u64, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         let communityId = object::id(community);
@@ -208,7 +208,7 @@ module basics::communityLib {
         event::emit(UpdateTagEvent {userId: userId, tagKey: tagId, communityId: communityId});
     }
 
-    /// Freeze the community
+    /// Freeze the `community`
     public entry fun freezeCommunity(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
         let userId = object::id(user);
         let communityId = object::id(community);
@@ -219,7 +219,7 @@ module basics::communityLib {
         event::emit(FreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
-    /// Unfreeze the community
+    /// Unfreeze the `community`
     public entry fun unfreezeCommunity(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community) {
         let userId = object::id(user);
         let communityId = object::id(community);
@@ -232,7 +232,7 @@ module basics::communityLib {
         event::emit(UnfreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
-    /// Check status of the community
+    /// Check status of the `community`
     public fun onlyNotFrozenCommunity(community: &Community) {
         assert!(!community.isFrozen, E_COMMUNITY_IS_FROZEN);
     }
@@ -246,7 +246,7 @@ module basics::communityLib {
         };
     }
 
-    /// Get list of mutable tags in the community
+    /// Get list of mutable `tags` in the `community`
     public fun getMutableTag(community: &mut Community, tagId: u64): &mut Tag {
         assert!(tagId > 0, E_TAG_ID_CAN_NOT_BE_0);
         assert!(table::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);
@@ -254,7 +254,7 @@ module basics::communityLib {
         tag
     }
 
-    /// Get list of tags in community
+    /// Get list of `tags` in `community`
     public fun getTag(community: &Community, tagId: u64): &Tag {
         assert!(tagId > 0, E_TAG_ID_CAN_NOT_BE_0);
         assert!(table::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);

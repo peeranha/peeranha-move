@@ -67,7 +67,7 @@ module basics::userLib_test
             let user = &mut user_val;
             let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
-            userLib::updateUser(user_rating_collection, user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", test_scenario::ctx(scenario));
+            userLib::updateUser(user_rating_collection, user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
 
             let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);

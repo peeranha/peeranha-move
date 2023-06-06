@@ -23,7 +23,7 @@ module basics::followCommunityLib {
         communityId: ID
     }
 
-    /// @notice User follows the community
+    /// `User` follows the `community`
     public entry fun followCommunity(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         user: &mut userLib::User,
@@ -33,7 +33,7 @@ module basics::followCommunityLib {
         let userId = object::id(user);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
-        userLib::checkRatingAndEnergy(
+        userLib::checkRating(
             user,
             userCommunityRating,
             userId,
@@ -55,7 +55,7 @@ module basics::followCommunityLib {
         event::emit(FollowCommunityEvent{userId: userId, communityId: community_id});
     }
 
-    /// @notice User follows the community
+    /// `User` unfollows the `community`
     public entry fun unfollowCommunity(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         user: &mut userLib::User,
@@ -65,7 +65,7 @@ module basics::followCommunityLib {
         let userId = object::id(user);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
-        let user = userLib::checkRatingAndEnergy(
+        let user = userLib::checkRating(
             user,
             userCommunityRating,
             userId,
