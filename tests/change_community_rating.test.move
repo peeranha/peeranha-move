@@ -1,13 +1,13 @@
 #[test_only]
-module basics::postLib_change_community_rating_test
+module peeranha::postLib_change_community_rating_test
 {
-    use basics::postLib::{Self, PostMetaData};
-    use basics::postLib_votes_test;
-    use basics::postLib_votes_rating_test;
-    use basics::postLib_change_community_test;
-    use basics::postLib_change_post_type_test;
+    use peeranha::postLib::{Self, PostMetaData};
+    use peeranha::postLib_votes_test;
+    use peeranha::postLib_votes_rating_test;
+    use peeranha::postLib_change_community_test;
+    use peeranha::postLib_change_post_type_test;
     use sui::test_scenario::{Self};
-    use basics::i64Lib;
+    use peeranha::i64Lib;
     use sui::clock::{Self};
 
     const EXPERT_POST: u8 = 0;

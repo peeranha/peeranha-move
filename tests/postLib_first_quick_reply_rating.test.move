@@ -1,17 +1,17 @@
 #[test_only]
-module basics::postLib_first_quick_reply_rating_test
+module peeranha::postLib_first_quick_reply_rating_test
 {
-    use basics::postLib::{PostMetaData};
-    use basics::postLib_test;
-    use basics::postLib_votes_test;
-    use basics::postLib_votes_rating_test;
-    use basics::userLib_test;
-    use basics::communityLib_test;
-    use basics::postLib_change_post_type_test;
-    use basics::userLib::{Self};
-    use basics::accessControlLib::{Self};
+    use peeranha::postLib::{PostMetaData};
+    use peeranha::postLib_test;
+    use peeranha::postLib_votes_test;
+    use peeranha::postLib_votes_rating_test;
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
+    use peeranha::postLib_change_post_type_test;
+    use peeranha::userLib::{Self};
+    use peeranha::accessControlLib::{Self};
     use sui::test_scenario::{Self, Scenario};
-    use basics::i64Lib;
+    use peeranha::i64Lib;
     use sui::clock::{Self};
 
     const EXPERT_POST: u8 = 0;

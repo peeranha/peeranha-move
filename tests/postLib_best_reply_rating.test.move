@@ -1,14 +1,14 @@
 #[test_only]
-module basics::postLib_best_reply_rating_test
+module peeranha::postLib_best_reply_rating_test
 {
-    use basics::postLib::{Self, PostMetaData};
-    use basics::postLib_test;
-    use basics::postLib_votes_rating_test;
-    use basics::postLib_change_post_type_test;
+    use peeranha::postLib::{Self, PostMetaData};
+    use peeranha::postLib_test;
+    use peeranha::postLib_votes_rating_test;
+    use peeranha::postLib_change_post_type_test;
     use sui::test_scenario::{Self};
-    use basics::userLib::{User};
+    use peeranha::userLib::{User};
     use sui::clock::{Self};
-    use basics::i64Lib;
+    use peeranha::i64Lib;
 
 
     // use std::debug;

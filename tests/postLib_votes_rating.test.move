@@ -1,16 +1,16 @@
 #[test_only]
-module basics::postLib_votes_rating_test
+module peeranha::postLib_votes_rating_test
 {
     use sui::object::{Self};
-    use basics::postLib::{Self, PostMetaData};
-    use basics::postLib_test;
-    use basics::postLib_change_post_type_test;
-    use basics::postLib_votes_test;
-    use basics::userLib::{Self, User, UsersRatingCollection};
-    use basics::communityLib::{Community};
+    use peeranha::postLib::{Self, PostMetaData};
+    use peeranha::postLib_test;
+    use peeranha::postLib_change_post_type_test;
+    use peeranha::postLib_votes_test;
+    use peeranha::userLib::{Self, User, UsersRatingCollection};
+    use peeranha::communityLib::{Community};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
-    use basics::i64Lib;
+    use peeranha::i64Lib;
 
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;

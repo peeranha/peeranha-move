@@ -1,14 +1,14 @@
 #[test_only]
-module basics::postLib_changePostType_rating_test
+module peeranha::postLib_changePostType_rating_test
 {
-    use basics::postLib::{Self, PostMetaData};
-    use basics::userLib_test::{Self};
-    use basics::userLib::{User};
-    use basics::postLib_test;
-    use basics::postLib_votes_test;
-    use basics::postLib_change_post_type_test;
-    use basics::postLib_votes_rating_test;
-    use basics::i64Lib;
+    use peeranha::postLib::{Self, PostMetaData};
+    use peeranha::userLib_test::{Self};
+    use peeranha::userLib::{User};
+    use peeranha::postLib_test;
+    use peeranha::postLib_votes_test;
+    use peeranha::postLib_change_post_type_test;
+    use peeranha::postLib_votes_rating_test;
+    use peeranha::i64Lib;
     use sui::test_scenario::{Self};
     use sui::clock::{Self};
     // use std::debug;

@@ -1,8 +1,8 @@
 #[test_only]
-module basics::postLib_best_reply_test
+module peeranha::postLib_best_reply_test
 {
-    use basics::postLib::{Self, PostMetaData};
-    use basics::postLib_test;
+    use peeranha::postLib::{Self, PostMetaData};
+    use peeranha::postLib_test;
     use sui::test_scenario::{Self};
     use sui::clock::{Self};
 

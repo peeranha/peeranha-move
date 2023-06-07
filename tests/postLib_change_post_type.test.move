@@ -1,13 +1,13 @@
 #[test_only]
-module basics::postLib_change_post_type_test
+module peeranha::postLib_change_post_type_test
 {
-    use basics::postLib::{Self, Post, PostMetaData};
-    use basics::userLib_test;
-    use basics::communityLib_test;
-    use basics::postLib_test;
-    use basics::userLib::{Self, UsersRatingCollection, User};
-    use basics::communityLib::{Community};
-    use basics::accessControlLib::{Self, UserRolesCollection};
+    use peeranha::postLib::{Self, Post, PostMetaData};
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
+    use peeranha::postLib_test;
+    use peeranha::userLib::{Self, UsersRatingCollection, User};
+    use peeranha::communityLib::{Community};
+    use peeranha::accessControlLib::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
 

@@ -1,4 +1,4 @@
-module basics::commonLib {
+module peeranha::commonLib {
     use std::vector;
     use sui::object::{Self, ID};
     use sui::clock::{Self, Clock};

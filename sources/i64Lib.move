@@ -2,7 +2,7 @@
 /// @title i64
 /// @notice Signed 64-bit integers in Move.
 /// @dev TODO: Pass in params by value instead of by ref to make usage easier?
-module basics::i64Lib {
+module peeranha::i64Lib {
     // use std::error;
 
     /// @dev Maximum I64 value as a u64.

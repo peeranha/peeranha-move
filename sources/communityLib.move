@@ -1,14 +1,14 @@
-module basics::communityLib {
+module peeranha::communityLib {
     use sui::transfer;
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{TxContext};
     use std::vector;
     use sui::event;
     // use std::debug;
-    use basics::commonLib;
-    use basics::accessControlLib;
-    use basics::userLib;
-    // friend basics::commonLib;
+    use peeranha::commonLib;
+    use peeranha::accessControlLib;
+    use peeranha::userLib;
+    // friend peeranha::commonLib;
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
 

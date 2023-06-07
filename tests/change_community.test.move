@@ -1,13 +1,13 @@
 #[test_only]
-module basics::postLib_change_community_test
+module peeranha::postLib_change_community_test
 {
-    use basics::userLib::{Self, User, UsersRatingCollection};
-    use basics::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
-    use basics::communityLib::{Community};
-    use basics::postLib::{Self, Post, PostMetaData};
-    use basics::postLib_change_post_type_test;
-    use basics::userLib_test;
-    use basics::communityLib_test;
+    use peeranha::userLib::{Self, User, UsersRatingCollection};
+    use peeranha::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
+    use peeranha::communityLib::{Community};
+    use peeranha::postLib::{Self, Post, PostMetaData};
+    use peeranha::postLib_change_post_type_test;
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
     use sui::object::{Self};

@@ -1,12 +1,12 @@
 #[test_only]
-module basics::postLib_language_test
+module peeranha::postLib_language_test
 {
-    use basics::postLib::{Self, Post, PostMetaData, Reply, Comment};
-    use basics::userLib_test;
-    use basics::communityLib_test;
-    use basics::postLib_test;
-    use basics::userLib::{Self};
-    use basics::accessControlLib::{Self};
+    use peeranha::postLib::{Self, Post, PostMetaData, Reply, Comment};
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
+    use peeranha::postLib_test;
+    use peeranha::userLib::{Self};
+    use peeranha::accessControlLib::{Self};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
 

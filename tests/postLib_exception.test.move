@@ -1,15 +1,15 @@
 #[test_only]
-module basics::postLib_exception_test
+module peeranha::postLib_exception_test
 {
-    use basics::postLib::{Self, Post, PostMetaData, Reply, Comment};
-    use basics::userLib_test;
-    use basics::commonLib;
-    use basics::communityLib_test;
-    use basics::postLib_votes_test;
-    use basics::postLib_change_post_type_test;
-    use basics::communityLib::{Self, Community};
-    use basics::userLib::{Self, User, UsersRatingCollection};
-    use basics::accessControlLib::{Self, UserRolesCollection};
+    use peeranha::postLib::{Self, Post, PostMetaData, Reply, Comment};
+    use peeranha::userLib_test;
+    use peeranha::commonLib;
+    use peeranha::communityLib_test;
+    use peeranha::postLib_votes_test;
+    use peeranha::postLib_change_post_type_test;
+    use peeranha::communityLib::{Self, Community};
+    use peeranha::userLib::{Self, User, UsersRatingCollection};
+    use peeranha::accessControlLib::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
 
