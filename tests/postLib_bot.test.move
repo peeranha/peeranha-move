@@ -67,7 +67,7 @@ module basics::postLib_bot_test
                 language,
                 officialReplyMetaDataKey,
                 bestReplyMetaDataKey,
-                deletedReplyCount,
+                deletedRepliesCount,
                 isDeleted,
                 tags,
                 _historyVotes
@@ -82,7 +82,7 @@ module basics::postLib_bot_test
             assert!(language == ENGLISH_LANGUAGE, 13);
             assert!(officialReplyMetaDataKey == 0, 7);
             assert!(bestReplyMetaDataKey == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
+            assert!(deletedRepliesCount == 0, 9);
             assert!(isDeleted == false, 10);
             assert!(tags == vector<u64>[1, 2], 11);
             let authorMetaData = postLib::getPostAuthorMetaData(post_meta_data);

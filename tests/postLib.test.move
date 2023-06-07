@@ -59,7 +59,7 @@ module basics::postLib_test
                 language,
                 officialReplyMetaDataKey,
                 bestReplyMetaDataKey,
-                deletedReplyCount,
+                deletedRepliesCount,
                 isDeleted,
                 tags,
                 _historyVotes
@@ -74,7 +74,7 @@ module basics::postLib_test
             assert!(language == ENGLISH_LANGUAGE, 13);
             assert!(officialReplyMetaDataKey == 0, 7);
             assert!(bestReplyMetaDataKey == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
+            assert!(deletedRepliesCount == 0, 9);
             assert!(isDeleted == false, 10);
             assert!(tags == vector<u64>[1, 2], 11);
             let authorMetaData = postLib::getPostAuthorMetaData(post_meta_data);
@@ -366,7 +366,7 @@ module basics::postLib_test
                 language,
                 officialReplyMetaDataKey,
                 bestReplyMetaDataKey,
-                deletedReplyCount,
+                deletedRepliesCount,
                 isDeleted,
                 tags,
                 _historyVotes
@@ -381,7 +381,7 @@ module basics::postLib_test
             assert!(language == ENGLISH_LANGUAGE, 13);
             assert!(officialReplyMetaDataKey == 0, 7);
             assert!(bestReplyMetaDataKey == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
+            assert!(deletedRepliesCount == 0, 9);
             assert!(isDeleted == false, 10);
             assert!(tags == vector<u64>[2, 3], 11);
 
@@ -438,7 +438,7 @@ module basics::postLib_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 tags,
                 _historyVotes
@@ -708,7 +708,7 @@ module basics::postLib_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 isDeleted,
                 _tags,
                 _historyVotes
@@ -779,7 +779,7 @@ module basics::postLib_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 isDeleted,
                 _tags,
                 _historyVotes,
@@ -823,6 +823,8 @@ module basics::postLib_test
             let post_meta_data = &mut post_meta_data_val;
             let reply_val = test_scenario::take_from_sender<Reply>(scenario);
             let reply = &mut reply_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
 
             postLib::deleteReply(
                 user_rating_collection,
@@ -848,6 +850,24 @@ module basics::postLib_test
 
             assert!(isDeleted == true, 9);
 
+            let (
+                _ipfsDoc,
+                _postId,
+                _postType,
+                _author,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                deletedRepliesCount,
+                _isDeleted,
+                _tags,
+                _historyVotes
+            ) = postLib::getPostData(post_meta_data, post);
+            assert!(deletedRepliesCount == 1, 10);
+
+            test_scenario::return_to_sender(scenario, post_val);
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, reply_val);
             return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
@@ -1017,7 +1037,7 @@ module basics::postLib_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 _tags,
                 _historyVotes
@@ -1043,7 +1063,7 @@ module basics::postLib_test
                 _language2,
                 _officialReplyMetaDataKey2,
                 _bestReplyMetaDataKey2,
-                _deletedReplyCount2,
+                _deletedRepliesCount2,
                 _isDeleted2,
                 _tags2,
                 _historyVotes
@@ -1090,7 +1110,7 @@ module basics::postLib_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 _tags,
                 _historyVotes
@@ -1109,7 +1129,7 @@ module basics::postLib_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 _tags,
                 _historyVotes
