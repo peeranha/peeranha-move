@@ -138,7 +138,7 @@ module basics::postLib {
         /// `Best reply meta data key` in replies for the `post meta data`
         bestReplyMetaDataKey: u64,
         /// Deleted `reply` count 
-        deletedReplyCount: u64,
+        deletedRepliesCount: u64,
         /// Status of the `post meta data`
         isDeleted: bool,
 
@@ -417,7 +417,7 @@ module basics::postLib {
             communityId: communityId,
             officialReplyMetaDataKey: 0,
             bestReplyMetaDataKey: 0,
-            deletedReplyCount: 0,
+            deletedRepliesCount: 0,
             language: language,
             isDeleted: false,
             tags: postTags,
@@ -1006,7 +1006,7 @@ module basics::postLib {
         let communityId = postMetaData.communityId;
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, object::id(user));
         
-        postMetaData.deletedReplyCount = postMetaData.deletedReplyCount + 1;
+        postMetaData.deletedRepliesCount = postMetaData.deletedRepliesCount + 1;
         let isBestReplyMetaData = postMetaData.bestReplyMetaDataKey == replyMetaDataKey;
         if (isBestReplyMetaData) {
             postMetaData.bestReplyMetaDataKey = 0;
@@ -1752,144 +1752,7 @@ module basics::postLib {
     fun getActiveReplyCount(
         postMetaData: &PostMetaData
     ): u64 {
-        return table::length(&postMetaData.replies) - postMetaData.deletedReplyCount
-    }
-
-    #[test_only]
-    public fun isDeletedPost(postMetaData: &PostMetaData): (bool) {
-        postMetaData.isDeleted
-    }
-
-    #[test_only]
-    public fun isDeletedReply(postMetaData: &PostMetaData, replyMetaDataKey: u64): (bool) {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        replyMetaData.isDeleted
-    }
-
-    #[test_only]
-    public fun isDeletedComment(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): bool {
-        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
-        commentMetaData.isDeleted
-    }
-
-    #[test_only]
-    public fun getPostLanguage(postMetaData: &PostMetaData): u8 {
-        postMetaData.language
-    }
-
-    #[test_only]
-    public fun getReplyLanguage(postMetaData: &PostMetaData, replyMetaDataKey: u64): u8 {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        replyMetaData.language
-    }
-
-    #[test_only]
-    public fun getCommentLanguage(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): u8 {
-        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
-        commentMetaData.language
-    }
-
-    #[test_only]
-    public fun getPostType(postMetaData: &PostMetaData): u8 {
-        postMetaData.postType
-    }
-
-    #[test_only]
-    public fun getBestReplyMetaDataKey(postMetaData: &PostMetaData): u64 {
-        postMetaData.bestReplyMetaDataKey
-    }
-
-    #[test_only]
-    public fun getPostHistoryVotes(postMetaData: &PostMetaData): VecMap<ID, u8> {
-        postMetaData.historyVotes
-    }
-
-    #[test_only]
-    public fun getReplyHistoryVotes(postMetaData: &PostMetaData, replyMetaDataKey: u64): VecMap<ID, u8> {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        replyMetaData.historyVotes
-    }
-
-    #[test_only]
-    public fun getCommentHistoryVotes(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): VecMap<ID, u8> {
-        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
-        commentMetaData.historyVotes
-    }
-
-    #[test_only]
-    public fun getPostData(postMetaData: &PostMetaData, post: &Post): (vector<u8>, ID, u8, ID, i64Lib::I64, ID, u8, u64, u64, u64, bool, vector<u64>, VecMap<ID, u8>) {
-        checkMatchItemId(object::id(post), postMetaData.postId);
-
-        (
-            commonLib::getIpfsHash(post.ipfsDoc),
-            postMetaData.postId,
-            postMetaData.postType,
-            postMetaData.author,
-            postMetaData.rating,
-            postMetaData.communityId,
-            postMetaData.language,
-            postMetaData.officialReplyMetaDataKey,
-            postMetaData.bestReplyMetaDataKey,
-            postMetaData.deletedReplyCount,
-            postMetaData.isDeleted,
-            postMetaData.tags,
-            postMetaData.historyVotes, 
-        )
-        // todo
-        // replies: Table<u64, ReplyMetaData>,
-        // comments: Table<u64, CommentMetaData>,
-        // properties: VecMap<u8, vector<u8>>,
-    }
-
-    #[test_only]
-    public fun getPostAuthorMetaData(postMetaData: &PostMetaData): (vector<u8>) {
-        postMetaData.authorMetaData
-    }
-
-    #[test_only]
-    public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u64, u8, bool, bool, bool, VecMap<ID, u8>) {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        checkMatchItemId(object::id(reply), replyMetaData.replyId);
-
-        (
-            commonLib::getIpfsHash(reply.ipfsDoc),
-            replyMetaData.replyId,
-            replyMetaData.author,
-            replyMetaData.rating,
-            replyMetaData.parentReplyMetaDataKey,
-            replyMetaData.language,
-            replyMetaData.isFirstReply,
-            replyMetaData.isQuickReply,
-            replyMetaData.isDeleted,
-            replyMetaData.historyVotes,
-        )
-        // add
-        // comments: Table<u64, CommentMetaData>,
-        // properties: VecMap<u8, vector<u8>>,
-    }
-
-    #[test_only]
-    public fun getReplyAuthorMetaData(postMetaData: &PostMetaData, replyMetaDataKey: u64): (vector<u8>) {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        replyMetaData.authorMetaData
-    }
-
-    #[test_only]
-    public fun getCommentData(postMetaData: &mut PostMetaData, comment: &Comment, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u8, bool, VecMap<ID, u8>) {
-        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
-        checkMatchItemId(object::id(comment), commentMetaData.commentId);
-
-        (
-            commonLib::getIpfsHash(comment.ipfsDoc),
-            commentMetaData.commentId,
-            commentMetaData.author,
-            commentMetaData.rating,
-            commentMetaData.language,
-            commentMetaData.isDeleted,
-            commentMetaData.historyVotes,
-        )
-        // add
-        // properties: VecMap<u8, vector<u8>>,
+        return table::length(&postMetaData.replies) - postMetaData.deletedRepliesCount
     }
 
     ///
@@ -2151,5 +2014,144 @@ module basics::postLib {
         } else {
             (NONE_VOTE, false)
         }
+    }
+
+    // --- Testing functions ---
+
+    #[test_only]
+    public fun isDeletedPost(postMetaData: &PostMetaData): (bool) {
+        postMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun isDeletedReply(postMetaData: &PostMetaData, replyMetaDataKey: u64): (bool) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun isDeletedComment(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): bool {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        commentMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun getPostLanguage(postMetaData: &PostMetaData): u8 {
+        postMetaData.language
+    }
+
+    #[test_only]
+    public fun getReplyLanguage(postMetaData: &PostMetaData, replyMetaDataKey: u64): u8 {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.language
+    }
+
+    #[test_only]
+    public fun getCommentLanguage(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): u8 {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        commentMetaData.language
+    }
+
+    #[test_only]
+    public fun getPostType(postMetaData: &PostMetaData): u8 {
+        postMetaData.postType
+    }
+
+    #[test_only]
+    public fun getBestReplyMetaDataKey(postMetaData: &PostMetaData): u64 {
+        postMetaData.bestReplyMetaDataKey
+    }
+
+    #[test_only]
+    public fun getPostHistoryVotes(postMetaData: &PostMetaData): VecMap<ID, u8> {
+        postMetaData.historyVotes
+    }
+
+    #[test_only]
+    public fun getReplyHistoryVotes(postMetaData: &PostMetaData, replyMetaDataKey: u64): VecMap<ID, u8> {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.historyVotes
+    }
+
+    #[test_only]
+    public fun getCommentHistoryVotes(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): VecMap<ID, u8> {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        commentMetaData.historyVotes
+    }
+
+    #[test_only]
+    public fun getPostData(postMetaData: &PostMetaData, post: &Post): (vector<u8>, ID, u8, ID, i64Lib::I64, ID, u8, u64, u64, u64, bool, vector<u64>, VecMap<ID, u8>) {
+        checkMatchItemId(object::id(post), postMetaData.postId);
+
+        (
+            commonLib::getIpfsHash(post.ipfsDoc),
+            postMetaData.postId,
+            postMetaData.postType,
+            postMetaData.author,
+            postMetaData.rating,
+            postMetaData.communityId,
+            postMetaData.language,
+            postMetaData.officialReplyMetaDataKey,
+            postMetaData.bestReplyMetaDataKey,
+            postMetaData.deletedRepliesCount,
+            postMetaData.isDeleted,
+            postMetaData.tags,
+            postMetaData.historyVotes, 
+        )
+        // todo
+        // replies: Table<u64, ReplyMetaData>,
+        // comments: Table<u64, CommentMetaData>,
+        // properties: VecMap<u8, vector<u8>>,
+    }
+
+    #[test_only]
+    public fun getPostAuthorMetaData(postMetaData: &PostMetaData): (vector<u8>) {
+        postMetaData.authorMetaData
+    }
+
+    #[test_only]
+    public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u64, u8, bool, bool, bool, VecMap<ID, u8>) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        checkMatchItemId(object::id(reply), replyMetaData.replyId);
+
+        (
+            commonLib::getIpfsHash(reply.ipfsDoc),
+            replyMetaData.replyId,
+            replyMetaData.author,
+            replyMetaData.rating,
+            replyMetaData.parentReplyMetaDataKey,
+            replyMetaData.language,
+            replyMetaData.isFirstReply,
+            replyMetaData.isQuickReply,
+            replyMetaData.isDeleted,
+            replyMetaData.historyVotes,
+        )
+        // add
+        // comments: Table<u64, CommentMetaData>,
+        // properties: VecMap<u8, vector<u8>>,
+    }
+
+    #[test_only]
+    public fun getReplyAuthorMetaData(postMetaData: &PostMetaData, replyMetaDataKey: u64): (vector<u8>) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.authorMetaData
+    }
+
+    #[test_only]
+    public fun getCommentData(postMetaData: &mut PostMetaData, comment: &Comment, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u8, bool, VecMap<ID, u8>) {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        checkMatchItemId(object::id(comment), commentMetaData.commentId);
+
+        (
+            commonLib::getIpfsHash(comment.ipfsDoc),
+            commentMetaData.commentId,
+            commentMetaData.author,
+            commentMetaData.rating,
+            commentMetaData.language,
+            commentMetaData.isDeleted,
+            commentMetaData.historyVotes,
+        )
+        // add
+        // properties: VecMap<u8, vector<u8>>,
     }
 }

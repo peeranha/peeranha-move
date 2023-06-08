@@ -96,11 +96,6 @@ module basics::accessControlLib {
         );
     }
 
-    #[test_only]
-    public fun init_test(ctx: &mut TxContext) {
-        init(ctx)
-    }
-    
     /// Returns `true` if `account` has been granted `role`.
     public fun hasRole(userRolesCollection: &UserRolesCollection, role: vector<u8>, userId: ID): bool {
         if (table::contains(&userRolesCollection.roles, role)) {
@@ -324,5 +319,12 @@ module basics::accessControlLib {
 
     public fun get_community_moderator_role(): vector<u8> {
         COMMUNITY_MODERATOR_ROLE
+    }
+
+    // --- Testing functions ---
+
+    #[test_only]
+    public fun init_test(ctx: &mut TxContext) {
+        init(ctx)
     }
 }

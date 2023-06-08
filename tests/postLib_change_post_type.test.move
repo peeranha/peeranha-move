@@ -636,7 +636,7 @@ module basics::postLib_change_post_type_test
             language,
             _officialReplyMetaDataKey,
             _bestReplyMetaDataKey,
-            _deletedReplyCount,
+            _deletedRepliesCount,
             _isDeleted,
             tags,
             _historyVotes

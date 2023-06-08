@@ -120,11 +120,6 @@ module basics::userLib {
         });
     }
 
-    #[test_only]    // call?
-    public fun init_test(ctx: &mut TxContext) {
-        init(ctx)
-    }
-
     /// Create new `user` info record
     public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {  // add check isExist??
         createUserPrivate(usersRatingCollection, ipfsDoc, ctx)
@@ -434,6 +429,13 @@ module basics::userLib {
         ACTION_FOLLOW_COMMUNITY
     }
 
+    // --- Testing functions ---
+
+    #[test_only]    // call?
+    public fun init_test(ctx: &mut TxContext) {
+        init(ctx)
+    }
+    
     #[test_only]
     public fun getUserData(user: &mut User): (vector<u8>, vector<ID>) {
         (commonLib::getIpfsHash(user.ipfsDoc), user.followedCommunities)

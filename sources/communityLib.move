@@ -262,6 +262,8 @@ module basics::communityLib {
         tag
     }
 
+    // --- Testing functions ---
+
     #[test_only]
     public fun getCommunityData(community: &Community): (vector<u8>, vector<u8>, bool) {
         (commonLib::getIpfsHash(community.ipfsDoc), commonLib::getIpfsHash(community.documentation), community.isFrozen)

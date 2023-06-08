@@ -69,7 +69,7 @@ module basics::postLib_change_community_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 _tags,
                 _historyVotes
@@ -123,7 +123,7 @@ module basics::postLib_change_community_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 _tags,
                 _historyVotes
@@ -177,7 +177,7 @@ module basics::postLib_change_community_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 _tags,
                 _historyVotes
