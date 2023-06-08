@@ -1,8 +1,8 @@
 #[test_only]
-module basics::postLib_first_quick_reply_test
+module peeranha::postLib_first_quick_reply_test
 {
-    use basics::postLib::{Self, PostMetaData, Reply};
-    use basics::postLib_change_post_type_test;
+    use peeranha::postLib::{Self, PostMetaData, Reply};
+    use peeranha::postLib_change_post_type_test;
     use sui::test_scenario::{Self};
     use sui::clock::{Self};
 

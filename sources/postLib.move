@@ -1,4 +1,4 @@
-module basics::postLib {    
+module peeranha::postLib {    
     use sui::transfer;
     use sui::event;
     use sui::object::{Self, ID, UID};
@@ -6,11 +6,11 @@ module basics::postLib {
     use sui::tx_context::{Self, TxContext};
     use sui::vec_map::{Self, VecMap};
     use std::vector;
-    use basics::accessControlLib;
-    use basics::communityLib;
-    use basics::commonLib;
-    use basics::userLib;
-    use basics::i64Lib;
+    use peeranha::accessControlLib;
+    use peeranha::communityLib;
+    use peeranha::commonLib;
+    use peeranha::userLib;
+    use peeranha::i64Lib;
 
     use sui::table::{Self, Table};
 

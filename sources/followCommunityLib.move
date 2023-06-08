@@ -1,10 +1,10 @@
-module basics::followCommunityLib {
+module peeranha::followCommunityLib {
     use sui::event;
     use sui::object::{Self, ID};
     use std::vector;
-    use basics::communityLib;
-    use basics::userLib;
-    use basics::commonLib;
+    use peeranha::communityLib;
+    use peeranha::userLib;
+    use peeranha::commonLib;
 
     // ====== Errors ======
 

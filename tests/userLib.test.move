@@ -1,10 +1,10 @@
 #[test_only]
-module basics::userLib_test
+module peeranha::userLib_test
 {
-    use basics::communityLib::{Self, Community};
-    use basics::userLib::{Self, User, UsersRatingCollection};
-    use basics::followCommunityLib::{Self};
-    use basics::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
+    use peeranha::communityLib::{Self, Community};
+    use peeranha::userLib::{Self, User, UsersRatingCollection};
+    use peeranha::followCommunityLib::{Self};
+    use peeranha::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
     use sui::test_scenario::{Self, Scenario};
     use sui::object::{Self, ID};
     // use std::debug;

@@ -1,18 +1,18 @@
 #[test_only]
-module basics::accessControlLib_action_common_user_negative_rating_test
+module peeranha::accessControlLib_action_common_user_negative_rating_test
 {
-    use basics::userLib;
-    use basics::postLib::{Self, Post, PostMetaData, Comment};
-    use basics::followCommunityLib;
+    use peeranha::userLib;
+    use peeranha::postLib::{Self, Post, PostMetaData, Comment};
+    use peeranha::followCommunityLib;
     use sui::clock;
-    use basics::userLib_test;
-    use basics::communityLib_test;
-    use basics::postLib_test;
-    use basics::postLib_votes_test;
-    use basics::accessControlLib_common_role_test;
-    use basics::accessControlLib;
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
+    use peeranha::postLib_test;
+    use peeranha::postLib_votes_test;
+    use peeranha::accessControlLib_common_role_test;
+    use peeranha::accessControlLib;
     use sui::test_scenario::{Self, Scenario};
-    use basics::i64Lib;
+    use peeranha::i64Lib;
     use sui::object;
 
 

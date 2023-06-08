@@ -1,13 +1,13 @@
 #[test_only]
-module basics::postLib_test
+module peeranha::postLib_test
 {
-    use basics::postLib::{Self, Post, PostMetaData, Reply, Comment};
-    use basics::userLib_test;
-    use basics::communityLib_test;
-    use basics::i64Lib;
-    use basics::communityLib::{Community};
-    use basics::userLib::{Self, User, UsersRatingCollection};
-    use basics::accessControlLib::{Self, UserRolesCollection};
+    use peeranha::postLib::{Self, Post, PostMetaData, Reply, Comment};
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
+    use peeranha::i64Lib;
+    use peeranha::communityLib::{Community};
+    use peeranha::userLib::{Self, User, UsersRatingCollection};
+    use peeranha::accessControlLib::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
     use sui::object::{Self};
     use sui::clock::{Self};

@@ -1,16 +1,16 @@
-module basics::userLib {
+module peeranha::userLib {
     use sui::transfer;
     use sui::event;
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
-    use basics::accessControlLib;
-    use basics::i64Lib;
+    use peeranha::accessControlLib;
+    use peeranha::i64Lib;
     use sui::table::{Self, Table};
-    use basics::commonLib;
+    use peeranha::commonLib;
     use sui::vec_map::{Self, VecMap};
     use std::option::{Self};
-    friend basics::followCommunityLib;
+    friend peeranha::followCommunityLib;
 
     // ====== Errors. Available values 1 - 99 ======
 

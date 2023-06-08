@@ -1,16 +1,16 @@
 #[test_only]
-module basics::accessControlLib_action_protacol_admin_test
+module peeranha::accessControlLib_action_protacol_admin_test
 {
-    use basics::userLib::{Self, User};
-    use basics::postLib::{Self, Post, PostMetaData};
+    use peeranha::userLib::{Self, User};
+    use peeranha::postLib::{Self, Post, PostMetaData};
     use sui::clock::{Self};
-    use basics::userLib_test;
-    use basics::communityLib_test;
-    use basics::accessControlLib_action_common_user_negative_rating_test;
-    use basics::postLib_test;
-    use basics::postLib_votes_test;
-    use basics::accessControlLib_common_role_test;
-    use basics::accessControlLib::{Self};
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
+    use peeranha::accessControlLib_action_common_user_negative_rating_test;
+    use peeranha::postLib_test;
+    use peeranha::postLib_votes_test;
+    use peeranha::accessControlLib_common_role_test;
+    use peeranha::accessControlLib::{Self};
     use sui::test_scenario::{Self, Scenario};
 
     // use std::debug;

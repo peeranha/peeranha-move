@@ -1,4 +1,4 @@
-module basics::accessControlLib {
+module peeranha::accessControlLib {
     use sui::tx_context::{Self, TxContext};
     use std::vector;
     use sui::event;
@@ -7,8 +7,8 @@ module basics::accessControlLib {
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
     use std::option;
-    friend basics::communityLib;
-    friend basics::userLib;
+    friend peeranha::communityLib;
+    friend peeranha::userLib;
 
     // ====== Errors. Available values 300 - 399 ======
 
