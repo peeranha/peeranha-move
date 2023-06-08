@@ -79,20 +79,27 @@ module basics::userLib {
 
     struct UsersRatingCollection has key {
         id: UID,
-        usersCommunityRating: Table<ID, UserCommunityRating>,   // key - userID
+        /// All `users` rating in all `communities`. Table key - `user object id`
+        usersCommunityRating: Table<ID, UserCommunityRating>,
     }
 
     struct User has key {
         id: UID,
+        /// `IPFS hash` of document with `user` information
         ipfsDoc: commonLib::IpfsHash,
+        /// Followed `communities` for the `user`
         followedCommunities: vector<ID>,
+        /// `Object rating id` for the `user`
         userRatingId: ID,   // need?
+        /// `Properties` for the `user`
         properties: VecMap<u8, vector<u8>>,
     }
 
     struct UserCommunityRating has key, store {    // shared
         id: UID,
-        userRating: VecMap<ID, i64Lib::I64>,               // key - communityId         // vecMap??
+        /// `Community rating` for the `user`. Depends on `object community id`. VecMap key - `communityId`
+        userRating: VecMap<ID, i64Lib::I64>,                // vecMap??
+        /// `Properties` for the `user rating`
         properties: VecMap<u8, vector<u8>>,
     }
 
@@ -118,6 +125,7 @@ module basics::userLib {
         init(ctx)
     }
 
+    /// Create new `user` info record
     public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {  // add check isExist??
         createUserPrivate(usersRatingCollection, ipfsDoc, ctx)
     }
@@ -146,8 +154,8 @@ module basics::userLib {
         );
     }
 
-    public entry fun updateUser(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
-        let _userAddress = tx_context::sender(ctx);  // del
+    /// Update `user` info record
+    public entry fun updateUser(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsDoc: vector<u8>) {
         // createIfDoesNotExist(usersRatingCollection, userAddress);   // add?
         updateUserPrivate(usersRatingCollection, user, ipfsDoc);
     }
@@ -156,7 +164,7 @@ module basics::userLib {
         let userId = object::id(user);
         let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
 
-        checkRatingAndEnergy(
+        checkRating(
             user,
             userCommunityRating,
             userId,
@@ -168,30 +176,36 @@ module basics::userLib {
         event::emit(UpdateUserEvent {userId: userId});
     }
 
+    /// Grant the `role` for the `user object id`
     public entry fun grantRole(userRolesCollection: &mut accessControlLib::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
         let adminId = object::id(admin);
         accessControlLib::grantRole(userRolesCollection, adminId, userId, role)
     }
 
+    /// Revoke the `role` for the `user object id`
     public entry fun revokeRole(userRolesCollection: &mut accessControlLib::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
         let adminId = object::id(admin);
         accessControlLib::revokeRole(userRolesCollection, adminId, userId, role)
     }
 
+    /// Get user's `folowed communies` by `user object id`
     public(friend) fun getUserFollowedCommunities(user: &User): &vector<ID> {
         &user.followedCommunities
     }
 
+    /// Follow to the `object community id` for `user object id`
     public(friend) fun followCommunity(user: &mut User, communityId: ID) {
         vector::push_back(&mut user.followedCommunities, communityId);
     }
 
+    /// Unfollow from the `object community id` for `user object id`
     public(friend) fun unfollowCommunity(user: &mut User, communityIndex: u64) {
         vector::remove(&mut user.followedCommunities, communityIndex);
     }
 
     /*plug*/
-    public fun updateRating(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {      // friend for post lib
+    /// Update rating for `user object id` in `community object id`
+    public fun updateRating(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {      // friend for post lib?
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
         
@@ -204,7 +218,7 @@ module basics::userLib {
         *userRating = i64Lib::add(&*userRating, &rating);
     }
 
-    // TODO: add UserLib.Action action + add field UserLib.ActionRole actionRole
+    /// Check the `role/rating` of the `user` to perform some action
     public fun checkActionRole(
         user: &mut User,
         userCommunityRating: &UserCommunityRating,
@@ -222,9 +236,10 @@ module basics::userLib {
         };
 
         accessControlLib::checkHasRole(userRolesCollection, actionCallerId, actionRole, communityId);
-        checkRatingAndEnergy(user, userCommunityRating, actionCallerId, dataUserId, communityId, action);
+        checkRating(user, userCommunityRating, actionCallerId, dataUserId, communityId, action);
     }
 
+    /// Check the `role/rating` of the `user` to perform some action
     public fun hasModeratorRole(
         userRolesCollection: &accessControlLib::UserRolesCollection,
         userId: ID,
@@ -239,7 +254,8 @@ module basics::userLib {
         }
     }
 
-    public fun checkRatingAndEnergy(
+    /// Check the `user's rating` with rating what must be for the action
+    public fun checkRating(
         user: &mut User,
         userCommunityRating: &UserCommunityRating,
         actionCaller: ID,
@@ -256,6 +272,7 @@ module basics::userLib {
         user
     }
 
+    /// Get rating what must be for the action
     fun getRatingForAction(
         actionCaller: ID,
         dataUser: ID,
@@ -336,6 +353,7 @@ module basics::userLib {
         (ratingAllowed, message)
     }
 
+    /// Get the `user's rating`
     public fun getUserRating(userCommunityRating: &UserCommunityRating, communityId: ID): i64Lib::I64 {   // public?  + user &mut?
         let position = vec_map::get_idx_opt(&userCommunityRating.userRating, &communityId);
         if (option::is_none(&position)) {
@@ -345,21 +363,17 @@ module basics::userLib {
         }
     }
 
-    fun getRatingToRewardChange(previosRatingToReward: i64Lib::I64, newRatingToReward: i64Lib::I64): i64Lib::I64 {
-        if (i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) != i64Lib::getLessThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) != i64Lib::getLessThan()) i64Lib::sub(&newRatingToReward, &previosRatingToReward)     // previosRatingToReward >= 0 && newRatingToReward >= 0
-        else if(i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) == i64Lib::getLessThan()) i64Lib::mul(&previosRatingToReward, &i64Lib::neg_from(1))     // previosRatingToReward > 0 && newRatingToReward < 0
-        else if(i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) == i64Lib::getLessThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) == i64Lib::getGreaterThan()) newRatingToReward   // previosRatingToReward < 0 && newRatingToReward > 0
-        else i64Lib::zero() // from negative to negative
-    }
-
+    /// Get the `user's rating objectId`
     public fun getUserRatingId(user: &User): ID {
         user.userRatingId
     }
 
+    /// Get the `user's community rating`
     public fun getUserCommunityRating(usersRatingCollection: &UsersRatingCollection, userId: ID): &UserCommunityRating {
         table::borrow(&usersRatingCollection.usersCommunityRating, userId)
     }
 
+    /// Get the mutable `user's community rating`
     public fun getMutableUserCommunityRating(usersRatingCollection: &mut UsersRatingCollection, userId: ID): &mut UserCommunityRating {
         table::borrow_mut(&mut usersRatingCollection.usersCommunityRating, userId)
     }
