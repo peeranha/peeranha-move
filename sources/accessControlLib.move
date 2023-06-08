@@ -10,18 +10,17 @@ module basics::accessControlLib {
     friend basics::communityLib;
     friend basics::userLib;
 
-    // ====== Errors ======
+    // ====== Errors. Available values 300 - 399 ======
 
-    const E_ACCESS_CONTROL_MISSING_ROLE: u64 = 201;                      // test all error
-    // const E_ACCESS_CONTROL_CAN_ONLY_RENOUNCE_ROLE_FOR_SELF: u64 = 202;
-    const E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE: u64 = 203;
-    const E_NOT_ALLOWED_NOT_ADMIN: u64 = 204;
-    const E_NOT_ALLOWED_NOT_BOT: u64 = 205;
-    const E_NOT_ALLOWED_NOT_DISPATHER: u64 = 206;
-    const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR: u64 = 207;
-    const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN: u64 = 208;
-    const E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN: u64 = 209;
-    const E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR: u64 = 210;
+    const E_ACCESS_CONTROL_MISSING_ROLE: u64 = 300;                      // test all error
+    const E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE: u64 = 301;
+    const E_NOT_ALLOWED_NOT_ADMIN: u64 = 302;
+    const E_NOT_ALLOWED_NOT_BOT: u64 = 303;
+    const E_NOT_ALLOWED_NOT_DISPATHER: u64 = 304;
+    const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR: u64 = 305;
+    const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN: u64 = 306;
+    const E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN: u64 = 307;
+    const E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR: u64 = 308;
 
     // ====== Constant ======
 

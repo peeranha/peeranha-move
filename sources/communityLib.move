@@ -12,16 +12,16 @@ module basics::communityLib {
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
 
-    // ====== Errors ======
+    // ====== Errors. Available values 200 - 299 ======
 
-    const E_REQUIRE_AT_LEAST_5_TAGS: u64 = 80;
-    const E_REQUIRE_TAGS_WITH_UNIQUE_NAME: u64 = 81;
-    const E_COMMUNITY_IS_FROZEN: u64 = 82;
-    const E_COMMUNITY_ID_CAN_NOT_BE_0: u64 = 83;
-    const E_COMMUNITY_DOES_NOT_EXIST: u64 = 84;
-    const E_TAG_ID_CAN_NOT_BE_0: u64 = 85;
-    const E_TAG_DOES_NOT_EXIST: u64 = 86;
-    const E_COMMUNITY_IS_NOT_FROZEN: u64 = 87;
+    const E_REQUIRE_AT_LEAST_5_TAGS: u64 = 200;
+    const E_REQUIRE_TAGS_WITH_UNIQUE_NAME: u64 = 201;
+    const E_COMMUNITY_IS_FROZEN: u64 = 202;
+    const E_COMMUNITY_ID_CAN_NOT_BE_0: u64 = 203;
+    const E_COMMUNITY_DOES_NOT_EXIST: u64 = 204;
+    const E_TAG_ID_CAN_NOT_BE_0: u64 = 205;
+    const E_TAG_DOES_NOT_EXIST: u64 = 206;
+    const E_COMMUNITY_IS_NOT_FROZEN: u64 = 207;
 
 
     struct Community has key {

@@ -12,33 +12,33 @@ module basics::userLib {
     use std::option::{Self};
     friend basics::followCommunityLib;
 
-    // ====== Errors ======
+    // ====== Errors. Available values 1 - 99 ======
 
-    const E_USER_EXIST: u64 = 9;
-    const E_USER_DOES_NOT_EXIST: u64 = 10;
-    const E_USER_NOT_FOUND: u64 = 13;
-    const E_NOT_ALLOWED_DELETE: u64 = 15;
-    const E_NOT_ALLOWED_VOTE_POST: u64 = 16;
-    const E_NOT_ALLOWED_VOTE_REPLY: u64 = 17;
-    const E_NOT_ALLOWED_VOTE_COMMENT: u64 = 18;
-    const E_NOT_ALLOWED_ACTION: u64 = 21;
-    const E_LOW_ENERGY: u64 = 22;
-    const E_MUST_BE_0_RATING: u64 = 23;
-    const E_LOW_RATING_CREATE_POST: u64 = 24;
-    const E_LOW_RATING_CREATE_REPLY: u64 = 25;
-    const E_LOW_RATING_CREATE_COMMENT: u64 = 26;
-    const E_LOW_RATING_EDIT_ITEM: u64 = 27;
-    const E_LOW_RATING_DELETE_ITEM: u64 = 28;
-    const E_LOW_RATING_UPVOTE_POST: u64 = 29;
-    const E_LOW_RATING_UPVOTE_REPLY: u64 = 30;
-    const E_LOW_RATING_VOTE_COMMENT: u64 = 31;
-    const E_LOW_RATING_DOWNVOTE_POST: u64 = 32;
-    const E_LOW_RATING_DOWNVOTE_REPLY: u64 = 33;
-    const E_LOW_RATING_CANCEL_VOTE: u64 = 34;
-    const E_LOW_RATING_MARK_BEST_REPLY: u64 = 35;
-    const E_LOW_RATING_UPDATE_PROFILE: u64 = 36;    // never call
-    const E_LOW_RATING_FOLLOW_COMMUNITY: u64 = 37;  // never call
-    const E_CHECK_FUNCTION_getMutableTotalRewardShare: u64 = 100; // todo
+    const E_USER_EXIST: u64 = 1;
+    const E_USER_DOES_NOT_EXIST: u64 = 2;
+    const E_USER_NOT_FOUND: u64 = 3;
+    const E_NOT_ALLOWED_DELETE: u64 = 4;
+    const E_NOT_ALLOWED_VOTE_POST: u64 = 5;
+    const E_NOT_ALLOWED_VOTE_REPLY: u64 = 6;
+    const E_NOT_ALLOWED_VOTE_COMMENT: u64 = 7;
+    const E_NOT_ALLOWED_ACTION: u64 = 8;
+    const E_LOW_ENERGY: u64 = 9;
+    const E_MUST_BE_0_RATING: u64 = 10;
+    const E_LOW_RATING_CREATE_POST: u64 = 11;
+    const E_LOW_RATING_CREATE_REPLY: u64 = 12;
+    const E_LOW_RATING_CREATE_COMMENT: u64 = 13;
+    const E_LOW_RATING_EDIT_ITEM: u64 = 14;
+    const E_LOW_RATING_DELETE_ITEM: u64 = 15;
+    const E_LOW_RATING_UPVOTE_POST: u64 = 16;
+    const E_LOW_RATING_UPVOTE_REPLY: u64 = 17;
+    const E_LOW_RATING_VOTE_COMMENT: u64 = 18;
+    const E_LOW_RATING_DOWNVOTE_POST: u64 = 19;
+    const E_LOW_RATING_DOWNVOTE_REPLY: u64 = 20;
+    const E_LOW_RATING_CANCEL_VOTE: u64 = 21;
+    const E_LOW_RATING_MARK_BEST_REPLY: u64 = 22;
+    const E_LOW_RATING_UPDATE_PROFILE: u64 = 23;    // never call
+    const E_LOW_RATING_FOLLOW_COMMUNITY: u64 = 24;  // never call
+    const E_CHECK_FUNCTION_getMutableTotalRewardShare: u64 = 99; // todo
 
     // ====== Enum ======
 
