@@ -80,8 +80,6 @@ module peeranha::userLib_test
         test_scenario::end(scenario_val);
     }
 
-
-    
     #[test]
     fun test_follow_community() {
         let scenario_val = test_scenario::begin(USER1);

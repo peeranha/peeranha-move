@@ -4,11 +4,9 @@ module peeranha::communityLib {
     use sui::tx_context::{TxContext};
     use std::vector;
     use sui::event;
-    // use std::debug;
     use peeranha::commonLib;
     use peeranha::accessControlLib;
     use peeranha::userLib;
-    // friend peeranha::commonLib;
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
 

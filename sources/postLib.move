@@ -354,7 +354,7 @@ module peeranha::postLib {
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
         let communityId = object::id(community);
-        userLib::checkActionRole(                               // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -363,7 +363,6 @@ module peeranha::postLib {
             communityId,
             userLib::get_action_publication_post(),
             accessControlLib::get_action_role_none(),
-            /*true*/
         );
 
         createPostPrivate(
@@ -484,7 +483,7 @@ module peeranha::postLib {
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
 
         let communityId = postMetaData.communityId;
-        userLib::checkActionRole(                       // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -495,7 +494,6 @@ module peeranha::postLib {
             if (isOfficialReply)
                 accessControlLib::get_action_role_community_admin() else
                 accessControlLib::get_action_role_none()
-            /*true*/
         );
 
         createReplyPrivate(
@@ -655,7 +653,7 @@ module peeranha::postLib {
             table::add(&mut replyMetaData.comments, commentMetaDataKey, commentMetaData);
         };
 
-        userLib::checkActionRole(       // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -664,7 +662,6 @@ module peeranha::postLib {
             postMetaData.communityId,
             userLib::get_action_publication_comment(),
             accessControlLib::get_action_role_none(),
-            /*true*/
         );
 
         transfer::transfer(
@@ -750,7 +747,7 @@ module peeranha::postLib {
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
         let postMetaDataAuthor = postMetaData.author;
-        userLib::checkActionRole(                       // test               
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -763,7 +760,6 @@ module peeranha::postLib {
             if (userId == postMetaDataAuthor)
                 accessControlLib::get_action_role_none() else
                 accessControlLib::get_action_role_admin_or_community_moderator(),
-            /*false*/
         );
 
         changePostType(usersRatingCollection, postMetaData, newPostType);
@@ -868,7 +864,6 @@ module peeranha::postLib {
             if (isOfficialReply || userId != replyMetaDataAuthor)
                 accessControlLib::get_action_role_admin_or_community_moderator() else
                 accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         if (isOfficialReply) {
@@ -901,7 +896,7 @@ module peeranha::postLib {
             commentMetaData.language = language;
         };
 
-        userLib::checkActionRole(               // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -910,7 +905,6 @@ module peeranha::postLib {
             postMetaData.communityId,
             userLib::get_action_edit_item(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         if (commonLib::getIpfsHash(comment.ipfsDoc) != ipfsHash)
@@ -933,7 +927,7 @@ module peeranha::postLib {
         let bestReplyMetaDataKey = postMetaData.bestReplyMetaDataKey;
         let userId = object::id(user);
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
-        userLib::checkActionRole(           // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -942,7 +936,6 @@ module peeranha::postLib {
             communityId,
             userLib::get_action_delete_item(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         let postType = postMetaData.postType;
@@ -1017,7 +1010,7 @@ module peeranha::postLib {
         let postType = postMetaData.postType;
         
         let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
-        userLib::checkActionRole(  // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -1026,7 +1019,6 @@ module peeranha::postLib {
             communityId,
             userLib::get_action_delete_item(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
         
         // admin can delete best reply
@@ -1115,7 +1107,7 @@ module peeranha::postLib {
         let commentMetaData = getMutableCommentMetaDataSafe(postMetaData, parentReplyKey, commentMetaDataKey);
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, object::id(user));
         
-        userLib::checkActionRole(         // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -1124,7 +1116,6 @@ module peeranha::postLib {
             communityId,
             userLib::get_action_delete_item(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         if (userId != commentMetaData.author) {
@@ -1187,7 +1178,7 @@ module peeranha::postLib {
         };
         let postAuthorId = object::id(postAuthor);
         let postAuthorCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, postMetaData.author);
-        userLib::checkActionRole(    // test
+        userLib::checkActionRole(
             postAuthor,
             postAuthorCommunityRating,
             userRolesCollection,
@@ -1196,7 +1187,6 @@ module peeranha::postLib {
             communityId,
             userLib::get_action_best_reply(),
             accessControlLib::get_action_role_none(),
-            //false
         );
 
         event::emit(ChangeStatusBestReply{userId: object::id(postAuthor), postMetaDataId: object::id(postMetaData), replyMetaDataKey: newBestReplyMetaDataKey});
@@ -1249,7 +1239,7 @@ module peeranha::postLib {
         
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut postMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, voteUserId);
-        userLib::checkActionRole(      // test
+        userLib::checkActionRole(
             voteUser,
             voteUserCommunityRating,
             userRolesCollection,
@@ -1262,7 +1252,6 @@ module peeranha::postLib {
                         userLib::get_action_upvote_post() else 
                         userLib::get_action_downvote_post(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         vote(
@@ -1312,7 +1301,7 @@ module peeranha::postLib {
 
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut replyMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
-        userLib::checkActionRole(    // test
+        userLib::checkActionRole(
             voteUser,
             voteUserCommunityRating,
             userRolesCollection,
@@ -1325,7 +1314,6 @@ module peeranha::postLib {
                         userLib::get_action_upvote_reply() else 
                         userLib::get_action_downvote_reply(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         let oldRating: i64Lib::I64 = replyMetaData.rating;
@@ -1403,7 +1391,7 @@ module peeranha::postLib {
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut commentMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         
-        userLib::checkActionRole(       // test
+        userLib::checkActionRole(
             voteUser,
             voteUserCommunityRating,
             userRolesCollection,
@@ -1414,7 +1402,6 @@ module peeranha::postLib {
                 userLib::get_action_cancel_vote() else  
                 userLib::get_action_vote_comment(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
         commentMetaData.rating = i64Lib::add(&commentMetaData.rating, &ratingChange);
 

@@ -1654,7 +1654,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
         let user_rating_collection = &mut user_rating_collection_val;
         let community = &mut community_val;
         let user_community_rating = userLib::getMutableUserCommunityRating(user_rating_collection, userId);
-        userLib::updateRating(
+        userLib::updateRating_test(
             user_community_rating,
             if(isPositive) i64Lib::from(changeRating) else i64Lib::neg_from(changeRating),
             object::id(community),

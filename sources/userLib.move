@@ -11,6 +11,7 @@ module peeranha::userLib {
     use sui::vec_map::{Self, VecMap};
     use std::option::{Self};
     friend peeranha::followCommunityLib;
+    friend peeranha::postLib;
 
     // ====== Errors. Available values 1 - 99 ======
 
@@ -109,7 +110,7 @@ module peeranha::userLib {
         userId: ID,
     }
 
-    struct UpdateUserEvent has copy, drop {     // double event
+    struct UpdateUserEvent has copy, drop {
         userId: ID,
     }
 
@@ -121,14 +122,10 @@ module peeranha::userLib {
     }
 
     /// Create new `user` info record
-    public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {  // add check isExist??
-        createUserPrivate(usersRatingCollection, ipfsDoc, ctx)
-    }
-
-    fun createUserPrivate(usersRatingCollection: &mut UsersRatingCollection, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
-
         let owner = tx_context::sender(ctx);
+
         let userCommunityRating = UserCommunityRating {
             id: object::new(ctx),
             userRating: vec_map::empty(),
@@ -150,12 +147,8 @@ module peeranha::userLib {
     }
 
     /// Update `user` info record
-    public entry fun updateUser(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsDoc: vector<u8>) {
-        // createIfDoesNotExist(usersRatingCollection, userAddress);   // add?
-        updateUserPrivate(usersRatingCollection, user, ipfsDoc);
-    }
-
-    fun updateUserPrivate(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsHash: vector<u8>) {
+    public entry fun updateUser(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsHash: vector<u8>) {
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
         let userId = object::id(user);
         let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
 
@@ -200,10 +193,10 @@ module peeranha::userLib {
 
     /*plug*/
     /// Update rating for `user object id` in `community object id`
-    public fun updateRating(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {      // friend for post lib?
+    public(friend) fun updateRating(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
-        
+
         let position = vec_map::get_idx_opt(&mut userCommunityRating.userRating, &communityId);
         if (option::is_none(&position)) {
             vec_map::insert(&mut userCommunityRating.userRating, communityId, i64Lib::from(START_USER_RATING));
@@ -223,7 +216,6 @@ module peeranha::userLib {
         communityId: ID,
         action: u8,
         actionRole: u8,
-        //createUserIfDoesNotExist: bool  // new transfer ???
     ) 
     {
         if (hasModeratorRole(userRolesCollection, actionCallerId, communityId)) {
@@ -260,7 +252,6 @@ module peeranha::userLib {
     ): &mut User
     {
         let userRating = getUserRating(userCommunityRating, communityId);
-            
         let (ratingAllowed, message) = getRatingForAction(actionCaller, dataUser, action);
         assert!(i64Lib::compare(&userRating, &ratingAllowed) != i64Lib::getLessThan(), message);
 
@@ -268,11 +259,12 @@ module peeranha::userLib {
     }
 
     /// Get rating what must be for the action
+    /// Return ratingAllowed and message
     fun getRatingForAction(
         actionCaller: ID,
         dataUser: ID,
         action: u8
-    ): (i64Lib::I64, u64) { // ratingAllowed, message
+    ): (i64Lib::I64, u64) {
         let ratingAllowed: i64Lib::I64 = i64Lib::neg_from(MINIMUM_RATING);
         let message: u64;
 
@@ -435,13 +427,17 @@ module peeranha::userLib {
     public fun init_test(ctx: &mut TxContext) {
         init(ctx)
     }
-    
+
+    #[test_only]
+    public fun updateRating_test(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
+        updateRating(userCommunityRating, rating, communityId);
+    }
+
     #[test_only]
     public fun getUserData(user: &mut User): (vector<u8>, vector<ID>) {
         (commonLib::getIpfsHash(user.ipfsDoc), user.followedCommunities)
     }
-    
-    
+
     #[test_only]
     public fun create_user(usersRatingCollection: &mut UsersRatingCollection, scenario: &mut TxContext) {
         createUser(usersRatingCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", scenario);
