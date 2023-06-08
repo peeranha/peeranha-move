@@ -1,8 +1,7 @@
-module basics::commonLib {
+module peeranha::commonLib {
     use std::vector;
     use sui::object::{Self, ID};
     use sui::clock::{Self, Clock};
-
 
     // ====== Errors ======
 
@@ -32,11 +31,6 @@ module basics::commonLib {
 
     public fun getTimestamp(time: &Clock): u64 {
         clock::timestamp_ms(time)
-    }
-
-
-    public fun getPeriod(): u64 {    // TODO: add
-        0
     }
 
     public fun getErrorInvalidIpfsHash(): u64 {

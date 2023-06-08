@@ -1,11 +1,11 @@
 #[test_only]
-module basics::communityLib_test
+module peeranha::communityLib_test
 {
-    use basics::communityLib::{Self, Community};
-    use basics::userLib::{Self, User};
+    use peeranha::communityLib::{Self, Community};
+    use peeranha::userLib::{Self, User};
     use std::vector;
-    use basics::userLib_test;
-    use basics::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
+    use peeranha::userLib_test;
+    use peeranha::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
     use sui::test_scenario::{Self, Scenario};
     use sui::object::{Self/*, ID*/};
 

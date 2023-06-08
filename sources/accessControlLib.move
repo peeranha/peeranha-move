@@ -1,4 +1,4 @@
-module basics::accessControlLib {
+module peeranha::accessControlLib {
     use sui::tx_context::{Self, TxContext};
     use std::vector;
     use sui::event;
@@ -7,21 +7,20 @@ module basics::accessControlLib {
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
     use std::option;
-    friend basics::communityLib;
-    friend basics::userLib;
+    friend peeranha::communityLib;
+    friend peeranha::userLib;
 
-    // ====== Errors ======
+    // ====== Errors. Available values 300 - 399 ======
 
-    const E_ACCESS_CONTROL_MISSING_ROLE: u64 = 201;                      // test all error
-    // const E_ACCESS_CONTROL_CAN_ONLY_RENOUNCE_ROLE_FOR_SELF: u64 = 202;
-    const E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE: u64 = 203;
-    const E_NOT_ALLOWED_NOT_ADMIN: u64 = 204;
-    const E_NOT_ALLOWED_NOT_BOT_ROLE: u64 = 205;                             // test
-    const E_NOT_ALLOWED_NOT_DISPATHER_ROLE: u64 = 206;
-    const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR: u64 = 207;
-    const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN: u64 = 208;
-    const E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN: u64 = 209;
-    const E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR: u64 = 210;
+    const E_ACCESS_CONTROL_MISSING_ROLE: u64 = 300;                      // test all error
+    const E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE: u64 = 301;
+    const E_NOT_ALLOWED_NOT_ADMIN: u64 = 302;
+    const E_NOT_ALLOWED_NOT_BOT_ROLE: u64 = 303;
+    const E_NOT_ALLOWED_NOT_DISPATHER_ROLE: u64 = 304;
+    const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR: u64 = 305;
+    const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN: u64 = 306;
+    const E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN: u64 = 307;
+    const E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR: u64 = 308;
     const E_NOT_ALLOWED_NOT_MINT_NFT_ROLE: u64 = 211;                          // test
 
     // ====== Constant ======
@@ -45,34 +44,41 @@ module basics::accessControlLib {
     const ACTION_ROLE_COMMUNITY_MODERATOR: u8 = 7;
     const ACTION_ROLE_MINT_NFT: u8 = 8;
 
-    struct RoleData has store {
-        members: VecMap<ID, bool>,
-        adminRole: vector<u8>
-    }
-
     struct UserRolesCollection has key {
         id: UID,
-        roles: Table<vector<u8>, RoleData>            // role
+        /// All `roles` and `users object id` who have it. Table key - `role`
+        roles: Table<vector<u8>, RoleData>,            // role
+    }
+
+    struct RoleData has store {
+        /// `Users object id` who have the role. VecMap key - `user object id`
+        members: VecMap<ID, bool>,
+        /// `Role` which must be for grant the `role`
+        adminRole: vector<u8>,
+        /// `Properties` for the `role data`
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct DefaultAdminCap has key {
         id: UID,
+        /// `Properties` for the `default admin cap`
+        properties: VecMap<u8, vector<u8>>,
     }
 
     // ====== Events ======
 
-    struct RoleAdminChanged has copy, drop {
+    struct RoleAdminChangedEvent has copy, drop {
         role: vector<u8>,
         previousAdminRole: vector<u8>,      // set??
         adminRole: vector<u8>,
     }
 
-    struct RoleGranted has copy, drop {
+    struct RoleGrantedEvent has copy, drop {
         role: vector<u8>,
         userId: ID,
     }
 
-    struct RoleRevoked has copy, drop {
+    struct RoleRevokedEvent has copy, drop {
         role: vector<u8>,
         userId: ID,
     }
@@ -80,27 +86,20 @@ module basics::accessControlLib {
     fun init(ctx: &mut TxContext) {
         let userRolesCollection = UserRolesCollection {
             id: object::new(ctx),
-            roles: table::new(ctx)
+            roles: table::new(ctx),
         };
         setRoleAdmin(&mut userRolesCollection, BOT_ROLE, PROTOCOL_ADMIN_ROLE);
         transfer::share_object(userRolesCollection);
 
         transfer::transfer(
             DefaultAdminCap {
-               id: object::new(ctx), 
+                id: object::new(ctx),
+                properties: vec_map::empty(),
             }, tx_context::sender(ctx)
         );
     }
 
-    #[test_only]
-    public fun init_test(ctx: &mut TxContext) {
-        init(ctx)
-    }
-
-    public fun onlyRole(userRolesCollection: &UserRolesCollection, role: vector<u8>, userId: ID) {
-        checkRole_(userRolesCollection, role, userId);
-    }
-    
+    /// Returns `true` if `account` has been granted `role`.
     public fun hasRole(userRolesCollection: &UserRolesCollection, role: vector<u8>, userId: ID): bool {
         if (table::contains(&userRolesCollection.roles, role)) {
             let role = table::borrow(&userRolesCollection.roles, role);
@@ -116,17 +115,15 @@ module basics::accessControlLib {
         }
     }
 
-    public fun checkRole_(userRolesCollection: &UserRolesCollection, role: vector<u8>, userId: ID) {
-        checkRole(userRolesCollection, role, userId);
-    }
-
-
-    public fun checkRole(userRolesCollection: &UserRolesCollection, role: vector<u8>, userId: ID) {
+    /// Abort if 'user object id' is missing `role`.
+    public fun onlyRole(userRolesCollection: &UserRolesCollection, role: vector<u8>, userId: ID) {
         if (!hasRole(userRolesCollection, role, userId)) {
             abort E_ACCESS_CONTROL_MISSING_ROLE
         }
     }
 
+    /// Returns the admin role that controls `role`. See {grantRole} and
+    /// * {revokeRole}.
     public fun getRoleAdmin(userRolesCollection: &UserRolesCollection, role: vector<u8>): vector<u8> {
         if (table::contains(&userRolesCollection.roles, role)) {
             let role = table::borrow(&userRolesCollection.roles, role);
@@ -136,6 +133,7 @@ module basics::accessControlLib {
         }
     }
 
+    /// Grants `role` to `object user id`
     public(friend) fun grantRole(userRolesCollection: &mut UserRolesCollection, adminId: ID, userId: ID, role: vector<u8>) {
         assert!(role != PROTOCOL_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE);
 
@@ -144,11 +142,13 @@ module basics::accessControlLib {
         grantRole_(userRolesCollection, role, userId);
     }
 
-    /// only default admin can call
+    /// Grants `admin role` to `object user id`
+    /// Only `default admin` can call
     public entry fun grantProtocolAdminRole(_: &DefaultAdminCap, userRolesCollection: &mut UserRolesCollection, userId: ID) {
         grantRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }
 
+    /// Revokes `role` from `object user id`
     public(friend) fun revokeRole(userRolesCollection: &mut UserRolesCollection, adminId: ID, userId: ID, role: vector<u8>) {
         assert!(role != PROTOCOL_ADMIN_ROLE, E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE);
 
@@ -157,10 +157,13 @@ module basics::accessControlLib {
         revokeRole_(userRolesCollection, role, userId);
     }
 
+    /// Revoke `admin role` from `object user id`
+    /// Only `default admin` can call
     public entry fun revokeProtocolAdminRole(_: &DefaultAdminCap, userRolesCollection: &mut UserRolesCollection, userId: ID) {
         revokeRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }
 
+    /// Sets `adminRole` as ``role``'s admin role.
     fun setRoleAdmin(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
         let previousAdminRole = getRoleAdmin(userRolesCollection, role);
 
@@ -170,14 +173,16 @@ module basics::accessControlLib {
         } else {
             table::add(&mut userRolesCollection.roles, role, RoleData {
                 members: vec_map::empty(),
-                adminRole: adminRole
+                adminRole: adminRole,
+                properties: vec_map::empty(),
             });
         };
 
-        event::emit(RoleAdminChanged{role, previousAdminRole, adminRole});
+        event::emit(RoleAdminChangedEvent{role, previousAdminRole, adminRole});
     }
 
-    // Internal function without access restriction.
+    /// Grants `role` to `object user id`.
+    /// Internal function without access restriction.
     fun grantRole_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
         if (!hasRole(userRolesCollection, role, userId)) {
             if (!table::contains(&userRolesCollection.roles, role)) {
@@ -185,7 +190,8 @@ module basics::accessControlLib {
 
                 table::add(&mut userRolesCollection.roles, role, RoleData {
                     members: vec_map::empty(),
-                    adminRole: vector::empty<u8>()
+                    adminRole: vector::empty<u8>(),
+                    properties: vec_map::empty(),
                 });
 
                 // vec_map::insert(&mut roles.roles.members, account, true)
@@ -199,11 +205,12 @@ module basics::accessControlLib {
                 let status = vec_map::get_mut(&mut role_.members, &userId);
                 *status = true;
             };
-            event::emit(RoleGranted{role, userId});    // , _msgSender()????
+            event::emit(RoleGrantedEvent{role, userId});    // , _msgSender()????
         }
     }     
     
-    // Internal function without access restriction.
+    /// Revokes `role` from `object user id`
+    /// Internal function without access restriction.
     fun revokeRole_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
         if (hasRole(userRolesCollection, role, userId)) {
             if (!table::contains(&userRolesCollection.roles, role)) {
@@ -218,10 +225,11 @@ module basics::accessControlLib {
                 let status = vec_map::get_mut(&mut role_.members, &userId);
                 *status = false;
             };
-            event::emit(RoleRevoked{role, userId});    // , _msgSender() ??
+            event::emit(RoleRevokedEvent{role, userId});    // , _msgSender() ??
         }
     }
 
+    /// Sets `adminRole` as ``role``'s admin role for 'communityAdminRole' and `communityModeratorRole`.
     public(friend) fun setCommunityPermission(userRolesCollection: &mut UserRolesCollection, communityId: ID) {
         let communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
         let communityModeratorRole = getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId);
@@ -230,6 +238,7 @@ module basics::accessControlLib {
         setRoleAdmin(userRolesCollection, communityAdminRole, PROTOCOL_ADMIN_ROLE);
     }
 
+    /// Abort if `user object id` is missing `actionRole`.
     public fun checkHasRole(userRolesCollection: &UserRolesCollection, userId: ID, actionRole: u8, communityId: ID) {
         // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
         let isAdmin = hasRole(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
@@ -263,6 +272,7 @@ module basics::accessControlLib {
         abort errorType
     }
 
+    /// Get community role from `community roleTemplate` and `community object id`
     public fun getCommunityRole(roleTemplate: vector<u8>, communityId: ID): vector<u8> {
         vector::append<u8>(&mut roleTemplate, object::id_to_bytes(&communityId));
         roleTemplate
@@ -318,5 +328,12 @@ module basics::accessControlLib {
 
     public fun get_community_moderator_role(): vector<u8> {
         COMMUNITY_MODERATOR_ROLE
+    }
+
+    // --- Testing functions ---
+
+    #[test_only]
+    public fun init_test(ctx: &mut TxContext) {
+        init(ctx)
     }
 }

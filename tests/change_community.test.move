@@ -1,13 +1,13 @@
 #[test_only]
-module basics::postLib_change_community_test
+module peeranha::postLib_change_community_test
 {
-    use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
-    use basics::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
-    use basics::communityLib::{Community};
-    use basics::postLib::{Self, Post, PostMetaData};
-    use basics::postLib_change_post_type_test;
-    use basics::userLib_test;
-    use basics::communityLib_test;
+    use peeranha::userLib::{Self, User, UsersRatingCollection};
+    use peeranha::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
+    use peeranha::communityLib::{Community};
+    use peeranha::postLib::{Self, Post, PostMetaData};
+    use peeranha::postLib_change_post_type_test;
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
     use sui::object::{Self};
@@ -69,7 +69,7 @@ module basics::postLib_change_community_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 _tags,
                 _historyVotes
@@ -123,7 +123,7 @@ module basics::postLib_change_community_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 _tags,
                 _historyVotes
@@ -177,7 +177,7 @@ module basics::postLib_change_community_test
                 _language,
                 _officialReplyMetaDataKey,
                 _bestReplyMetaDataKey,
-                _deletedReplyCount,
+                _deletedRepliesCount,
                 _isDeleted,
                 _tags,
                 _historyVotes
@@ -262,7 +262,7 @@ module basics::postLib_change_community_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (_user_rating_collection_val, user_roles_collection_val, _period_reward_container_val, user_val, _community_val, _community2_val) = init_all_shared(scenario);
+            let (user_rating_collection_val,user_roles_collection_val, user_val, community_val, community2_val) = init_all_shared(scenario);
             let user_roles_collection = &mut user_roles_collection_val;
             let user5 = &mut user5_val;
 
@@ -272,7 +272,7 @@ module basics::postLib_change_community_test
             accessControlLib::grantProtocolAdminRole(default_admin_cap, user_roles_collection, object::id(user5));
             
             test_scenario::return_to_sender(scenario, default_admin_cap_val);
-            return_all_shared(_user_rating_collection_val, user_roles_collection_val, _period_reward_container_val, user_val, _community_val, _community2_val, scenario);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER5);
@@ -288,7 +288,7 @@ module basics::postLib_change_community_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (_user_rating_collection_val, user_roles_collection_val, _period_reward_container_val, user_val, _community_val, _community2_val) = init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val) = init_all_shared(scenario);
             let user_roles_collection = &mut user_roles_collection_val;
             let user4 = &mut user4_val;
 
@@ -299,7 +299,7 @@ module basics::postLib_change_community_test
             
             test_scenario::return_to_sender(scenario, default_admin_cap_val);
 
-            return_all_shared(_user_rating_collection_val, user_roles_collection_val, _period_reward_container_val, user_val, _community_val, _community2_val, scenario);
+            return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER4);
@@ -312,22 +312,20 @@ module basics::postLib_change_community_test
     }
 
     #[test_only]
-    public fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Community, Community) {
+    public fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, User, Community, Community) {
         let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
-        let period_reward_container_val = test_scenario::take_shared<PeriodRewardContainer>(scenario);
         let user_val = test_scenario::take_from_sender<User>(scenario);
         let community2_val = test_scenario::take_shared<Community>(scenario);
         let community_val = test_scenario::take_shared<Community>(scenario);
 
-        (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, community2_val)
+        (user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val)
     }
 
     #[test_only]
     public fun return_all_shared(
         user_rating_collection_val: UsersRatingCollection,
         user_roles_collection_val: UserRolesCollection,
-        period_reward_container_val:PeriodRewardContainer,
         user_val: User,
         community_val: Community,
         community_val2: Community,
@@ -335,7 +333,6 @@ module basics::postLib_change_community_test
     ) {
         test_scenario::return_shared(user_rating_collection_val);
         test_scenario::return_shared(user_roles_collection_val);
-        test_scenario::return_shared(period_reward_container_val);
         test_scenario::return_to_sender(scenario, user_val);
         test_scenario::return_shared(community_val);
         test_scenario::return_shared(community_val2);
@@ -343,20 +340,18 @@ module basics::postLib_change_community_test
     
     #[test_only]
     public fun change_post_community(post_meta_data: &mut PostMetaData, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, _community_val, community2_val) = init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val) = init_all_shared(scenario);
         let post_val = test_scenario::take_from_sender<Post>(scenario);
         let post = &mut post_val;
         let postType = postLib::getPostType(post_meta_data);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
-        let period_reward_container = &mut period_reward_container_val;
         let user = &mut user_val;
         let community2 = &mut community2_val;
 
         postLib::authorEditPost(
             user_rating_collection,
             user_roles_collection,
-            period_reward_container,
             user,
             post,
             post_meta_data,
@@ -365,10 +360,9 @@ module basics::postLib_change_community_test
             postType,
             vector<u64>[2, 3],
             ENGLISH_LANGUAGE,
-            test_scenario::ctx(scenario)
         );
 
         test_scenario::return_to_sender(scenario, post_val);
-        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, _community_val, community2_val, scenario);
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val, scenario);
     }
 }

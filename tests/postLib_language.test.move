@@ -1,12 +1,12 @@
 #[test_only]
-module basics::postLib_language_test
+module peeranha::postLib_language_test
 {
-    use basics::postLib::{Self, Post, PostMetaData, Reply, Comment};
-    use basics::userLib_test;
-    use basics::communityLib_test;
-    use basics::postLib_test;
-    use basics::userLib::{Self};
-    use basics::accessControlLib::{Self};
+    use peeranha::postLib::{Self, Post, PostMetaData, Reply, Comment};
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
+    use peeranha::postLib_test;
+    use peeranha::userLib::{Self};
+    use peeranha::accessControlLib::{Self};
     use sui::test_scenario::{Self, Scenario};
     use sui::clock::{Self};
 
@@ -139,10 +139,9 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
-            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
             let community = &mut community_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
@@ -153,7 +152,6 @@ module basics::postLib_language_test
             postLib::authorEditPost(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post,
                 post_meta_data,
@@ -162,14 +160,13 @@ module basics::postLib_language_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 CHINESE_LANGUAGE,
-                test_scenario::ctx(scenario)
             );
             
             assert!(postLib::getPostLanguage(post_meta_data) == CHINESE_LANGUAGE, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -187,10 +184,9 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
-            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
             let community = &mut community_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
@@ -201,7 +197,6 @@ module basics::postLib_language_test
             postLib::authorEditPost(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post,
                 post_meta_data,
@@ -210,14 +205,13 @@ module basics::postLib_language_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 VIETNAMESE_LANGUAGE,
-                test_scenario::ctx(scenario)
             );
 
             assert!(postLib::getPostLanguage(post_meta_data) == VIETNAMESE_LANGUAGE, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -235,10 +229,9 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
-            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
             let community = &mut community_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
@@ -249,7 +242,6 @@ module basics::postLib_language_test
             postLib::authorEditPost(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post,
                 post_meta_data,
@@ -258,12 +250,11 @@ module basics::postLib_language_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 INVALID_LANGUAGE,
-                test_scenario::ctx(scenario)
             );
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -446,7 +437,7 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let user = &mut user_val;
@@ -471,7 +462,7 @@ module basics::postLib_language_test
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, reply_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -499,7 +490,7 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let user = &mut user_val;
@@ -524,7 +515,7 @@ module basics::postLib_language_test
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, reply_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -552,7 +543,7 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let user = &mut user_val;
@@ -575,7 +566,7 @@ module basics::postLib_language_test
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, reply_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -791,7 +782,7 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
@@ -816,7 +807,7 @@ module basics::postLib_language_test
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -850,7 +841,7 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
@@ -875,7 +866,7 @@ module basics::postLib_language_test
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -901,7 +892,7 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
@@ -924,7 +915,7 @@ module basics::postLib_language_test
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -958,7 +949,7 @@ module basics::postLib_language_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
@@ -981,7 +972,7 @@ module basics::postLib_language_test
 
             test_scenario::return_to_sender(scenario, comment_val);
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1029,13 +1020,13 @@ module basics::postLib_language_test
        
     #[test_only]
     public fun create_post(time: &clock::Clock, language: u8, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let user = &mut user_val;
         let community = &mut community_val;
 
-        postLib::createPostByUser(
+        postLib::createPost(
             user_rating_collection,
             user_roles_collection,
             time,
@@ -1048,21 +1039,19 @@ module basics::postLib_language_test
             test_scenario::ctx(scenario)
         );
 
-        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
     }
 
     #[test_only]
     public fun create_reply(postMetadata: &mut PostMetaData, time: &clock::Clock, language: u8, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
-        let period_reward_container = &mut period_reward_container_val;
         let user = &mut user_val;
         
-        postLib::createReplyByUser(
+        postLib::createReply(
             user_rating_collection,
             user_roles_collection,
-            period_reward_container,
             time,
             user,
             postMetadata,
@@ -1073,12 +1062,12 @@ module basics::postLib_language_test
             test_scenario::ctx(scenario)
         );
 
-        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
     }
 
     #[test_only]
     public fun create_comment(postMetadata: &mut PostMetaData, time: &clock::Clock, parentReplyMetaDataKey: u64, language: u8, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let user = &mut user_val;
@@ -1095,6 +1084,6 @@ module basics::postLib_language_test
             test_scenario::ctx(scenario)
         );
 
-        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
     }
 }

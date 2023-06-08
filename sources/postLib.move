@@ -1,4 +1,4 @@
-module basics::postLib {    
+module peeranha::postLib {    
     use sui::transfer;
     use sui::event;
     use sui::object::{Self, ID, UID};
@@ -6,64 +6,64 @@ module basics::postLib {
     use sui::tx_context::{Self, TxContext};
     use sui::vec_map::{Self, VecMap};
     use std::vector;
-    use basics::accessControlLib;
-    use basics::communityLib;
-    use basics::commonLib;
-    use basics::userLib;
-    use basics::i64Lib;
+    use peeranha::accessControlLib;
+    use peeranha::communityLib;
+    use peeranha::commonLib;
+    use peeranha::userLib;
+    use peeranha::i64Lib;
     use sui::table::{Self, Table};
 
-    // ====== Errors ======
+    // ====== Errors. Available values 100 - 199 ======
 
-    const E_INVALID_POST_TYPE: u64 = 31;
+    const E_INVALID_POST_TYPE: u64 = 100;
 
-    const E_INVALID_RESOURCE_TYPE: u64 = 32;
+    const E_INVALID_RESOURCE_TYPE: u64 = 101;
 
-    const E_ITEM_ID_CAN_NOT_BE_0: u64 = 40;
+    const E_ITEM_ID_CAN_NOT_BE_0: u64 = 102;
 
-    const E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_POST: u64 = 41;
+    const E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_POST: u64 = 103;
 
-    const E_NOT_ALLOWED_EDIT_NOT_AUTHOR: u64 = 42;
+    const E_NOT_ALLOWED_EDIT_NOT_AUTHOR: u64 = 104;
 
-    const E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY: u64 = 45;
+    const E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY: u64 = 105;
 
-    const E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL: u64 = 46;
+    const E_YOU_CAN_NOT_PUBLISH_REPLIES_IN_TUTORIAL: u64 = 106;
 
-    const E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST: u64 = 47;       // name
+    const E_USER_IS_FORBIDDEN_TO_REPLY_ON_REPLY_FOR_EXPERT_AND_COMMON_TYPE_OF_POST: u64 = 107;       // name
 
-    const E_THIS_POST_TYPE_IS_ALREADY_SET: u64 = 49;        // deleted
+    const E_THIS_POST_TYPE_IS_ALREADY_SET: u64 = 108;        // deleted
 
-    const E_ERROR_POST_TYPE: u64 = 50;      ///
+    const E_ERROR_POST_TYPE: u64 = 109;      ///
 
-    const E_ERROR_VOTE_COMMENT: u64 = 51;
+    const E_ERROR_VOTE_COMMENT: u64 = 110;
 
-    const E_ERROR_VOTE_REPLY: u64 = 52;
+    const E_ERROR_VOTE_REPLY: u64 = 111;
 
-    const E_ERROR_VOTE_POST: u64 = 53;
+    const E_ERROR_VOTE_POST: u64 = 112;
 
-    const E_POST_NOT_EXIST: u64 = 55;
+    const E_POST_NOT_EXIST: u64 = 113;
 
-    const E_REPLY_NOT_EXIST: u64 = 56;
+    const E_REPLY_NOT_EXIST: u64 = 114;
 
-    const E_COMMENT_NOT_EXIST: u64 = 57;
+    const E_COMMENT_NOT_EXIST: u64 = 115;
 
-    const E_POST_DELETED: u64 = 58;
+    const E_POST_DELETED: u64 = 116;
 
-    const E_REPLY_DELETED: u64 = 59;
+    const E_REPLY_DELETED: u64 = 117;
 
-    const E_COMMENT_DELETED: u64 = 60;
+    const E_COMMENT_DELETED: u64 = 118;
 
-    const E_ERROR_CHANGE_COMMUNITY_ID: u64 = 61;
+    const E_ERROR_CHANGE_COMMUNITY_ID: u64 = 119;
 
-    const E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY: u64 = 64;
+    const E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY: u64 = 120;
 
-    const E_WRONG_SIGNER: u64 = 64;
+    const E_WRONG_SIGNER: u64 = 121;
 
-    const E_ITEM_ID_NOT_MATCHING: u64 = 65;
+    const E_ITEM_ID_NOT_MATCHING: u64 = 122;
 
-    const E_AT_LEAST_ONE_TAG_IS_REQUIRED: u64 = 86;
+    const E_AT_LEAST_ONE_TAG_IS_REQUIRED: u64 = 123;
 
-    const E_INVALID_LANGUAGE: u64 = 67;
+    const E_INVALID_LANGUAGE: u64 = 124;
 
     // 98, 99 - getPeriodRating  ???
 
@@ -105,79 +105,123 @@ module basics::postLib {
 
     struct Post has key {
         id: UID,
+        /// `IPFS hash` of document with `post` information
         ipfsDoc: commonLib::IpfsHash,
+        /// Properties for the `post`
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct PostMetaData has key {       // shared
         id: UID,
+        /// `Post object id` for the `post meta data`
         postId: ID,
+        /// `Post type` of the `post meta data`
         postType: u8,
+        /// `Created time` of the `post meta data`
         postTime: u64,
+        /// `Author` of the `post meta data`
         author: ID,
+        /// Information the `post author` when create `bot`
+        /// Defaut value - vector::empty<u8>()
+        /// For bot - messenger `type` + `handle`
         authorMetaData: vector<u8>,
+        /// `Rating` of the `post meta data`
         rating: i64Lib::I64,
+        /// `Community Id` for the `post meta data`
         communityId: ID,
+        /// Current `language` for the `post meta data`
         language: u8,
 
+        /// `Oficial reply meta data key` in `replies` for the `post meta data`
         officialReplyMetaDataKey: u64,
+        /// `Best reply meta data key` in replies for the `post meta data`
         bestReplyMetaDataKey: u64,
-        deletedReplyCount: u64,
+        /// Deleted `reply` count 
+        deletedRepliesCount: u64,
+        /// Status of the `post meta data`
         isDeleted: bool,
 
+        /// `Tags key` in `Community->tags` for the `post meta data`
         tags: vector<u64>,
+        /// `Replies meta data` for the `post meta data`. Table key - `reply meta data key`
         replies: Table<u64, ReplyMetaData>,
+        /// `Comments meta data` for the `post meta data`. Table key - `comment meta data key`
         comments: Table<u64, CommentMetaData>,
+        /// Properties for the `post meta data`
         properties: VecMap<u8, vector<u8>>,
-        historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
+        /// Users vote for the `post meta data`. VecMap key - `user object id`. downVote = 1, NONE = 2, upVote = 3.
+        historyVotes: VecMap<ID, u8>,      // rewrite look getForumItemRatingChange
     }
 
     struct Reply has key {
         id: UID,
+        /// `IPFS hash` of document with `reply` information
         ipfsDoc: commonLib::IpfsHash,
+        /// Properties for the `reply`
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct ReplyMetaData has key, store {
         id: UID,
+        /// `Reply object id` for the `reply meta data`
         replyId: ID,
+        /// `Created time` of the `reply meta data`
         postTime: u64,
+        /// `Author` of the `reply meta data`
         author: ID,
+        /// Information the `post author` when create bot
+        /// Defaut value - vector::empty<u8>()
+        /// For bot - messenger `type` + `handle`
         authorMetaData: vector<u8>,
+        /// `Rating` of the `reply meta data`
         rating: i64Lib::I64,
+        /// `Parent reply meta data key` for the `reply meta data` (reply to reply).
         parentReplyMetaDataKey: u64,
+        /// Current `language` for the `reply meta data`
         language: u8,
 
+        /// Status of the `reply meta data`. First for `post`
         isFirstReply: bool,
+        /// Status of the `reply meta data`. The `reply` created less than 15 minutes after created `post`.
         isQuickReply: bool,
+        /// Status of the `reply meta data`
         isDeleted: bool,
 
+        /// `Comments meta data` for the `reply meta data`. Table key - `comment meta data key`
         comments: Table<u64, CommentMetaData>,
+        /// Properties for the `reply meta data`
         properties: VecMap<u8, vector<u8>>,
-        historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
+        /// Users' Vote for the `reply meta data`. VecMap key - user object id. downVote = 1, NONE = 2, upVote = 3.
+        historyVotes: VecMap<ID, u8>,       // rewrite look getForumItemRatingChange
     }
 
     struct Comment has key {
         id: UID,
+        /// `IPFS hash` of document with `comment` information
         ipfsDoc: commonLib::IpfsHash,
-
+        /// `Properties` for the `comment`
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct CommentMetaData has key, store {
         id: UID,
+        /// `Comment object id` for the `comment meta data`
         commentId: ID,
+        /// `Created time` of the `comment meta data`
         postTime: u64,
+        /// `Author` of the `comment meta data`
         author: ID,
+        /// `Rating` of the `comment meta data`
         rating: i64Lib::I64,
+        /// Current `language` for the `comment meta data`
         language: u8,
 
+        /// Status of the `comment meta data`
         isDeleted: bool,
+        /// `Properties` for the `comment meta data`
         properties: VecMap<u8, vector<u8>>,
-        historyVotes: VecMap<ID, u8>,       // downVote = 1, NONE = 2, upVote = 3 // rewrite look getForumItemRatingChange
-    }
-
-    struct UserRatingChange {
-        user: userLib::User,
-        userCommunityRating: userLib::UserCommunityRating,
-        rating: i64Lib::I64
+        /// `Users' Vote for the `comment meta data`. VecMap key - `user object id`. downVote = 1, NONE = 2, upVote = 3.
+        historyVotes: VecMap<ID, u8>,       // rewrite look getForumItemRatingChange
     }
 
     // ====== Events ======
@@ -263,6 +307,7 @@ module basics::postLib {
         voteDirection: u8,
     }
 
+    /// Publication `post` by `bot`
     public entry fun createPostByBot(
         roles: &mut accessControlLib::UserRolesCollection,
         time: &Clock,
@@ -278,7 +323,7 @@ module basics::postLib {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
 
-        createPost(
+        createPostPrivate(
             time,
             commonLib::get_bot_id(),
             community,
@@ -291,7 +336,8 @@ module basics::postLib {
         )
     }
 
-    public entry fun createPostByUser(
+    /// Publication `post` by `user`
+    public entry fun createPost(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
         time: &Clock,
@@ -307,7 +353,7 @@ module basics::postLib {
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
         let communityId = object::id(community);
-        userLib::checkActionRole(                               // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -316,10 +362,9 @@ module basics::postLib {
             communityId,
             userLib::get_action_publication_post(),
             accessControlLib::get_action_role_none(),
-            /*true*/
         );
 
-        createPost(
+        createPostPrivate(
             time,
             userId,
             community,
@@ -332,7 +377,8 @@ module basics::postLib {
         )
     }
 
-    fun createPost(
+    /// Publication `post`
+    fun createPostPrivate(
         time: &Clock,
         userId: ID,
         community: &communityLib::Community,
@@ -356,6 +402,7 @@ module basics::postLib {
         let post = Post {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         };
         let postMetaData = PostMetaData {
             id: object::new(ctx),
@@ -368,7 +415,7 @@ module basics::postLib {
             communityId: communityId,
             officialReplyMetaDataKey: 0,
             bestReplyMetaDataKey: 0,
-            deletedReplyCount: 0,
+            deletedRepliesCount: 0,
             language: language,
             isDeleted: false,
             tags: postTags,
@@ -388,10 +435,10 @@ module basics::postLib {
         );
     }
 
+    /// Publication `reply` by `bot`
     public entry fun createReplyByBot(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         roles: &mut accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -404,9 +451,8 @@ module basics::postLib {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
 
-        createReply(
+        createReplyPrivate(
             usersRatingCollection,
-            periodRewardContainer,
             time,
             commonLib::get_bot_id(),
             postMetaData,
@@ -419,10 +465,10 @@ module basics::postLib {
         )
     }
 
-    public entry fun createReplyByUser(
+    /// Publication `reply` by `user`
+    public entry fun createReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -436,7 +482,7 @@ module basics::postLib {
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
 
         let communityId = postMetaData.communityId;
-        userLib::checkActionRole(                       // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -447,12 +493,10 @@ module basics::postLib {
             if (isOfficialReply)
                 accessControlLib::get_action_role_community_admin() else
                 accessControlLib::get_action_role_none()
-            /*true*/
         );
 
-        createReply(
+        createReplyPrivate(
             usersRatingCollection,
-            periodRewardContainer,
             time,
             userId,
             postMetaData,
@@ -465,9 +509,9 @@ module basics::postLib {
         )
     }
 
-    fun createReply(
+    /// Publication `reply` by `user`
+    fun createReplyPrivate(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         userId: ID,
         postMetaData: &mut PostMetaData,
@@ -519,17 +563,15 @@ module basics::postLib {
             let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
             userLib::updateRating(
                 userCommunityRating,
-                periodRewardContainer,
-                userId,
                 changeUserRating,
                 postMetaData.communityId,
-                ctx
             );
         };
 
         let reply = Reply {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         };
         let replyMetaData = ReplyMetaData {
             id: object::new(ctx),
@@ -559,6 +601,7 @@ module basics::postLib {
         );
     }
 
+    /// Publication `comment`
     public entry fun createComment(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -578,6 +621,7 @@ module basics::postLib {
         let comment = Comment {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         };
         let commentId = object::id(&comment);
         let commentMetaData = CommentMetaData {
@@ -608,7 +652,7 @@ module basics::postLib {
             table::add(&mut replyMetaData.comments, commentMetaDataKey, commentMetaData);
         };
 
-        userLib::checkActionRole(       // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -617,7 +661,6 @@ module basics::postLib {
             postMetaData.communityId,
             userLib::get_action_publication_comment(),
             accessControlLib::get_action_role_none(),
-            /*true*/
         );
 
         transfer::transfer(
@@ -628,10 +671,10 @@ module basics::postLib {
         event::emit(CreateCommentEvent{userId: userId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyMetaDataKey, commentMetaDataKey: commentMetaDataKey});
     }
 
+    /// `Author` edit own `post`
     public entry fun authorEditPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         post: &mut Post,
         postMetaData: &mut PostMetaData,
@@ -640,7 +683,6 @@ module basics::postLib {
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
-        ctx: &mut TxContext
     ) {
         checkMatchItemId(object::id(post), postMetaData.postId);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
@@ -650,67 +692,61 @@ module basics::postLib {
         editPost(
             usersRatingCollection,
             userRolesCollection,
-            periodRewardContainer,
             user,
             postMetaData,
             newCommunity,
             newPostType,
             tags,
             language,
-            ctx
         );
         event::emit(EditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
 
+    /// `Moderator` edit `post meta data` (post type/community/tags/language)
     public entry fun moderatorEditPostMetaData(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newCommunity: &communityLib::Community,
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
-        ctx: &mut TxContext
     ) {
-        let _newCommunityId = object::id(newCommunity);
+        // let newCommunityId = object::id(newCommunity);
         // if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
         //     abort E_ERROR_CHANGE_COMMUNITY_ID;  // test
 
         editPost(
             usersRatingCollection,
             userRolesCollection,
-            periodRewardContainer,
             user,
             postMetaData,
             newCommunity,
             newPostType,
             tags,
             language,
-            ctx
         );
         event::emit(ModeratorEditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
 
+    /// Edit the `post`
     fun editPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newCommunity: &communityLib::Community,
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
-        ctx: &mut TxContext
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let userId = object::id(user);
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
         let postMetaDataAuthor = postMetaData.author;
-        userLib::checkActionRole(                       // test               
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -723,11 +759,10 @@ module basics::postLib {
             if (userId == postMetaDataAuthor)
                 accessControlLib::get_action_role_none() else
                 accessControlLib::get_action_role_admin_or_community_moderator(),
-            /*false*/
         );
 
-        changePostType(usersRatingCollection, periodRewardContainer, postMetaData, newPostType, ctx);
-        changePostCommunity(usersRatingCollection, periodRewardContainer, postMetaData, newCommunity, ctx);
+        changePostType(usersRatingCollection, postMetaData, newPostType);
+        changePostCommunity(usersRatingCollection, postMetaData, newCommunity);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         if (postMetaData.language != language) {
@@ -742,6 +777,7 @@ module basics::postLib {
         event::emit(EditPostEvent{userId: userId, postMetaDataId: object::id(postMetaData)});
     }
 
+    /// `Author` edit own `reply`
     public entry fun authorEditReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -753,6 +789,8 @@ module basics::postLib {
         isOfficialReply: bool,
         language: u8,
     ) {
+        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
+        checkMatchItemId(object::id(reply), replyMetaData.replyId);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
         if (commonLib::getIpfsHash(reply.ipfsDoc) != ipfsHash)
             reply.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
@@ -769,7 +807,8 @@ module basics::postLib {
         event::emit(EditReplyEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey});
     }
 
-    //moderatorEditReply -> moderatorEditReplyMetaData
+    // moderatorEditReply -> moderatorEditReplyMetaData
+    /// `Moderator` edit `reply`(isOfficialReply/language)
     public entry fun moderatorEditReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -791,6 +830,7 @@ module basics::postLib {
         event::emit(ModeratorEditReplyEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey});
     }
 
+    /// Edit `reply`
     fun editReply(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -801,8 +841,8 @@ module basics::postLib {
         language: u8,
     ) {
         let userId = object::id(user);
-        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey); // add checkMatchItemId for authorEditReply?
         let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
+        let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         if (replyMetaData.language != language) {
@@ -823,7 +863,6 @@ module basics::postLib {
             if (isOfficialReply || userId != replyMetaDataAuthor)
                 accessControlLib::get_action_role_admin_or_community_moderator() else
                 accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         if (isOfficialReply) {
@@ -833,6 +872,7 @@ module basics::postLib {
         };
     }
 
+    /// `Author` edit `comment`
     public entry fun editComment(
         usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -855,7 +895,7 @@ module basics::postLib {
             commentMetaData.language = language;
         };
 
-        userLib::checkActionRole(               // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -864,7 +904,6 @@ module basics::postLib {
             postMetaData.communityId,
             userLib::get_action_edit_item(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         if (commonLib::getIpfsHash(comment.ipfsDoc) != ipfsHash)
@@ -873,14 +912,13 @@ module basics::postLib {
         event::emit(EditCommentEvent{userId: userId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyKey, commentMetaDataKey: commentMetaDataKey});
     }
 
+    /// `Author` and `moderator` delete `post`
     public entry fun deletePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
-        ctx: &mut TxContext
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let communityId = postMetaData.communityId;
@@ -888,7 +926,7 @@ module basics::postLib {
         let bestReplyMetaDataKey = postMetaData.bestReplyMetaDataKey;
         let userId = object::id(user);
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
-        userLib::checkActionRole(           // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -897,7 +935,6 @@ module basics::postLib {
             communityId,
             userLib::get_action_delete_item(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         let postType = postMetaData.postType;
@@ -921,11 +958,8 @@ module basics::postLib {
             &i64Lib::from(MODERATOR_DELETE_POST));
         userLib::updateRating(
             userCommunityRating,
-            periodRewardContainer,
-            postAuthor,
             changeUserRating,
             communityId,
-            ctx
         );
 
         if (currentTime - postMetaData.postTime < DELETE_TIME) {
@@ -938,12 +972,10 @@ module basics::postLib {
 
                 deductReplyRating(
                     replyAuthorCommunityRating,
-                    periodRewardContainer,
                     replyMetaData,
                     postType,
                     bestReplyMetaDataKey == replyMetaDataKey,
                     communityId,
-                    ctx
                 );
                 replyMetaDataKey = replyMetaDataKey + 1;
             }
@@ -953,21 +985,20 @@ module basics::postLib {
         event::emit(DeletePostEvent{userId: userId, postMetaDataId: object::id(postMetaData)});
     }
 
+    /// `Author` and `moderator` delete `reply`
     public entry fun deleteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
-        ctx: &mut TxContext
     ) {
         let userId = object::id(user);
         let communityId = postMetaData.communityId;
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, object::id(user));
         
-        postMetaData.deletedReplyCount = postMetaData.deletedReplyCount + 1;
+        postMetaData.deletedRepliesCount = postMetaData.deletedRepliesCount + 1;
         let isBestReplyMetaData = postMetaData.bestReplyMetaDataKey == replyMetaDataKey;
         if (isBestReplyMetaData) {
             postMetaData.bestReplyMetaDataKey = 0;
@@ -978,7 +1009,7 @@ module basics::postLib {
         let postType = postMetaData.postType;
         
         let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
-        userLib::checkActionRole(  // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -987,7 +1018,6 @@ module basics::postLib {
             communityId,
             userLib::get_action_delete_item(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
         
         // admin can delete best reply
@@ -997,13 +1027,10 @@ module basics::postLib {
         let time: u64 = commonLib::getTimestamp(time);
         userLib::updateRating(
             replyAuthorCommunityRating,
-            periodRewardContainer,
-            replyMetaData.author,
             if(userId == replyMetaData.author) 
                 i64Lib::neg_from(DELETE_OWN_REPLY) else 
                 i64Lib::neg_from(MODERATOR_DELETE_REPLY),
             communityId,
-            ctx
         );
         
         let parentReplyMetaDataKey = replyMetaData.parentReplyMetaDataKey;
@@ -1011,12 +1038,10 @@ module basics::postLib {
         if (isDeductReplyRating) {
             deductReplyRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
                 replyMetaData,
                 postType,
                 parentReplyMetaDataKey == 0 && isBestReplyMetaData,
                 communityId,
-                ctx
             );
         };
         replyMetaData.isDeleted = true;
@@ -1024,14 +1049,13 @@ module basics::postLib {
     }
 
 
+    /// When delete the `reply` take `rating` from the `author`
     fun deductReplyRating(
         userCommunityRating: &mut userLib::UserCommunityRating,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         replyMetaData: &ReplyMetaData,
         postType: u8,
         isBestReply: bool,
         communityId: ID,
-        ctx: &mut TxContext
     ) {
         if (replyMetaData.isDeleted)    // test rating
             return;
@@ -1062,31 +1086,27 @@ module basics::postLib {
         if (i64Lib::compare(&changeReplyAuthorRating, &i64Lib::zero()) != i64Lib::getEual()) {
             userLib::updateRating(
                 userCommunityRating,
-                periodRewardContainer,
-                replyMetaData.author,
                 changeReplyAuthorRating,
                 communityId,
-                ctx
             );
         };
     }
 
+    /// `Author` and `moderator` delete `comment`
     public entry fun deleteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         parentReplyKey: u64,
         commentMetaDataKey: u64,
-        ctx: &mut TxContext
     ) {
         let userId = object::id(user);
         let communityId = postMetaData.communityId;
         let commentMetaData = getMutableCommentMetaDataSafe(postMetaData, parentReplyKey, commentMetaDataKey);
         let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, object::id(user));
         
-        userLib::checkActionRole(         // test
+        userLib::checkActionRole(
             user,
             userCommunityRating,
             userRolesCollection,
@@ -1095,17 +1115,13 @@ module basics::postLib {
             communityId,
             userLib::get_action_delete_item(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         if (userId != commentMetaData.author) {
             userLib::updateRating(
                 userCommunityRating,
-                periodRewardContainer,
-                object::id(user),
                 i64Lib::neg_from(MODERATOR_DELETE_COMMENT),
                 communityId,
-                ctx
             );
         };
 
@@ -1113,14 +1129,13 @@ module basics::postLib {
         event::emit(DeleteCommentEvent{userId: userId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyKey, commentMetaDataKey: commentMetaDataKey});
     }
 
+    /// Change status `best reply`
     public entry fun changeStatusBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postAuthor: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newBestReplyMetaDataKey: u64,
-        ctx: &mut TxContext
     ) {
         let newBestReplyMetaData = getReplyMetaDataSafe(postMetaData, newBestReplyMetaDataKey);
         let communityId = postMetaData.communityId;
@@ -1129,13 +1144,11 @@ module basics::postLib {
         if (postMetaData.bestReplyMetaDataKey == newBestReplyMetaDataKey) {
             updateRatingForBestReply(
                 usersRatingCollection,
-                periodRewardContainer,
                 postMetaData.author,
                 newBestReplyMetaData.author,
                 postMetaData.postType,
                 false,
                 communityId,
-                ctx
             );
             postMetaData.bestReplyMetaDataKey = 0;
         } else {
@@ -1144,31 +1157,27 @@ module basics::postLib {
                 let oldBestReplyMetaData = getReplyMetaDataSafe(postMetaData, bestReplyMetaDataKey);
                 updateRatingForBestReply(
                     usersRatingCollection,
-                    periodRewardContainer,
                     postMetaData.author,
                     oldBestReplyMetaData.author,
                     postMetaData.postType,
                     false,
                     communityId,
-                    ctx
                 );
             };
 
             updateRatingForBestReply(
                 usersRatingCollection,
-                periodRewardContainer,
                 postMetaData.author,
                 newBestReplyMetaData.author,
                 postMetaData.postType,
                 true,
                 communityId,
-                ctx
             );
             postMetaData.bestReplyMetaDataKey = newBestReplyMetaDataKey;
         };
         let postAuthorId = object::id(postAuthor);
         let postAuthorCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, postMetaData.author);
-        userLib::checkActionRole(    // test
+        userLib::checkActionRole(
             postAuthor,
             postAuthorCommunityRating,
             userRolesCollection,
@@ -1177,58 +1186,49 @@ module basics::postLib {
             communityId,
             userLib::get_action_best_reply(),
             accessControlLib::get_action_role_none(),
-            //false
         );
 
         event::emit(ChangeStatusBestReply{userId: object::id(postAuthor), postMetaDataId: object::id(postMetaData), replyMetaDataKey: newBestReplyMetaDataKey});
     }
 
     
+    /// Recalculation `post author` and `reply author` `rating` when change `status best reply`
     fun updateRatingForBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postAuthorAddress: ID,
         replyAuthorAddress: ID,
         postType: u8,
         isMark: bool,
         communityId: ID,
-        ctx: &mut TxContext
     ) {
         if (postAuthorAddress != replyAuthorAddress) {
             let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postAuthorAddress);
             userLib::updateRating(
                 postAuthorCommunityRating,
-                periodRewardContainer,
-                postAuthorAddress,
                 if (isMark)
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY), &i64Lib::neg_from(1)),
                 communityId,
-                ctx
             );
 
             let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyAuthorAddress);
             userLib::updateRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
-                replyAuthorAddress,
                 if (isMark)
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY), &i64Lib::neg_from(1)),
                 communityId,
-                ctx
             );
         }
     }
 
+    /// Vote for `post`
     public entry fun votePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         isUpvote: bool,
-        ctx: &mut TxContext
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let postType = postMetaData.postType;
@@ -1238,7 +1238,7 @@ module basics::postLib {
         
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut postMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, voteUserId);
-        userLib::checkActionRole(      // test
+        userLib::checkActionRole(
             voteUser,
             voteUserCommunityRating,
             userRolesCollection,
@@ -1251,12 +1251,10 @@ module basics::postLib {
                         userLib::get_action_upvote_post() else 
                         userLib::get_action_downvote_post(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         vote(
             usersRatingCollection,
-            periodRewardContainer,
             voteUserId,
             postMetaData.author,
             postType,
@@ -1264,7 +1262,6 @@ module basics::postLib {
             ratingChange,
             TYPE_CONTENT_POST,
             communityId,
-            ctx
         );
         postMetaData.rating = i64Lib::add(&postMetaData.rating, &ratingChange);
 
@@ -1286,15 +1283,14 @@ module basics::postLib {
         event::emit(VoteItem{userId: voteUserId, postMetaDataId: object::id(postMetaData), replyMetaDataKey: 0, commentMetaDataKey: 0, voteDirection: voteDirection});
     }
 
+    /// Vote for `reply`
     public entry fun voteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
         isUpvote: bool,
-        ctx: &mut TxContext
     ) {
         let postType = postMetaData.postType;
         let voteUserId = object::id(voteUser);
@@ -1304,7 +1300,7 @@ module basics::postLib {
 
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut replyMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
-        userLib::checkActionRole(    // test
+        userLib::checkActionRole(
             voteUser,
             voteUserCommunityRating,
             userRolesCollection,
@@ -1317,7 +1313,6 @@ module basics::postLib {
                         userLib::get_action_upvote_reply() else 
                         userLib::get_action_downvote_reply(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
 
         let oldRating: i64Lib::I64 = replyMetaData.rating;
@@ -1344,16 +1339,12 @@ module basics::postLib {
         let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
         userLib::updateRating(
             replyAuthorCommunityRating,
-            periodRewardContainer,
-            replyMetaData.author,
             changeReplyAuthorRating,
             communityId,
-            ctx
         );
 
         vote(
             usersRatingCollection,
-            periodRewardContainer,
             voteUserId,
             replyMetaData.author,
             postType,
@@ -1361,7 +1352,6 @@ module basics::postLib {
             ratingChange,
             TYPE_CONTENT_REPLY,
             communityId,
-            ctx
         );
         
         let voteDirection;
@@ -1381,6 +1371,7 @@ module basics::postLib {
         event::emit(VoteItem{userId: voteUserId, postMetaDataId: object::id(postMetaData), replyMetaDataKey: replyMetaDataKey, commentMetaDataKey: 0, voteDirection: voteDirection});
     }
 
+    /// Vote for `comment`
     public entry fun voteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
@@ -1399,7 +1390,7 @@ module basics::postLib {
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut commentMetaData.historyVotes, isUpvote);
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         
-        userLib::checkActionRole(       // test
+        userLib::checkActionRole(
             voteUser,
             voteUserCommunityRating,
             userRolesCollection,
@@ -1410,7 +1401,6 @@ module basics::postLib {
                 userLib::get_action_cancel_vote() else  
                 userLib::get_action_vote_comment(),
             accessControlLib::get_action_role_none(),
-            /*false*/
         );
         commentMetaData.rating = i64Lib::add(&commentMetaData.rating, &ratingChange);
 
@@ -1432,9 +1422,9 @@ module basics::postLib {
         event::emit(VoteItem{userId: voteUserId, postMetaDataId: object::id(postMetaData), replyMetaDataKey: parentReplyMetaDataKey, commentMetaDataKey: commentMetaDataKey, voteDirection: voteDirection});
     }
 
+    /// Recalculation `users' rating` after voting per a `reply` or `post`
     fun vote(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         voteUserId: ID,
         votedUserId: ID,
         postType: u8,
@@ -1442,7 +1432,6 @@ module basics::postLib {
         ratingChanged: i64Lib::I64,
         typeContent: u8,
         communityId: ID,
-        ctx: &mut TxContext
     ) {
         // TODO: add why warning - Unused assignment or binding for local '_authorRating'. Consider removing, replacing with '_', or prefixing with '_'
         let voteUserRating = i64Lib::zero();
@@ -1477,30 +1466,23 @@ module basics::postLib {
         let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         userLib::updateRating(
             voteUserCommunityRating,
-            periodRewardContainer,
-            voteUserId,
             voteUserRating,
             communityId,
-            ctx
         );
 
         let votedUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, votedUserId);
         userLib::updateRating(
             votedUserCommunityRating,
-            periodRewardContainer,
-            votedUserId,
             _authorRating,
             communityId,
-            ctx
         );
     }
 
+    /// Change `postType` for the `post` and recalculation `rating` for all `users` who were active in the `post`
     fun changePostType(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postMetaData: &mut PostMetaData,
         newPostType: u8,
-        ctx: &mut TxContext
     ) {
         if (postMetaData.postType == newPostType) return;
 
@@ -1547,33 +1529,26 @@ module basics::postLib {
             let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
             userLib::updateRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
-                replyMetaData.author,
                 changeReplyAuthorRating,
                 postMetaData.communityId,
-                ctx
             );
             replyMetaDataKey = replyMetaDataKey + 1;
         };
         let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postMetaData.author);
         userLib::updateRating(
             postAuthorCommunityRating,
-            periodRewardContainer,
-            postMetaData.author,
             changePostAuthorRating,
             postMetaData.communityId,
-            ctx
         );
 
         postMetaData.postType = newPostType;
     }
 
+    /// Change `communityId` for the `post` and recalculation `rating` for all `users` who were active in the `post`
     fun changePostCommunity(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
-        periodRewardContainer: &mut userLib::PeriodRewardContainer,
         postMetaData: &mut PostMetaData,
         community: &communityLib::Community,
-        ctx: &mut TxContext
     ) {
         let newCommunityId = object::id(community);
         if (postMetaData.communityId == newCommunityId) return;
@@ -1619,19 +1594,13 @@ module basics::postLib {
             let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
             userLib::updateRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
-                replyMetaData.author,
                 i64Lib::mul(&changeReplyAuthorRating, &i64Lib::neg_from(1)),
                 oldCommunityId,
-                ctx
             );
             userLib::updateRating(
                 replyAuthorCommunityRating,
-                periodRewardContainer,
-                replyMetaData.author,
                 changeReplyAuthorRating,
                 newCommunityId,
-                ctx
             );
             replyMetaDataKey = replyMetaDataKey + 1;
         };
@@ -1639,23 +1608,18 @@ module basics::postLib {
         let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postMetaData.author);
         userLib::updateRating(
             postAuthorCommunityRating,
-            periodRewardContainer,
-            postMetaData.author,
             i64Lib::mul(&changePostAuthorRating, &i64Lib::neg_from(1)),
             oldCommunityId,
-            ctx
         );
         userLib::updateRating(
             postAuthorCommunityRating,
-            periodRewardContainer,
-            postMetaData.author,
             changePostAuthorRating,
             newCommunityId,
-            ctx
         );
         postMetaData.communityId = newCommunityId;
     }
 
+    /// Check overlap `item object id` and `itemMetaData.itemId` (for post/reply/comment)
     fun checkMatchItemId(
         itemId: ID,
         savedItemId: ID
@@ -1666,6 +1630,7 @@ module basics::postLib {
         ); 
     }
 
+    /// Get constants `rating` depends on `post type` (upvotedPost, downvotedPost, upvotedReply, downvotedReply, firstReply, quickReply, acceptedReply, acceptReply)
     fun getTypesRating(        //name?
         postType: u8
     ): StructRating {
@@ -1680,6 +1645,7 @@ module basics::postLib {
         }
     }
 
+    /// Get count upvotes/downvotes for the `item meta data`
     fun getHistoryInformations(
         historyVotes: VecMap<ID, u8>
     ): (u64, u64) {
@@ -1699,6 +1665,7 @@ module basics::postLib {
         (positive, negative)
     }
 
+    /// Get the mutable `reply meta data`
     public fun getMutableReplyMetaData(postMetaData: &mut PostMetaData, replyMetaDataKey: u64): &mut ReplyMetaData {
         assert!(replyMetaDataKey >= 0, E_ITEM_ID_CAN_NOT_BE_0);
         assert!(table::length(&postMetaData.replies) >= replyMetaDataKey, E_REPLY_NOT_EXIST);
@@ -1706,6 +1673,7 @@ module basics::postLib {
         replyMetaData
     }
 
+    /// Get the mutable `reply meta data` + (check status deleted for `post/reply`)
     public fun getMutableReplyMetaDataSafe(postMetaData: &mut PostMetaData, replyMetaDataKey: u64): &mut ReplyMetaData {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let replyMetaData = getMutableReplyMetaData(postMetaData, replyMetaDataKey);
@@ -1713,6 +1681,7 @@ module basics::postLib {
         replyMetaData
     }
 
+    /// Get the `reply meta data`
     public fun getReplyMetaData(postMetaData: &PostMetaData, replyMetaDataKey: u64): &ReplyMetaData {
         assert!(replyMetaDataKey > 0, E_ITEM_ID_CAN_NOT_BE_0);
         assert!(table::length(&postMetaData.replies) >= replyMetaDataKey, E_REPLY_NOT_EXIST);
@@ -1720,6 +1689,7 @@ module basics::postLib {
         replyMetaData
     }
 
+    /// Get the `reply meta data` + (check status deleted for `post/reply`)
     public fun getReplyMetaDataSafe(postMetaData: &PostMetaData, replyMetaDataKey: u64): &ReplyMetaData {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
@@ -1727,6 +1697,7 @@ module basics::postLib {
         replyMetaData
     }
 
+    /// Get the mutable `comment meta data`
     public fun getMutableCommentMetaData(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &mut CommentMetaData {
         assert!(commentMetaDataKey > 0, E_ITEM_ID_CAN_NOT_BE_0);
         if (parentReplyMetaDataKey == 0) {
@@ -1742,6 +1713,7 @@ module basics::postLib {
         }
     }
 
+    /// Get the mutable `comment meta data` + (check status deleted for `post/reply/comment`)
     public fun getMutableCommentMetaDataSafe(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &mut CommentMetaData {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let commentMetaData = getMutableCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
@@ -1749,10 +1721,12 @@ module basics::postLib {
         commentMetaData
     }
 
+    /// Get the `comment meta data`
     public fun getCommentMetaData(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &CommentMetaData {
         getMutableCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey)
     }
 
+    /// Get the `comment meta data` + (check status deleted for post/reply/comment)
     public fun getCommentMetaDataSafe(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): &CommentMetaData {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
@@ -1760,147 +1734,11 @@ module basics::postLib {
         commentMetaData
     }
 
+    /// Get active `reply` count for the `post` (created replies - deleted replies)
     fun getActiveReplyCount(
         postMetaData: &PostMetaData
     ): u64 {
-        return table::length(&postMetaData.replies) - postMetaData.deletedReplyCount
-    }
-
-    #[test_only]
-    public fun isDeletedPost(postMetaData: &PostMetaData): (bool) {
-        postMetaData.isDeleted
-    }
-
-    #[test_only]
-    public fun isDeletedReply(postMetaData: &PostMetaData, replyMetaDataKey: u64): (bool) {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        replyMetaData.isDeleted
-    }
-
-    #[test_only]
-    public fun isDeletedComment(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): bool {
-        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
-        commentMetaData.isDeleted
-    }
-
-    #[test_only]
-    public fun getPostLanguage(postMetaData: &PostMetaData): u8 {
-        postMetaData.language
-    }
-
-    #[test_only]
-    public fun getReplyLanguage(postMetaData: &PostMetaData, replyMetaDataKey: u64): u8 {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        replyMetaData.language
-    }
-
-    #[test_only]
-    public fun getCommentLanguage(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): u8 {
-        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
-        commentMetaData.language
-    }
-
-    #[test_only]
-    public fun getPostType(postMetaData: &PostMetaData): u8 {
-        postMetaData.postType
-    }
-
-    #[test_only]
-    public fun getBestReplyMetaDataKey(postMetaData: &PostMetaData): u64 {
-        postMetaData.bestReplyMetaDataKey
-    }
-
-    #[test_only]
-    public fun getPostHistoryVotes(postMetaData: &PostMetaData): VecMap<ID, u8> {
-        postMetaData.historyVotes
-    }
-
-    #[test_only]
-    public fun getReplyHistoryVotes(postMetaData: &PostMetaData, replyMetaDataKey: u64): VecMap<ID, u8> {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        replyMetaData.historyVotes
-    }
-
-    #[test_only]
-    public fun getCommentHistoryVotes(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): VecMap<ID, u8> {
-        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
-        commentMetaData.historyVotes
-    }
-
-    #[test_only]
-    public fun getPostData(postMetaData: &PostMetaData, post: &Post): (vector<u8>, ID, u8, ID, i64Lib::I64, ID, u8, u64, u64, u64, bool, vector<u64>, VecMap<ID, u8>) {
-        checkMatchItemId(object::id(post), postMetaData.postId);
-
-        (
-            commonLib::getIpfsHash(post.ipfsDoc),
-            postMetaData.postId,
-            postMetaData.postType,
-            postMetaData.author,
-            postMetaData.rating,
-            postMetaData.communityId,
-            postMetaData.language,
-            postMetaData.officialReplyMetaDataKey,
-            postMetaData.bestReplyMetaDataKey,
-            postMetaData.deletedReplyCount,
-            postMetaData.isDeleted,
-            postMetaData.tags,
-            postMetaData.historyVotes, 
-        )
-        // todo
-        // replies: Table<u64, ReplyMetaData>,
-        // comments: Table<u64, CommentMetaData>,
-        // properties: VecMap<u8, vector<u8>>,
-    }
-
-    #[test_only]
-    public fun getPostAuthorMetaData(postMetaData: &PostMetaData): (vector<u8>) {
-        postMetaData.authorMetaData
-    }
-
-    #[test_only]
-    public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u64, u8, bool, bool, bool, VecMap<ID, u8>) {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        checkMatchItemId(object::id(reply), replyMetaData.replyId);
-
-        (
-            commonLib::getIpfsHash(reply.ipfsDoc),
-            replyMetaData.replyId,
-            replyMetaData.author,
-            replyMetaData.rating,
-            replyMetaData.parentReplyMetaDataKey,
-            replyMetaData.language,
-            replyMetaData.isFirstReply,
-            replyMetaData.isQuickReply,
-            replyMetaData.isDeleted,
-            replyMetaData.historyVotes,
-        )
-        // add
-        // comments: Table<u64, CommentMetaData>,
-        // properties: VecMap<u8, vector<u8>>,
-    }
-
-    #[test_only]
-    public fun getReplyAuthorMetaData(postMetaData: &PostMetaData, replyMetaDataKey: u64): (vector<u8>) {
-        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-        replyMetaData.authorMetaData
-    }
-
-    #[test_only]
-    public fun getCommentData(postMetaData: &mut PostMetaData, comment: &Comment, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u8, bool, VecMap<ID, u8>) {
-        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
-        checkMatchItemId(object::id(comment), commentMetaData.commentId);
-
-        (
-            commonLib::getIpfsHash(comment.ipfsDoc),
-            commentMetaData.commentId,
-            commentMetaData.author,
-            commentMetaData.rating,
-            commentMetaData.language,
-            commentMetaData.isDeleted,
-            commentMetaData.historyVotes,
-        )
-        // add
-        // properties: VecMap<u8, vector<u8>>,
+        return table::length(&postMetaData.replies) - postMetaData.deletedRepliesCount
     }
 
     ///
@@ -1971,6 +1809,7 @@ module basics::postLib {
 
     const MODERATOR_DELETE_COMMENT: u64 = 1;    // negative
 
+    /// Get constants rating for expert post type (upvotedPost, downvotedPost, upvotedReply, downvotedReply, firstReply, quickReply, acceptedReply, acceptReply)
     fun getExpertRating(): StructRating {
         StructRating {
             upvotedPost: i64Lib::from(UPVOTED_EXPERT_POST),
@@ -1985,6 +1824,7 @@ module basics::postLib {
         }
     }
 
+    /// Get constants rating for common post type (upvotedPost, downvotedPost, upvotedReply, downvotedReply, firstReply, quickReply, acceptedReply, acceptReply)
     fun getCommonRating(): StructRating {
         StructRating {
             upvotedPost: i64Lib::from(UPVOTED_COMMON_POST),
@@ -1999,6 +1839,7 @@ module basics::postLib {
         }
     }
 
+    /// Get constants rating for tutorial post type (upvotedPost, downvotedPost, upvotedReply, downvotedReply, firstReply, quickReply, acceptedReply, acceptReply)
     fun getTutorialRating(): StructRating {
         StructRating {
             upvotedPost: i64Lib::from(UPVOTED_TUTORIAL),
@@ -2159,5 +2000,144 @@ module basics::postLib {
         } else {
             (NONE_VOTE, false)
         }
+    }
+
+    // --- Testing functions ---
+
+    #[test_only]
+    public fun isDeletedPost(postMetaData: &PostMetaData): (bool) {
+        postMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun isDeletedReply(postMetaData: &PostMetaData, replyMetaDataKey: u64): (bool) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun isDeletedComment(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): bool {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        commentMetaData.isDeleted
+    }
+
+    #[test_only]
+    public fun getPostLanguage(postMetaData: &PostMetaData): u8 {
+        postMetaData.language
+    }
+
+    #[test_only]
+    public fun getReplyLanguage(postMetaData: &PostMetaData, replyMetaDataKey: u64): u8 {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.language
+    }
+
+    #[test_only]
+    public fun getCommentLanguage(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): u8 {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        commentMetaData.language
+    }
+
+    #[test_only]
+    public fun getPostType(postMetaData: &PostMetaData): u8 {
+        postMetaData.postType
+    }
+
+    #[test_only]
+    public fun getBestReplyMetaDataKey(postMetaData: &PostMetaData): u64 {
+        postMetaData.bestReplyMetaDataKey
+    }
+
+    #[test_only]
+    public fun getPostHistoryVotes(postMetaData: &PostMetaData): VecMap<ID, u8> {
+        postMetaData.historyVotes
+    }
+
+    #[test_only]
+    public fun getReplyHistoryVotes(postMetaData: &PostMetaData, replyMetaDataKey: u64): VecMap<ID, u8> {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.historyVotes
+    }
+
+    #[test_only]
+    public fun getCommentHistoryVotes(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): VecMap<ID, u8> {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        commentMetaData.historyVotes
+    }
+
+    #[test_only]
+    public fun getPostData(postMetaData: &PostMetaData, post: &Post): (vector<u8>, ID, u8, ID, i64Lib::I64, ID, u8, u64, u64, u64, bool, vector<u64>, VecMap<ID, u8>) {
+        checkMatchItemId(object::id(post), postMetaData.postId);
+
+        (
+            commonLib::getIpfsHash(post.ipfsDoc),
+            postMetaData.postId,
+            postMetaData.postType,
+            postMetaData.author,
+            postMetaData.rating,
+            postMetaData.communityId,
+            postMetaData.language,
+            postMetaData.officialReplyMetaDataKey,
+            postMetaData.bestReplyMetaDataKey,
+            postMetaData.deletedRepliesCount,
+            postMetaData.isDeleted,
+            postMetaData.tags,
+            postMetaData.historyVotes, 
+        )
+        // todo
+        // replies: Table<u64, ReplyMetaData>,
+        // comments: Table<u64, CommentMetaData>,
+        // properties: VecMap<u8, vector<u8>>,
+    }
+
+    #[test_only]
+    public fun getPostAuthorMetaData(postMetaData: &PostMetaData): (vector<u8>) {
+        postMetaData.authorMetaData
+    }
+
+    #[test_only]
+    public fun getReplyData(postMetaData: &PostMetaData, reply: &Reply, replyMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u64, u8, bool, bool, bool, VecMap<ID, u8>) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        checkMatchItemId(object::id(reply), replyMetaData.replyId);
+
+        (
+            commonLib::getIpfsHash(reply.ipfsDoc),
+            replyMetaData.replyId,
+            replyMetaData.author,
+            replyMetaData.rating,
+            replyMetaData.parentReplyMetaDataKey,
+            replyMetaData.language,
+            replyMetaData.isFirstReply,
+            replyMetaData.isQuickReply,
+            replyMetaData.isDeleted,
+            replyMetaData.historyVotes,
+        )
+        // add
+        // comments: Table<u64, CommentMetaData>,
+        // properties: VecMap<u8, vector<u8>>,
+    }
+
+    #[test_only]
+    public fun getReplyAuthorMetaData(postMetaData: &PostMetaData, replyMetaDataKey: u64): (vector<u8>) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        replyMetaData.authorMetaData
+    }
+
+    #[test_only]
+    public fun getCommentData(postMetaData: &mut PostMetaData, comment: &Comment, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (vector<u8>, ID, ID, i64Lib::I64, u8, bool, VecMap<ID, u8>) {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        checkMatchItemId(object::id(comment), commentMetaData.commentId);
+
+        (
+            commonLib::getIpfsHash(comment.ipfsDoc),
+            commentMetaData.commentId,
+            commentMetaData.author,
+            commentMetaData.rating,
+            commentMetaData.language,
+            commentMetaData.isDeleted,
+            commentMetaData.historyVotes,
+        )
+        // add
+        // properties: VecMap<u8, vector<u8>>,
     }
 }

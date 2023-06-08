@@ -1,8 +1,8 @@
 #[test_only]
-module basics::postLib_best_reply_test
+module peeranha::postLib_best_reply_test
 {
-    use basics::postLib::{Self, PostMetaData};
-    use basics::postLib_test;
+    use peeranha::postLib::{Self, PostMetaData};
+    use peeranha::postLib_test;
     use sui::test_scenario::{Self};
     use sui::clock::{Self};
 
@@ -35,10 +35,9 @@ module basics::postLib_best_reply_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
-            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -46,18 +45,16 @@ module basics::postLib_best_reply_test
             postLib::changeStatusBestReply(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post_meta_data,
                 1,
-                test_scenario::ctx(scenario)
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
             assert!(bestReplyMetaDataKey == 1, 1);
 
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -83,10 +80,9 @@ module basics::postLib_best_reply_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
-            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -94,18 +90,16 @@ module basics::postLib_best_reply_test
             postLib::changeStatusBestReply(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post_meta_data,
                 1,
-                test_scenario::ctx(scenario)
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
             assert!(bestReplyMetaDataKey == 1, 1);
 
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -139,10 +133,9 @@ module basics::postLib_best_reply_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
-            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -150,11 +143,9 @@ module basics::postLib_best_reply_test
             postLib::changeStatusBestReply(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post_meta_data,
                 1,
-                test_scenario::ctx(scenario)
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -163,11 +154,9 @@ module basics::postLib_best_reply_test
             postLib::changeStatusBestReply(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post_meta_data,
                 2,
-                test_scenario::ctx(scenario)
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -175,7 +164,7 @@ module basics::postLib_best_reply_test
 
 
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -201,10 +190,9 @@ module basics::postLib_best_reply_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
-            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -212,11 +200,9 @@ module basics::postLib_best_reply_test
             postLib::changeStatusBestReply(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post_meta_data,
                 1,
-                test_scenario::ctx(scenario)
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -225,11 +211,9 @@ module basics::postLib_best_reply_test
             postLib::changeStatusBestReply(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post_meta_data,
                 1,
-                test_scenario::ctx(scenario)
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -237,7 +221,7 @@ module basics::postLib_best_reply_test
 
 
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -263,10 +247,9 @@ module basics::postLib_best_reply_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
-            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -274,26 +257,23 @@ module basics::postLib_best_reply_test
             postLib::changeStatusBestReply(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 user,
                 post_meta_data,
                 1,
-                test_scenario::ctx(scenario)
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
             assert!(bestReplyMetaDataKey == 1, 0);
 
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
-            let period_reward_container = &mut period_reward_container_val;
             let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
@@ -301,19 +281,17 @@ module basics::postLib_best_reply_test
             postLib::deleteReply(
                 user_rating_collection,
                 user_roles_collection,
-                period_reward_container,
                 &time,
                 user,
                 post_meta_data,
                 1,
-                test_scenario::ctx(scenario)
             ); 
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
             assert!(bestReplyMetaDataKey == 0, 0);
 
             test_scenario::return_shared(post_meta_data_val);
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
         };
 
         clock::destroy_for_testing(time);

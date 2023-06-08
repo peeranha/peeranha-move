@@ -1,8 +1,8 @@
 // Copyright (c) Mysten Labs, Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-module basics::nftLib {
-    use basics::commonLib;
+module peeranha::nftLib {
+    use peeranha::commonLib;
     use sui::url::{Self, Url};
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
@@ -12,8 +12,8 @@ module basics::nftLib {
     use sui::event;
     use sui::transfer;
     use sui::tx_context::{Self, TxContext};
-    friend basics::userLib;
-    friend basics::achievementLib;
+    friend peeranha::userLib;
+    friend peeranha::achievementLib;
 
     // ====== Errors ======
 

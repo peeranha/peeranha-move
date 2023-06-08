@@ -1,14 +1,14 @@
 #[test_only]
-module basics::postLib_bot_test
+module peeranha::postLib_bot_test
 {
-    use basics::postLib::{Self, Post, PostMetaData, Reply};
-    use basics::userLib_test;
-    use basics::communityLib_test;
-    use basics::i64Lib;
-    use basics::communityLib::{Community};
-    use basics::commonLib;
-    use basics::userLib::{Self, User, UsersRatingCollection, PeriodRewardContainer};
-    use basics::accessControlLib::{Self, UserRolesCollection};
+    use peeranha::postLib::{Self, Post, PostMetaData, Reply};
+    use peeranha::userLib_test;
+    use peeranha::communityLib_test;
+    use peeranha::i64Lib;
+    use peeranha::communityLib::{Community};
+    use peeranha::commonLib;
+    use peeranha::userLib::{Self, User, UsersRatingCollection};
+    use peeranha::accessControlLib::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
     use sui::object;
     use sui::clock;
@@ -67,7 +67,7 @@ module basics::postLib_bot_test
                 language,
                 officialReplyMetaDataKey,
                 bestReplyMetaDataKey,
-                deletedReplyCount,
+                deletedRepliesCount,
                 isDeleted,
                 tags,
                 _historyVotes
@@ -82,7 +82,7 @@ module basics::postLib_bot_test
             assert!(language == ENGLISH_LANGUAGE, 13);
             assert!(officialReplyMetaDataKey == 0, 7);
             assert!(bestReplyMetaDataKey == 0, 8);
-            assert!(deletedReplyCount == 0, 9);
+            assert!(deletedRepliesCount == 0, 9);
             assert!(isDeleted == false, 10);
             assert!(tags == vector<u64>[1, 2], 11);
             let authorMetaData = postLib::getPostAuthorMetaData(post_meta_data);
@@ -317,28 +317,25 @@ module basics::postLib_bot_test
     }
 
     #[test_only]
-    public fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, PeriodRewardContainer, User, Community) {
+    public fun init_all_shared(scenario: &mut Scenario): (UsersRatingCollection, UserRolesCollection, User, Community) {
         let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
-        let period_reward_container_val = test_scenario::take_shared<PeriodRewardContainer>(scenario);
         let user_val = test_scenario::take_from_sender<User>(scenario);
         let community_val = test_scenario::take_shared<Community>(scenario);
 
-        (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val)
+        (user_rating_collection_val, user_roles_collection_val, user_val, community_val)
     }
 
     #[test_only]
     public fun return_all_shared(
         user_rating_collection_val: UsersRatingCollection,
         user_roles_collection_val: UserRolesCollection,
-        period_reward_container_val:PeriodRewardContainer,
         user_val: User,
         community_val: Community,
         scenario: &mut Scenario
     ) {
         test_scenario::return_shared(user_rating_collection_val);
         test_scenario::return_shared(user_roles_collection_val);
-        test_scenario::return_shared(period_reward_container_val);
         test_scenario::return_to_sender(scenario, user_val);
         test_scenario::return_shared(community_val);
     }
@@ -358,7 +355,7 @@ module basics::postLib_bot_test
     
     #[test_only]
     public fun create_standart_post_by_bot(time: &clock::Clock, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = init_all_shared(scenario);
         let user_roles_collection = &mut user_roles_collection_val;
         let user = &mut user_val;
         let community = &mut community_val;
@@ -376,15 +373,14 @@ module basics::postLib_bot_test
             test_scenario::ctx(scenario)
         );
 
-        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
     }
 
     #[test_only]
     public fun create_standart_reply_by_bot(time: &clock::Clock, handle: vector<u8>, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val) = init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
-        let period_reward_container = &mut period_reward_container_val;
         let user = &mut user_val;
         let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
         let post_meta_data = &mut post_meta_data_val;
@@ -392,7 +388,6 @@ module basics::postLib_bot_test
         postLib::createReplyByBot(
             user_rating_collection,
             user_roles_collection,
-            period_reward_container,
             time,
             user,
             post_meta_data,
@@ -404,6 +399,6 @@ module basics::postLib_bot_test
         );
 
         test_scenario::return_shared(post_meta_data_val);
-        return_all_shared(user_rating_collection_val, user_roles_collection_val, period_reward_container_val, user_val, community_val, scenario);
+        return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
     }
 }

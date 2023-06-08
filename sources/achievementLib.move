@@ -1,10 +1,10 @@
-module basics::achievementLib {
+module peeranha::achievementLib {
     use sui::object;
-    use basics::accessControlLib;
-    use basics::communityLib;
-    use basics::userLib;
-    use basics::commonLib;
-    use basics::nftLib;
+    use peeranha::accessControlLib;
+    use peeranha::communityLib;
+    use peeranha::userLib;
+    use peeranha::commonLib;
+    use peeranha::nftLib;
     use sui::tx_context::{TxContext};
 
     public entry fun configure_new_nft(

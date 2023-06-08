@@ -1,85 +1,105 @@
-module basics::communityLib {
+module peeranha::communityLib {
     use sui::transfer;
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{TxContext};
     use std::vector;
     use sui::event;
-    // use std::debug;
-    use basics::commonLib;
-    use basics::accessControlLib;
-    use basics::userLib;
-    // friend basics::commonLib;
+    use peeranha::commonLib;
+    use peeranha::accessControlLib;
+    use peeranha::userLib;
     use sui::table::{Self, Table};
+    use sui::vec_map::{Self, VecMap};
 
-    // ====== Errors ======
+    // ====== Errors. Available values 200 - 299 ======
 
-    const E_REQUIRE_AT_LEAST_5_TAGS: u64 = 80;
-    const E_REQUIRE_TAGS_WITH_UNIQUE_NAME: u64 = 81;
-    const E_COMMUNITY_IS_FROZEN: u64 = 82;
-    const E_COMMUNITY_ID_CAN_NOT_BE_0: u64 = 83;
-    const E_COMMUNITY_DOES_NOT_EXIST: u64 = 84;
-    const E_TAG_ID_CAN_NOT_BE_0: u64 = 85;
-    const E_TAG_DOES_NOT_EXIST: u64 = 86;
-    const E_COMMUNITY_IS_NOT_FROZEN: u64 = 87;
+    const E_REQUIRE_AT_LEAST_5_TAGS: u64 = 200;
+    const E_REQUIRE_TAGS_WITH_UNIQUE_NAME: u64 = 201;
+    const E_COMMUNITY_IS_FROZEN: u64 = 202;
+    const E_COMMUNITY_ID_CAN_NOT_BE_0: u64 = 203;
+    const E_COMMUNITY_DOES_NOT_EXIST: u64 = 204;
+    const E_TAG_ID_CAN_NOT_BE_0: u64 = 205;
+    const E_TAG_DOES_NOT_EXIST: u64 = 206;
+    const E_COMMUNITY_IS_NOT_FROZEN: u64 = 207;
 
 
     struct Community has key {
         id: UID,
+        /// `IPFS hash` of document with `community` information
         ipfsDoc: commonLib::IpfsHash,
+        /// `Docomentation` of the `community`
         documentation: commonLib::IpfsHash,
+        /// Frozen status of the `community`
         isFrozen: bool,
+        /// `Tags` for the `community`. Table key - `tag key`.
         tags: Table<u64, Tag>,
+        /// `Properties` for the `community`
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct Tag has key, store {
         id: UID,
+        /// `IPFS hash` of document with `tag` information
         ipfsDoc: commonLib::IpfsHash,
+        /// `Properties` for the `tag`
+        properties: VecMap<u8, vector<u8>>,
     }
 
     // ====== Events ======
 
     struct CreateCommunityEvent has copy, drop {
+        /// The transaction `sender`
         userId: ID,
+        /// The `object ID` of the `community`
         communityId: ID,
     }
 
     struct UpdateCommunityEvent has copy, drop {
+        /// The transaction `sender`
         userId: ID,
+        /// The `object ID` of the `community`
         communityId: ID,
     }
 
-
     struct SetDocumentationTree has copy, drop {
+        /// The transaction `sender`
         userId: ID,
+        /// Set `documentation` for the `community`
         communityId: ID,
     }
 
     struct CreateTagEvent has copy, drop {
+        /// The transaction `sender `
         userId: ID,
+        /// The `tag key` of the new `tag`
         tagKey: u64,
+        /// The `object ID` of the `community`
         communityId: ID,
     }
 
     struct UpdateTagEvent has copy, drop {
+        /// The transaction `sender`
         userId: ID,
+        /// The `tag key` of the updated `tag`
         tagKey: u64,
+        /// The `object ID` of the `community`
         communityId: ID,
     }
 
     struct FreezeCommunityEvent has copy, drop {
+        /// The transaction `sender`
         userId: ID,
+        /// The `object ID` of the frozen community
         communityId: ID,
     }
 
     struct UnfreezeCommunityEvent has copy, drop {
+        /// The transaction `sender`
         userId: ID,
+        /// The `object ID` of the unfrozen `community`
         communityId: ID,
     }
 
-    ///
-    // tags: vector<Tag> -> tags: vector<vector<u8>>.
-    // error "Expected primitive or object type. Got: vector<0x0::communityLib::Tag>"
-    ///
+    /// Create new `community` info record
     public entry fun createCommunity(
         roles: &mut accessControlLib::UserRolesCollection,
         user: &userLib::User,
@@ -110,7 +130,8 @@ module basics::communityLib {
         while(tagId < tagsLength) {
             table::add(&mut communityTags, tagId + 1, Tag {
                 id: object::new(ctx),
-                ipfsDoc: commonLib::getIpfsDoc(*vector::borrow(&tags, tagId), vector::empty<u8>())
+                ipfsDoc: commonLib::getIpfsDoc(*vector::borrow(&tags, tagId), vector::empty<u8>()),
+                properties: vec_map::empty(),
             });
             tagId = tagId + 1;
         };
@@ -121,6 +142,7 @@ module basics::communityLib {
             documentation: commonLib::getIpfsDoc(vector::empty<u8>(), vector::empty<u8>()),
             isFrozen: false,
             tags: communityTags,
+            properties: vec_map::empty(),
         };
 
         let communityId = object::id(&community);
@@ -129,6 +151,7 @@ module basics::communityLib {
         transfer::share_object(community);
     }
 
+    /// Update `community` info record
     public entry fun updateCommunity(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_admin_or_community_admin(), object::id(community));
@@ -138,6 +161,7 @@ module basics::communityLib {
         event::emit(UpdateCommunityEvent {userId: userId, communityId: object::id(community)});
     }
 
+    /// Update `documentation ipfs` tree
     public entry fun updateDocumentationTree(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_community_admin(), object::id(community));
@@ -147,6 +171,7 @@ module basics::communityLib {
         event::emit(SetDocumentationTree {userId: userId, communityId: object::id(community)});
     }
 
+    /// Create new `tag` info record
     public entry fun createTag(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         let userId = object::id(user);
         let communityId = object::id(community);
@@ -163,10 +188,11 @@ module basics::communityLib {
         event::emit(CreateTagEvent {userId: userId, tagKey: tagsCount + 1, communityId: communityId});
         table::add(&mut community.tags, tagsCount + 1, Tag {
             id: object::new(ctx),
-            ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>())
+            ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
+            properties: vec_map::empty(),
         });
     }
-
+    /// Update `tag` info record
     public entry fun updateTag(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, tagId: u64, ipfsHash: vector<u8>) {
         let userId = object::id(user);
         let communityId = object::id(community);
@@ -180,6 +206,7 @@ module basics::communityLib {
         event::emit(UpdateTagEvent {userId: userId, tagKey: tagId, communityId: communityId});
     }
 
+    /// Freeze the `community`
     public entry fun freezeCommunity(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community) {  //Invalid function name 'freeze'. 'freeze' is restricted and cannot be used to name a function
         let userId = object::id(user);
         let communityId = object::id(community);
@@ -190,6 +217,7 @@ module basics::communityLib {
         event::emit(FreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
+    /// Unfreeze the `community`
     public entry fun unfreezeCommunity(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community) {
         let userId = object::id(user);
         let communityId = object::id(community);
@@ -202,6 +230,7 @@ module basics::communityLib {
         event::emit(UnfreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
+    /// Check status of the `community`
     public fun onlyNotFrozenCommunity(community: &Community) {
         assert!(!community.isFrozen, E_COMMUNITY_IS_FROZEN);
     }
@@ -215,6 +244,7 @@ module basics::communityLib {
         };
     }
 
+    /// Get list of mutable `tags` in the `community`
     public fun getMutableTag(community: &mut Community, tagId: u64): &mut Tag {
         assert!(tagId > 0, E_TAG_ID_CAN_NOT_BE_0);
         assert!(table::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);
@@ -222,12 +252,15 @@ module basics::communityLib {
         tag
     }
 
+    /// Get list of `tags` in `community`
     public fun getTag(community: &Community, tagId: u64): &Tag {
         assert!(tagId > 0, E_TAG_ID_CAN_NOT_BE_0);
         assert!(table::length(&community.tags) >= tagId, E_TAG_DOES_NOT_EXIST);
         let tag = table::borrow(&community.tags, tagId);
         tag
     }
+
+    // --- Testing functions ---
 
     #[test_only]
     public fun getCommunityData(community: &Community): (vector<u8>, vector<u8>, bool) {

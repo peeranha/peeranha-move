@@ -1,45 +1,46 @@
-module basics::userLib {
+module peeranha::userLib {
     use sui::transfer;
     use sui::event;
     use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use std::vector;
-    use basics::accessControlLib;
-    use basics::i64Lib;
-    use basics::nftLib;
+    use peeranha::accessControlLib;
+    use peeranha::i64Lib;
+    use peeranha::nftLib;
     use sui::table::{Self, Table};
-    use basics::commonLib;
+    use peeranha::commonLib;
     use sui::vec_map::{Self, VecMap};
     use std::option::{Self};
-    friend basics::followCommunityLib;
+    friend peeranha::followCommunityLib;
+    friend peeranha::postLib;
 
-    // ====== Errors ======
+    // ====== Errors. Available values 1 - 99 ======
 
-    const E_USER_EXIST: u64 = 9;
-    const E_USER_DOES_NOT_EXIST: u64 = 10;
-    const E_USER_NOT_FOUND: u64 = 13;
-    const E_NOT_ALLOWED_DELETE: u64 = 15;
-    const E_NOT_ALLOWED_VOTE_POST: u64 = 16;
-    const E_NOT_ALLOWED_VOTE_REPLY: u64 = 17;
-    const E_NOT_ALLOWED_VOTE_COMMENT: u64 = 18;
-    const E_NOT_ALLOWED_ACTION: u64 = 21;
-    const E_LOW_ENERGY: u64 = 22;
-    const E_MUST_BE_0_RATING: u64 = 23;
-    const E_LOW_RATING_CREATE_POST: u64 = 24;
-    const E_LOW_RATING_CREATE_REPLY: u64 = 25;
-    const E_LOW_RATING_CREATE_COMMENT: u64 = 26;
-    const E_LOW_RATING_EDIT_ITEM: u64 = 27;
-    const E_LOW_RATING_DELETE_ITEM: u64 = 28;
-    const E_LOW_RATING_UPVOTE_POST: u64 = 29;
-    const E_LOW_RATING_UPVOTE_REPLY: u64 = 30;
-    const E_LOW_RATING_VOTE_COMMENT: u64 = 31;
-    const E_LOW_RATING_DOWNVOTE_POST: u64 = 32;
-    const E_LOW_RATING_DOWNVOTE_REPLY: u64 = 33;
-    const E_LOW_RATING_CANCEL_VOTE: u64 = 34;
-    const E_LOW_RATING_MARK_BEST_REPLY: u64 = 35;
-    const E_LOW_RATING_UPDATE_PROFILE: u64 = 36;    // never call
-    const E_LOW_RATING_FOLLOW_COMMUNITY: u64 = 37;  // never call
-    const E_CHECK_FUNCTION_getMutableTotalRewardShare: u64 = 100; // todo
+    const E_USER_EXIST: u64 = 1;
+    const E_USER_DOES_NOT_EXIST: u64 = 2;
+    const E_USER_NOT_FOUND: u64 = 3;
+    const E_NOT_ALLOWED_DELETE: u64 = 4;
+    const E_NOT_ALLOWED_VOTE_POST: u64 = 5;
+    const E_NOT_ALLOWED_VOTE_REPLY: u64 = 6;
+    const E_NOT_ALLOWED_VOTE_COMMENT: u64 = 7;
+    const E_NOT_ALLOWED_ACTION: u64 = 8;
+    const E_LOW_ENERGY: u64 = 9;
+    const E_MUST_BE_0_RATING: u64 = 10;
+    const E_LOW_RATING_CREATE_POST: u64 = 11;
+    const E_LOW_RATING_CREATE_REPLY: u64 = 12;
+    const E_LOW_RATING_CREATE_COMMENT: u64 = 13;
+    const E_LOW_RATING_EDIT_ITEM: u64 = 14;
+    const E_LOW_RATING_DELETE_ITEM: u64 = 15;
+    const E_LOW_RATING_UPVOTE_POST: u64 = 16;
+    const E_LOW_RATING_UPVOTE_REPLY: u64 = 17;
+    const E_LOW_RATING_VOTE_COMMENT: u64 = 18;
+    const E_LOW_RATING_DOWNVOTE_POST: u64 = 19;
+    const E_LOW_RATING_DOWNVOTE_REPLY: u64 = 20;
+    const E_LOW_RATING_CANCEL_VOTE: u64 = 21;
+    const E_LOW_RATING_MARK_BEST_REPLY: u64 = 22;
+    const E_LOW_RATING_UPDATE_PROFILE: u64 = 23;    // never call
+    const E_LOW_RATING_FOLLOW_COMMUNITY: u64 = 24;  // never call
+    const E_CHECK_FUNCTION_getMutableTotalRewardShare: u64 = 99; // todo
 
     // ====== Enum ======
 
@@ -78,70 +79,30 @@ module basics::userLib {
     const CANCEL_VOTE: u64 = 0;
     const UPDATE_PROFILE_ALLOWED: u64 = 0;
 
-    // u8?
-    const ENERGY_DOWNVOTE_QUESTION: u64 = 5;
-    const ENERGY_DOWNVOTE_ANSWER: u64 = 3;
-    const ENERGY_DOWNVOTE_COMMENT: u64 = 2;
-    const ENERGY_UPVOTE_QUESTION: u64 = 1;
-    const ENERGY_UPVOTE_ANSWER: u64 = 1;
-    const ENERGY_VOTE_COMMENT: u64 = 1;
-    const ENERGY_FORUM_VOTE_CANCEL: u64 = 1;
-    const ENERGY_POST_QUESTION: u64 = 10;
-    const ENERGY_POST_ANSWER: u64 = 6;
-    const ENERGY_POST_COMMENT: u64 = 4;
-    const ENERGY_MODIFY_ITEM: u64 = 2;
-    const ENERGY_DELETE_ITEM: u64 = 2;
-
-    const ENERGY_MARK_REPLY_AS_CORRECT: u64 = 1;
-    const ENERGY_UPDATE_PROFILE: u64 = 1;
-    const ENERGY_FOLLOW_COMMUNITY: u64 = 1;
-
     struct UsersRatingCollection has key {
         id: UID,
+        /// All `users` rating in all `communities`. Table key - `user object id`
         usersCommunityRating: Table<ID, UserCommunityRating>,
-        // roles: accessControlLib::Role,
-    }
-
-    struct PeriodRewardContainer has key {   // Container || Collection??
-        id: UID,
-        periodRewardShares: VecMap<u64, PeriodRewardShares>,          // key - period   // VecMap? table/bag
     }
 
     struct User has key {
         id: UID,
+        /// `IPFS hash` of document with `user` information
         ipfsDoc: commonLib::IpfsHash,
-        energy: u64,
-        lastUpdatePeriod: u64,
+        /// Followed `communities` for the `user`
         followedCommunities: vector<ID>,
+        /// `Object rating id` for the `user`
         userRatingId: ID,   // need?
+        /// `Properties` for the `user`
+        properties: VecMap<u8, vector<u8>>,
     }
 
     struct UserCommunityRating has key, store {    // shared
         id: UID,
-        userRating: VecMap<ID, i64Lib::I64>,               // key - communityId         // vecMap??
-        userPeriodRewards: VecMap<u64, UserPeriodRewards>,  // key - period             // vecMap??
-    }
-
-    struct DataUpdateUserRating has drop {
-        ratingToReward: u64,
-        penalty: u64,
-        changeRating: i64Lib::I64,
-        ratingToRewardChange: i64Lib::I64
-    }
-
-    struct UserPeriodRewards has store, drop, copy {
-        periodRating: VecMap<ID, PeriodRating>,          // key - communityId
-    }
-
-    struct PeriodRating has store, drop, copy {
-        ratingToReward: u64,
-        penalty: u64,
-    }
-
-    struct PeriodRewardShares has key, store {
-        id: UID,                                // uid need??
-        totalRewardShares: u64,
-        activeUsersInPeriod: vector<ID>,       // Id ??
+        /// `Community rating` for the `user`. Depends on `object community id`. VecMap key - `communityId`
+        userRating: VecMap<ID, i64Lib::I64>,                // vecMap??
+        /// `Properties` for the `user rating`
+        properties: VecMap<u8, vector<u8>>,
     }
 
     // ====== Events ======
@@ -150,7 +111,7 @@ module basics::userLib {
         userId: ID,
     }
 
-    struct UpdateUserEvent has copy, drop {     // double event
+    struct UpdateUserEvent has copy, drop {
         userId: ID,
     }
 
@@ -158,40 +119,25 @@ module basics::userLib {
         transfer::share_object(UsersRatingCollection {
             id: object::new(ctx),
             usersCommunityRating: table::new(ctx),
-            // roles: accessControlLib::initRole()
-        });
-
-        transfer::share_object(PeriodRewardContainer {
-            id: object::new(ctx),
-            periodRewardShares: vec_map::empty()
         });
     }
 
-    #[test_only]    // call?
-    public fun init_test(ctx: &mut TxContext) {
-        init(ctx)
-    }
-
-    public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsDoc: vector<u8>, ctx: &mut TxContext) {  // add check isExist??
-        createUserPrivate(usersRatingCollection, ipfsDoc, ctx)
-    }
-
-    fun createUserPrivate(usersRatingCollection: &mut UsersRatingCollection, ipfsHash: vector<u8>, ctx: &mut TxContext) {
+    /// Create new `user` info record
+    public entry fun createUser(usersRatingCollection: &mut UsersRatingCollection, ipfsHash: vector<u8>, ctx: &mut TxContext) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
-
         let owner = tx_context::sender(ctx);
+
         let userCommunityRating = UserCommunityRating {
             id: object::new(ctx),
             userRating: vec_map::empty(),
-            userPeriodRewards: vec_map::empty(),
+            properties: vec_map::empty(),
         };
         let user = User {
             id: object::new(ctx),
             ipfsDoc: commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>()),
-            energy: getStatusEnergy(),
-            lastUpdatePeriod: commonLib::getPeriod(),
             followedCommunities: vector::empty<ID>(),
-            userRatingId: object::id(&userCommunityRating)
+            userRatingId: object::id(&userCommunityRating),
+            properties: vec_map::empty(),
         };
 
         table::add(&mut usersRatingCollection.usersCommunityRating, object::id(&user), userCommunityRating);
@@ -201,17 +147,13 @@ module basics::userLib {
         );
     }
 
-    public entry fun updateUser(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsDoc: vector<u8>, ctx: &mut TxContext) {
-        let _userAddress = tx_context::sender(ctx);  // del
-        // createIfDoesNotExist(usersRatingCollection, userAddress);   // add?
-        updateUserPrivate(usersRatingCollection, user, ipfsDoc);
-    }
-
-    fun updateUserPrivate(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsHash: vector<u8>) {
+    /// Update `user` info record
+    public entry fun updateUser(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsHash: vector<u8>) {
+        assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
         let userId = object::id(user);
         let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
 
-        checkRatingAndEnergy(
+        checkRating(
             user,
             userCommunityRating,
             userId,
@@ -223,37 +165,39 @@ module basics::userLib {
         event::emit(UpdateUserEvent {userId: userId});
     }
 
+    /// Grant the `role` for the `user object id`
     public entry fun grantRole(userRolesCollection: &mut accessControlLib::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
         let adminId = object::id(admin);
         accessControlLib::grantRole(userRolesCollection, adminId, userId, role)
     }
 
+    /// Revoke the `role` for the `user object id`
     public entry fun revokeRole(userRolesCollection: &mut accessControlLib::UserRolesCollection, admin: &User, userId: ID, role: vector<u8>) {
         let adminId = object::id(admin);
         accessControlLib::revokeRole(userRolesCollection, adminId, userId, role)
     }
 
+    /// Get user's `folowed communies` by `user object id`
     public(friend) fun getUserFollowedCommunities(user: &User): &vector<ID> {
         &user.followedCommunities
     }
 
+    /// Follow to the `object community id` for `user object id`
     public(friend) fun followCommunity(user: &mut User, communityId: ID) {
         vector::push_back(&mut user.followedCommunities, communityId);
     }
 
+    /// Unfollow from the `object community id` for `user object id`
     public(friend) fun unfollowCommunity(user: &mut User, communityIndex: u64) {
         vector::remove(&mut user.followedCommunities, communityIndex);
     }
 
-    public fun getStatusEnergy(): u64 {
-        1000
-    }
-
     /*plug*/
-    public fun updateRating(userCommunityRating: &mut UserCommunityRating, _periodRewardContainer: &mut PeriodRewardContainer, _userId: ID, rating: i64Lib::I64, communityId: ID, _ctx: &mut TxContext) {
+    /// Update rating for `user object id` in `community object id`
+    public(friend) fun updateRating(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
-        
+
         let position = vec_map::get_idx_opt(&mut userCommunityRating.userRating, &communityId);
         if (option::is_none(&position)) {
             vec_map::insert(&mut userCommunityRating.userRating, communityId, i64Lib::from(START_USER_RATING));
@@ -263,12 +207,12 @@ module basics::userLib {
         *userRating = i64Lib::add(&*userRating, &rating);
 
         if (i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-            let achievementsTypesArray: vector<u8> = vector[nftLib::getAchievementTypeRating(), nftLib::getAchievementTypeSoulRating()];
+            let _achievementsTypesArray: vector<u8> = vector[nftLib::getAchievementTypeRating(), nftLib::getAchievementTypeSoulRating()];
             // nftLib::mint(...);
         }
     }
 
-    // TODO: add UserLib.Action action + add field UserLib.ActionRole actionRole
+    /// Check the `role/rating` of the `user` to perform some action
     public fun checkActionRole(
         user: &mut User,
         userCommunityRating: &UserCommunityRating,
@@ -278,7 +222,6 @@ module basics::userLib {
         communityId: ID,
         action: u8,
         actionRole: u8,
-        //createUserIfDoesNotExist: bool  // new transfer ???
     ) 
     {
         if (hasModeratorRole(userRolesCollection, actionCallerId, communityId)) {
@@ -286,9 +229,10 @@ module basics::userLib {
         };
 
         accessControlLib::checkHasRole(userRolesCollection, actionCallerId, actionRole, communityId);
-        checkRatingAndEnergy(user, userCommunityRating, actionCallerId, dataUserId, communityId, action);
+        checkRating(user, userCommunityRating, actionCallerId, dataUserId, communityId, action);
     }
 
+    /// Check the `role/rating` of the `user` to perform some action
     public fun hasModeratorRole(
         userRolesCollection: &accessControlLib::UserRolesCollection,
         userId: ID,
@@ -303,7 +247,8 @@ module basics::userLib {
         }
     }
 
-    public fun checkRatingAndEnergy(
+    /// Check the `user's rating` with rating what must be for the action
+    public fun checkRating(
         user: &mut User,
         userCommunityRating: &UserCommunityRating,
         actionCaller: ID,
@@ -313,36 +258,32 @@ module basics::userLib {
     ): &mut User
     {
         let userRating = getUserRating(userCommunityRating, communityId);
-            
-        let (ratingAllowed, message, energy) = getRatingAndEnergyForAction(actionCaller, dataUser, action);
+        let (ratingAllowed, message) = getRatingForAction(actionCaller, dataUser, action);
         assert!(i64Lib::compare(&userRating, &ratingAllowed) != i64Lib::getLessThan(), message);
-        reduceEnergy(user, energy);
 
         user
     }
 
-    fun getRatingAndEnergyForAction(
+    /// Get rating what must be for the action
+    /// Return ratingAllowed and message
+    fun getRatingForAction(
         actionCaller: ID,
         dataUser: ID,
         action: u8
-    ): (i64Lib::I64, u64, u64) { // ratingAllowed, message, energy
+    ): (i64Lib::I64, u64) {
         let ratingAllowed: i64Lib::I64 = i64Lib::neg_from(MINIMUM_RATING);
         let message: u64;
-        let energy: u64;
 
         if (action == ACTION_NONE) {
             ratingAllowed = i64Lib::zero();
             message = E_MUST_BE_0_RATING;
-            energy = 0;
         } else if (action == ACTION_PUBLICATION_POST) {
             ratingAllowed = i64Lib::from(POST_QUESTION_ALLOWED);
             message = E_LOW_RATING_CREATE_POST; 
-            energy = ENERGY_POST_QUESTION;
 
         } else if (action == ACTION_PUBLICATION_REPLY) {
             ratingAllowed = i64Lib::from(POST_REPLY_ALLOWED);
             message = E_LOW_RATING_CREATE_REPLY;
-            energy = ENERGY_POST_ANSWER;
 
         } else if (action == ACTION_PUBLICATION_COMMENT) {
             if (actionCaller == dataUser) {
@@ -351,96 +292,61 @@ module basics::userLib {
                 ratingAllowed = i64Lib::from(POST_COMMENT_ALLOWED);
             };
             message = E_LOW_RATING_CREATE_COMMENT;
-            energy = ENERGY_POST_COMMENT;
 
         } else if (action == ACTION_EDIT_ITEM) {
             ratingAllowed = i64Lib::neg_from(MINIMUM_RATING);
             message = E_LOW_RATING_EDIT_ITEM;
-            energy = ENERGY_MODIFY_ITEM;
 
         } else if (action == ACTION_DELETE_ITEM) {
             assert!(actionCaller == dataUser, E_NOT_ALLOWED_DELETE);
             ratingAllowed = i64Lib::zero();
             message = E_LOW_RATING_DELETE_ITEM; // delete own item?
-            energy = ENERGY_DELETE_ITEM;
 
         } else if (action == ACTION_UPVOTE_POST) {
             assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_POST);
             ratingAllowed = i64Lib::from(UPVOTE_POST_ALLOWED);
             message = E_LOW_RATING_UPVOTE_POST;
-            energy = ENERGY_UPVOTE_QUESTION;
 
         } else if (action == ACTION_UPVOTE_REPLY) {
             assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_REPLY);
             ratingAllowed = i64Lib::from(UPVOTE_REPLY_ALLOWED);
             message = E_LOW_RATING_UPVOTE_REPLY;
-            energy = ENERGY_UPVOTE_ANSWER;
 
         } else if (action == ACTION_VOTE_COMMENT) {
             assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_COMMENT);
             ratingAllowed = i64Lib::from(VOTE_COMMENT_ALLOWED);
             message = E_LOW_RATING_VOTE_COMMENT;
-            energy = ENERGY_VOTE_COMMENT;
 
         } else if (action == ACTION_DOWNVOTE_POST) {
             assert!(actionCaller != dataUser, E_NOT_ALLOWED_VOTE_POST);     // NEED?
             ratingAllowed = i64Lib::from(DOWNVOTE_POST_ALLOWED);
             message = E_LOW_RATING_DOWNVOTE_POST;
-            energy = ENERGY_DOWNVOTE_QUESTION;
 
         } else if (action == ACTION_DOWNVOTE_REPLY) {
             assert!(actionCaller != dataUser, DOWNVOTE_REPLY_ALLOWED);      // NEED?
             ratingAllowed = i64Lib::from(DOWNVOTE_REPLY_ALLOWED);
             message = E_LOW_RATING_DOWNVOTE_REPLY;
-            energy = ENERGY_DOWNVOTE_ANSWER;
 
         } else if (action == ACTION_CANCEL_VOTE) {
             ratingAllowed = i64Lib::from(CANCEL_VOTE);
             message = E_LOW_RATING_CANCEL_VOTE;
-            energy = ENERGY_FORUM_VOTE_CANCEL;
 
         } else if (action == ACTION_BEST_REPLY) {       // test neg rating?
             message = E_LOW_RATING_MARK_BEST_REPLY;
-            energy = ENERGY_MARK_REPLY_AS_CORRECT;
 
         } else if (action == ACTION_UPDATE_PROFILE) {
-            energy = ENERGY_UPDATE_PROFILE;
             message = E_LOW_RATING_UPDATE_PROFILE;
 
         } else if (action == ACTION_FOLLOW_COMMUNITY) {
             message = E_LOW_RATING_FOLLOW_COMMUNITY;
-            energy = ENERGY_FOLLOW_COMMUNITY;
 
         } else {
             abort E_NOT_ALLOWED_ACTION
         };
-        (ratingAllowed, message, energy)
+        (ratingAllowed, message)
     }
 
-    fun reduceEnergy(user: &mut User, energy: u64) {
-        let currentPeriod: u64 = commonLib::getPeriod();
-        let periodsHavePassed: u64 = currentPeriod - user.lastUpdatePeriod;
-
-        let userEnergy: u64;
-        if (periodsHavePassed == 0) {
-            userEnergy = user.energy;
-        } else {
-            userEnergy = getStatusEnergy();
-            user.lastUpdatePeriod = currentPeriod;
-        };
-
-        assert!(userEnergy >= energy, E_LOW_ENERGY);
-        user.energy = userEnergy - energy;
-    }
-
-    fun getMutableTotalRewardShares(periodRewardContainer: &mut PeriodRewardContainer, period: u64): &mut PeriodRewardShares {
-        if (vec_map::contains(&periodRewardContainer.periodRewardShares, &period)) {
-            vec_map::get_mut(&mut periodRewardContainer.periodRewardShares, &period)
-        } else {
-            abort E_CHECK_FUNCTION_getMutableTotalRewardShare   // TODO: add del
-        }
-    }
-
+    /// Get the `user's rating`
     public fun getUserRating(userCommunityRating: &UserCommunityRating, communityId: ID): i64Lib::I64 {   // public?  + user &mut?
         let position = vec_map::get_idx_opt(&userCommunityRating.userRating, &communityId);
         if (option::is_none(&position)) {
@@ -450,21 +356,17 @@ module basics::userLib {
         }
     }
 
-    fun getRatingToRewardChange(previosRatingToReward: i64Lib::I64, newRatingToReward: i64Lib::I64): i64Lib::I64 {
-        if (i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) != i64Lib::getLessThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) != i64Lib::getLessThan()) i64Lib::sub(&newRatingToReward, &previosRatingToReward)     // previosRatingToReward >= 0 && newRatingToReward >= 0
-        else if(i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) == i64Lib::getGreaterThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) == i64Lib::getLessThan()) i64Lib::mul(&previosRatingToReward, &i64Lib::neg_from(1))     // previosRatingToReward > 0 && newRatingToReward < 0
-        else if(i64Lib::compare(&previosRatingToReward, &i64Lib::zero()) == i64Lib::getLessThan() && i64Lib::compare(&newRatingToReward, &i64Lib::zero()) == i64Lib::getGreaterThan()) newRatingToReward   // previosRatingToReward < 0 && newRatingToReward > 0
-        else i64Lib::zero() // from negative to negative
-    }
-
+    /// Get the `user's rating objectId`
     public fun getUserRatingId(user: &User): ID {
         user.userRatingId
     }
 
+    /// Get the `user's community rating`
     public fun getUserCommunityRating(usersRatingCollection: &UsersRatingCollection, userId: ID): &UserCommunityRating {
         table::borrow(&usersRatingCollection.usersCommunityRating, userId)
     }
 
+    /// Get the mutable `user's community rating`
     public fun getMutableUserCommunityRating(usersRatingCollection: &mut UsersRatingCollection, userId: ID): &mut UserCommunityRating {
         table::borrow_mut(&mut usersRatingCollection.usersCommunityRating, userId)
     }
@@ -525,12 +427,23 @@ module basics::userLib {
         ACTION_FOLLOW_COMMUNITY
     }
 
-    #[test_only]
-    public fun getUserData(user: &mut User): (vector<u8>, u64, u64, vector<ID>) {
-        (commonLib::getIpfsHash(user.ipfsDoc), user.energy, user.lastUpdatePeriod, user.followedCommunities)
+    // --- Testing functions ---
+
+    #[test_only]    // call?
+    public fun init_test(ctx: &mut TxContext) {
+        init(ctx)
     }
-    
-    
+
+    #[test_only]
+    public fun updateRating_test(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
+        updateRating(userCommunityRating, rating, communityId);
+    }
+
+    #[test_only]
+    public fun getUserData(user: &mut User): (vector<u8>, vector<ID>) {
+        (commonLib::getIpfsHash(user.ipfsDoc), user.followedCommunities)
+    }
+
     #[test_only]
     public fun create_user(usersRatingCollection: &mut UsersRatingCollection, scenario: &mut TxContext) {
         createUser(usersRatingCollection, x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", scenario);
