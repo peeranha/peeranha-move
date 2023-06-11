@@ -194,7 +194,7 @@ module peeranha::userLib {
 
     /*plug*/
     /// Update rating for `user object id` in `community object id`
-    public(friend) fun updateRating(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
+    public(friend) fun updateRating(userCommunityRating: &mut UserCommunityRating, _achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
 
@@ -429,14 +429,14 @@ module peeranha::userLib {
 
     // --- Testing functions ---
 
-    #[test_only]    // call?
+    #[test_only]
     public fun init_test(ctx: &mut TxContext) {
         init(ctx)
     }
 
     #[test_only]
-    public fun updateRating_test(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
-        updateRating(userCommunityRating, rating, communityId);
+    public fun updateRating_test(userCommunityRating: &mut UserCommunityRating, achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID) {
+        updateRating(userCommunityRating, achievementCollection, rating, communityId);
     }
 
     #[test_only]

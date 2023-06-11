@@ -6,10 +6,11 @@ module peeranha::postLib_change_post_type_test
     use peeranha::communityLib_test;
     use peeranha::postLib_test;
     use peeranha::userLib::{Self, UsersRatingCollection, User};
+    use peeranha::nftLib::{Self, AchievementCollection};
     use peeranha::communityLib::{Community};
     use peeranha::accessControlLib::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
-    use sui::clock::{Self};
+    use sui::clock;
 
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
@@ -484,6 +485,7 @@ module peeranha::postLib_change_post_type_test
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
+            nftLib::init_test(test_scenario::ctx(scenario));
             accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
@@ -522,7 +524,7 @@ module peeranha::postLib_change_post_type_test
        
     #[test_only]
     public fun create_post(time: &clock::Clock, postType: u8, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let user = &mut user_val;
@@ -541,19 +543,21 @@ module peeranha::postLib_change_post_type_test
             test_scenario::ctx(scenario)
         );
 
-        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
     }
 
     #[test_only]
     public fun create_reply(postMetadata: &mut PostMetaData, time: &clock::Clock, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
+        let achievement_collection = &mut achievement_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let user = &mut user_val;
         
         postLib::createReply(
             user_rating_collection,
             user_roles_collection,
+            achievement_collection,
             time,
             user,
             postMetadata,
@@ -564,32 +568,35 @@ module peeranha::postLib_change_post_type_test
             test_scenario::ctx(scenario)
         );
 
-        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
     }
 
     #[test_only]
     public fun delete_reply(postMetadata: &mut PostMetaData, replyMetaDataKey: u64, time: &clock::Clock, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
+        let achievement_collection = &mut achievement_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let user = &mut user_val;
 
         postLib::deleteReply(
             user_rating_collection,
             user_roles_collection,
+            achievement_collection,
             time,
             user,
             postMetadata,
             replyMetaDataKey,
         );
 
-        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
     }
 
     #[test_only]
     public fun change_post_type(post_meta_data: &mut PostMetaData, postType: u8, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
+        let achievement_collection = &mut achievement_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let user = &mut user_val;
         let community = &mut community_val;
@@ -599,6 +606,7 @@ module peeranha::postLib_change_post_type_test
         postLib::authorEditPost(
             user_rating_collection,
             user_roles_collection,
+            achievement_collection,
             user,
             post,
             post_meta_data,
@@ -610,13 +618,14 @@ module peeranha::postLib_change_post_type_test
         );
 
         test_scenario::return_to_sender(scenario, post_val);
-        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
     }
 
     #[test_only]
     public fun change_post_type_all_params(
         user_rating_collection: &mut UsersRatingCollection,
         user_roles_collection: &mut UserRolesCollection,
+        achievement_collection: &mut AchievementCollection,
         user: &mut User,
         post_meta_data: &mut PostMetaData,
         community: &mut Community,
@@ -645,6 +654,7 @@ module peeranha::postLib_change_post_type_test
         postLib::authorEditPost(
             user_rating_collection,
             user_roles_collection,
+            achievement_collection,
             user,
             post,
             post_meta_data,

@@ -3,8 +3,8 @@ module peeranha::postLib_first_quick_reply_test
 {
     use peeranha::postLib::{Self, PostMetaData, Reply};
     use peeranha::postLib_change_post_type_test;
-    use sui::test_scenario::{Self};
-    use sui::clock::{Self};
+    use sui::test_scenario;
+    use sui::clock;
 
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;

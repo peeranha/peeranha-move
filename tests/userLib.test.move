@@ -3,7 +3,7 @@ module peeranha::userLib_test
 {
     use peeranha::communityLib::{Self, Community};
     use peeranha::userLib::{Self, User, UsersRatingCollection};
-    use peeranha::followCommunityLib::{Self};
+    use peeranha::followCommunityLib;
     use peeranha::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
     use sui::test_scenario::{Self, Scenario};
     use sui::object::{Self, ID};

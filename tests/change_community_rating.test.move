@@ -2,13 +2,14 @@
 module peeranha::postLib_change_community_rating_test
 {
     use peeranha::postLib::{Self, PostMetaData};
+    use peeranha::nftLib::{AchievementCollection};
     use peeranha::postLib_votes_test;
     use peeranha::postLib_votes_rating_test;
     use peeranha::postLib_change_community_test;
     use peeranha::postLib_change_post_type_test;
     use sui::test_scenario::{Self};
     use peeranha::i64Lib;
-    use sui::clock::{Self};
+    use sui::clock;
 
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
@@ -1940,7 +1941,8 @@ module peeranha::postLib_change_community_rating_test
         test_scenario::next_tx(scenario, USER1);
         {
             let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val) = postLib_change_community_test::init_all_shared(scenario);
-            let user_rating_collection = &mut user_rating_collection_val;
+            let achievement_collection_val = test_scenario::take_shared<AchievementCollection>(scenario);
+            let achievement_collection = &mut achievement_collection_val;let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
@@ -1949,12 +1951,14 @@ module peeranha::postLib_change_community_rating_test
             postLib::changeStatusBestReply(
                 user_rating_collection,
                 user_roles_collection,
+                achievement_collection,
                 user,
                 post_meta_data,
                 1,
             );
 
             test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_shared(achievement_collection_val);
             postLib_change_community_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val,  community_val, community2_val, scenario);
         };
 
@@ -2009,7 +2013,8 @@ module peeranha::postLib_change_community_rating_test
         test_scenario::next_tx(scenario, USER1);
         {
             let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val) = postLib_change_community_test::init_all_shared(scenario);
-            let user_rating_collection = &mut user_rating_collection_val;
+            let achievement_collection_val = test_scenario::take_shared<AchievementCollection>(scenario);
+            let achievement_collection = &mut achievement_collection_val;let user_rating_collection = &mut user_rating_collection_val;
             let user_roles_collection = &mut user_roles_collection_val;
             let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
@@ -2018,12 +2023,14 @@ module peeranha::postLib_change_community_rating_test
             postLib::changeStatusBestReply(
                 user_rating_collection,
                 user_roles_collection,
+                achievement_collection,
                 user,
                 post_meta_data,
                 1,
             );
 
             test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_shared(achievement_collection_val);
             postLib_change_community_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val,  community_val, community2_val, scenario);
         };
 

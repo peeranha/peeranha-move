@@ -1,7 +1,7 @@
 #[test_only]
 module peeranha::postLib_votes_rating_test
 {
-    use sui::object::{Self};
+    use sui::object;
     use peeranha::postLib::{Self, PostMetaData};
     use peeranha::postLib_test;
     use peeranha::postLib_change_post_type_test;
@@ -9,7 +9,7 @@ module peeranha::postLib_votes_rating_test
     use peeranha::userLib::{Self, User, UsersRatingCollection};
     use peeranha::communityLib::{Community};
     use sui::test_scenario::{Self, Scenario};
-    use sui::clock::{Self};
+    use sui::clock;
     use peeranha::i64Lib;
 
     const EXPERT_POST: u8 = 0;
@@ -71,7 +71,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -81,7 +81,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -107,7 +107,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -117,7 +117,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -143,7 +143,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -153,7 +153,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -179,7 +179,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -189,12 +189,12 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -204,7 +204,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -230,7 +230,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -240,12 +240,12 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -255,7 +255,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -281,7 +281,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -291,12 +291,12 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -306,7 +306,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 1);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -340,7 +340,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -350,7 +350,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -384,7 +384,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -394,7 +394,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -428,7 +428,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -438,7 +438,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -472,7 +472,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -482,7 +482,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -516,7 +516,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -526,7 +526,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -560,7 +560,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -570,7 +570,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -604,7 +604,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -614,7 +614,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == &votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -648,7 +648,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -658,7 +658,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == &votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -692,7 +692,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -702,7 +702,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -736,7 +736,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -746,7 +746,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -780,7 +780,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -790,12 +790,12 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -805,7 +805,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -839,7 +839,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -849,12 +849,12 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -864,7 +864,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVoteUserRating == voteUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -906,7 +906,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -916,7 +916,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -958,7 +958,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -968,7 +968,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1010,7 +1010,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1020,7 +1020,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1062,7 +1062,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1072,7 +1072,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1114,7 +1114,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1124,7 +1124,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == &votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1166,7 +1166,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1176,7 +1176,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == &votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1210,7 +1210,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1220,7 +1220,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1254,7 +1254,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1264,7 +1264,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1298,7 +1298,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1308,7 +1308,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1342,7 +1342,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1352,7 +1352,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1394,7 +1394,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1404,7 +1404,7 @@ module peeranha::postLib_votes_rating_test
 
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1446,7 +1446,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1456,7 +1456,7 @@ module peeranha::postLib_votes_rating_test
 
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1498,7 +1498,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1508,7 +1508,7 @@ module peeranha::postLib_votes_rating_test
 
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1550,7 +1550,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1560,7 +1560,7 @@ module peeranha::postLib_votes_rating_test
 
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1602,7 +1602,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1612,7 +1612,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1662,7 +1662,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1672,7 +1672,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1722,7 +1722,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1732,7 +1732,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1782,7 +1782,7 @@ module peeranha::postLib_votes_rating_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user_rating_collection = &mut user_rating_collection_val;
             let community = &mut community_val;
             let user = &mut user_val;
@@ -1792,7 +1792,7 @@ module peeranha::postLib_votes_rating_test
             
             assert!(expectedVotedUserRating == votedUserRating, 0);
 
-            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1803,20 +1803,22 @@ module peeranha::postLib_votes_rating_test
 
     #[test_only]
     public fun delete_post(postMetadata: &mut PostMetaData, time: &clock::Clock, scenario: &mut Scenario) {
-        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val) = postLib_test::init_all_shared(scenario);
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
         let user_rating_collection = &mut user_rating_collection_val;
+        let achievement_collection = &mut achievement_collection_val;
         let user_roles_collection = &mut user_roles_collection_val;
         let user = &mut user_val;
 
         postLib::deletePost(
             user_rating_collection,
             user_roles_collection,
+            achievement_collection,
             time,
             user,
             postMetadata,
         );
 
-        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, scenario);
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
     }
 
     #[test_only]

@@ -233,4 +233,11 @@ module peeranha::nftLib {
     public fun getAchievementTypeSoulRating(): (u8) {
         ACHIEVEMENT_TYPE_SOUL_RATING
     }
+
+    // --- Testing functions ---
+
+    #[test_only]
+    public fun init_test(ctx: &mut TxContext) {
+        init(ctx)
+    }
 }
