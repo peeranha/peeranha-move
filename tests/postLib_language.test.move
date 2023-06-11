@@ -163,6 +163,7 @@ module peeranha::postLib_language_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 CHINESE_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
             
             assert!(postLib::getPostLanguage(post_meta_data) == CHINESE_LANGUAGE, 1);
@@ -210,6 +211,7 @@ module peeranha::postLib_language_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 VIETNAMESE_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             assert!(postLib::getPostLanguage(post_meta_data) == VIETNAMESE_LANGUAGE, 1);
@@ -257,6 +259,7 @@ module peeranha::postLib_language_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 INVALID_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);

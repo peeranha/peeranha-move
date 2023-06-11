@@ -1955,6 +1955,7 @@ module peeranha::postLib_change_community_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2027,6 +2028,7 @@ module peeranha::postLib_change_community_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);

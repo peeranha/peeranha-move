@@ -587,6 +587,7 @@ module peeranha::postLib_change_post_type_test
             user,
             postMetadata,
             replyMetaDataKey,
+            test_scenario::ctx(scenario),
         );
 
         postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -615,6 +616,7 @@ module peeranha::postLib_change_post_type_test
             postType,
             vector<u64>[2, 3],
             ENGLISH_LANGUAGE,
+            test_scenario::ctx(scenario),
         );
 
         test_scenario::return_to_sender(scenario, post_val);
@@ -663,6 +665,7 @@ module peeranha::postLib_change_post_type_test
             postType,
             tags,
             language,
+            test_scenario::ctx(scenario),
         );
 
         test_scenario::return_to_sender(scenario, post_val);

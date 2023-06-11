@@ -92,6 +92,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let expectedPostAuthorIdRating = i64Lib::from(START_USER_RATING + ACCEPT_EXPERT_REPLY);
@@ -156,6 +157,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let expectedPostAuthorIdRating = i64Lib::from(START_USER_RATING + ACCEPT_COMMON_REPLY);
@@ -214,6 +216,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let expectedAuthorIdRating = i64Lib::from(0);
@@ -264,6 +267,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
             postLib::changeStatusBestReply(
                 user_rating_collection,
@@ -272,6 +276,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let expectedAuthorIdRating = i64Lib::from(0);
@@ -342,6 +347,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
             postLib::changeStatusBestReply(
                 user_rating_collection,
@@ -350,6 +356,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 2,
+                test_scenario::ctx(scenario),
             );
 
             let expectedPostAuthorIdRating = i64Lib::from(START_USER_RATING + ACCEPT_EXPERT_REPLY);
@@ -437,6 +444,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
             postLib::changeStatusBestReply(
                 user_rating_collection,
@@ -445,6 +453,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 2,
+                test_scenario::ctx(scenario),
             );
 
             let expectedPostAuthorIdRating = i64Lib::from(START_USER_RATING + ACCEPT_COMMON_REPLY);
@@ -526,6 +535,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let oldExpectedPostAuthorIdRating = i64Lib::from(0);
@@ -543,6 +553,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 2,
+                test_scenario::ctx(scenario),
             );
 
             let expectedPostAuthorIdRating = i64Lib::from(START_USER_RATING + ACCEPT_COMMON_REPLY);
@@ -616,6 +627,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 2,
+                test_scenario::ctx(scenario),
             );
 
             let oldExpectedPostAuthorIdRating = i64Lib::from(START_USER_RATING + ACCEPT_COMMON_REPLY);
@@ -633,6 +645,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let expectedPostAuthorIdRating = i64Lib::from(START_USER_RATING);
@@ -698,6 +711,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
             postLib::changeStatusBestReply(
                 user_rating_collection,
@@ -706,6 +720,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let expectedPostAuthorIdRating = i64Lib::from(START_USER_RATING);
@@ -770,6 +785,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
             postLib::changeStatusBestReply(
                 user_rating_collection,
@@ -778,6 +794,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let expectedPostAuthorIdRating = i64Lib::from(START_USER_RATING);
@@ -841,6 +858,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -865,6 +883,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -939,6 +958,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -963,6 +983,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1037,6 +1058,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1060,6 +1082,7 @@ module peeranha::postLib_best_reply_rating_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1134,6 +1157,7 @@ module peeranha::postLib_best_reply_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1157,6 +1181,7 @@ module peeranha::postLib_best_reply_rating_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);

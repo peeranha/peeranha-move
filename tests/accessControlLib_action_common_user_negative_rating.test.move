@@ -130,6 +130,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 1,
                 vector<u64>[2, 3],
                 1,
+                test_scenario::ctx(scenario),
             );
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
@@ -180,6 +181,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 1,
                 vector<u64>[2, 3],
                 1,
+                test_scenario::ctx(scenario),
             );
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -225,6 +227,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -270,6 +273,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -490,6 +494,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -618,6 +623,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -669,6 +675,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -721,6 +728,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -773,6 +781,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -1007,6 +1016,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 post_meta_data,
                 0,
                 1,
+                 test_scenario::ctx(scenario),
             );
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -1063,6 +1073,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
                 post_meta_data,
                 1,
                 1,
+                test_scenario::ctx(scenario),
             );
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -1684,6 +1695,7 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
             achievement_collection,
             if(isPositive) i64Lib::from(changeRating) else i64Lib::neg_from(changeRating),
             object::id(community),
+            test_scenario::ctx(scenario),
         );
 
         postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);

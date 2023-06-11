@@ -529,6 +529,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -602,6 +603,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -654,6 +656,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -707,6 +710,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -753,6 +757,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -805,6 +810,7 @@ module peeranha::postLib_exception_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -874,6 +880,7 @@ module peeranha::postLib_exception_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -914,6 +921,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
             
             postLib::authorEditPost(
@@ -928,6 +936,7 @@ module peeranha::postLib_exception_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -973,6 +982,7 @@ module peeranha::postLib_exception_test
                 EXPERT_POST,
                 vector<u64>[2, 8],
                 ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1018,6 +1028,7 @@ module peeranha::postLib_exception_test
                 EXPERT_POST,
                 vector<u64>[2, 0],
                 ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1114,6 +1125,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
             
             postLib::authorEditReply(
@@ -1230,6 +1242,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
             
             postLib::editComment(
@@ -1297,6 +1310,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             postLib::editComment(
@@ -1365,6 +1379,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             ); 
             
             postLib::editComment(
@@ -1531,6 +1546,7 @@ module peeranha::postLib_exception_test
                 post_meta_data,
                 0,
                 1,
+                 test_scenario::ctx(scenario),
             );
             
             postLib::editComment(
@@ -1599,6 +1615,7 @@ module peeranha::postLib_exception_test
                 post_meta_data,
                 1,
                 1,
+                test_scenario::ctx(scenario),
             );
             
             postLib::editComment(
@@ -1705,6 +1722,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             postLib::deletePost(
@@ -1714,6 +1732,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1759,6 +1778,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
 
             postLib::deleteReply(
@@ -1769,6 +1789,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             ); 
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1813,6 +1834,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             postLib::deleteReply(
@@ -1823,6 +1845,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1868,6 +1891,7 @@ module peeranha::postLib_exception_test
                 post_meta_data,
                 0,
                 1,
+                 test_scenario::ctx(scenario),
             );
             
             postLib::deleteComment(
@@ -1878,6 +1902,7 @@ module peeranha::postLib_exception_test
                 post_meta_data,
                 0,
                 1,
+                 test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1922,6 +1947,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
             
             postLib::deleteComment(
@@ -1932,6 +1958,7 @@ module peeranha::postLib_exception_test
                 post_meta_data,
                 0,
                 1,
+                 test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1984,6 +2011,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             postLib::deleteComment(
@@ -1994,6 +2022,7 @@ module peeranha::postLib_exception_test
                 post_meta_data,
                 1,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2047,6 +2076,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             ); 
             
             postLib::deleteComment(
@@ -2057,6 +2087,7 @@ module peeranha::postLib_exception_test
                 post_meta_data,
                 1,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2101,6 +2132,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             postLib::changeStatusBestReply(
@@ -2110,6 +2142,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2146,6 +2179,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2191,6 +2225,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             ); 
 
             postLib::changeStatusBestReply(
@@ -2200,6 +2235,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2244,6 +2280,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2295,6 +2332,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2319,6 +2357,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2342,6 +2381,7 @@ module peeranha::postLib_exception_test
                 user,
                 post_meta_data,
                 2,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2378,6 +2418,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -2451,6 +2492,7 @@ module peeranha::postLib_exception_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);

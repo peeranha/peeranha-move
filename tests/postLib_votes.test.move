@@ -328,6 +328,7 @@ module peeranha::postLib_votes_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -374,6 +375,7 @@ module peeranha::postLib_votes_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             test_scenario::return_shared(post_meta_data_val);
@@ -1029,6 +1031,7 @@ module peeranha::postLib_votes_test
             user,
             postMetadata,
             isUpvote,
+            test_scenario::ctx(scenario),
         );
 
         postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val,  user_val, community_val, achievement_collection_val, scenario);
@@ -1050,6 +1053,7 @@ module peeranha::postLib_votes_test
             postMetadata,
             replyMetaDataKey,
             isUpvote,
+            test_scenario::ctx(scenario),
         );
 
         postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val,  user_val, community_val, achievement_collection_val, scenario);

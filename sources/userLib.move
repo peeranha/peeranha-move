@@ -194,7 +194,7 @@ module peeranha::userLib {
 
     /*plug*/
     /// Update rating for `user object id` in `community object id`
-    public(friend) fun updateRating(userCommunityRating: &mut UserCommunityRating, _achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID) {
+    public(friend) fun updateRating(userCommunityRating: &mut UserCommunityRating, achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
 
@@ -206,9 +206,11 @@ module peeranha::userLib {
         let userRating = vec_map::get_mut(&mut userCommunityRating.userRating, &communityId);
         *userRating = i64Lib::add(&*userRating, &rating);
 
-        if (i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getGreaterThan()) {
-            let _achievementsTypesArray: vector<u8> = vector[nftLib::getAchievementTypeRating(), nftLib::getAchievementTypeSoulRating()];
-            // nftLib::mint(...);
+        let isGrovedRating = i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getGreaterThan();
+        let isPositiveRating = i64Lib::compare(userRating, &i64Lib::zero()) == i64Lib::getGreaterThan();
+        if (isGrovedRating && isPositiveRating) {
+            let achievementsTypesArray: vector<u8> = vector[nftLib::getAchievementTypeRating(), nftLib::getAchievementTypeSoulRating()];
+            nftLib::mint(achievementCollection, i64Lib::as_u64(userRating), communityId, achievementsTypesArray, ctx);
         }
     }
 
@@ -435,8 +437,8 @@ module peeranha::userLib {
     }
 
     #[test_only]
-    public fun updateRating_test(userCommunityRating: &mut UserCommunityRating, achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID) {
-        updateRating(userCommunityRating, achievementCollection, rating, communityId);
+    public fun updateRating_test(userCommunityRating: &mut UserCommunityRating, achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext,) {
+        updateRating(userCommunityRating, achievementCollection, rating, communityId, ctx);
     }
 
     #[test_only]

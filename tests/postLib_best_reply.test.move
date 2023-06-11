@@ -50,6 +50,7 @@ module peeranha::postLib_best_reply_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -97,6 +98,7 @@ module peeranha::postLib_best_reply_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -152,6 +154,7 @@ module peeranha::postLib_best_reply_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -164,6 +167,7 @@ module peeranha::postLib_best_reply_test
                 user,
                 post_meta_data,
                 2,
+                test_scenario::ctx(scenario),
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -212,6 +216,7 @@ module peeranha::postLib_best_reply_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -224,6 +229,7 @@ module peeranha::postLib_best_reply_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -272,6 +278,7 @@ module peeranha::postLib_best_reply_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);
@@ -299,6 +306,7 @@ module peeranha::postLib_best_reply_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             ); 
 
             let bestReplyMetaDataKey = postLib::getBestReplyMetaDataKey(post_meta_data);

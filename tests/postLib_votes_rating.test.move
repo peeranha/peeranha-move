@@ -1816,6 +1816,7 @@ module peeranha::postLib_votes_rating_test
             time,
             user,
             postMetadata,
+            test_scenario::ctx(scenario),
         );
 
         postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);

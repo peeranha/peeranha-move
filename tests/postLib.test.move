@@ -357,6 +357,7 @@ module peeranha::postLib_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             let (
@@ -431,6 +432,7 @@ module peeranha::postLib_test
                 EXPERT_POST,
                 vector<u64>[],
                 ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             let (
@@ -703,6 +705,7 @@ module peeranha::postLib_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             let (
@@ -776,6 +779,7 @@ module peeranha::postLib_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
 
             let (
@@ -844,7 +848,8 @@ module peeranha::postLib_test
                 user,
                 post_meta_data,
                 1,
-            ); 
+                test_scenario::ctx(scenario)
+            );
 
             let (
                 _ipfsDoc,
@@ -925,6 +930,7 @@ module peeranha::postLib_test
                 post_meta_data,
                 0,
                 1,
+                 test_scenario::ctx(scenario),
             );
 
             let (
@@ -993,6 +999,7 @@ module peeranha::postLib_test
                 post_meta_data,
                 1,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             let (
@@ -1102,6 +1109,7 @@ module peeranha::postLib_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             postLib::authorEditPost(
@@ -1116,6 +1124,7 @@ module peeranha::postLib_test
                 EXPERT_POST,
                 vector<u64>[2, 3],
                 ENGLISH_LANGUAGE,
+                test_scenario::ctx(scenario),
             );
 
             let (
@@ -1162,6 +1171,7 @@ module peeranha::postLib_test
                 &time,
                 user,
                 post_meta_data,
+                test_scenario::ctx(scenario),
             );
             postLib::deletePost(
                 user_rating_collection,
@@ -1170,6 +1180,7 @@ module peeranha::postLib_test
                 &time,
                 user,
                 post_meta_data2,
+                test_scenario::ctx(scenario),
             );
             assert!(postId4 == object::id(post2), 12);
             assert!(ipfsDoc4 == x"0000000000000000000000000000000000000000000000000000000000000009", 3);
@@ -1287,6 +1298,7 @@ module peeranha::postLib_test
                 user,
                 post_meta_data,
                 1,
+                test_scenario::ctx(scenario)
             );
             
             assert!(postLib::isDeletedReply(post_meta_data, 1) == true, 9);
@@ -1367,6 +1379,7 @@ module peeranha::postLib_test
                 user,
                 post_meta_data,
                 2,
+                test_scenario::ctx(scenario),
             );
             
             assert!(postLib::isDeletedReply(post_meta_data, 2) == true, 9);
@@ -1472,6 +1485,7 @@ module peeranha::postLib_test
                 post_meta_data,
                 0,
                 1,
+                 test_scenario::ctx(scenario),
             );
 
             assert!(postLib::isDeletedComment(post_meta_data, 0, 1) == true, 10);
@@ -1548,6 +1562,7 @@ module peeranha::postLib_test
                 post_meta_data,
                 0,
                 2,
+                test_scenario::ctx(scenario),
             );
 
             assert!(postLib::isDeletedComment(post_meta_data, 0, 2) == true, 10);
@@ -1669,6 +1684,7 @@ module peeranha::postLib_test
                 post_meta_data,
                 1,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             assert!(postLib::isDeletedComment(post_meta_data, 1, 1) == true, 10);
@@ -1745,6 +1761,7 @@ module peeranha::postLib_test
                 post_meta_data,
                 2,
                 1,
+                test_scenario::ctx(scenario),
             );
 
             assert!(postLib::isDeletedComment(post_meta_data, 2, 1) == true, 10);

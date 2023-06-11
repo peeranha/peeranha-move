@@ -572,6 +572,7 @@ module peeranha::postLib {
                 achievementCollection,
                 changeUserRating,
                 postMetaData.communityId,
+                ctx,
             );
         };
 
@@ -691,6 +692,7 @@ module peeranha::postLib {
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
+        ctx: &mut TxContext,
     ) {
         checkMatchItemId(object::id(post), postMetaData.postId);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
@@ -707,6 +709,7 @@ module peeranha::postLib {
             newPostType,
             tags,
             language,
+            ctx,
         );
         event::emit(EditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
@@ -722,6 +725,7 @@ module peeranha::postLib {
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
+        ctx: &mut TxContext,
     ) {
         // let newCommunityId = object::id(newCommunity);
         // if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
@@ -737,6 +741,7 @@ module peeranha::postLib {
             newPostType,
             tags,
             language,
+            ctx,
         );
         event::emit(ModeratorEditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
@@ -752,6 +757,7 @@ module peeranha::postLib {
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
+        ctx: &mut TxContext,
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let userId = object::id(user);
@@ -773,8 +779,8 @@ module peeranha::postLib {
                 accessControlLib::get_action_role_admin_or_community_moderator(),
         );
 
-        changePostType(usersRatingCollection, achievementCollection, postMetaData, newPostType);
-        changePostCommunity(usersRatingCollection, achievementCollection, postMetaData, newCommunity);
+        changePostType(usersRatingCollection, achievementCollection, postMetaData, newPostType, ctx);
+        changePostCommunity(usersRatingCollection, achievementCollection, postMetaData, newCommunity, ctx);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         if (postMetaData.language != language) {
@@ -932,6 +938,7 @@ module peeranha::postLib {
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
+        ctx: &mut TxContext,
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let communityId = postMetaData.communityId;
@@ -974,6 +981,7 @@ module peeranha::postLib {
             achievementCollection,
             changeUserRating,
             communityId,
+            ctx,
         );
 
         if (currentTime - postMetaData.postTime < DELETE_TIME) {
@@ -991,6 +999,7 @@ module peeranha::postLib {
                     postType,
                     bestReplyMetaDataKey == replyMetaDataKey,
                     communityId,
+                    ctx,
                 );
                 replyMetaDataKey = replyMetaDataKey + 1;
             }
@@ -1009,6 +1018,7 @@ module peeranha::postLib {
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
+        ctx: &mut TxContext,
     ) {
         let userId = object::id(user);
         let communityId = postMetaData.communityId;
@@ -1048,6 +1058,7 @@ module peeranha::postLib {
                 i64Lib::neg_from(DELETE_OWN_REPLY) else 
                 i64Lib::neg_from(MODERATOR_DELETE_REPLY),
             communityId,
+            ctx,
         );
         
         let parentReplyMetaDataKey = replyMetaData.parentReplyMetaDataKey;
@@ -1060,6 +1071,7 @@ module peeranha::postLib {
                 postType,
                 parentReplyMetaDataKey == 0 && isBestReplyMetaData,
                 communityId,
+                ctx,
             );
         };
         replyMetaData.isDeleted = true;
@@ -1075,6 +1087,7 @@ module peeranha::postLib {
         postType: u8,
         isBestReply: bool,
         communityId: ID,
+        ctx: &mut TxContext,
     ) {
         if (replyMetaData.isDeleted)    // test rating
             return;
@@ -1108,6 +1121,7 @@ module peeranha::postLib {
                 achievementCollection,
                 changeReplyAuthorRating,
                 communityId,
+                ctx,
             );
         };
     }
@@ -1121,6 +1135,7 @@ module peeranha::postLib {
         postMetaData: &mut PostMetaData,
         parentReplyKey: u64,
         commentMetaDataKey: u64,
+        ctx: &mut TxContext,
     ) {
         let userId = object::id(user);
         let communityId = postMetaData.communityId;
@@ -1144,6 +1159,7 @@ module peeranha::postLib {
                 achievementCollection,
                 i64Lib::neg_from(MODERATOR_DELETE_COMMENT),
                 communityId,
+                ctx,
             );
         };
 
@@ -1159,6 +1175,7 @@ module peeranha::postLib {
         postAuthor: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newBestReplyMetaDataKey: u64,
+        ctx: &mut TxContext,
     ) {
         let newBestReplyMetaData = getReplyMetaDataSafe(postMetaData, newBestReplyMetaDataKey);
         let communityId = postMetaData.communityId;
@@ -1173,6 +1190,7 @@ module peeranha::postLib {
                 postMetaData.postType,
                 false,
                 communityId,
+                ctx,
             );
             postMetaData.bestReplyMetaDataKey = 0;
         } else {
@@ -1187,6 +1205,7 @@ module peeranha::postLib {
                     postMetaData.postType,
                     false,
                     communityId,
+                    ctx,
                 );
             };
 
@@ -1198,6 +1217,7 @@ module peeranha::postLib {
                 postMetaData.postType,
                 true,
                 communityId,
+                ctx,
             );
             postMetaData.bestReplyMetaDataKey = newBestReplyMetaDataKey;
         };
@@ -1227,6 +1247,7 @@ module peeranha::postLib {
         postType: u8,
         isMark: bool,
         communityId: ID,
+        ctx: &mut TxContext,
     ) {
         if (postAuthorAddress != replyAuthorAddress) {
             let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postAuthorAddress);
@@ -1237,6 +1258,7 @@ module peeranha::postLib {
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY), &i64Lib::neg_from(1)),
                 communityId,
+                ctx,
             );
 
             let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyAuthorAddress);
@@ -1247,6 +1269,7 @@ module peeranha::postLib {
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY), &i64Lib::neg_from(1)),
                 communityId,
+                ctx,
             );
         }
     }
@@ -1259,6 +1282,7 @@ module peeranha::postLib {
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         isUpvote: bool,
+        ctx: &mut TxContext,
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let postType = postMetaData.postType;
@@ -1293,6 +1317,7 @@ module peeranha::postLib {
             ratingChange,
             TYPE_CONTENT_POST,
             communityId,
+            ctx,
         );
         postMetaData.rating = i64Lib::add(&postMetaData.rating, &ratingChange);
 
@@ -1323,6 +1348,7 @@ module peeranha::postLib {
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
         isUpvote: bool,
+        ctx: &mut TxContext,
     ) {
         let postType = postMetaData.postType;
         let voteUserId = object::id(voteUser);
@@ -1374,6 +1400,7 @@ module peeranha::postLib {
             achievementCollection,
             changeReplyAuthorRating,
             communityId,
+            ctx,
         );
 
         vote(
@@ -1386,6 +1413,7 @@ module peeranha::postLib {
             ratingChange,
             TYPE_CONTENT_REPLY,
             communityId,
+            ctx,
         );
         
         let voteDirection;
@@ -1467,6 +1495,7 @@ module peeranha::postLib {
         ratingChanged: i64Lib::I64,
         typeContent: u8,
         communityId: ID,
+        ctx: &mut TxContext,
     ) {
         // TODO: add why warning - Unused assignment or binding for local '_authorRating'. Consider removing, replacing with '_', or prefixing with '_'
         let voteUserRating = i64Lib::zero();
@@ -1504,6 +1533,7 @@ module peeranha::postLib {
             achievementCollection,
             voteUserRating,
             communityId,
+            ctx,
         );
 
         let votedUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, votedUserId);
@@ -1512,6 +1542,7 @@ module peeranha::postLib {
             achievementCollection,
             _authorRating,
             communityId,
+            ctx,
         );
     }
 
@@ -1521,6 +1552,7 @@ module peeranha::postLib {
         achievementCollection: &mut nftLib::AchievementCollection,
         postMetaData: &mut PostMetaData,
         newPostType: u8,
+        ctx: &mut TxContext,
     ) {
         if (postMetaData.postType == newPostType) return;
 
@@ -1570,6 +1602,7 @@ module peeranha::postLib {
                 achievementCollection,
                 changeReplyAuthorRating,
                 postMetaData.communityId,
+                ctx,
             );
             replyMetaDataKey = replyMetaDataKey + 1;
         };
@@ -1579,6 +1612,7 @@ module peeranha::postLib {
             achievementCollection,
             changePostAuthorRating,
             postMetaData.communityId,
+            ctx,
         );
 
         postMetaData.postType = newPostType;
@@ -1590,6 +1624,7 @@ module peeranha::postLib {
         achievementCollection: &mut nftLib::AchievementCollection,
         postMetaData: &mut PostMetaData,
         community: &communityLib::Community,
+        ctx: &mut TxContext,
     ) {
         let newCommunityId = object::id(community);
         if (postMetaData.communityId == newCommunityId) return;
@@ -1638,12 +1673,14 @@ module peeranha::postLib {
                 achievementCollection,
                 i64Lib::mul(&changeReplyAuthorRating, &i64Lib::neg_from(1)),
                 oldCommunityId,
+                ctx,
             );
             userLib::updateRating(
                 replyAuthorCommunityRating,
                 achievementCollection,
                 changeReplyAuthorRating,
                 newCommunityId,
+                ctx,
             );
             replyMetaDataKey = replyMetaDataKey + 1;
         };
@@ -1654,12 +1691,14 @@ module peeranha::postLib {
             achievementCollection,
             i64Lib::mul(&changePostAuthorRating, &i64Lib::neg_from(1)),
             oldCommunityId,
+            ctx,
         );
         userLib::updateRating(
             postAuthorCommunityRating,
             achievementCollection,
             changePostAuthorRating,
             newCommunityId,
+            ctx,
         );
         postMetaData.communityId = newCommunityId;
     }

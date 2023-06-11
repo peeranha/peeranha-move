@@ -366,6 +366,7 @@ module peeranha::postLib_change_community_test
             postType,
             vector<u64>[2, 3],
             ENGLISH_LANGUAGE,
+            test_scenario::ctx(scenario),
         );
 
         test_scenario::return_to_sender(scenario, post_val);
