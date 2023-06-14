@@ -201,8 +201,8 @@ module peeranha::userLib {
         }
     }
 
-    public entry fun mintUserNFT(user: &User, achievementCollection: &mut nftLib::AchievementCollection, achievementKey: u64, ctx: &mut TxContext) {
-        nftLib::mint(object::id(user), achievementCollection, achievementKey, ctx);
+    public entry fun mintUserNFT(achievementCollection: &mut nftLib::AchievementCollection, user: &User, achievementsKey: vector<u64>, ctx: &mut TxContext) {
+        nftLib::mint(achievementCollection, object::id(user), achievementsKey, ctx);
     }
 
     /// Check the `role/rating` of the `user` to perform some action

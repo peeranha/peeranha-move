@@ -22,15 +22,17 @@ module peeranha::nftLib {
     const E_ACHIEVEMENT_ID_CAN_NOT_BE_0: u64 = 302;
     const E_ACHIEVEMENT_NOT_EXIST: u64 = 303;
 
+    const E_NEW_ERROR: u64 = 399;       // add
+
     // ====== Constant ======
     
     const POOL_NFT: u32 = 1000000;
 
     // ====== Enum ======
 
-    const ACHIEVEMENT_TYPE_RATING: u8 = 0;
-    const ACHIEVEMENT_TYPE_MANUAL: u8 = 1;
-    const ACHIEVEMENT_TYPE_SOUL_RATING: u8 = 2;
+    const ACHIEVEMENT_TYPE_RATING: u8 = 1;
+    const ACHIEVEMENT_TYPE_MANUAL: u8 = 2;
+    const ACHIEVEMENT_TYPE_SOUL_RATING: u8 = 3;
 
     struct AchievementCollection has key {
         id: UID,
@@ -145,7 +147,6 @@ module peeranha::nftLib {
         event::emit(ConfigureNewAchievementNFTEvent{achievementId: achievementKey});
     }
 
-
     /// Unlock achievements
     public(friend) fun unlockAchievements(
         achievementCollection: &mut AchievementCollection,
@@ -190,39 +191,47 @@ module peeranha::nftLib {
 
     /// mint nft
     public(friend) fun mint(
-        userObjectId: ID,
         achievementCollection: &mut AchievementCollection,
-        achievementKey: u64,
+        userObjectId: ID,
+        achievementsKey: vector<u64>,
         ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
-        let achievement = getAchievement(achievementCollection, achievementKey);
+        let achievementsKeyLength = vector::length(&achievementsKey);
+        let achievementKeyPosition = 0;
+
+        while (achievementKeyPosition < achievementsKeyLength) {
+            let achievementKey = *vector::borrow(&achievementsKey, achievementKeyPosition);
+            let achievement = getAchievement(achievementCollection, achievementKey);
+            
+            let isExistUserNFTIsMinted = table::contains(&mut achievement.usersNFTIsMinted, userObjectId);
+            if (!isExistUserNFTIsMinted) {
+                abort E_NEW_ERROR
+            };
+
+            let isMinted = table::borrow_mut<ID, bool>(&mut achievement.usersNFTIsMinted, userObjectId);
+            if (*isMinted) {
+                // error already minted
+            };
+
+            let nft = NFT {
+                id: object::new(ctx),
+                name: string::utf8(achievement.name),
+                description: string::utf8(achievement.description),
+                url: url::new_unsafe_from_bytes(achievement.url),
+                achievementType: achievement.achievementType,
+            };
+
+            event::emit(NFTTransferEvent {
+                object_id: object::id(&nft),
+                from: @0x0,
+                to: sender,
+            });
+            *isMinted = true;
+            transfer::public_transfer(nft, sender);
+            achievementKeyPosition = achievementKeyPosition + 1;
+        }
         
-        let isExistUserNFTIsMinted = table::contains(&mut achievement.usersNFTIsMinted, userObjectId);
-        if (!isExistUserNFTIsMinted) {
-            // error you can not get this achievement
-        };
-
-        let isMinted = table::borrow_mut<ID, bool>(&mut achievement.usersNFTIsMinted, userObjectId);
-        if (*isMinted) {
-            // error already minted
-        };
-
-        let nft = NFT {
-            id: object::new(ctx),
-            name: string::utf8(achievement.name),
-            description: string::utf8(achievement.description),
-            url: url::new_unsafe_from_bytes(achievement.url),
-            achievementType: achievement.achievementType,
-        };
-
-        event::emit(NFTTransferEvent {
-            object_id: object::id(&nft),
-            from: @0x0,
-            to: sender,
-        });
-        *isMinted = true;
-        transfer::public_transfer(nft, sender);
     }
 
     fun is_achievement_available(maxCount: u32, factCount: u32): (bool) {
@@ -240,7 +249,7 @@ module peeranha::nftLib {
         vec_map::get_mut<u64, Achievement>(&mut achievementCollection.achievements, &achievementKey)
     }
 
-    fun getAchievement(
+    public fun getAchievement(
         achievementCollection: &mut AchievementCollection,
         achievementKey: u64
     ): &mut Achievement {
@@ -294,5 +303,21 @@ module peeranha::nftLib {
     #[test_only]
     public fun init_test(ctx: &mut TxContext) {
         init(ctx)
+    }
+
+    #[test_only]
+    public fun getUsersNFTIsMinted(
+        achievementCollection: &mut AchievementCollection,
+        userObjectId: ID,
+        achievementKey: u64,
+    ): &mut bool {
+        let achievement = getAchievement(achievementCollection, achievementKey);
+
+        let isExistUserNFTIsMinted = table::contains(&mut achievement.usersNFTIsMinted, userObjectId);
+        if (!isExistUserNFTIsMinted) {
+            abort E_NEW_ERROR
+        };
+
+        table::borrow_mut<ID, bool>(&mut achievement.usersNFTIsMinted, userObjectId)
     }
 }
