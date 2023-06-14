@@ -52,9 +52,8 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
         {
             let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
             let user = &mut user_val;
-            let user_rating_collection = &mut user_rating_collection_val;
             
-            userLib::updateUser(user_rating_collection, user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
+            userLib::updateUser(user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
 
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
@@ -1626,11 +1625,10 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
-            let user_rating_collection = &mut user_rating_collection_val;
             let user = &mut user_val;
             let community = &mut community_val;
             
-            followCommunityLib::followCommunity(user_rating_collection, user, community);
+            followCommunityLib::followCommunity(user, community);
 
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
@@ -1651,11 +1649,10 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
-            let user_rating_collection = &mut user_rating_collection_val;
             let user = &mut user_val;
             let community = &mut community_val;
             
-            followCommunityLib::followCommunity(user_rating_collection, user, community);
+            followCommunityLib::followCommunity(user, community);
 
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
@@ -1668,11 +1665,10 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
-            let user_rating_collection = &mut user_rating_collection_val;
             let user = &mut user_val;
             let community = &mut community_val;
             
-            followCommunityLib::unfollowCommunity(user_rating_collection, user, community);
+            followCommunityLib::unfollowCommunity(user, community);
 
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
@@ -1689,9 +1685,9 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
         let userId = object::id(&mut user_val);
         let user_rating_collection = &mut user_rating_collection_val;
         let community = &mut community_val;
-        let user_community_rating = userLib::getMutableUserCommunityRating(user_rating_collection, userId);
         userLib::updateRating_test(
-            user_community_rating,
+            user_rating_collection,
+            userId,
             achievement_collection,
             if(isPositive) i64Lib::from(changeRating) else i64Lib::neg_from(changeRating),
             object::id(community),

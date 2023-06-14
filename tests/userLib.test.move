@@ -65,16 +65,13 @@ module peeranha::userLib_test
         {
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
-            let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
-            let user_rating_collection = &mut user_rating_collection_val;
-            userLib::updateUser(user_rating_collection, user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
+            userLib::updateUser(user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
 
             let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82", 1);
             assert!(followedCommunities == vector<ID>[], 5);
 
             test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_shared(user_rating_collection_val);
         };
 
         test_scenario::end(scenario_val);
@@ -103,18 +100,15 @@ module peeranha::userLib_test
         {
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
-            let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
-            let user_rating_collection = &mut user_rating_collection_val;
             let community_val = test_scenario::take_shared<Community>(scenario);
             let community = &mut community_val;
-            followCommunityLib::followCommunity(user_rating_collection, user, community);
+            followCommunityLib::followCommunity(user, community);
 
             let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(followedCommunities == vector<ID>[object::id(community)], 5);
             
             test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_shared(user_rating_collection_val);
             test_scenario::return_shared(community_val);
         };
 
@@ -144,20 +138,17 @@ module peeranha::userLib_test
         {
             let user_val = test_scenario::take_from_sender<User>(scenario);
             let user = &mut user_val;
-            let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
-            let user_rating_collection = &mut user_rating_collection_val;
             let community_val = test_scenario::take_shared<Community>(scenario);
             let community = &mut community_val;
 
-            followCommunityLib::followCommunity(user_rating_collection, user, community);
-            followCommunityLib::unfollowCommunity(user_rating_collection, user, community);
+            followCommunityLib::followCommunity(user, community);
+            followCommunityLib::unfollowCommunity(user, community);
 
             let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(followedCommunities == vector<ID>[], 5);
 
             test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_shared(user_rating_collection_val);
             test_scenario::return_shared(community_val);
         };
 
