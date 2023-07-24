@@ -6,6 +6,7 @@ module peeranha::userLib {
     use std::vector;
     use peeranha::accessControlLib;
     use peeranha::i64Lib;
+    use peeranha::nftLib;
     use sui::table::{Self, Table};
     use peeranha::commonLib;
     use sui::vec_map::{Self, VecMap};
@@ -37,8 +38,6 @@ module peeranha::userLib {
     const E_LOW_RATING_DOWNVOTE_REPLY: u64 = 20;
     const E_LOW_RATING_CANCEL_VOTE: u64 = 21;
     const E_LOW_RATING_MARK_BEST_REPLY: u64 = 22;
-    const E_LOW_RATING_UPDATE_PROFILE: u64 = 23;    // never call
-    const E_LOW_RATING_FOLLOW_COMMUNITY: u64 = 24;  // never call
     const E_CHECK_FUNCTION_getMutableTotalRewardShare: u64 = 99; // todo
 
     // ====== Enum ======
@@ -56,8 +55,6 @@ module peeranha::userLib {
     const ACTION_VOTE_COMMENT: u8 = 10;
     const ACTION_CANCEL_VOTE: u8 = 11;
     const ACTION_BEST_REPLY: u8 = 12;
-    const ACTION_UPDATE_PROFILE: u8 = 13;
-    const ACTION_FOLLOW_COMMUNITY: u8 = 14;
 
     // ====== Constant ======
 
@@ -147,21 +144,11 @@ module peeranha::userLib {
     }
 
     /// Update `user` info record
-    public entry fun updateUser(usersRatingCollection: &mut UsersRatingCollection, user: &mut User, ipfsHash: vector<u8>) {
+    public entry fun updateUser(user: &mut User, ipfsHash: vector<u8>) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash()); // TODO: TEST
-        let userId = object::id(user);
-        let userCommunityRating = getUserCommunityRating(usersRatingCollection, userId);
 
-        checkRating(
-            user,
-            userCommunityRating,
-            userId,
-            userId,
-            commonLib::getZeroId(),
-            ACTION_UPDATE_PROFILE
-        );
         user.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
-        event::emit(UpdateUserEvent {userId: userId});
+        event::emit(UpdateUserEvent {userId: object::id(user)});
     }
 
     /// Grant the `role` for the `user object id`
@@ -193,10 +180,11 @@ module peeranha::userLib {
 
     /*plug*/
     /// Update rating for `user object id` in `community object id`
-    public(friend) fun updateRating(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
+    public(friend) fun updateRating(usersRatingCollection: &mut UsersRatingCollection, userId: ID, achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
 
+        let userCommunityRating = getMutableUserCommunityRating(usersRatingCollection, userId);
         let position = vec_map::get_idx_opt(&mut userCommunityRating.userRating, &communityId);
         if (option::is_none(&position)) {
             vec_map::insert(&mut userCommunityRating.userRating, communityId, i64Lib::from(START_USER_RATING));
@@ -204,26 +192,36 @@ module peeranha::userLib {
 
         let userRating = vec_map::get_mut(&mut userCommunityRating.userRating, &communityId);
         *userRating = i64Lib::add(&*userRating, &rating);
+
+        let isGrovedRating = i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getGreaterThan();
+        let isPositiveRating = i64Lib::compare(userRating, &i64Lib::zero()) == i64Lib::getGreaterThan();
+        if (isGrovedRating && isPositiveRating) {
+            let achievementsTypesArray: vector<u8> = vector[nftLib::getAchievementTypeRating(), nftLib::getAchievementTypeSoulRating()];
+            nftLib::unlockAchievements(achievementCollection, userId, i64Lib::as_u64(userRating), communityId, achievementsTypesArray, ctx);
+        }
+    }
+
+    public entry fun mintUserNFT(achievementCollection: &mut nftLib::AchievementCollection, user: &User, achievementsKey: vector<u64>, ctx: &mut TxContext) {
+        nftLib::mint(achievementCollection, object::id(user), achievementsKey, ctx);
     }
 
     /// Check the `role/rating` of the `user` to perform some action
     public fun checkActionRole(
-        user: &mut User,
-        userCommunityRating: &UserCommunityRating,
+        usersRatingCollection: &UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
-        actionCallerId: ID,  // need? user -> owner
+        actionCaller: &User,
         dataUserId: ID,
         communityId: ID,
         action: u8,
         actionRole: u8,
-    ) 
-    {
+    ) {
+        let actionCallerId = object::id(actionCaller);
         if (hasModeratorRole(userRolesCollection, actionCallerId, communityId)) {
             return
         };
 
         accessControlLib::checkHasRole(userRolesCollection, actionCallerId, actionRole, communityId);
-        checkRating(user, userCommunityRating, actionCallerId, dataUserId, communityId, action);
+        checkRating(usersRatingCollection, actionCallerId, dataUserId, communityId, action);
     }
 
     /// Check the `role/rating` of the `user` to perform some action
@@ -243,19 +241,16 @@ module peeranha::userLib {
 
     /// Check the `user's rating` with rating what must be for the action
     public fun checkRating(
-        user: &mut User,
-        userCommunityRating: &UserCommunityRating,
-        actionCaller: ID,
-        dataUser: ID,
+        usersRatingCollection: &UsersRatingCollection,
+        actionCallerId: ID,
+        dataUserId: ID,
         communityId: ID,
         action: u8
-    ): &mut User
-    {
+    ) {
+        let userCommunityRating = getUserCommunityRating(usersRatingCollection, actionCallerId);
         let userRating = getUserRating(userCommunityRating, communityId);
-        let (ratingAllowed, message) = getRatingForAction(actionCaller, dataUser, action);
+        let (ratingAllowed, message) = getRatingForAction(actionCallerId, dataUserId, action);
         assert!(i64Lib::compare(&userRating, &ratingAllowed) != i64Lib::getLessThan(), message);
-
-        user
     }
 
     /// Get rating what must be for the action
@@ -327,12 +322,6 @@ module peeranha::userLib {
 
         } else if (action == ACTION_BEST_REPLY) {       // test neg rating?
             message = E_LOW_RATING_MARK_BEST_REPLY;
-
-        } else if (action == ACTION_UPDATE_PROFILE) {
-            message = E_LOW_RATING_UPDATE_PROFILE;
-
-        } else if (action == ACTION_FOLLOW_COMMUNITY) {
-            message = E_LOW_RATING_FOLLOW_COMMUNITY;
 
         } else {
             abort E_NOT_ALLOWED_ACTION
@@ -417,20 +406,16 @@ module peeranha::userLib {
         ACTION_BEST_REPLY
     }
 
-    public fun get_action_follow_community(): u8 {
-        ACTION_FOLLOW_COMMUNITY
-    }
-
     // --- Testing functions ---
 
-    #[test_only]    // call?
+    #[test_only]
     public fun init_test(ctx: &mut TxContext) {
         init(ctx)
     }
 
     #[test_only]
-    public fun updateRating_test(userCommunityRating: &mut UserCommunityRating, rating: i64Lib::I64, communityId: ID) {
-        updateRating(userCommunityRating, rating, communityId);
+    public fun updateRating_test(usersRatingCollection: &mut UsersRatingCollection, userId: ID, achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
+        updateRating(usersRatingCollection, userId, achievementCollection, rating, communityId, ctx);
     }
 
     #[test_only]

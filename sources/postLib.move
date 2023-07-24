@@ -11,7 +11,7 @@ module peeranha::postLib {
     use peeranha::commonLib;
     use peeranha::userLib;
     use peeranha::i64Lib;
-
+    use peeranha::nftLib;
     use sui::table::{Self, Table};
 
     // ====== Errors. Available values 100 - 199 ======
@@ -351,14 +351,12 @@ module peeranha::postLib {
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
-        let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
         let communityId = object::id(community);
         userLib::checkActionRole(
-            user,
-            userCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            userId,
+            user,
             userId,
             communityId,
             userLib::get_action_publication_post(),
@@ -440,6 +438,7 @@ module peeranha::postLib {
     public entry fun createReplyByBot(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         roles: &mut accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -454,6 +453,7 @@ module peeranha::postLib {
 
         createReplyPrivate(
             usersRatingCollection,
+            achievementCollection,
             time,
             commonLib::get_bot_id(),
             postMetaData,
@@ -470,6 +470,7 @@ module peeranha::postLib {
     public entry fun createReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
@@ -480,14 +481,12 @@ module peeranha::postLib {
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
-        let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
 
         let communityId = postMetaData.communityId;
         userLib::checkActionRole(
-            user,
-            userCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            userId,
+            user,
             postMetaData.author,
             communityId,
             userLib::get_action_publication_reply(),
@@ -498,6 +497,7 @@ module peeranha::postLib {
 
         createReplyPrivate(
             usersRatingCollection,
+            achievementCollection,
             time,
             userId,
             postMetaData,
@@ -513,6 +513,7 @@ module peeranha::postLib {
     /// Publication `reply` by `user`
     fun createReplyPrivate(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         time: &Clock,
         userId: ID,
         postMetaData: &mut PostMetaData,
@@ -561,11 +562,13 @@ module peeranha::postLib {
                 isQuickReply = true;
                 changeUserRating = i64Lib::add(&changeUserRating, &getUserRatingChangeForReplyAction(postMetaData.postType, RESOURCE_ACTION_QUICK_REPLY));
             };
-            let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
             userLib::updateRating(
-                userCommunityRating,
+                usersRatingCollection,
+                userId,
+                achievementCollection,
                 changeUserRating,
                 postMetaData.communityId,
+                ctx,
             );
         };
 
@@ -615,7 +618,6 @@ module peeranha::postLib {
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
-        let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
 
@@ -654,10 +656,9 @@ module peeranha::postLib {
         };
 
         userLib::checkActionRole(
-            user,
-            userCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            userId,
+            user,
             dataUser,
             postMetaData.communityId,
             userLib::get_action_publication_comment(),
@@ -676,6 +677,7 @@ module peeranha::postLib {
     public entry fun authorEditPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         user: &mut userLib::User,
         post: &mut Post,
         postMetaData: &mut PostMetaData,
@@ -684,6 +686,7 @@ module peeranha::postLib {
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
+        ctx: &mut TxContext,
     ) {
         checkMatchItemId(object::id(post), postMetaData.postId);
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
@@ -693,12 +696,14 @@ module peeranha::postLib {
         editPost(
             usersRatingCollection,
             userRolesCollection,
+            achievementCollection,
             user,
             postMetaData,
             newCommunity,
             newPostType,
             tags,
             language,
+            ctx,
         );
         event::emit(EditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
@@ -707,12 +712,14 @@ module peeranha::postLib {
     public entry fun moderatorEditPostMetaData(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newCommunity: &communityLib::Community,
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
+        ctx: &mut TxContext,
     ) {
         // let newCommunityId = object::id(newCommunity);
         // if (newCommunityId != postMetaData.communityId /*&& newCommunityId != DEFAULT_COMMUNITY *//*&& !self.peeranhaUser.isProtocolAdmin(userAddr)*/) // todo new transfer 
@@ -721,12 +728,14 @@ module peeranha::postLib {
         editPost(
             usersRatingCollection,
             userRolesCollection,
+            achievementCollection,
             user,
             postMetaData,
             newCommunity,
             newPostType,
             tags,
             language,
+            ctx,
         );
         event::emit(ModeratorEditPostEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData)});
     }
@@ -735,23 +744,23 @@ module peeranha::postLib {
     fun editPost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newCommunity: &communityLib::Community,
         newPostType: u8,
         tags: vector<u64>,
         language: u8,
+        ctx: &mut TxContext,
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let userId = object::id(user);
-        let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
         let postMetaDataAuthor = postMetaData.author;
         userLib::checkActionRole(
-            user,
-            userCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            userId,
+            user,
             postMetaDataAuthor,
             postMetaData.communityId,
             if (userId == postMetaDataAuthor)
@@ -762,8 +771,8 @@ module peeranha::postLib {
                 accessControlLib::get_action_role_admin_or_community_moderator(),
         );
 
-        changePostType(usersRatingCollection, postMetaData, newPostType);
-        changePostCommunity(usersRatingCollection, postMetaData, newCommunity);
+        changePostType(usersRatingCollection, achievementCollection, postMetaData, newPostType, ctx);
+        changePostCommunity(usersRatingCollection, achievementCollection, postMetaData, newCommunity, ctx);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         if (postMetaData.language != language) {
@@ -842,7 +851,6 @@ module peeranha::postLib {
         language: u8,
     ) {
         let userId = object::id(user);
-        let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
         let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
@@ -852,10 +860,9 @@ module peeranha::postLib {
 
         let replyMetaDataAuthor = replyMetaData.author;
         userLib::checkActionRole(
-            user,
-            userCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            userId,
+            user,
             replyMetaDataAuthor,
             postMetaData.communityId,
             if (userId == replyMetaDataAuthor)
@@ -886,10 +893,8 @@ module peeranha::postLib {
         language: u8,
     ) {
         assert!(!commonLib::isEmptyIpfs(ipfsHash), commonLib::getErrorInvalidIpfsHash());
-        let userId = object::id(user);
         let commentMetaData = getMutableCommentMetaDataSafe(postMetaData, parentReplyKey, commentMetaDataKey);
         checkMatchItemId(object::id(comment), commentMetaData.commentId);
-        let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         if (commentMetaData.language != language) {
@@ -897,10 +902,9 @@ module peeranha::postLib {
         };
 
         userLib::checkActionRole(
-            user,
-            userCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            userId,
+            user,
             commentMetaData.author,
             postMetaData.communityId,
             userLib::get_action_edit_item(),
@@ -910,28 +914,28 @@ module peeranha::postLib {
         if (commonLib::getIpfsHash(comment.ipfsDoc) != ipfsHash)
             comment.ipfsDoc = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
 
-        event::emit(EditCommentEvent{userId: userId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyKey, commentMetaDataKey: commentMetaDataKey});
+        event::emit(EditCommentEvent{userId: object::id(user), postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyKey, commentMetaDataKey: commentMetaDataKey});
     }
 
     /// `Author` and `moderator` delete `post`
     public entry fun deletePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
+        ctx: &mut TxContext,
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let communityId = postMetaData.communityId;
         let postAuthor = postMetaData.author;
         let bestReplyMetaDataKey = postMetaData.bestReplyMetaDataKey;
         let userId = object::id(user);
-        let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, userId);
         userLib::checkActionRole(
-            user,
-            userCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            userId,
+            user,
             postAuthor,
             communityId,
             userLib::get_action_delete_item(),
@@ -958,9 +962,12 @@ module peeranha::postLib {
             &i64Lib::from(DELETE_OWN_POST) else
             &i64Lib::from(MODERATOR_DELETE_POST));
         userLib::updateRating(
-            userCommunityRating,
+            usersRatingCollection,
+            userId,
+            achievementCollection,
             changeUserRating,
             communityId,
+            ctx,
         );
 
         if (currentTime - postMetaData.postTime < DELETE_TIME) {
@@ -969,14 +976,14 @@ module peeranha::postLib {
 
             while (replyMetaDataKey <= replyCount) {
                 let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
-                let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
-
                 deductReplyRating(
-                    replyAuthorCommunityRating,
+                    usersRatingCollection,
+                    achievementCollection,
                     replyMetaData,
                     postType,
                     bestReplyMetaDataKey == replyMetaDataKey,
                     communityId,
+                    ctx,
                 );
                 replyMetaDataKey = replyMetaDataKey + 1;
             }
@@ -990,14 +997,15 @@ module peeranha::postLib {
     public entry fun deleteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         time: &Clock,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
+        ctx: &mut TxContext,
     ) {
         let userId = object::id(user);
         let communityId = postMetaData.communityId;
-        let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, object::id(user));
         
         postMetaData.deletedRepliesCount = postMetaData.deletedRepliesCount + 1;
         let isBestReplyMetaData = postMetaData.bestReplyMetaDataKey == replyMetaDataKey;
@@ -1011,10 +1019,9 @@ module peeranha::postLib {
         
         let replyMetaData = getMutableReplyMetaDataSafe(postMetaData, replyMetaDataKey);
         userLib::checkActionRole(
-            user,
-            userCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            userId,
+            user,
             replyMetaData.author,
             communityId,
             userLib::get_action_delete_item(),
@@ -1024,25 +1031,29 @@ module peeranha::postLib {
         // admin can delete best reply
         assert!(userId != replyMetaData.author || !isBestReplyMetaData, E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY);
 
-        let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
         let time: u64 = commonLib::getTimestamp(time);
         userLib::updateRating(
-            replyAuthorCommunityRating,
+            usersRatingCollection,
+            replyMetaData.author,
+            achievementCollection,
             if(userId == replyMetaData.author) 
                 i64Lib::neg_from(DELETE_OWN_REPLY) else 
                 i64Lib::neg_from(MODERATOR_DELETE_REPLY),
             communityId,
+            ctx,
         );
         
         let parentReplyMetaDataKey = replyMetaData.parentReplyMetaDataKey;
         let isDeductReplyRating = time - replyMetaData.postTime < DELETE_TIME || userId == replyMetaData.author;
         if (isDeductReplyRating) {
             deductReplyRating(
-                replyAuthorCommunityRating,
+                usersRatingCollection,
+                achievementCollection,
                 replyMetaData,
                 postType,
                 parentReplyMetaDataKey == 0 && isBestReplyMetaData,
                 communityId,
+                ctx,
             );
         };
         replyMetaData.isDeleted = true;
@@ -1052,11 +1063,13 @@ module peeranha::postLib {
 
     /// When delete the `reply` take `rating` from the `author`
     fun deductReplyRating(
-        userCommunityRating: &mut userLib::UserCommunityRating,
+        usersRatingCollection: &mut userLib::UsersRatingCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         replyMetaData: &ReplyMetaData,
         postType: u8,
         isBestReply: bool,
         communityId: ID,
+        ctx: &mut TxContext,
     ) {
         if (replyMetaData.isDeleted)    // test rating
             return;
@@ -1086,9 +1099,12 @@ module peeranha::postLib {
 
         if (i64Lib::compare(&changeReplyAuthorRating, &i64Lib::zero()) != i64Lib::getEual()) {
             userLib::updateRating(
-                userCommunityRating,
+                usersRatingCollection,
+                replyMetaData.author,
+                achievementCollection,
                 changeReplyAuthorRating,
                 communityId,
+                ctx,
             );
         };
     }
@@ -1097,21 +1113,21 @@ module peeranha::postLib {
     public entry fun deleteComment(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         user: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         parentReplyKey: u64,
         commentMetaDataKey: u64,
+        ctx: &mut TxContext,
     ) {
         let userId = object::id(user);
         let communityId = postMetaData.communityId;
         let commentMetaData = getMutableCommentMetaDataSafe(postMetaData, parentReplyKey, commentMetaDataKey);
-        let userCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, object::id(user));
         
         userLib::checkActionRole(
-            user,
-            userCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            userId,
+            user,
             commentMetaData.author,
             communityId,
             userLib::get_action_delete_item(),
@@ -1120,9 +1136,12 @@ module peeranha::postLib {
 
         if (userId != commentMetaData.author) {
             userLib::updateRating(
-                userCommunityRating,
+                usersRatingCollection,
+                userId,
+                achievementCollection,
                 i64Lib::neg_from(MODERATOR_DELETE_COMMENT),
                 communityId,
+                ctx,
             );
         };
 
@@ -1134,22 +1153,27 @@ module peeranha::postLib {
     public entry fun changeStatusBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         postAuthor: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         newBestReplyMetaDataKey: u64,
+        ctx: &mut TxContext,
     ) {
         let newBestReplyMetaData = getReplyMetaDataSafe(postMetaData, newBestReplyMetaDataKey);
         let communityId = postMetaData.communityId;
-        assert!(postMetaData.author == object::id(postAuthor), E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY);
+        let postAuthorId = object::id(postAuthor);
+        assert!(postMetaData.author == postAuthorId, E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY);
 
         if (postMetaData.bestReplyMetaDataKey == newBestReplyMetaDataKey) {
             updateRatingForBestReply(
                 usersRatingCollection,
-                postMetaData.author,
+                achievementCollection,
+                postAuthorId,
                 newBestReplyMetaData.author,
                 postMetaData.postType,
                 false,
                 communityId,
+                ctx,
             );
             postMetaData.bestReplyMetaDataKey = 0;
         } else {
@@ -1158,32 +1182,33 @@ module peeranha::postLib {
                 let oldBestReplyMetaData = getReplyMetaDataSafe(postMetaData, bestReplyMetaDataKey);
                 updateRatingForBestReply(
                     usersRatingCollection,
-                    postMetaData.author,
+                    achievementCollection,
+                    postAuthorId,
                     oldBestReplyMetaData.author,
                     postMetaData.postType,
                     false,
                     communityId,
+                    ctx,
                 );
             };
 
             updateRatingForBestReply(
                 usersRatingCollection,
-                postMetaData.author,
+                achievementCollection,
+                postAuthorId,
                 newBestReplyMetaData.author,
                 postMetaData.postType,
                 true,
                 communityId,
+                ctx,
             );
             postMetaData.bestReplyMetaDataKey = newBestReplyMetaDataKey;
         };
-        let postAuthorId = object::id(postAuthor);
-        let postAuthorCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, postMetaData.author);
         userLib::checkActionRole(
-            postAuthor,
-            postAuthorCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
+            postAuthor,
             postAuthorId,
-            postMetaData.author,
             communityId,
             userLib::get_action_best_reply(),
             accessControlLib::get_action_role_none(),
@@ -1196,29 +1221,35 @@ module peeranha::postLib {
     /// Recalculation `post author` and `reply author` `rating` when change `status best reply`
     fun updateRatingForBestReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         postAuthorAddress: ID,
         replyAuthorAddress: ID,
         postType: u8,
         isMark: bool,
         communityId: ID,
+        ctx: &mut TxContext,
     ) {
         if (postAuthorAddress != replyAuthorAddress) {
-            let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postAuthorAddress);
             userLib::updateRating(
-                postAuthorCommunityRating,
+                usersRatingCollection,
+                postAuthorAddress,
+                achievementCollection,
                 if (isMark)
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPT_REPLY), &i64Lib::neg_from(1)),
                 communityId,
+                ctx,
             );
 
-            let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyAuthorAddress);
             userLib::updateRating(
-                replyAuthorCommunityRating,
+                usersRatingCollection,
+                replyAuthorAddress,
+                achievementCollection,
                 if (isMark)
                     getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY) else
                     i64Lib::mul(&getUserRatingChangeForReplyAction(postType, RESOURCE_ACTION_ACCEPTED_REPLY), &i64Lib::neg_from(1)),
                 communityId,
+                ctx,
             );
         }
     }
@@ -1227,9 +1258,11 @@ module peeranha::postLib {
     public entry fun votePost(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         isUpvote: bool,
+        ctx: &mut TxContext,
     ) {
         assert!(!postMetaData.isDeleted, E_POST_DELETED);
         let postType = postMetaData.postType;
@@ -1238,12 +1271,10 @@ module peeranha::postLib {
         assert!(voteUserId != postMetaData.author, E_ERROR_VOTE_POST);
         
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut postMetaData.historyVotes, isUpvote);
-        let voteUserCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, voteUserId);
         userLib::checkActionRole(
-            voteUser,
-            voteUserCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            voteUserId,
+            voteUser,
             postMetaData.author,
             communityId,
             if(isCancel) 
@@ -1256,6 +1287,7 @@ module peeranha::postLib {
 
         vote(
             usersRatingCollection,
+            achievementCollection,
             voteUserId,
             postMetaData.author,
             postType,
@@ -1263,6 +1295,7 @@ module peeranha::postLib {
             ratingChange,
             TYPE_CONTENT_POST,
             communityId,
+            ctx,
         );
         postMetaData.rating = i64Lib::add(&postMetaData.rating, &ratingChange);
 
@@ -1288,10 +1321,12 @@ module peeranha::postLib {
     public entry fun voteReply(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         voteUser: &mut userLib::User,
         postMetaData: &mut PostMetaData,
         replyMetaDataKey: u64,
         isUpvote: bool,
+        ctx: &mut TxContext,
     ) {
         let postType = postMetaData.postType;
         let voteUserId = object::id(voteUser);
@@ -1300,12 +1335,11 @@ module peeranha::postLib {
         assert!(voteUserId != replyMetaData.author, E_ERROR_VOTE_REPLY);
 
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut replyMetaData.historyVotes, isUpvote);
-        let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
+        // let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         userLib::checkActionRole(
-            voteUser,
-            voteUserCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            voteUserId,
+            voteUser,
             replyMetaData.author,
             communityId,
             if(isCancel) 
@@ -1337,15 +1371,18 @@ module peeranha::postLib {
             };
         };
 
-        let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
         userLib::updateRating(
-            replyAuthorCommunityRating,
+            usersRatingCollection,
+            replyMetaData.author,
+            achievementCollection,
             changeReplyAuthorRating,
             communityId,
+            ctx,
         );
 
         vote(
             usersRatingCollection,
+            achievementCollection,
             voteUserId,
             replyMetaData.author,
             postType,
@@ -1353,6 +1390,7 @@ module peeranha::postLib {
             ratingChange,
             TYPE_CONTENT_REPLY,
             communityId,
+            ctx,
         );
         
         let voteDirection;
@@ -1389,13 +1427,11 @@ module peeranha::postLib {
         assert!(voteUserId != commentMetaData.author, E_ERROR_VOTE_COMMENT);   // test
         
         let (ratingChange, isCancel) = getForumItemRatingChange(voteUserId, &mut commentMetaData.historyVotes, isUpvote);
-        let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         
         userLib::checkActionRole(
-            voteUser,
-            voteUserCommunityRating,
+            usersRatingCollection,
             userRolesCollection,
-            voteUserId,
+            voteUser,
             commentMetaData.author,
             communityId,
             if(isCancel) 
@@ -1426,6 +1462,7 @@ module peeranha::postLib {
     /// Recalculation `users' rating` after voting per a `reply` or `post`
     fun vote(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         voteUserId: ID,
         votedUserId: ID,
         postType: u8,
@@ -1433,6 +1470,7 @@ module peeranha::postLib {
         ratingChanged: i64Lib::I64,
         typeContent: u8,
         communityId: ID,
+        ctx: &mut TxContext,
     ) {
         // TODO: add why warning - Unused assignment or binding for local '_authorRating'. Consider removing, replacing with '_', or prefixing with '_'
         let voteUserRating = i64Lib::zero();
@@ -1464,26 +1502,32 @@ module peeranha::postLib {
             };
         };
 
-        let voteUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, voteUserId);
         userLib::updateRating(
-            voteUserCommunityRating,
+            usersRatingCollection,
+            voteUserId,
+            achievementCollection,
             voteUserRating,
             communityId,
+            ctx,
         );
 
-        let votedUserCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, votedUserId);
         userLib::updateRating(
-            votedUserCommunityRating,
+            usersRatingCollection,
+            votedUserId,
+            achievementCollection,
             _authorRating,
             communityId,
+            ctx,
         );
     }
 
     /// Change `postType` for the `post` and recalculation `rating` for all `users` who were active in the `post`
     fun changePostType(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         postMetaData: &mut PostMetaData,
         newPostType: u8,
+        ctx: &mut TxContext,
     ) {
         if (postMetaData.postType == newPostType) return;
 
@@ -1527,19 +1571,23 @@ module peeranha::postLib {
                 changePostAuthorRating = i64Lib::add(&changePostAuthorRating, &i64Lib::sub(&newTypeRating.acceptReply, &oldTypeRating.acceptReply));
             };
 
-            let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
             userLib::updateRating(
-                replyAuthorCommunityRating,
+                usersRatingCollection,
+                replyMetaData.author,
+                achievementCollection,
                 changeReplyAuthorRating,
                 postMetaData.communityId,
+                ctx,
             );
             replyMetaDataKey = replyMetaDataKey + 1;
         };
-        let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postMetaData.author);
         userLib::updateRating(
-            postAuthorCommunityRating,
+            usersRatingCollection,
+            postMetaData.author,
+            achievementCollection,
             changePostAuthorRating,
             postMetaData.communityId,
+            ctx,
         );
 
         postMetaData.postType = newPostType;
@@ -1548,8 +1596,10 @@ module peeranha::postLib {
     /// Change `communityId` for the `post` and recalculation `rating` for all `users` who were active in the `post`
     fun changePostCommunity(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
+        achievementCollection: &mut nftLib::AchievementCollection,
         postMetaData: &mut PostMetaData,
         community: &communityLib::Community,
+        ctx: &mut TxContext,
     ) {
         let newCommunityId = object::id(community);
         if (postMetaData.communityId == newCommunityId) return;
@@ -1592,30 +1642,40 @@ module peeranha::postLib {
                 changePostAuthorRating = i64Lib::add(&changeReplyAuthorRating, &typeRating.acceptReply);
             };
 
-            let replyAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, replyMetaData.author);
             userLib::updateRating(
-                replyAuthorCommunityRating,
+                usersRatingCollection,
+                replyMetaData.author,
+                achievementCollection,
                 i64Lib::mul(&changeReplyAuthorRating, &i64Lib::neg_from(1)),
                 oldCommunityId,
+                ctx,
             );
             userLib::updateRating(
-                replyAuthorCommunityRating,
+                usersRatingCollection,
+                replyMetaData.author,
+                achievementCollection,
                 changeReplyAuthorRating,
                 newCommunityId,
+                ctx,
             );
             replyMetaDataKey = replyMetaDataKey + 1;
         };
 
-        let postAuthorCommunityRating = userLib::getMutableUserCommunityRating(usersRatingCollection, postMetaData.author);
         userLib::updateRating(
-            postAuthorCommunityRating,
+            usersRatingCollection,
+            postMetaData.author,
+            achievementCollection,
             i64Lib::mul(&changePostAuthorRating, &i64Lib::neg_from(1)),
             oldCommunityId,
+            ctx,
         );
         userLib::updateRating(
-            postAuthorCommunityRating,
+            usersRatingCollection,
+            postMetaData.author,
+            achievementCollection,
             changePostAuthorRating,
             newCommunityId,
+            ctx,
         );
         postMetaData.communityId = newCommunityId;
     }

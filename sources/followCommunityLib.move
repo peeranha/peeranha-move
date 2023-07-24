@@ -4,7 +4,6 @@ module peeranha::followCommunityLib {
     use std::vector;
     use peeranha::communityLib;
     use peeranha::userLib;
-    use peeranha::commonLib;
 
     // ====== Errors ======
 
@@ -25,22 +24,10 @@ module peeranha::followCommunityLib {
 
     /// `User` follows the `community`
     public entry fun followCommunity(
-        usersRatingCollection: &mut userLib::UsersRatingCollection,
         user: &mut userLib::User,
         community: &communityLib::Community
     ) {
         communityLib::onlyNotFrozenCommunity(community);
-        let userId = object::id(user);
-        let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
-
-        userLib::checkRating(
-            user,
-            userCommunityRating,
-            userId,
-            userId,
-            commonLib::getZeroId(),
-            userLib::get_action_follow_community()
-        );
 
         let i = 0;
         let community_id = object::id(community);
@@ -52,27 +39,15 @@ module peeranha::followCommunityLib {
         };
 
         userLib::followCommunity(user, community_id);
-        event::emit(FollowCommunityEvent{userId: userId, communityId: community_id});
+        event::emit(FollowCommunityEvent{userId: object::id(user), communityId: community_id});
     }
 
     /// `User` unfollows the `community`
     public entry fun unfollowCommunity(
-        usersRatingCollection: &mut userLib::UsersRatingCollection,
         user: &mut userLib::User,
         community: &communityLib::Community
     ) {
         communityLib::onlyNotFrozenCommunity(community);
-        let userId = object::id(user);
-        let userCommunityRating = userLib::getUserCommunityRating(usersRatingCollection, userId);
-
-        let user = userLib::checkRating(
-            user,
-            userCommunityRating,
-            userId,
-            userId,
-            commonLib::getZeroId(),
-            userLib::get_action_follow_community()
-        );
 
         let i = 0;
         let community_id = object::id(community);
@@ -82,7 +57,7 @@ module peeranha::followCommunityLib {
             if(*vector::borrow(userFolowedCommunities, i) == community_id) {
                 userLib::unfollowCommunity(user, i);
 
-                event::emit(UnfollowCommunityEvent{userId: userId, communityId: community_id});
+                event::emit(UnfollowCommunityEvent{userId: object::id(user), communityId: community_id});
                 return
             };
             i = i +1;

@@ -2,15 +2,17 @@
 module peeranha::postLib_change_community_test
 {
     use peeranha::userLib::{Self, User, UsersRatingCollection};
+    use peeranha::nftLib;
     use peeranha::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
     use peeranha::communityLib::{Community};
     use peeranha::postLib::{Self, Post, PostMetaData};
+    use peeranha::nftLib::{AchievementCollection};
     use peeranha::postLib_change_post_type_test;
     use peeranha::userLib_test;
     use peeranha::communityLib_test;
     use sui::test_scenario::{Self, Scenario};
-    use sui::clock::{Self};
-    use sui::object::{Self};
+    use sui::clock;
+    use sui::object;
 
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
@@ -201,6 +203,7 @@ module peeranha::postLib_change_community_test
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
+            nftLib::init_test(test_scenario::ctx(scenario));
             accessControlLib::init_test(test_scenario::ctx(scenario));
         };
 
@@ -341,6 +344,8 @@ module peeranha::postLib_change_community_test
     #[test_only]
     public fun change_post_community(post_meta_data: &mut PostMetaData, scenario: &mut Scenario) {
         let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val) = init_all_shared(scenario);
+        let achievement_collection_val = test_scenario::take_shared<AchievementCollection>(scenario);
+        let achievement_collection = &mut achievement_collection_val;
         let post_val = test_scenario::take_from_sender<Post>(scenario);
         let post = &mut post_val;
         let postType = postLib::getPostType(post_meta_data);
@@ -352,6 +357,7 @@ module peeranha::postLib_change_community_test
         postLib::authorEditPost(
             user_rating_collection,
             user_roles_collection,
+            achievement_collection,
             user,
             post,
             post_meta_data,
@@ -360,9 +366,11 @@ module peeranha::postLib_change_community_test
             postType,
             vector<u64>[2, 3],
             ENGLISH_LANGUAGE,
+            test_scenario::ctx(scenario),
         );
 
         test_scenario::return_to_sender(scenario, post_val);
+        test_scenario::return_shared(achievement_collection_val);
         return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, community2_val, scenario);
     }
 }
