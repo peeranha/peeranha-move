@@ -7,7 +7,7 @@ module peeranha::nftLib {
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
     use std::vector;
-    use std::string::{Self , utf8};
+    use std::string::{Self, utf8};
     use sui::object::{Self, ID, UID};
     use sui::event;
     use sui::transfer;
