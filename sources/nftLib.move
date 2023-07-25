@@ -54,7 +54,7 @@ module peeranha::nftLib {
         lowerBound: u64,
         name: string::String,
         description: string::String,
-        img_url: Url,
+        url: Url,
         achievementType: u8,
         communityId: ID,
         properties: VecMap<u8, vector<u8>>,
@@ -71,7 +71,8 @@ module peeranha::nftLib {
         /// Description of the token
         description: string::String,
         /// URL for the token
-        img_url: Url,
+        url: Url,
+
         achievementType: u8,
         // TODO: allow custom attributes
     }
@@ -117,16 +118,11 @@ module peeranha::nftLib {
         ];
 
         let values = vector[
-            // For `name` one can use the `Hero.name` property
             utf8(b"{name}"),
-            // For `link` one can build a URL using an `id` property
-            utf8(b"https://sui-heroes.io/hero/{id}"),                                       // del?
-            // For `img_url` use an IPFS template + `img_url` property.
-            utf8(b"{img_url}"),
-            // Description is static for all `Hero` objects.
+            utf8(b"https://peeranha.io/nft/{id}"),
+            utf8(b"{url}"),
             utf8(b"{description}"),
-            // Project URL is usually static
-            utf8(b"https://dev2.testpeeranha.io"),                                                 // add link
+            utf8(b"https://peeranha.io"),
         ];
 
         // Claim the `Publisher` for the package!
@@ -162,7 +158,7 @@ module peeranha::nftLib {
 
     /// Get the NFT's `url`
     public fun url(nft: &NFT): &Url {
-        &nft.img_url
+        &nft.url
     }
 
     public(friend) fun configureAchievement(
@@ -172,7 +168,7 @@ module peeranha::nftLib {
         lowerBound: u64,
         name: vector<u8>,
         description: vector<u8>,
-        img_url: vector<u8>,
+        url: vector<u8>,
         achievementType: u8,
         ctx: &mut TxContext
     ) {
@@ -184,7 +180,7 @@ module peeranha::nftLib {
             lowerBound: lowerBound,
             name: string::utf8(name),
             description: string::utf8(description),
-            img_url: url::new_unsafe_from_bytes(img_url),
+            url: url::new_unsafe_from_bytes(url),
             achievementType: achievementType,
             communityId: communityId,
             properties: vec_map::empty(),
@@ -286,7 +282,7 @@ module peeranha::nftLib {
                 id: object::new(ctx),
                 name: achievement.name,
                 description: achievement.description,
-                img_url: achievement.img_url,
+                url: achievement.url,
                 achievementType: achievement.achievementType,
             };
 
@@ -351,7 +347,7 @@ module peeranha::nftLib {
 
     /// Permanently delete `nft`
     public entry fun burn(nft: NFT, _: &mut TxContext) {
-        let NFT { id, name: _, description: _, img_url: _, achievementType: _} = nft;
+        let NFT { id, name: _, description: _, url: _, achievementType: _} = nft;
         // add event?
         object::delete(id)
     }
@@ -402,7 +398,7 @@ module peeranha::nftLib {
             achievement.lowerBound,
             achievement.name,
             achievement.description,
-            achievement.img_url,
+            achievement.url,
             achievement.achievementType,
             achievement.communityId,
         )
