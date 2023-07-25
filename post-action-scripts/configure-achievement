@@ -1,0 +1,4 @@
+if [ -f .env ]; then
+  export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
+fi
+sui client call --function configureAchievement --module achievementLib --package $PACKAGE --args $USER_ROLES_COLLECTION $ACHIEVEMENT_COLLECTION $USER 15 20 "NFT name new" "NFT description new" "ipfs://bafybeiaj4nujwizct37nz5hpne6ltjqh2susaoyaempmsd76qfyns4quhq" 0 --gas-budget 400000000

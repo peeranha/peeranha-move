@@ -179,8 +179,16 @@ module peeranha::userLib {
     }
 
     /*plug*/
+    // to do arguments: userRating, acievements, userId...
     /// Update rating for `user object id` in `community object id`
-    public(friend) fun updateRating(usersRatingCollection: &mut UsersRatingCollection, userId: ID, achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
+    public(friend) fun updateRating(
+        usersRatingCollection: &mut UsersRatingCollection,
+        userId: ID,
+        achievementCollection: &mut nftLib::AchievementCollection,
+        rating: i64Lib::I64,
+        communityId: ID,
+        ctx: &mut TxContext
+    ) {
         if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
 
@@ -197,12 +205,8 @@ module peeranha::userLib {
         let isPositiveRating = i64Lib::compare(userRating, &i64Lib::zero()) == i64Lib::getGreaterThan();
         if (isGrovedRating && isPositiveRating) {
             let achievementsTypesArray: vector<u8> = vector[nftLib::getAchievementTypeRating(), nftLib::getAchievementTypeSoulRating()];
-            nftLib::unlockAchievements(achievementCollection, userId, i64Lib::as_u64(userRating), communityId, achievementsTypesArray, ctx);
+            nftLib::unlockAchievements(achievementCollection, userId, communityId, i64Lib::as_u64(userRating), achievementsTypesArray, ctx);
         }
-    }
-
-    public entry fun mintUserNFT(achievementCollection: &mut nftLib::AchievementCollection, user: &User, achievementsKey: vector<u64>, ctx: &mut TxContext) {
-        nftLib::mint(achievementCollection, object::id(user), achievementsKey, ctx);
     }
 
     /// Check the `role/rating` of the `user` to perform some action
@@ -411,6 +415,16 @@ module peeranha::userLib {
     #[test_only]
     public fun init_test(ctx: &mut TxContext) {
         init(ctx)
+    }
+
+
+    /////////////////////////////////////////////////////////
+    // ////////////////////////////////////////////////////
+    // delete
+    // /////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////
+    public entry fun updateRatingBuf(usersRatingCollection: &mut UsersRatingCollection, userId: ID, achievementCollection: &mut nftLib::AchievementCollection, rating: u64, isPositive:bool, communityId: ID, ctx: &mut TxContext) {
+        updateRating(usersRatingCollection, userId, achievementCollection, if(isPositive) i64Lib::from(rating) else i64Lib::neg_from(rating), communityId, ctx);
     }
 
     #[test_only]
