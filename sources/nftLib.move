@@ -126,7 +126,7 @@ module peeranha::nftLib {
             // Description is static for all `Hero` objects.
             utf8(b"{description}"),
             // Project URL is usually static
-            utf8(b"https://dev2.testpeeranha.io/feed"),                                                 // add link
+            utf8(b"https://dev2.testpeeranha.io"),                                                 // add link
         ];
 
         // Claim the `Publisher` for the package!
