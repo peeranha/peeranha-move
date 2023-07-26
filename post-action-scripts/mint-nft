@@ -1,4 +1,4 @@
 if [ -f .env ]; then
   export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 fi
-sui client call --function mintUserNFT --module userLib --package $PACKAGE --args $ACHIEVEMENT_COLLECTION $USER [1] --gas-budget 400000000
+sui client call --function mintUserNFT --module achievementLib --package $PACKAGE --args $ACHIEVEMENT_COLLECTION $USER [1] --gas-budget 400000000
