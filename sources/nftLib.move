@@ -112,7 +112,7 @@ module peeranha::nftLib {
         let keys = vector[
             utf8(b"name"),
             utf8(b"link"),
-            utf8(b"img_url"),
+            utf8(b"image_url"),
             utf8(b"description"),
             utf8(b"project_url"),
         ];
