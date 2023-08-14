@@ -528,7 +528,7 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_community_admin_set_own_best_reply() {
+    fun test_protocol_admin_set_own_best_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
@@ -575,7 +575,7 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_deleted_reply_own_reply() {
+    fun test_protocol_admin_deleted_own_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
@@ -1366,6 +1366,11 @@ module peeranha::accessControlLib_action_protacol_admin_test
 
         test_scenario::next_tx(scenario, USER1);
         {
+            communityLib_test::grant_protocol_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
             accessControlLib_common_role_test::grant_protocol_admin_role_to_user(&mut user2_val, scenario);
         };
 
@@ -1374,7 +1379,7 @@ module peeranha::accessControlLib_action_protacol_admin_test
             test_scenario::return_to_sender(scenario, user2_val);
         };
 
-        test_scenario::next_tx(scenario, USER2);
+        test_scenario::next_tx(scenario, USER1);
         {
             communityLib_test::create_community(scenario);
         };

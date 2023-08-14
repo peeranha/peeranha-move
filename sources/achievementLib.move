@@ -6,6 +6,7 @@ module peeranha::achievementLib {
     use peeranha::commonLib;
     use peeranha::nftLib;
     use sui::tx_context::{TxContext};
+    use std::string::{Self};
     use sui::object::{ID};
 
     public entry fun configureAchievement(
@@ -14,15 +15,18 @@ module peeranha::achievementLib {
         user: &userLib::User,
         maxCount: u32,
         lowerBound: u64,
-        name: vector<u8>,
-        description: vector<u8>,
+        name: string::String,
+        description: string::String,
         url: vector<u8>,
         achievementsType: u8,
+        externalUrl: vector<u8>,
+        attributesKey: vector<string::String>,
+        attributesValue: vector<string::String>,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_admin(), commonLib::getZeroId());
-        nftLib::configureAchievement(achievementCollection, commonLib::getZeroId(), maxCount, lowerBound, name, description, url, achievementsType, ctx);
+        nftLib::configureAchievement(achievementCollection, commonLib::getZeroId(), maxCount, lowerBound, name, description, url, achievementsType, externalUrl, attributesKey, attributesValue, ctx);
     }
 
     public entry fun configureCommunityAchievement(
@@ -32,16 +36,19 @@ module peeranha::achievementLib {
         community: &communityLib::Community,
         maxCount: u32,
         lowerBound: u64,
-        name: vector<u8>,
-        description: vector<u8>,
+        name: string::String,
+        description: string::String,
         url: vector<u8>,
         achievementsType: u8,
+        externalUrl: vector<u8>,
+        attributesKey: vector<string::String>,
+        attributesValue: vector<string::String>,
         ctx: &mut TxContext
     ) {
         let userId = object::id(user);
         accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_admin_or_community_admin(), object::id(community)); // test
         communityLib::onlyNotFrozenCommunity(community);
-        nftLib::configureAchievement(achievementCollection, object::id(community), maxCount, lowerBound, name, description, url, achievementsType, ctx);
+        nftLib::configureAchievement(achievementCollection, object::id(community), maxCount, lowerBound, name, description, url, achievementsType, externalUrl, attributesKey, attributesValue, ctx);
     }
 
     public entry fun mintUserNFT(

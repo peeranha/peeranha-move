@@ -230,12 +230,15 @@ module peeranha::accessControlLib {
     }
 
     /// Sets `adminRole` as ``role``'s admin role for 'communityAdminRole' and `communityModeratorRole`.
-    public(friend) fun setCommunityPermission(userRolesCollection: &mut UserRolesCollection, communityId: ID) {
+    public(friend) fun setCommunityPermission(userRolesCollection: &mut UserRolesCollection, communityId: ID, userId: ID) {
         let communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
         let communityModeratorRole = getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId);
 
         setRoleAdmin(userRolesCollection, communityModeratorRole, communityAdminRole);
         setRoleAdmin(userRolesCollection, communityAdminRole, PROTOCOL_ADMIN_ROLE);
+
+        grantRole_(userRolesCollection, communityAdminRole, userId);        // test
+        grantRole_(userRolesCollection, communityModeratorRole, userId);    // test
     }
 
     /// Abort if `user object id` is missing `actionRole`.

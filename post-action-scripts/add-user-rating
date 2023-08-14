@@ -1,4 +1,4 @@
 if [ -f .env ]; then
   export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 fi
-sui client call --function updateRatingBuf --module userLib --package $PACKAGE --args $USERS_RATING_COLLECTION $USER $ACHIEVEMENT_COLLECTION 30 true $COMMUNITY --gas-budget 300000000
+sui client call --function updateRatingBuf --module userLib --package $PACKAGE --args $USERS_RATING_COLLECTION $USER $ACHIEVEMENT_COLLECTION 10005 true $COMMUNITY --gas-budget 300000000

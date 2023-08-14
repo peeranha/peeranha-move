@@ -599,7 +599,7 @@ module peeranha::accessControlLib_action_community_admin_test
     }
 
     #[test]
-    fun test_community_admin_deleted_reply_own_reply() {
+    fun test_community_admin_deleted_own_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
@@ -1373,11 +1373,6 @@ module peeranha::accessControlLib_action_community_admin_test
         };
 
         test_scenario::next_tx(scenario, USER2);
-        {
-            userLib_test::create_user(scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER3);
         {
             userLib_test::create_user(scenario);
         };
