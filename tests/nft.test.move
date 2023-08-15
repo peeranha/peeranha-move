@@ -861,6 +861,234 @@ module peeranha::nft_test
         test_scenario::end(scenario_val);
     }
 
+    #[test, expected_failure(abort_code = nftLib::E_ALREADY_MINTED)]
+    fun test_mint_2_identical_common_nft() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_standart_achievement(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let achievement_collection = &mut achievement_collection_val;
+            achievementLib::mintUserNFT(achievement_collection, &mut user_val, vector<u64>[1, 1], test_scenario::ctx(scenario));
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_mint_2_common_nft_in_1_transaction() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_standart_achievement(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_standart_achievement(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let achievement_collection = &mut achievement_collection_val;
+            achievementLib::mintUserNFT(achievement_collection, &mut user_val, vector<u64>[1, 2], test_scenario::ctx(scenario));
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let achievement_collection = &mut achievement_collection_val;
+
+            let user_nft_val = test_scenario::take_from_sender<NFT>(scenario);
+            let (
+                name,
+                description,
+                url,
+                externalUrl,
+                attributes,
+                achievementType,
+            ) = nftLib::getNftData(&mut user_nft_val);
+
+            assert!(name == string::utf8(b"Nft name"), 4);
+            assert!(description == string::utf8(b"Nft description"), 5);
+            assert!(url == url::new_unsafe_from_bytes(b"ipfs://bafybeiaj4nujwizct37nz5hpne6ltjqh2susaoyaempmsd76qfyns4quhq"), 6);
+            assert!(externalUrl == url::new_unsafe_from_bytes(EXTERNAL_URL), 8);
+            assert!(attributes == createAttribytes(), 9);
+            assert!(achievementType ==  nftLib::getAchievementTypeRating(), 7);
+
+            let usersNFTIsMinted = nftLib::getUsersNFTIsMinted(achievement_collection, object::id(&mut user_val), 1);
+            assert!(usersNFTIsMinted == true, 7);
+
+            let user_nft_val2 = test_scenario::take_from_sender<NFT>(scenario);
+            let (
+                name2,
+                description2,
+                url2,
+                externalUrl2,
+                attributes2,
+                achievementType2,
+            ) = nftLib::getNftData(&mut user_nft_val2);
+
+            assert!(name2 == string::utf8(b"Nft name"), 4);
+            assert!(description2 == string::utf8(b"Nft description"), 5);
+            assert!(url2 == url::new_unsafe_from_bytes(b"ipfs://bafybeiaj4nujwizct37nz5hpne6ltjqh2susaoyaempmsd76qfyns4quhq"), 6);
+            assert!(externalUrl2 == url::new_unsafe_from_bytes(EXTERNAL_URL), 8);
+            assert!(attributes2 == createAttribytes(), 9);
+            assert!(achievementType2 ==  nftLib::getAchievementTypeRating(), 7);
+
+            let usersNFTIsMinted2 = nftLib::getUsersNFTIsMinted(achievement_collection, object::id(&mut user_val), 2);
+            assert!(usersNFTIsMinted2 == true, 7);
+
+            test_scenario::return_to_sender(scenario, user_nft_val);
+            test_scenario::return_to_sender(scenario, user_nft_val2);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = nftLib::E_ACHIEVEMENT_NOT_EXIST)]
+    fun test_mint_2_common_nft_in_1_transaction_1_nft_does_not_exist() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_standart_achievement(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let achievement_collection = &mut achievement_collection_val;
+            achievementLib::mintUserNFT(achievement_collection, &mut user_val, vector<u64>[1, 2], test_scenario::ctx(scenario));
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = nftLib::E_ALREADY_MINTED)]
+    fun test_mint_2_common_nft_in_1_transaction_1_nft_already_minted() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_standart_achievement(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_standart_achievement(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let achievement_collection = &mut achievement_collection_val;
+            achievementLib::mintUserNFT(achievement_collection, &mut user_val, vector<u64>[1], test_scenario::ctx(scenario));
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let achievement_collection = &mut achievement_collection_val;
+            achievementLib::mintUserNFT(achievement_collection, &mut user_val, vector<u64>[2, 1], test_scenario::ctx(scenario));
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = nftLib::E_NOT_UNLOCK_ACHIEVEMENT)]
+    fun test_mint_2_common_nft_in_1_transaction_1_can_not() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_standart_achievement(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_achievement(15, 300, nftLib::getAchievementTypeManual(), scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let achievement_collection = &mut achievement_collection_val;
+            achievementLib::mintUserNFT(achievement_collection, &mut user_val, vector<u64>[1, 2], test_scenario::ctx(scenario));
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
 
     // ====== Support functions ======
 
