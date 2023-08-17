@@ -22,7 +22,7 @@ module peeranha::nftLib {
     // ====== Errors ======
 
     const E_MAX_NFT_COUNT: u64 = 300;
-    const E_YOU_CAN_NOT_TRANSFER_SOUL_BOUND_NFT: u64 = 301;
+    const E_WRONG_ATTRIBUTES_LENGTH: u64 = 301;
     const E_ACHIEVEMENT_ID_CAN_NOT_BE_0: u64 = 302;
     const E_ACHIEVEMENT_NOT_EXIST: u64 = 303;
     const E_YOU_CAN_UNLOCK_ONLY_MANUAL_NFT: u64 = 304;
@@ -38,7 +38,6 @@ module peeranha::nftLib {
 
     const ACHIEVEMENT_TYPE_RATING: u8 = 0;
     const ACHIEVEMENT_TYPE_MANUAL: u8 = 1;
-    const ACHIEVEMENT_TYPE_SOUL_RATING: u8 = 2;
 
     /// One-Time-Witness for the module.
     struct NFTLIB has drop {}
@@ -55,9 +54,11 @@ module peeranha::nftLib {
         name: string::String,
         description: string::String,
         url: Url,
+        externalUrl: Url,
         achievementType: u8,
         communityId: ID,
         properties: VecMap<u8, vector<u8>>,
+        attributes: VecMap<string::String, string::String>,
         /// is minted the achievement for 'user object id'. Table key - `user object id`
         /// false - user can mint nft, but has not minted yet
         /// true - user has minted the nft 
@@ -72,9 +73,9 @@ module peeranha::nftLib {
         description: string::String,
         /// URL for the token
         url: Url,
-
+        externalUrl: Url,
         achievementType: u8,
-        // TODO: allow custom attributes
+        attributes: VecMap<string::String, string::String>,
     }
 
     // ===== Events =====
@@ -86,16 +87,16 @@ module peeranha::nftLib {
     struct UnlockAchievementEvent has copy, drop {
         // The `user object ID` who unlocked the `achievementId`
         userObjectId: ID,
-        // The `achievement Id key` which the `userObjectId` can mint
+        // The `achievement id key` which the `userObjectId` can mint
         achievementId: u64,
     }
 
-    struct NFTTransferEvent has copy, drop {
-        // The Object ID of the NFT
-        nftObjectId: ID,
-        from: address,
-        // The creator of the NFT       ///
-        to: address,
+    struct MintNftEvent has copy, drop {
+        // The `user object ID` who unlocked the `achievementId`
+        userObjectId: ID,
+        // The `achievement id key` which the `userObjectId` can mint
+        achievementId: u64,
+        nftId: ID,
     }
 
     fun init(otw: NFTLIB, ctx: &mut TxContext) {
@@ -111,18 +112,16 @@ module peeranha::nftLib {
 
         let keys = vector[
             utf8(b"name"),
-            utf8(b"link"),
             utf8(b"image_url"),
             utf8(b"description"),
-            utf8(b"project_url"),
+            utf8(b"Website"),
         ];
 
         let values = vector[
             utf8(b"{name}"),
-            utf8(b"https://peeranha.io/nft/{id}"),
             utf8(b"{url}"),
             utf8(b"{description}"),
-            utf8(b"https://peeranha.io"),
+            utf8(b"{externalUrl}"),
         ];
 
         // Claim the `Publisher` for the package!
@@ -144,46 +143,43 @@ module peeranha::nftLib {
         //
     }
 
-    // ===== Public view functions =====
-
-    /// Get the NFT's `name`
-    public fun name(nft: &NFT): &string::String {
-        &nft.name
-    }
-
-    /// Get the NFT's `description`
-    public fun description(nft: &NFT): &string::String {
-        &nft.description
-    }
-
-    /// Get the NFT's `url`
-    public fun url(nft: &NFT): &Url {
-        &nft.url
-    }
-
     public(friend) fun configureAchievement(
         achievementCollection: &mut AchievementCollection,
         communityId: ID,
         maxCount: u32,
         lowerBound: u64,
-        name: vector<u8>,
-        description: vector<u8>,
+        name:  string::String,
+        description:  string::String,
         url: vector<u8>,
         achievementType: u8,
+        externalUrl: vector<u8>,
+        attributesKeys:  vector<string::String>,
+        attributesValues:  vector<string::String>,
         ctx: &mut TxContext
     ) {
         assert!(maxCount < POOL_NFT, E_MAX_NFT_COUNT);  // TEST
+        let attributeKeysLength = vector::length(&attributesKeys);
+        assert!(vector::length(&attributesKeys) == vector::length(&attributesValues), E_WRONG_ATTRIBUTES_LENGTH);
 
+        let attributes: VecMap<string::String, string::String> = vec_map::empty();
+        let attributeId = 0;
+        while (attributeId < attributeKeysLength) {
+            vec_map::insert(&mut attributes, *vector::borrow(&attributesKeys, attributeId), *vector::borrow(&attributesValues, attributeId));
+            attributeId = attributeId + 1;
+        };
+        
         let achievement = Achievement {
             maxCount: maxCount,
             factCount: 0,
             lowerBound: lowerBound,
-            name: string::utf8(name),
-            description: string::utf8(description),
+            name: name,
+            description: description,
             url: url::new_unsafe_from_bytes(url),
+            externalUrl: url::new_unsafe_from_bytes(externalUrl),
             achievementType: achievementType,
             communityId: communityId,
             properties: vec_map::empty(),
+            attributes: attributes,
             usersNFTIsMinted: table::new(ctx)
         };
 
@@ -257,7 +253,7 @@ module peeranha::nftLib {
     public(friend) fun mint(
         achievementCollection: &mut AchievementCollection,
         userObjectId: ID,
-        achievementsKey: vector<u64>,
+        achievementsKey: vector<u64>,                           // 0 count (assert)
         ctx: &mut TxContext
     ) {
         let sender = tx_context::sender(ctx);
@@ -283,14 +279,17 @@ module peeranha::nftLib {
                 name: achievement.name,
                 description: achievement.description,
                 url: achievement.url,
+                externalUrl: achievement.externalUrl,
                 achievementType: achievement.achievementType,
+                attributes: achievement.attributes
             };
 
-            event::emit(NFTTransferEvent {
-                nftObjectId: object::id(&nft),
-                from: @0x0,
-                to: sender,
+            event::emit(MintNftEvent {
+                userObjectId: userObjectId,
+                achievementId: achievementKey,
+                nftId: object::id(&nft),
             });
+
             *isMinted = true;
             transfer::public_transfer(nft, sender);
             achievementKeyPosition = achievementKeyPosition + 1;
@@ -321,20 +320,6 @@ module peeranha::nftLib {
 
     // ===== Entrypoints =====
 
-    /// Transfer `nft` to `recipient`
-    public entry fun transferNFT(
-        nft: NFT, recipient: address, ctx: &mut TxContext
-    ) {
-        assert!(nft.achievementType != ACHIEVEMENT_TYPE_SOUL_RATING, E_YOU_CAN_NOT_TRANSFER_SOUL_BOUND_NFT);
-        let sender = tx_context::sender(ctx);
-        event::emit(NFTTransferEvent {
-            nftObjectId: object::id(&nft),
-            from: sender,
-            to: recipient,
-        });
-        transfer::public_transfer(nft, recipient)
-    }
-
     /// Update the `description` of `nft` to `new_description`
     public entry fun update_description(
         nft: &mut NFT,
@@ -347,7 +332,7 @@ module peeranha::nftLib {
 
     /// Permanently delete `nft`
     public entry fun burn(nft: NFT, _: &mut TxContext) {
-        let NFT { id, name: _, description: _, url: _, achievementType: _} = nft;
+        let NFT { id, name: _, description: _, url: _, externalUrl: _, achievementType: _, attributes: _} = nft;
         // add event?
         object::delete(id)
     }
@@ -360,12 +345,8 @@ module peeranha::nftLib {
         ACHIEVEMENT_TYPE_MANUAL
     }
 
-    public fun getAchievementTypeSoulRating(): (u8) {
-        ACHIEVEMENT_TYPE_SOUL_RATING
-    }
-
     // --- Testing functions ---
-
+    
     #[test_only]
     public fun init_test(ctx: &mut TxContext) {
         init(NFTLIB{}, ctx)
@@ -390,7 +371,7 @@ module peeranha::nftLib {
     public fun getAchievementData(
         achievementCollection: &mut AchievementCollection,
         achievementKey: u64
-    ): (u32, u32, u64, string::String, string::String, Url, u8, ID) {
+    ): (u32, u32, u64, string::String, string::String, Url, u8, ID, Url, VecMap<string::String, string::String>) {
         let achievement = getAchievement(achievementCollection, achievementKey);
         (
             achievement.maxCount,
@@ -401,6 +382,23 @@ module peeranha::nftLib {
             achievement.url,
             achievement.achievementType,
             achievement.communityId,
+            achievement.externalUrl,
+            achievement.attributes,
+        )
+    }
+
+    #[test_only]
+    public fun getNftData(
+        nft: &mut NFT,
+    ): (string::String, string::String, Url, Url, VecMap<string::String, string::String>, u8) {
+
+        (
+            nft.name,
+            nft.description,
+            nft.url,
+            nft.externalUrl,
+            nft.attributes,
+            nft.achievementType,
         )
     }
 }

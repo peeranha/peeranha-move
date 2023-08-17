@@ -64,7 +64,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test]
-    fun test_defaul_admin_grant_protocal_admin_himself() {
+    fun test_defaul_admin_grant_protocol_admin_himself() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -103,7 +103,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test, expected_failure(abort_code = accessControlLib::E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE)]
-    fun test_defaul_admin_grant_protocal_admin_by_common_action() {
+    fun test_defaul_admin_grant_protocol_admin_by_common_action() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -135,7 +135,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test]
-    fun test_defaul_admin_grant_protocal_admin_another_user() {
+    fun test_defaul_admin_grant_protocol_admin_another_user() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -184,7 +184,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test, expected_failure(abort_code = test_scenario::EEmptyInventory)]
-    fun test_common_user_grant_protocal_admin_another_user() {
+    fun test_common_user_grant_protocol_admin_another_user() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -227,7 +227,7 @@ module peeranha::accessControlLib_common_role_test
     }
     
     #[test]
-    fun test_defaul_admin_revorke_protocal_admin_another_user() {
+    fun test_defaul_admin_revorke_protocol_admin_another_user() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -281,7 +281,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test, expected_failure(abort_code = accessControlLib::E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE)]
-    fun test_defaul_admin_revoke_protocal_admin_by_common_action() {
+    fun test_defaul_admin_revoke_protocol_admin_by_common_action() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -313,7 +313,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test]
-    fun test_defaul_admin_revorke_not_exist_protocal_admin() {
+    fun test_defaul_admin_revorke_not_exist_protocol_admin() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -362,7 +362,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test]
-    fun test_defaul_admin_revorke_not_given_protocal_admin() {
+    fun test_defaul_admin_revorke_not_given_protocol_admin() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -432,7 +432,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test, expected_failure(abort_code = test_scenario::EEmptyInventory)]
-    fun test_common_user_revoke_protocal_admin_another_user() {
+    fun test_common_user_revoke_protocol_admin_another_user() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
@@ -489,14 +489,15 @@ module peeranha::accessControlLib_common_role_test
             init_accessControlLib_common_role(scenario);
         };
 
-        test_scenario::next_tx(scenario, USER2);
+        test_scenario::next_tx(scenario, USER1);
         {
+            let user1_val = test_scenario::take_from_sender<User>(scenario);
             let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
             let user_roles_collection = &mut user_roles_collection_val;
+            let user1 = &mut user1_val;
             let community_val = test_scenario::take_shared<Community>(scenario);
             let community = &mut community_val;
 
-            
             let community_admin_template = COMMUNITY_ADMIN_ROLE;
             vector::append<u8>(&mut community_admin_template, object::id_to_bytes(&object::id(community)));
             let admin_role_for_community_admin = accessControlLib::getRoleAdmin(user_roles_collection, community_admin_template);
@@ -507,6 +508,13 @@ module peeranha::accessControlLib_common_role_test
             let admin_role_for_community_moderator = accessControlLib::getRoleAdmin(user_roles_collection, community_moderator_template);
             assert!(admin_role_for_community_moderator == community_admin_template, 2);
 
+            let has_community_admin_role = accessControlLib::hasRole(user_roles_collection, community_admin_template, object::id(user1));
+            assert!(has_community_admin_role == true, 1);
+
+            let has_community_moderator_role = accessControlLib::hasRole(user_roles_collection, community_moderator_template, object::id(user1));
+            assert!(has_community_moderator_role == true, 1);
+
+            test_scenario::return_to_sender(scenario, user1_val);
             test_scenario::return_shared(user_roles_collection_val);
             test_scenario::return_shared(community_val);
         };
@@ -667,7 +675,23 @@ module peeranha::accessControlLib_common_role_test
             user3_val = test_scenario::take_from_sender<User>(scenario);
         };
 
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
         test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role_to_user(&mut user2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
         {
             let community_val = test_scenario::take_shared<Community>(scenario);
             let community = &mut community_val;
@@ -714,7 +738,23 @@ module peeranha::accessControlLib_common_role_test
             user3_val = test_scenario::take_from_sender<User>(scenario);
         };
 
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
         test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role_to_user(&mut user2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
         {
             let community_val = test_scenario::take_shared<Community>(scenario);
             let community = &mut community_val;

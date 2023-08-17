@@ -146,7 +146,7 @@ module peeranha::communityLib {
         };
 
         let communityId = object::id(&community);
-        accessControlLib::setCommunityPermission(roles, communityId);
+        accessControlLib::setCommunityPermission(roles, communityId, userId);
         event::emit(CreateCommunityEvent {userId: userId, communityId: communityId});
         transfer::share_object(community);
     }

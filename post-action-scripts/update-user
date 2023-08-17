@@ -1,0 +1,4 @@
+if [ -f .env ]; then
+  export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
+fi
+sui client call --function updateUser --module userLib --package $PACKAGE --args $USER "5e626a3eb15c587290cf810ae3786c1b0be3e4fcdaa49886e1cf22be8388c550" --gas-budget 300000000

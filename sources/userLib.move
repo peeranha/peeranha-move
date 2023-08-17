@@ -204,7 +204,7 @@ module peeranha::userLib {
         let isGrovedRating = i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getGreaterThan();
         let isPositiveRating = i64Lib::compare(userRating, &i64Lib::zero()) == i64Lib::getGreaterThan();
         if (isGrovedRating && isPositiveRating) {
-            let achievementsTypesArray: vector<u8> = vector[nftLib::getAchievementTypeRating(), nftLib::getAchievementTypeSoulRating()];
+            let achievementsTypesArray: vector<u8> = vector[nftLib::getAchievementTypeRating()];
             nftLib::unlockAchievements(achievementCollection, userId, communityId, i64Lib::as_u64(userRating), achievementsTypesArray, ctx);
         }
     }

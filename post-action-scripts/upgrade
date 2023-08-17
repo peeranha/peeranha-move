@@ -1,0 +1,4 @@
+if [ -f .env ]; then
+  export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
+fi
+sui client upgrade --gas-budget 300000000 --upgrade-capability $UPGRADE_CAP_ID

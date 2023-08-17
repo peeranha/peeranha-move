@@ -317,6 +317,7 @@ module peeranha::postLib {
         ipfsHash: vector<u8>, 
         postType: u8,
         tags: vector<u64>,
+        language: u8,
         messengerType: u8,
         handle: vector<u8>,
         ctx: &mut TxContext
@@ -331,7 +332,7 @@ module peeranha::postLib {
             ipfsHash, 
             postType,
             tags,
-            ENGLISH_LANGUAGE,
+            language,
             commonLib::compose_messenger_sender_property(messengerType, handle),
             ctx
         )
@@ -444,6 +445,7 @@ module peeranha::postLib {
         postMetaData: &mut PostMetaData,
         parentReplyMetaDataKey: u64,
         ipfsHash: vector<u8>,
+        language: u8,
         messengerType: u8,
         handle: vector<u8>,
         ctx: &mut TxContext
@@ -460,7 +462,7 @@ module peeranha::postLib {
             parentReplyMetaDataKey,
             ipfsHash,
             false,
-            ENGLISH_LANGUAGE,
+            language,
             commonLib::compose_messenger_sender_property(messengerType, handle),
             ctx
         )
