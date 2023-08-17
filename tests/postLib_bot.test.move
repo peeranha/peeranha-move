@@ -100,6 +100,53 @@ module peeranha::postLib_bot_test
     }
 
     #[test]
+    fun test_create_chinese_post_by_bot() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_basic_postLib_by_bot_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+
+            postLib::createPostByBot(
+                user_roles_collection,
+                &time,
+                user,
+                community,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                EXPERT_POST,
+                vector<u64>[1, 2],
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            assert!(postLib::getPostLanguage(post_meta_data) == CHINESE_LANGUAGE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
     fun test_create_reply_by_bot() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
@@ -146,6 +193,58 @@ module peeranha::postLib_bot_test
             assert!(authorMetaData == commonLib::compose_messenger_sender_property(MESSENGER_TYPE_TELEGRAM, HANDLE1), 12);
 
             test_scenario::return_to_sender(scenario, reply_val);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_chinese_reply_by_bot() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let achievement_collection = &mut achievement_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            postLib::createReplyByBot(
+                user_rating_collection,
+                user_roles_collection,
+                achievement_collection,
+                &time,
+                user,
+                post_meta_data,
+                0,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == CHINESE_LANGUAGE, 1);
+
             test_scenario::return_shared(post_meta_data_val);
         };
 
@@ -267,6 +366,18 @@ module peeranha::postLib_bot_test
 
     #[test_only]
     public fun init_postLib_by_bot_test(scenario: &mut Scenario): clock::Clock {
+        let time = init_basic_postLib_by_bot_test(scenario);
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            create_standart_post_by_bot(&time, scenario);
+        };
+
+        time
+    }
+
+    #[test_only]
+    public fun init_basic_postLib_by_bot_test(scenario: &mut Scenario): clock::Clock {
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
@@ -309,11 +420,6 @@ module peeranha::postLib_bot_test
         test_scenario::next_tx(scenario, USER2);
         {
             test_scenario::return_to_sender(scenario, user2_val);
-        };
-
-        test_scenario::next_tx(scenario, USER2);
-        {
-            create_standart_post_by_bot(&time, scenario);
         };
 
         time
@@ -371,6 +477,7 @@ module peeranha::postLib_bot_test
             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
             EXPERT_POST,
             vector<u64>[1, 2],
+            ENGLISH_LANGUAGE,
             MESSENGER_TYPE_TELEGRAM,
             HANDLE1,
             test_scenario::ctx(scenario)
@@ -398,6 +505,7 @@ module peeranha::postLib_bot_test
             post_meta_data,
             0,
             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+            ENGLISH_LANGUAGE,
             MESSENGER_TYPE_TELEGRAM,
             handle,
             test_scenario::ctx(scenario)
