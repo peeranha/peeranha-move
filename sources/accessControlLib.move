@@ -16,12 +16,10 @@ module peeranha::accessControlLib {
     const E_ACCESS_CONTROL_CAN_NOT_GIVE_PROTOCOL_ADMIN_ROLE: u64 = 301;
     const E_NOT_ALLOWED_NOT_ADMIN: u64 = 302;
     const E_NOT_ALLOWED_NOT_BOT_ROLE: u64 = 303;
-    const E_NOT_ALLOWED_NOT_DISPATHER_ROLE: u64 = 304;
     const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR: u64 = 305;
     const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN: u64 = 306;
     const E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN: u64 = 307;
     const E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR: u64 = 308;
-    const E_NOT_ALLOWED_NOT_MINT_NFT_ROLE: u64 = 211;                          // test
 
     // ====== Constant ======
 
@@ -30,14 +28,12 @@ module peeranha::accessControlLib {
     const COMMUNITY_MODERATOR_ROLE: vector<u8> = vector<u8>[4];
     const BOT_ROLE: vector<u8> = vector<u8>[5];
     const DISPATCHER_ROLE: vector<u8> = vector<u8>[6];
-    const MINT_NFT_ROLE: vector<u8> = vector<u8>[7];
 
     // ====== Enum ======
 
     const ACTION_ROLE_NONE: u8 = 0;
     const ACTION_ROLE_BOT: u8 = 1;
     const ACTION_ROLE_ADMIN: u8 = 2;
-    const ACTION_ROLE_DISPATCHER: u8 = 3;                           // need?
     const ACTION_ROLE_ADMIN_OR_COMMUNITY_MODERATOR: u8 = 4;
     const ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN: u8 = 5;
     const ACTION_ROLE_COMMUNITY_ADMIN: u8 = 6;
@@ -255,8 +251,6 @@ module peeranha::accessControlLib {
             errorType = E_NOT_ALLOWED_NOT_ADMIN
         } else if (actionRole == ACTION_ROLE_BOT && !hasRole(userRolesCollection, BOT_ROLE, userId)) {
             errorType = E_NOT_ALLOWED_NOT_BOT_ROLE
-        } else if (actionRole == ACTION_ROLE_DISPATCHER && !hasRole(userRolesCollection, DISPATCHER_ROLE, userId)) {
-            errorType = E_NOT_ALLOWED_NOT_DISPATHER_ROLE
         } else if (actionRole == ACTION_ROLE_ADMIN_OR_COMMUNITY_MODERATOR && 
             !(isAdmin || (isCommunityModerator))) {
             errorType = E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR
@@ -266,8 +260,6 @@ module peeranha::accessControlLib {
             errorType = E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN
         } else if (actionRole == ACTION_ROLE_COMMUNITY_MODERATOR && !isCommunityModerator) {
             errorType = E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR
-        } else if (actionRole == ACTION_ROLE_MINT_NFT) {
-            errorType = E_NOT_ALLOWED_NOT_MINT_NFT_ROLE
         } else {
             return
         };
@@ -293,10 +285,6 @@ module peeranha::accessControlLib {
 
     public fun get_action_role_bot(): u8 {
         ACTION_ROLE_BOT
-    }
-
-    public fun get_action_role_dispatcher(): u8 {
-        ACTION_ROLE_DISPATCHER
     }
 
     public fun get_action_role_admin_or_community_moderator(): u8 {

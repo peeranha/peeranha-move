@@ -7,8 +7,10 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
     use peeranha::followCommunityLib;
     use sui::clock;
     use peeranha::userLib_test;
+    use peeranha::nft_test;
     use peeranha::communityLib_test;
     use peeranha::postLib_test;
+    use peeranha::postLib_bot_test;
     use peeranha::postLib_votes_test;
     use peeranha::accessControlLib_common_role_test;
     use peeranha::accessControlLib;
@@ -79,6 +81,29 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             postLib_test::create_standart_post(&time, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_BOT_ROLE)]
+    fun test_common_user_negative_rating_create_bot_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common_negative_rating(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            postLib_bot_test::create_standart_post_by_bot(&time, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -304,6 +329,34 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
         test_scenario::next_tx(scenario, USER2);
         {
             postLib_test::create_standart_reply(&time, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_BOT_ROLE)]
+    fun test_common_user_negative_rating_create_bot_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common_negative_rating(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            postLib_test::create_standart_post(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            updateRating(RATING, false, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            postLib_bot_test::create_standart_reply_by_bot(&time, vector<u8>[1], scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -1671,6 +1724,65 @@ module peeranha::accessControlLib_action_common_user_negative_rating_test
             followCommunityLib::unfollowCommunity(user, community);
 
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::end(scenario_val);
+        clock::destroy_for_testing(time);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_ADMIN)]
+    fun test_bot_create_achievement() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common_negative_rating(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            nft_test::create_standart_achievement(scenario);
+        };
+
+        test_scenario::end(scenario_val);
+        clock::destroy_for_testing(time);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN)]
+    fun test_bot_create_community_achievement() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common_negative_rating(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            nft_test::create_community_standart_achievement(scenario);
+        };
+
+        test_scenario::end(scenario_val);
+        clock::destroy_for_testing(time);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_ADMIN)]
+    fun test_bot_unlock_manual_achievement() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_common_negative_rating(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            nft_test::create_standart_manual_achievement(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            nft_test::unlock_standart_manual_achievement(scenario);
         };
 
         test_scenario::end(scenario_val);

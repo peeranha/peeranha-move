@@ -6,6 +6,7 @@ module peeranha::accessControlLib_common_role_test
     use std::vector;
     use peeranha::userLib_test;
     use peeranha::communityLib_test;
+    use peeranha::postLib_bot_test;
     use peeranha::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
     use sui::test_scenario::{Self, Scenario};
     use sui::object::{Self/*, ID*/};
@@ -659,6 +660,71 @@ module peeranha::accessControlLib_common_role_test
         test_scenario::end(scenario_val);
     }
 
+    #[test, expected_failure(abort_code = accessControlLib::E_ACCESS_CONTROL_MISSING_ROLE)]
+    fun test_defaul_admin_grant_bot_role() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        {
+            userLib::init_test(test_scenario::ctx(scenario));
+            accessControlLib::init_test(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role_to_user(&mut user2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            communityLib_test::create_community(scenario);
+        };
+
+        let user3_val;
+        test_scenario::next_tx(scenario, USER3);
+        {
+            user3_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let user3 = &mut user3_val;
+            postLib_bot_test::grant_bot_role(object::id(user3), scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            test_scenario::return_to_sender(scenario, user3_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
     #[test]
     fun test_protocol_admin_grant_community_admin() {
         let scenario_val = test_scenario::begin(USER1);
@@ -766,6 +832,60 @@ module peeranha::accessControlLib_common_role_test
 
         test_scenario::next_tx(scenario, USER3);
         {
+            test_scenario::return_to_sender(scenario, user3_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_protocol_admin_grant_bot_role() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            init_accessControlLib_common_role(scenario);
+        };
+
+        let user3_val;
+        test_scenario::next_tx(scenario, USER3);
+        {
+            user3_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role_to_user(&mut user2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let user3 = &mut user3_val;
+            postLib_bot_test::grant_bot_role(object::id(user3), scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user3 = &mut user3_val;
+
+            let has_community_admin_role = accessControlLib::hasRole(user_roles_collection, BOT_ROLE, object::id(user3));
+            assert!(has_community_admin_role == true, 1);
+
+            test_scenario::return_shared(user_roles_collection_val);
             test_scenario::return_to_sender(scenario, user3_val);
         };
 
@@ -889,6 +1009,57 @@ module peeranha::accessControlLib_common_role_test
 
             test_scenario::return_shared(community_val);
             test_scenario::return_shared(user_roles_collection_val);
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_ACCESS_CONTROL_MISSING_ROLE)]
+    fun test_community_admin_grant_bot_role() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            init_accessControlLib_common_role(scenario);
+        };
+
+        let user3_val;
+        test_scenario::next_tx(scenario, USER3);
+        {
+            user3_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user3 = &mut user3_val;
+            grant_community_admin_role(object::id(user3), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            test_scenario::return_to_sender(scenario, user3_val);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            let user2 = &mut user2_val;
+            postLib_bot_test::grant_bot_role(object::id(user2), scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
             test_scenario::return_to_sender(scenario, user2_val);
         };
 

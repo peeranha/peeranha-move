@@ -11,12 +11,12 @@ module peeranha::nft_test
     use peeranha::communityLib::{Community};
     use peeranha::achievementLib;
     use peeranha::commonLib;
-    use peeranha::accessControlLib_action_common_user_negative_rating_test;
     use peeranha::nftLib::{Self, AchievementCollection, NFT};
     use peeranha::userLib::{Self, User};
     use peeranha::accessControlLib::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
     use sui::object;
+    use peeranha::i64Lib;
     use sui::clock;
 
     // use std::debug;
@@ -49,7 +49,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -99,7 +99,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -149,7 +149,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -199,7 +199,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -248,7 +248,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -258,7 +258,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -296,7 +296,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -306,7 +306,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -362,7 +362,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -372,7 +372,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(5, true, scenario);
+            updateRating(5, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -395,7 +395,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -456,7 +456,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -471,7 +471,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -526,7 +526,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -536,7 +536,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -576,7 +576,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -586,7 +586,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -643,7 +643,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -653,7 +653,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -702,7 +702,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -712,7 +712,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -741,7 +741,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -751,7 +751,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -818,7 +818,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -828,7 +828,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -846,7 +846,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(10, true, scenario);
+            updateRating(10, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -867,7 +867,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -877,7 +877,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -898,7 +898,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -913,7 +913,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -984,7 +984,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -994,7 +994,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1015,7 +1015,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1030,7 +1030,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1059,7 +1059,7 @@ module peeranha::nft_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_test(scenario);
+            time = init_nft_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1074,7 +1074,7 @@ module peeranha::nft_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
+            updateRating(100, true, scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1101,7 +1101,7 @@ module peeranha::nft_test
     }
 
     #[test_only]
-    public fun init_postLib_test(scenario: &mut Scenario): clock::Clock {
+    public fun init_nft_test(scenario: &mut Scenario): clock::Clock {
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
@@ -1135,6 +1135,11 @@ module peeranha::nft_test
     #[test_only]
     public fun create_standart_achievement(scenario: &mut Scenario) {
         create_achievement(15, 100, nftLib::getAchievementTypeRating(), scenario);
+    }
+
+    #[test_only]
+    public fun create_standart_manual_achievement(scenario: &mut Scenario) {
+        create_achievement(15, 100, nftLib::getAchievementTypeManual(), scenario);
     }
 
     #[test_only]
@@ -1199,5 +1204,41 @@ module peeranha::nft_test
         test_scenario::return_shared(user_roles_collection_val);
         test_scenario::return_to_sender(scenario, user_val);
         test_scenario::return_shared(achievement_collection_val);
+    }
+
+    #[test_only]
+    public fun unlock_standart_manual_achievement(scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+        let achievement_collection = &mut achievement_collection_val;
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user = &user_val;
+
+        achievementLib::unlockManualNft(
+            user_roles_collection,
+            achievement_collection,
+            user,
+            object::id(user),
+            1
+        );
+
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+    }
+
+    public fun updateRating(changeRating: u64, isPositive: bool, scenario: &mut Scenario) {
+        let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+        let achievement_collection = &mut achievement_collection_val;
+        let userId = object::id(&mut user_val);
+        let user_rating_collection = &mut user_rating_collection_val;
+        let community = &mut community_val;
+        userLib::updateRating_test(
+            user_rating_collection,
+            userId,
+            achievement_collection,
+            if(isPositive) i64Lib::from(changeRating) else i64Lib::neg_from(changeRating),
+            object::id(community),
+            test_scenario::ctx(scenario),
+        );
+
+        postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
     }
 }

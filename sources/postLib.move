@@ -308,6 +308,18 @@ module peeranha::postLib {
         voteDirection: u8,
     }
 
+    struct PostTypeChanged has copy, drop {
+        userId: ID,
+        postMetaDataId: ID,
+        oldPostType: u8,
+    }
+
+    struct PostCommunityChanged has copy, drop {
+        userId: ID,
+        postMetaDataId: ID,
+        oldCommunityId: ID,
+    }
+
     /// Publication `post` by `bot`
     public entry fun createPostByBot(
         roles: &mut accessControlLib::UserRolesCollection,
@@ -773,8 +785,14 @@ module peeranha::postLib {
                 accessControlLib::get_action_role_admin_or_community_moderator(),
         );
 
-        changePostType(usersRatingCollection, achievementCollection, postMetaData, newPostType, ctx);
-        changePostCommunity(usersRatingCollection, achievementCollection, postMetaData, newCommunity, ctx);
+        if (postMetaData.postType != newPostType) {
+            event::emit(PostTypeChanged{userId: userId, postMetaDataId: object::id(postMetaData), oldPostType: postMetaData.postType});
+            changePostType(usersRatingCollection, achievementCollection, postMetaData, newPostType, ctx);
+        };
+        if (postMetaData.communityId != object::id(newCommunity)) {
+            event::emit(PostCommunityChanged{userId: userId, postMetaDataId: object::id(postMetaData), oldCommunityId: postMetaData.communityId});
+            changePostCommunity(usersRatingCollection, achievementCollection, postMetaData, newCommunity, ctx);
+        };
 
         assert!(language < LANGUAGE_LENGTH, E_INVALID_LANGUAGE);
         if (postMetaData.language != language) {
@@ -1531,8 +1549,6 @@ module peeranha::postLib {
         newPostType: u8,
         ctx: &mut TxContext,
     ) {
-        if (postMetaData.postType == newPostType) return;
-
         let oldPostType = postMetaData.postType;
         assert!(newPostType != TUTORIAL || getActiveReplyCount(postMetaData) == 0, E_ERROR_POST_TYPE);   // test
 
@@ -1604,7 +1620,6 @@ module peeranha::postLib {
         ctx: &mut TxContext,
     ) {
         let newCommunityId = object::id(community);
-        if (postMetaData.communityId == newCommunityId) return;
 
         communityLib::onlyNotFrozenCommunity(community);
         let oldCommunityId: ID = postMetaData.communityId;
@@ -2154,6 +2169,13 @@ module peeranha::postLib {
     }
 
     #[test_only]
+    public fun getPostRating(postMetaData: &PostMetaData): (i64Lib::I64) {
+        (
+            postMetaData.rating,
+        )
+    }
+
+    #[test_only]
     public fun getPostAuthorMetaData(postMetaData: &PostMetaData): (vector<u8>) {
         postMetaData.authorMetaData
     }
@@ -2181,6 +2203,14 @@ module peeranha::postLib {
     }
 
     #[test_only]
+    public fun getReplyRating(postMetaData: &PostMetaData, replyMetaDataKey: u64): (i64Lib::I64) {
+        let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
+        (
+            replyMetaData.rating,
+        )
+    }
+
+    #[test_only]
     public fun getReplyAuthorMetaData(postMetaData: &PostMetaData, replyMetaDataKey: u64): (vector<u8>) {
         let replyMetaData = getReplyMetaData(postMetaData, replyMetaDataKey);
         replyMetaData.authorMetaData
@@ -2202,5 +2232,13 @@ module peeranha::postLib {
         )
         // add
         // properties: VecMap<u8, vector<u8>>,
+    }
+
+    #[test_only]
+    public fun getCommentRating(postMetaData: &mut PostMetaData, parentReplyMetaDataKey: u64, commentMetaDataKey: u64): (i64Lib::I64) {
+        let commentMetaData = getCommentMetaData(postMetaData, parentReplyMetaDataKey, commentMetaDataKey);
+        (
+            commentMetaData.rating,
+        )
     }
 }

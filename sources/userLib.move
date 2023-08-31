@@ -189,7 +189,9 @@ module peeranha::userLib {
         communityId: ID,
         ctx: &mut TxContext
     ) {
-        if(i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
+        if (userId == commonLib::get_bot_id())
+            return;
+        if (i64Lib::compare(&rating, &i64Lib::zero()) == i64Lib::getEual())
             return;
 
         let userCommunityRating = getMutableUserCommunityRating(usersRatingCollection, userId);

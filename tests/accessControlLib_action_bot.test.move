@@ -1,20 +1,21 @@
 #[test_only]
-module peeranha::accessControlLib_action_protacol_admin_test
+module peeranha::accessControlLib_action_bot_test
 {
     use peeranha::userLib::{Self, User};
     use peeranha::nftLib;
     use peeranha::postLib::{Self, Post, PostMetaData};
+    use peeranha::followCommunityLib;
     use sui::clock;
     use peeranha::userLib_test;
     use peeranha::nft_test;
     use peeranha::communityLib_test;
-    use peeranha::accessControlLib_action_common_user_negative_rating_test;
     use peeranha::postLib_test;
     use peeranha::postLib_bot_test;
     use peeranha::postLib_votes_test;
     use peeranha::accessControlLib_common_role_test;
     use peeranha::accessControlLib;
     use sui::test_scenario::{Self, Scenario};
+    use sui::object;
 
     // use std::debug;
     // debug::print(community);
@@ -29,15 +30,15 @@ module peeranha::accessControlLib_action_protacol_admin_test
     const BOT_ROLE: vector<u8> = vector<u8>[5];
     const DISPATCHER_ROLE: vector<u8> = vector<u8>[6];
 
-    // ====== protocol admin action ======
+    // ====== community admin action ======
 
     #[test]
-    fun test_protocol_admin_create_post() {
+    fun test_bot_create_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -49,13 +50,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_BOT_ROLE)]
-    fun test_protocol_admin_create_bot_post() {
+    #[test]
+    fun test_bot_create_bot_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -68,12 +69,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_edit_own_post() {
+    fun test_bot_edit_own_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -117,13 +118,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_edit_not_own_post_meta_data() {
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR)]
+    fun test_bot_edit_not_own_post_meta_data() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -163,12 +164,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_delete_own_post_meta_data() {
+    fun test_bot_delete_own_post_meta_data() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -203,13 +204,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_delete_not_own_post_meta_data() {
+    #[test, expected_failure(abort_code = userLib::E_NOT_ALLOWED_DELETE)]
+    fun test_bot_delete_not_own_post_meta_data() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -245,12 +246,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_create_reply() {
+    fun test_bot_create_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -267,13 +268,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_BOT_ROLE)]
-    fun test_protocol_admin_create_bot_reply() {
+    #[test]
+    fun test_bot_create_bot_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -290,13 +291,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_create_official_reply() {
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN)]
+    fun test_bot_create_official_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -337,12 +338,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_edit_own_reply() {
+    fun test_bot_edit_own_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -382,12 +383,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test, expected_failure(abort_code = postLib::E_REPLY_NOT_EXIST)]
-    fun test_protocol_admin_edit_not_exist_reply() {
+    fun test_bot_edit_not_exist_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -422,12 +423,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test, expected_failure(abort_code = postLib::E_REPLY_DELETED)]
-    fun test_protocol_admin_edit_deleted_reply() {
+    fun test_bot_edit_deleted_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -478,13 +479,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_edit_not_own_reply_meta_data() {
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR)]
+    fun test_bot_edit_not_own_reply_meta_data() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -524,12 +525,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test, expected_failure(abort_code = postLib::E_ONLY_OWNER_BY_POST_CAN_CHANGE_STATUS_BEST_REPLY)]
-    fun test_protocol_admin_set_not_own_best_reply() {
+    fun test_bot_set_not_own_best_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -571,12 +572,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_set_own_best_reply() {
+    fun test_bot_set_own_best_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -618,12 +619,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_deleted_own_reply() {
+    fun test_bot_deleted_reply_own_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -665,13 +666,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_deleted_not_own_reply() {
+    #[test, expected_failure(abort_code = userLib::E_NOT_ALLOWED_DELETE)]
+    fun test_bot_deleted_not_own_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -712,13 +713,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_create_comment_to_not_own_post() {
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_CREATE_COMMENT)]
+    fun test_bot_create_comment_to_not_own_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -735,13 +736,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_create_comment_to_not_own_reply() {
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_CREATE_COMMENT)]
+    fun test_bot_create_comment_to_not_own_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -764,12 +765,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_create_comment_to_own_post() {
+    fun test_bot_create_comment_to_own_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -787,12 +788,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_create_comment_to_own_reply() {
+    fun test_bot_create_comment_to_own_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -814,13 +815,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_delete_not_own_comment_to_post() {
+    #[test, expected_failure(abort_code = userLib::E_NOT_ALLOWED_DELETE)]
+    fun test_bot_delete_not_own_comment_to_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -862,12 +863,34 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_delete_not_own_comment_to_reply() {
+    fun test_common_user_positive_update_profile() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user = &mut user_val;
+            userLib::updateUser(user, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c82");
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = userLib::E_NOT_ALLOWED_DELETE)]
+    fun test_bot_delete_not_own_comment_to_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -913,13 +936,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_upvote_post() {
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_UPVOTE_POST)]
+    fun test_bot_upvote_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -940,13 +963,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_cancel_vote_post() {
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_UPVOTE_POST)]
+    fun test_bot_cancel_vote_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -956,21 +979,11 @@ module peeranha::accessControlLib_action_protacol_admin_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER2);
-        {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             postLib_votes_test::vote_post(post_meta_data, true, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
-        };
-
-        test_scenario::next_tx(scenario, USER2);
-        {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, false, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -986,13 +999,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_downvote_post() {
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_DOWNVOTE_POST)]
+    fun test_bot_downvote_post() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1013,13 +1026,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_upvote_reply() {
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_UPVOTE_REPLY)]
+    fun test_bot_upvote_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1045,13 +1058,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_cancel_vote_reply() {
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_UPVOTE_REPLY)]
+    fun test_bot_cancel_vote_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1066,21 +1079,11 @@ module peeranha::accessControlLib_action_protacol_admin_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER2);
-        {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             postLib_votes_test::vote_reply(post_meta_data, 1, true, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
-        };
-
-        test_scenario::next_tx(scenario, USER2);
-        {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, false, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1096,13 +1099,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_downvote_reply() {
+    #[test, expected_failure(abort_code = userLib::E_LOW_RATING_DOWNVOTE_REPLY)]
+    fun test_bot_downvote_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1129,12 +1132,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_upvote_comment() {
+    fun test_bot_upvote_comment() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1161,12 +1164,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_cancel_vote_comment() {
+    fun test_bot_cancel_vote_comment() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1181,21 +1184,11 @@ module peeranha::accessControlLib_action_protacol_admin_test
 
         test_scenario::next_tx(scenario, USER2);
         {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, true, scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER2);
-        {
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             postLib_votes_test::vote_comment(post_meta_data, 0, 1, true, scenario);
 
             test_scenario::return_shared(post_meta_data_val);
-        };
-
-        test_scenario::next_tx(scenario, USER2);
-        {
-            accessControlLib_action_common_user_negative_rating_test::updateRating(100, false, scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1212,12 +1205,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
-    fun test_protocol_admin_downvote_comment() {
+    fun test_bot_downvote_comment() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1243,13 +1236,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_create_community() {
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_ADMIN)]
+    fun test_bot_create_community() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1261,13 +1254,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_update_community() {
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN)]
+    fun test_bot_update_community() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1280,12 +1273,12 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN)]
-    fun test_protocol_admin_update_documentation() {
+    fun test_bot_update_documentation() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1297,13 +1290,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_create_tag() {
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN)]
+    fun test_bot_create_tag() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1315,13 +1308,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_update_tag() {
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN)]
+    fun test_bot_update_tag() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1333,13 +1326,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_freeze_community() {
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN)]
+    fun test_bot_freeze_community() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1351,13 +1344,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         test_scenario::end(scenario_val);
     }
 
-    #[test]
-    fun test_protocol_admin_unfreeze_community() {
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN)]
+    fun test_bot_unfreeze_community() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1375,12 +1368,71 @@ module peeranha::accessControlLib_action_protacol_admin_test
     }
 
     #[test]
+    fun test_bot_follow_community() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_bot(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user = &mut user_val;
+            let community = &mut community_val;
+            
+            followCommunityLib::followCommunity(user, community);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::end(scenario_val);
+        clock::destroy_for_testing(time);
+    }
+
+    #[test]
+    fun test_bot_unfollow_community() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_bot(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user = &mut user_val;
+            let community = &mut community_val;
+            
+            followCommunityLib::followCommunity(user, community);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user = &mut user_val;
+            let community = &mut community_val;
+            
+            followCommunityLib::unfollowCommunity(user, community);
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::end(scenario_val);
+        clock::destroy_for_testing(time);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_ADMIN)]
     fun test_bot_create_achievement() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1392,13 +1444,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         clock::destroy_for_testing(time);
     }
 
-    #[test]
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN)]
     fun test_bot_create_community_achievement() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1410,13 +1462,13 @@ module peeranha::accessControlLib_action_protacol_admin_test
         clock::destroy_for_testing(time);
     }
 
-    #[test]
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_ADMIN)]
     fun test_bot_unlock_manual_achievement() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         let time;
         {
-            time = init_accessControlLib_protocol_admin_for_user2(scenario);
+            time = init_accessControlLib_user2_is_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1436,7 +1488,7 @@ module peeranha::accessControlLib_action_protacol_admin_test
     // ====== Support functions ======
 
     #[test_only]
-    public fun init_accessControlLib_protocol_admin_for_user2(scenario: &mut Scenario) : clock::Clock {
+    public fun init_accessControlLib_user2_is_bot(scenario: &mut Scenario) : clock::Clock {
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));
@@ -1459,6 +1511,16 @@ module peeranha::accessControlLib_action_protacol_admin_test
             userLib_test::create_user(scenario);
         };
 
+        test_scenario::next_tx(scenario, USER1);
+        {
+            accessControlLib_common_role_test::grant_protocol_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            communityLib_test::create_community(scenario);
+        };
+
         let user2_val;
         test_scenario::next_tx(scenario, USER2);
         {
@@ -1467,12 +1529,8 @@ module peeranha::accessControlLib_action_protacol_admin_test
 
         test_scenario::next_tx(scenario, USER1);
         {
-            communityLib_test::grant_protocol_admin_role(scenario);
-        };
-
-        test_scenario::next_tx(scenario, USER1);
-        {
-            accessControlLib_common_role_test::grant_protocol_admin_role_to_user(&mut user2_val, scenario);
+            let user2 = &mut user2_val;
+            postLib_bot_test::grant_bot_role(object::id(user2), scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -1480,10 +1538,6 @@ module peeranha::accessControlLib_action_protacol_admin_test
             test_scenario::return_to_sender(scenario, user2_val);
         };
 
-        test_scenario::next_tx(scenario, USER1);
-        {
-            communityLib_test::create_community(scenario);
-        };
         time
     }
 }
