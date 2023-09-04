@@ -5,7 +5,9 @@ module peeranha::postLib_bot_test
     use peeranha::nftLib;
     use peeranha::userLib_test;
     use peeranha::communityLib_test;
+    use peeranha::postLib_votes_rating_test;
     use peeranha::postLib_test;
+    use peeranha::postLib_votes_test;
     use peeranha::i64Lib;
     use peeranha::communityLib::{Community};
     use peeranha::commonLib;
@@ -33,6 +35,9 @@ module peeranha::postLib_bot_test
     const MESSENGER_TYPE_DISCORD: u8 = 2;
     const MESSENGER_TYPE_SLACK: u8 = 3;
 
+    const UPVOTE_FLAG: bool = true;
+    const DOWNVOTE_FLAG: bool = false;
+
     const HANDLE1: vector<u8> = vector<u8>[1];
     const HANDLE2: vector<u8> = vector<u8>[2];
 
@@ -47,7 +52,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test(scenario);
+            time = init_postLib_by_bot_test_and_create_post(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -105,7 +110,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_basic_postLib_by_bot_test(scenario);
+            time = init_postLib_by_bot_test(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -147,12 +152,12 @@ module peeranha::postLib_bot_test
     }
 
     #[test]
-    fun test_create_reply_by_bot() {
+    fun test_create_reply_by_bot_to_post_from_bot() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test(scenario);
+            time = init_postLib_by_bot_test_and_create_post(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -162,6 +167,10 @@ module peeranha::postLib_bot_test
 
         test_scenario::next_tx(scenario, USER2);
         {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
             let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
             let post_meta_data = &mut post_meta_data_val;
             let reply_val = test_scenario::take_from_sender<Reply>(scenario);
@@ -192,8 +201,81 @@ module peeranha::postLib_bot_test
             let authorMetaData = postLib::getReplyAuthorMetaData(post_meta_data, 1);
             assert!(authorMetaData == commonLib::compose_messenger_sender_property(MESSENGER_TYPE_TELEGRAM, HANDLE1), 12);
 
+            let expectedBotRating = i64Lib::from(0);
+            let botRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+            assert!(expectedBotRating == botRating, 0);            
+            
             test_scenario::return_to_sender(scenario, reply_val);
             test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_reply_by_bot_to_post_from_common_user() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            postLib_test::create_standart_post(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            create_standart_reply_by_bot(&time, HANDLE1, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
+
+            let (
+                ipfsDoc,
+                replyId,
+                author,
+                rating,
+                parentReplyMetaDataKey,
+                language,
+                isFirstReply,
+                isQuickReply,
+                isDeleted,
+                _historyVotes
+            ) = postLib::getReplyData(post_meta_data, reply, 1);
+
+            assert!(ipfsDoc == x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6", 1);
+            assert!(replyId == object::id(reply), 11);
+            assert!(author == commonLib::get_bot_id(), 4);
+            assert!(rating == i64Lib::zero(), 4);
+            assert!(parentReplyMetaDataKey == 0, 5);
+            assert!(language == ENGLISH_LANGUAGE, 5);
+            assert!(isFirstReply == true, 6);
+            assert!(isQuickReply == true, 7);
+            assert!(isDeleted == false, 9);
+            let authorMetaData = postLib::getReplyAuthorMetaData(post_meta_data, 1);
+            assert!(authorMetaData == commonLib::compose_messenger_sender_property(MESSENGER_TYPE_TELEGRAM, HANDLE1), 12);
+
+            let expectedBotRating = i64Lib::from(0);
+            let botRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+            assert!(expectedBotRating == botRating, 0);
+
+            test_scenario::return_to_sender(scenario, reply_val);
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
 
         clock::destroy_for_testing(time);
@@ -206,7 +288,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test(scenario);
+            time = init_postLib_by_bot_test_and_create_post(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -258,7 +340,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test(scenario);
+            time = init_postLib_by_bot_test_and_create_post(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -345,7 +427,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test(scenario);
+            time = init_postLib_by_bot_test_and_create_post(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -362,11 +444,195 @@ module peeranha::postLib_bot_test
         test_scenario::end(scenario_val);
     }
 
+    #[test]
+    fun test_upvote_bot_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test_and_create_post(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_post(post_meta_data, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            let (rating) = postLib::getPostRating(post_meta_data);
+            assert!(rating == i64Lib::from(1), 5);
+
+            let expectedBotRating = i64Lib::from(0);
+            let botRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+            assert!(expectedBotRating == botRating, 0);  
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_downvote_bot_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test_and_create_post(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_post(post_meta_data, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            let (rating) = postLib::getPostRating(post_meta_data);
+            assert!(rating == i64Lib::neg_from(1), 5);
+
+            let expectedBotRating = i64Lib::from(0);
+            let botRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+            assert!(expectedBotRating == botRating, 0);  
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_upvote_reply_by_bot_to_post_from_common_user() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            postLib_test::create_standart_post(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            create_standart_reply_by_bot(&time, HANDLE1, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_reply(post_meta_data, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            let (rating) = postLib::getReplyRating(post_meta_data, 1);
+            assert!(rating == i64Lib::from(1), 4);
+
+            let expectedBotRating = i64Lib::from(0);
+            let botRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+            assert!(expectedBotRating == botRating, 0);
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_downvote_reply_by_bot_to_post_from_common_user() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            postLib_test::create_standart_post(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            create_standart_reply_by_bot(&time, HANDLE1, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            postLib_votes_test::vote_reply(post_meta_data, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let community = &mut community_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            let (rating) = postLib::getReplyRating(post_meta_data, 1);
+            assert!(rating == i64Lib::neg_from(1), 4);
+
+            let expectedBotRating = i64Lib::from(0);
+            let botRating = postLib_votes_rating_test::getUserRating(user_rating_collection, user, community);
+            assert!(expectedBotRating == botRating, 0);
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
     // ====== Support functions ======
 
     #[test_only]
-    public fun init_postLib_by_bot_test(scenario: &mut Scenario): clock::Clock {
-        let time = init_basic_postLib_by_bot_test(scenario);
+    public fun init_postLib_by_bot_test_and_create_post(scenario: &mut Scenario): clock::Clock {
+        let time = init_postLib_by_bot_test(scenario);
 
         test_scenario::next_tx(scenario, USER2);
         {
@@ -377,7 +643,7 @@ module peeranha::postLib_bot_test
     }
 
     #[test_only]
-    public fun init_basic_postLib_by_bot_test(scenario: &mut Scenario): clock::Clock {
+    public fun init_postLib_by_bot_test(scenario: &mut Scenario): clock::Clock {
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
             userLib::init_test(test_scenario::ctx(scenario));

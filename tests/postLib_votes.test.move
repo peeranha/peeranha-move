@@ -5,6 +5,7 @@ module peeranha::postLib_votes_test
     use peeranha::postLib::{Self, PostMetaData};
     use peeranha::postLib_test;
     use peeranha::postLib_change_post_type_test;
+    use peeranha::i64Lib;
     use sui::test_scenario::{Self, Scenario};
     use sui::clock;
 
@@ -53,6 +54,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == UPVOTE, 1);
+
+            let (rating) = postLib::getPostRating(post_meta_data);
+            assert!(rating == i64Lib::from(1), 5);
             
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -93,6 +97,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == DOWNVOTE, 1);
+
+            let (rating) = postLib::getPostRating(post_meta_data);
+            assert!(rating == i64Lib::neg_from(1), 5);
 
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -143,6 +150,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == UPVOTE, 1);
+
+            let (rating) = postLib::getPostRating(post_meta_data);
+            assert!(rating == i64Lib::from(1), 5);
             
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -193,6 +203,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == DOWNVOTE, 1);
+
+            let (rating) = postLib::getPostRating(post_meta_data);
+            assert!(rating == i64Lib::neg_from(1), 5);
             
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -243,6 +256,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == NONE_VOTE, 1);
+
+            let (rating) = postLib::getPostRating(post_meta_data);
+            assert!(rating == i64Lib::zero(), 5);
             
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -293,6 +309,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == NONE_VOTE, 1);
+
+            let (rating) = postLib::getPostRating(post_meta_data);
+            assert!(rating == i64Lib::zero(), 5);
 
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -479,6 +498,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == UPVOTE, 1);
+
+            let (rating) = postLib::getReplyRating(post_meta_data, 1);
+            assert!(rating == i64Lib::from(1), 4);
             
 
             test_scenario::return_shared(post_meta_data_val);
@@ -526,6 +548,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == DOWNVOTE, 1);
+
+            let (rating) = postLib::getReplyRating(post_meta_data, 1);
+            assert!(rating == i64Lib::neg_from(1), 4);
 
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -581,6 +606,9 @@ module peeranha::postLib_votes_test
             assert!(isExistVote == true, 0);
             assert!(history == UPVOTE, 1);
 
+            let (rating) = postLib::getReplyRating(post_meta_data, 1);
+            assert!(rating == i64Lib::from(1), 4);
+
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
@@ -634,6 +662,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == DOWNVOTE, 1);
+
+            let (rating) = postLib::getReplyRating(post_meta_data, 1);
+            assert!(rating == i64Lib::neg_from(1), 4);
 
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -689,6 +720,9 @@ module peeranha::postLib_votes_test
             assert!(isExistVote == true, 0);
             assert!(history == NONE_VOTE, 1);
 
+            let (rating) = postLib::getReplyRating(post_meta_data, 1);
+            assert!(rating == i64Lib::zero(), 4);
+
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
         };
@@ -742,6 +776,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == NONE_VOTE, 1);
+
+            let (rating) = postLib::getReplyRating(post_meta_data, 1);
+            assert!(rating == i64Lib::zero(), 4);
 
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -884,7 +921,105 @@ module peeranha::postLib_votes_test
     }
 
     #[test]
-    fun test_upvote_comment() {
+    fun test_upvote_comment_to_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(post_meta_data, 0, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_comment(post_meta_data, 0, 1, UPVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getCommentHistoryVotes(post_meta_data, 0, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == UPVOTE, 1);
+
+            let (rating) = postLib::getCommentRating(post_meta_data, 0, 1);
+            assert!(rating == i64Lib::from(1), 4);
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_downvote_comment_to_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            create_comment(post_meta_data, 0, &time, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            vote_comment(post_meta_data, 0, 1, DOWNVOTE_FLAG, scenario);
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let userId = object::id(user);
+
+            let historyVotes = postLib::getCommentHistoryVotes(post_meta_data, 0, 1);
+            let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
+            assert!(isExistVote == true, 0);
+            assert!(history == DOWNVOTE, 1);
+
+            let (rating) = postLib::getCommentRating(post_meta_data, 0, 1);
+            assert!(rating == i64Lib::neg_from(1), 4);
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_upvote_comment_to_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -928,7 +1063,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == UPVOTE, 1);
-            
+
+            let (rating) = postLib::getCommentRating(post_meta_data, 1, 1);
+            assert!(rating == i64Lib::from(1), 4);
 
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
@@ -939,7 +1076,7 @@ module peeranha::postLib_votes_test
     }
 
     #[test]
-    fun test_downvote_comment() {
+    fun test_downvote_comment_to_reply() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
@@ -983,6 +1120,9 @@ module peeranha::postLib_votes_test
             let (history, isExistVote) = postLib::getHistoryVote(userId, historyVotes);
             assert!(isExistVote == true, 0);
             assert!(history == DOWNVOTE, 1);
+
+            let (rating) = postLib::getCommentRating(post_meta_data, 1, 1);
+            assert!(rating == i64Lib::neg_from(1), 4);
 
             test_scenario::return_shared(post_meta_data_val);
             postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
