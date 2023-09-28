@@ -39,9 +39,9 @@ module peeranha::postLib_exception_test
         let scenario = &mut scenario_val;
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            nftLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            nftLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -90,9 +90,9 @@ module peeranha::postLib_exception_test
         let scenario = &mut scenario_val;
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            nftLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            nftLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -144,9 +144,9 @@ module peeranha::postLib_exception_test
         let scenario = &mut scenario_val;
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            nftLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            nftLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -198,9 +198,9 @@ module peeranha::postLib_exception_test
         let scenario = &mut scenario_val;
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            nftLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            nftLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -252,9 +252,9 @@ module peeranha::postLib_exception_test
         let scenario = &mut scenario_val;
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            nftLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            nftLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -306,9 +306,9 @@ module peeranha::postLib_exception_test
         let scenario = &mut scenario_val;
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            nftLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            nftLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -341,9 +341,9 @@ module peeranha::postLib_exception_test
         let scenario = &mut scenario_val;
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            nftLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            nftLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -2547,9 +2547,9 @@ module peeranha::postLib_exception_test
     fun init_postLib_test(scenario: &mut Scenario): clock::Clock {
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
-            nftLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
+            nftLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
