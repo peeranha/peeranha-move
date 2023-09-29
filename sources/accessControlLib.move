@@ -324,7 +324,8 @@ module peeranha::accessControlLib {
     // --- Testing functions ---
 
     #[test_only]
-    public fun init_test(ctx: &mut TxContext) {
+    /// Wrapper of module initializer for testing
+    public fun test_init(ctx: &mut TxContext) {
         init(ctx)
     }
 }
