@@ -420,16 +420,6 @@ module peeranha::userLib {
         init(ctx)
     }
 
-
-    /////////////////////////////////////////////////////////
-    // ////////////////////////////////////////////////////
-    // delete
-    // /////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////
-    public entry fun updateRatingBuf(usersRatingCollection: &mut UsersRatingCollection, userId: ID, achievementCollection: &mut nftLib::AchievementCollection, rating: u64, isPositive:bool, communityId: ID, ctx: &mut TxContext) {
-        updateRating(usersRatingCollection, userId, achievementCollection, if(isPositive) i64Lib::from(rating) else i64Lib::neg_from(rating), communityId, ctx);
-    }
-
     #[test_only]
     public fun updateRating_test(usersRatingCollection: &mut UsersRatingCollection, userId: ID, achievementCollection: &mut nftLib::AchievementCollection, rating: i64Lib::I64, communityId: ID, ctx: &mut TxContext) {
         updateRating(usersRatingCollection, userId, achievementCollection, rating, communityId, ctx);
