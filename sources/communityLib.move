@@ -230,6 +230,60 @@ module peeranha::communityLib {
         event::emit(UnfreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
+
+
+    /// Give community administrator permission by admin or community admin
+    public fun giveCommunityAdminPermission(                                    // test
+        roles: &mut accessControlLib::UserRolesCollection,
+        admin: &userLib::User,
+        userId: ID,
+        community: &Community
+    ) {
+        onlyNotFrozenCommunity(community);
+        let communityId = object::id(community);
+        let adminId = object::id(admin);
+        accessControlLib::grantCommunityAdminRole(roles, communityId, adminId, userId);
+    }
+
+    /// Give community moderator permission by admin or community admin
+    public fun giveCommunityModeratorPermission(                                    // test
+        roles: &mut accessControlLib::UserRolesCollection,
+        admin: &userLib::User,
+        userId: ID,
+        community: &Community
+    ) {
+        onlyNotFrozenCommunity(community);
+        let communityId = object::id(community);
+        let adminId = object::id(admin);
+        accessControlLib::grantCommunityModeratorRole(roles, communityId, adminId, userId);
+    }
+
+    /// Revoke community administrator permission by admin or community admin
+    public fun revokeCommunityAdminPermission(                                    // test
+        roles: &mut accessControlLib::UserRolesCollection,
+        admin: &userLib::User,
+        userId: ID,
+        community: &Community
+    ) {
+        onlyNotFrozenCommunity(community);
+        let communityId = object::id(community);
+        let adminId = object::id(admin);
+        accessControlLib::revokeCommunityAdminRole(roles, communityId, adminId, userId);
+    }
+
+    /// Revoke community moderator permission by admin or community admin
+    public fun revokeCommunityModeratorPermission(                                    // test
+        roles: &mut accessControlLib::UserRolesCollection,
+        admin: &userLib::User,
+        userId: ID,
+        community: &Community
+    ) {
+        onlyNotFrozenCommunity(community);
+        let communityId = object::id(community);
+        let adminId = object::id(admin);
+        accessControlLib::revokeCommunityModeratorRole(roles, communityId, adminId, userId);
+    }
+
     /// Check status of the `community`
     public fun onlyNotFrozenCommunity(community: &Community) {
         assert!(!community.isFrozen, E_COMMUNITY_IS_FROZEN);

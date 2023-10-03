@@ -20,6 +20,7 @@ module peeranha::accessControlLib {
     const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN: u64 = 306;
     const E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN: u64 = 307;
     const E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR: u64 = 308;
+    const E_SELF_REVOKE: u64 = 309;
 
     // ====== Constant ======
 
@@ -201,7 +202,7 @@ module peeranha::accessControlLib {
                 let status = vec_map::get_mut(&mut role_.members, &userId);
                 *status = true;
             };
-            event::emit(RoleGrantedEvent{role, userId});    // , _msgSender()????
+            event::emit(RoleGrantedEvent{role, userId});
         }
     }     
     
@@ -221,7 +222,7 @@ module peeranha::accessControlLib {
                 let status = vec_map::get_mut(&mut role_.members, &userId);
                 *status = false;
             };
-            event::emit(RoleRevokedEvent{role, userId});    // , _msgSender() ??
+            event::emit(RoleRevokedEvent{role, userId});
         }
     }
 
@@ -233,8 +234,37 @@ module peeranha::accessControlLib {
         setRoleAdmin(userRolesCollection, communityModeratorRole, communityAdminRole);
         setRoleAdmin(userRolesCollection, communityAdminRole, PROTOCOL_ADMIN_ROLE);
 
-        grantRole_(userRolesCollection, communityAdminRole, userId);        // test
-        grantRole_(userRolesCollection, communityModeratorRole, userId);    // test
+        grantRole_(userRolesCollection, communityAdminRole, userId);
+        grantRole_(userRolesCollection, communityModeratorRole, userId);
+    }
+
+    /// Grant 'communityAdminRole'. Expected call from community lib by admin or community admin
+    public(friend) fun grantCommunityAdminRole(userRolesCollection: &mut UserRolesCollection, communityId: ID, adminId: ID, userId: ID) {
+        checkHasRole(userRolesCollection, adminId, ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN, communityId);
+        let communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
+        grantRole_(userRolesCollection, communityAdminRole, userId);
+    }
+
+    /// Grant 'communityModeratorRole'. Expected call from community lib by admin or community admin
+    public(friend) fun grantCommunityModeratorRole(userRolesCollection: &mut UserRolesCollection, communityId: ID, adminId: ID, userId: ID) {
+        checkHasRole(userRolesCollection, adminId, ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN, communityId);
+        let communityModeratorRole = getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId);
+        grantRole_(userRolesCollection, communityModeratorRole, userId);
+    }
+
+    /// Revoke 'communityAdminRole'. Expected call from community lib by admin or community admin
+    public(friend) fun revokeCommunityAdminRole(userRolesCollection: &mut UserRolesCollection, communityId: ID, adminId: ID, userId: ID) {
+        checkHasRole(userRolesCollection, adminId, ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN, communityId);
+        assert!(adminId != userId, E_SELF_REVOKE);                                              // TEST
+        let communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
+        grantRole_(userRolesCollection, communityAdminRole, userId);
+    }
+
+    /// Revoke 'communityModeratorRole'. Expected call from community lib by admin or community admin
+    public(friend) fun revokeCommunityModeratorRole(userRolesCollection: &mut UserRolesCollection, communityId: ID, adminId: ID, userId: ID) {
+        checkHasRole(userRolesCollection, adminId, ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN, communityId);
+        let communityModeratorRole = getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId);
+        grantRole_(userRolesCollection, communityModeratorRole, userId);
     }
 
     /// Abort if `user object id` is missing `actionRole`.
