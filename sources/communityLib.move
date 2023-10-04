@@ -233,7 +233,7 @@ module peeranha::communityLib {
 
 
     /// Give community administrator permission by admin or community admin
-    public fun giveCommunityAdminPermission(                                    // test
+    public fun giveCommunityAdminPermission(
         roles: &mut accessControlLib::UserRolesCollection,
         admin: &userLib::User,
         userId: ID,
@@ -246,7 +246,7 @@ module peeranha::communityLib {
     }
 
     /// Give community moderator permission by admin or community admin
-    public fun giveCommunityModeratorPermission(                                    // test
+    public fun giveCommunityModeratorPermission(
         roles: &mut accessControlLib::UserRolesCollection,
         admin: &userLib::User,
         userId: ID,
@@ -259,7 +259,7 @@ module peeranha::communityLib {
     }
 
     /// Revoke community administrator permission by admin or community admin
-    public fun revokeCommunityAdminPermission(                                    // test
+    public fun revokeCommunityAdminPermission(
         roles: &mut accessControlLib::UserRolesCollection,
         admin: &userLib::User,
         userId: ID,
@@ -272,7 +272,7 @@ module peeranha::communityLib {
     }
 
     /// Revoke community moderator permission by admin or community admin
-    public fun revokeCommunityModeratorPermission(                                    // test
+    public fun revokeCommunityModeratorPermission(
         roles: &mut accessControlLib::UserRolesCollection,
         admin: &userLib::User,
         userId: ID,

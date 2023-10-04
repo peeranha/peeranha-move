@@ -1554,6 +1554,67 @@ module peeranha::accessControlLib_common_role_test
         test_scenario::end(scenario_val);
     }
 
+    #[test, expected_failure(abort_code = accessControlLib::E_SELF_REVOKE)]
+    fun test_community_admin_revoke_community_admin_from_himself() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            init_accessControlLib_common_role(scenario);
+        };
+
+        let user3_val;
+        test_scenario::next_tx(scenario, USER3);
+        {
+            user3_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role_to_user(&mut user2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user3 = &mut user3_val;
+            grant_community_admin_role_correct_action(object::id(user3), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let userId = object::id(&mut user3_val);
+            let user = &mut user3_val;
+
+            communityLib::revokeCommunityAdminPermission(user_roles_collection, user, userId, community);
+
+            test_scenario::return_to_sender(scenario, user3_val);
+            test_scenario::return_shared(community_val);
+            test_scenario::return_shared(user_roles_collection_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
     #[test]
     fun test_community_admin_revoke_community_moderator() {
         let scenario_val = test_scenario::begin(USER1);

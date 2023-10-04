@@ -258,7 +258,7 @@ module peeranha::accessControlLib {
     /// Revoke 'communityAdminRole'. Expected call from community lib by admin or community admin
     public(friend) fun revokeCommunityAdminRole(userRolesCollection: &mut UserRolesCollection, communityId: ID, adminId: ID, userId: ID) {
         checkHasRole(userRolesCollection, adminId, ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN, communityId);
-        assert!(adminId != userId, E_SELF_REVOKE);                                              // TEST
+        assert!(adminId != userId, E_SELF_REVOKE);
         let communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
         revokeRole_(userRolesCollection, communityAdminRole, userId);
     }
