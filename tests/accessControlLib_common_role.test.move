@@ -1,7 +1,7 @@
 #[test_only]
 module peeranha::accessControlLib_common_role_test
 {
-    use peeranha::communityLib::{Community};
+    use peeranha::communityLib::{Self, Community};
     use peeranha::userLib::{Self, User};
     use std::vector;
     use peeranha::userLib_test;
@@ -877,6 +877,69 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test]
+    fun test_protocol_admin_grant_community_moderator_correct_action() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            init_accessControlLib_common_role(scenario);
+        };
+
+        let user3_val;
+        test_scenario::next_tx(scenario, USER3);
+        {
+            user3_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role_to_user(&mut user2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user3 = &mut user3_val;
+            grant_community_moderator_role_correct_action(object::id(user3), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user3 = &mut user3_val;
+
+            let roleTemplate = COMMUNITY_MODERATOR_ROLE;
+            roleTemplate = accessControlLib::getCommunityRole(roleTemplate, object::id(community));
+            let has_community_moderator_role = accessControlLib::hasRole(user_roles_collection, roleTemplate, object::id(user3));
+            assert!(has_community_moderator_role == true, 1);
+
+            test_scenario::return_shared(community_val);
+            test_scenario::return_shared(user_roles_collection_val);
+            test_scenario::return_to_sender(scenario, user3_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
     fun test_protocol_admin_grant_bot_role() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
@@ -979,6 +1042,74 @@ module peeranha::accessControlLib_common_role_test
 
         test_scenario::next_tx(scenario, USER2);
         {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_community_admin_grant_community_admin_correct_action() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            init_accessControlLib_common_role(scenario);
+        };
+
+        let user3_val;
+        test_scenario::next_tx(scenario, USER3);
+        {
+            user3_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user3 = &mut user3_val;
+            grant_community_admin_role(object::id(user3), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            test_scenario::return_to_sender(scenario, user3_val);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user2 = &mut user2_val;
+            grant_community_admin_role_correct_action(object::id(user2), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user2 = &mut user2_val;
+
+            let roleTemplate = COMMUNITY_ADMIN_ROLE;
+            roleTemplate = accessControlLib::getCommunityRole(roleTemplate, object::id(community));
+            let has_community_moderator_role = accessControlLib::hasRole(user_roles_collection, roleTemplate, object::id(user2));
+            assert!(has_community_moderator_role == true, 1);
+
+            test_scenario::return_shared(community_val);
+            test_scenario::return_shared(user_roles_collection_val);
             test_scenario::return_to_sender(scenario, user2_val);
         };
 
@@ -1238,6 +1369,152 @@ module peeranha::accessControlLib_common_role_test
 
         test_scenario::end(scenario_val);
     }
+    
+    #[test]
+    fun test_protocol_admin_revoke_community_admin() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            init_accessControlLib_common_role(scenario);
+        };
+
+        let user3_val;
+        test_scenario::next_tx(scenario, USER3);
+        {
+            user3_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role_to_user(&mut user2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user3 = &mut user3_val;
+            grant_community_admin_role(object::id(user3), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user3 = &mut user3_val;
+            revoke_community_admin_role(object::id(user3), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user3 = &mut user3_val;
+
+            let roleTemplate = COMMUNITY_MODERATOR_ROLE;
+            roleTemplate = accessControlLib::getCommunityRole(roleTemplate, object::id(community));
+            let has_community_moderator_role = accessControlLib::hasRole(user_roles_collection, roleTemplate, object::id(user3));
+            assert!(has_community_moderator_role == false, 1);
+
+            test_scenario::return_shared(community_val);
+            test_scenario::return_shared(user_roles_collection_val);
+            test_scenario::return_to_sender(scenario, user3_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_protocol_admin_revoke_community_admin_correct_action() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            init_accessControlLib_common_role(scenario);
+        };
+
+        let user3_val;
+        test_scenario::next_tx(scenario, USER3);
+        {
+            user3_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role_to_user(&mut user2_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user3 = &mut user3_val;
+            grant_community_admin_role_correct_action(object::id(user3), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user3 = &mut user3_val;
+            revoke_community_admin_role_correct_action(object::id(user3), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user3 = &mut user3_val;
+
+            let roleTemplate = COMMUNITY_MODERATOR_ROLE;
+            roleTemplate = accessControlLib::getCommunityRole(roleTemplate, object::id(community));
+            let has_community_moderator_role = accessControlLib::hasRole(user_roles_collection, roleTemplate, object::id(user3));
+            assert!(has_community_moderator_role == false, 1);
+
+            test_scenario::return_shared(community_val);
+            test_scenario::return_shared(user_roles_collection_val);
+            test_scenario::return_to_sender(scenario, user3_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
 
     #[test]
     fun test_community_admin_revoke_community_moderator() {
@@ -1292,6 +1569,84 @@ module peeranha::accessControlLib_common_role_test
             let community = &mut community_val;
             let user2 = &mut user2_val;
             revoke_community_moderator_role(object::id(user2), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user2 = &mut user2_val;
+
+            let roleTemplate = COMMUNITY_MODERATOR_ROLE;
+            roleTemplate = accessControlLib::getCommunityRole(roleTemplate, object::id(community));
+            let has_community_moderator_role = accessControlLib::hasRole(user_roles_collection, roleTemplate, object::id(user2));
+            assert!(has_community_moderator_role == false, 1);
+
+            test_scenario::return_shared(community_val);
+            test_scenario::return_shared(user_roles_collection_val);
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_community_admin_revoke_community_moderator_correct_action() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            init_accessControlLib_common_role(scenario);
+        };
+
+        let user3_val;
+        test_scenario::next_tx(scenario, USER3);
+        {
+            user3_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user3 = &mut user3_val;
+            grant_community_admin_role(object::id(user3), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            test_scenario::return_to_sender(scenario, user3_val);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user2 = &mut user2_val;
+            grant_community_moderator_role(object::id(user2), community, scenario);
+
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER3);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user2 = &mut user2_val;
+            revoke_community_moderator_role_correct_action(object::id(user2), community, scenario);
 
             test_scenario::return_shared(community_val);
         };
@@ -1494,7 +1849,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test_only]
-    public fun grant_community_admin_role(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) {
+    public fun grant_community_admin_role(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) {    // only for protocol admin
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let user_roles_collection = &mut user_roles_collection_val;
         let user_val = test_scenario::take_from_sender<User>(scenario);
@@ -1509,7 +1864,20 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test_only]
-    public fun grant_himself_community_admin_role(community: &mut Community, scenario: &mut Scenario) {
+    public fun grant_community_admin_role_correct_action(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) { // for protocol admin and community admin
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+
+        communityLib::giveCommunityAdminPermission(user_roles_collection, user, userId, community);
+
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun grant_himself_community_admin_role(community: &mut Community, scenario: &mut Scenario) { // only for protocol admin
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let user_roles_collection = &mut user_roles_collection_val;
         let user_val = test_scenario::take_from_sender<User>(scenario);
@@ -1525,7 +1893,7 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test_only]
-    public fun grant_community_moderator_role(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) {
+    public fun grant_community_moderator_role(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) { // only for protocol admin
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let user_roles_collection = &mut user_roles_collection_val;
         let user_val = test_scenario::take_from_sender<User>(scenario);
@@ -1540,7 +1908,20 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test_only]
-    public fun revoke_community_admin_role(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) {
+    public fun grant_community_moderator_role_correct_action(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) { // for protocol admin and community admin
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+
+        communityLib::giveCommunityModeratorPermission(user_roles_collection, user, userId, community);
+
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun revoke_community_admin_role(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) { // only for protocol admin
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let user_roles_collection = &mut user_roles_collection_val;
         let user_val = test_scenario::take_from_sender<User>(scenario);
@@ -1555,7 +1936,20 @@ module peeranha::accessControlLib_common_role_test
     }
 
     #[test_only]
-    public fun revoke_community_moderator_role(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) {
+    public fun revoke_community_admin_role_correct_action(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) { // for protocol admin and community admin
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+
+        communityLib::revokeCommunityAdminPermission(user_roles_collection, user, userId, community);
+
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun revoke_community_moderator_role(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) { // only for community admin
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let user_roles_collection = &mut user_roles_collection_val;
         let user_val = test_scenario::take_from_sender<User>(scenario);
@@ -1564,6 +1958,19 @@ module peeranha::accessControlLib_common_role_test
         let roleTemplate = COMMUNITY_MODERATOR_ROLE;
         roleTemplate = accessControlLib::getCommunityRole(roleTemplate, object::id(community));
         userLib::revokeRole(user_roles_collection, user, userId, roleTemplate);
+
+        test_scenario::return_to_sender(scenario, user_val);
+        test_scenario::return_shared(user_roles_collection_val);
+    }
+
+    #[test_only]
+    public fun revoke_community_moderator_role_correct_action(userId: sui::object::ID, community: &mut Community, scenario: &mut Scenario) { // for protocol admin and community admin
+        let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+        let user_roles_collection = &mut user_roles_collection_val;
+        let user_val = test_scenario::take_from_sender<User>(scenario);
+        let user = &mut user_val;
+
+        communityLib::revokeCommunityModeratorPermission(user_roles_collection, user, userId, community);
 
         test_scenario::return_to_sender(scenario, user_val);
         test_scenario::return_shared(user_roles_collection_val);
