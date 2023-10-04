@@ -7,7 +7,7 @@ module peeranha::nftLib {
     use sui::table::{Self, Table};
     use sui::vec_map::{Self, VecMap};
     use std::vector;
-    use std::string::{Self/*, utf8*/};
+    use std::string::{Self, utf8};
     use sui::object::{Self, ID, UID};
     use sui::event;
     use sui::transfer;
@@ -16,8 +16,8 @@ module peeranha::nftLib {
     friend peeranha::achievementLib;
 
     // The creator bundle: these two packages often go together.
-    // use sui::package;
-    // use sui::display;
+    use sui::package;
+    use sui::display;
 
     // ====== Errors ======
 
@@ -99,7 +99,7 @@ module peeranha::nftLib {
         nftId: ID,
     }
 
-    fun init(_otw: NFTLIB, ctx: &mut TxContext) {
+    fun init(otw: NFTLIB, ctx: &mut TxContext) {
         let achievementCollection = AchievementCollection {
             id: object::new(ctx),
             achievements: vec_map::empty(),
@@ -109,7 +109,7 @@ module peeranha::nftLib {
         //
         // Comment for unit tests start
         //
-        /*
+
         let keys = vector[
             utf8(b"name"),
             utf8(b"image_url"),
@@ -137,7 +137,7 @@ module peeranha::nftLib {
 
         transfer::public_transfer(publisher, tx_context::sender(ctx));  // test error
         transfer::public_transfer(display, tx_context::sender(ctx));
-        */
+
         //
         // Comment for unit tests end
         //
