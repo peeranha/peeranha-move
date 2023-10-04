@@ -1104,9 +1104,9 @@ module peeranha::nft_test
     public fun init_nft_test(scenario: &mut Scenario): clock::Clock {
         let time = clock::create_for_testing(test_scenario::ctx(scenario));
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            nftLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            nftLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);

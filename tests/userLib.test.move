@@ -17,7 +17,7 @@ module peeranha::userLib_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -49,7 +49,7 @@ module peeranha::userLib_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -82,8 +82,8 @@ module peeranha::userLib_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -120,8 +120,8 @@ module peeranha::userLib_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);

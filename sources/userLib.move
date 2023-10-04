@@ -415,18 +415,9 @@ module peeranha::userLib {
     // --- Testing functions ---
 
     #[test_only]
-    public fun init_test(ctx: &mut TxContext) {
+    /// Wrapper of module initializer for testing
+    public fun test_init(ctx: &mut TxContext) {
         init(ctx)
-    }
-
-
-    /////////////////////////////////////////////////////////
-    // ////////////////////////////////////////////////////
-    // delete
-    // /////////////////////////////////////////////////////
-    // /////////////////////////////////////////////////////
-    public entry fun updateRatingBuf(usersRatingCollection: &mut UsersRatingCollection, userId: ID, achievementCollection: &mut nftLib::AchievementCollection, rating: u64, isPositive:bool, communityId: ID, ctx: &mut TxContext) {
-        updateRating(usersRatingCollection, userId, achievementCollection, if(isPositive) i64Lib::from(rating) else i64Lib::neg_from(rating), communityId, ctx);
     }
 
     #[test_only]

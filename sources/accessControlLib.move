@@ -21,6 +21,7 @@ module peeranha::accessControlLib {
     const E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN: u64 = 307;
     const E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR: u64 = 308;
     const E_SELF_REVOKE: u64 = 309;
+    const E_EMPTY_ROLE: u64 = 310;                              // how test?  test_common_user_revoke_not_exist_role, test_common_user_grant_not_exist_role
 
     // ====== Constant ======
 
@@ -181,6 +182,7 @@ module peeranha::accessControlLib {
     /// Grants `role` to `object user id`.
     /// Internal function without access restriction.
     fun grantRole_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
+        assert!(role != vector::empty<u8>(), E_EMPTY_ROLE);
         if (!hasRole(userRolesCollection, role, userId)) {
             if (!table::contains(&userRolesCollection.roles, role)) {
                 // let mapPeriodRating: VecMap<u64, PeriodRating> = vec_map::empty();
@@ -209,6 +211,7 @@ module peeranha::accessControlLib {
     /// Revokes `role` from `object user id`
     /// Internal function without access restriction.
     fun revokeRole_(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, userId: ID) {
+        assert!(role != vector::empty<u8>(), E_EMPTY_ROLE);
         if (hasRole(userRolesCollection, role, userId)) {
             if (!table::contains(&userRolesCollection.roles, role)) {
                 return
@@ -354,7 +357,8 @@ module peeranha::accessControlLib {
     // --- Testing functions ---
 
     #[test_only]
-    public fun init_test(ctx: &mut TxContext) {
+    /// Wrapper of module initializer for testing
+    public fun test_init(ctx: &mut TxContext) {
         init(ctx)
     }
 }

@@ -31,7 +31,7 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -69,8 +69,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -108,8 +108,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -140,8 +140,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -189,8 +189,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -232,8 +232,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -286,8 +286,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -318,8 +318,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -362,13 +362,51 @@ module peeranha::accessControlLib_common_role_test
         test_scenario::end(scenario_val);
     }
 
+    #[test, expected_failure(abort_code = accessControlLib::E_ACCESS_CONTROL_MISSING_ROLE)]
+    fun test_common_user_revoke_not_exist_role() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            init_accessControlLib_common_role(scenario);
+        };
+
+        let user2_val;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            user2_val = test_scenario::take_from_sender<User>(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, user2_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let userId = object::id(&mut user_val);
+            let user = &mut user_val;
+
+            userLib::revokeRole(user_roles_collection, user, userId, vector<u8>[]);
+
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(user_roles_collection_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
     #[test]
     fun test_defaul_admin_revorke_not_given_protocol_admin() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -437,8 +475,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -527,8 +565,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -596,8 +634,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -665,8 +703,8 @@ module peeranha::accessControlLib_common_role_test
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1979,8 +2017,8 @@ module peeranha::accessControlLib_common_role_test
     #[test_only]
     public fun init_accessControlLib_common_role(scenario: &mut Scenario) {
         {
-            userLib::init_test(test_scenario::ctx(scenario));
-            accessControlLib::init_test(test_scenario::ctx(scenario));
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
         };
 
         test_scenario::next_tx(scenario, USER1);
