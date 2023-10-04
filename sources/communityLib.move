@@ -265,7 +265,6 @@ module peeranha::communityLib {
         userId: ID,
         community: &Community
     ) {
-        onlyNotFrozenCommunity(community);
         let communityId = object::id(community);
         let adminId = object::id(admin);
         accessControlLib::revokeCommunityAdminRole(roles, communityId, adminId, userId);
@@ -278,7 +277,6 @@ module peeranha::communityLib {
         userId: ID,
         community: &Community
     ) {
-        onlyNotFrozenCommunity(community);
         let communityId = object::id(community);
         let adminId = object::id(admin);
         accessControlLib::revokeCommunityModeratorRole(roles, communityId, adminId, userId);
