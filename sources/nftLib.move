@@ -348,7 +348,6 @@ module peeranha::nftLib {
     // --- Testing functions ---
     
     #[test_only]
-    /// Wrapper of module initializer for testing
     public fun test_init(ctx: &mut TxContext) {
         init(NFTLIB{}, ctx)
     }
