@@ -66,6 +66,8 @@ module peeranha::postLib {
 
     const E_INVALID_LANGUAGE: u64 = 124;
 
+    const E_WRONG_BOT_ARGUMENT: u64 = 125;
+
     // 98, 99 - getPeriodRating  ???
 
     // ====== Constant ======
@@ -320,11 +322,13 @@ module peeranha::postLib {
         oldCommunityId: ID,
     }
 
-    /// Publication `post` by `bot`
+    /// Publication `post` by `bot`. If post owner bot, userAuthorId must be empty
     public entry fun createPostByBot(
         roles: &mut accessControlLib::UserRolesCollection,
         time: &Clock,
-        user: &mut userLib::User,
+        bot: &mut userLib::User,
+        userAuthorId: ID,
+        userAuthorAddress: address,
         community: &communityLib::Community,
         ipfsHash: vector<u8>, 
         postType: u8,
@@ -334,12 +338,22 @@ module peeranha::postLib {
         handle: vector<u8>,
         ctx: &mut TxContext
     ) {
-        let userId = object::id(user);
-        accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
+        let botId = object::id(bot);
+        accessControlLib::checkHasRole(roles, botId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
+
+        let authorId = userAuthorId;
+        let authorAddress = userAuthorAddress;
+        if (authorId == commonLib::getZeroId()) {
+            authorId = commonLib::get_bot_id();
+            authorAddress = tx_context::sender(ctx);
+        } else {
+            assert!(authorAddress != @0x0, E_WRONG_BOT_ARGUMENT);
+        };
 
         createPostPrivate(
             time,
-            commonLib::get_bot_id(),
+            authorId,
+            authorAddress,
             community,
             ipfsHash, 
             postType,
@@ -379,6 +393,7 @@ module peeranha::postLib {
         createPostPrivate(
             time,
             userId,
+            tx_context::sender(ctx),
             community,
             ipfsHash, 
             postType,
@@ -392,7 +407,8 @@ module peeranha::postLib {
     /// Publication `post`
     fun createPostPrivate(
         time: &Clock,
-        userId: ID,
+        authorId: ID,
+        authorAddress: address,
         community: &communityLib::Community,
         ipfsHash: vector<u8>, 
         postType: u8,
@@ -421,7 +437,7 @@ module peeranha::postLib {
             postId: object::id(&post),
             postType: postType,
             postTime: commonLib::getTimestamp(time),
-            author: userId,
+            author: authorId,
             authorMetaData: authorMetaData,
             rating: i64Lib::zero(),
             communityId: communityId,
@@ -437,23 +453,25 @@ module peeranha::postLib {
             historyVotes: vec_map::empty(),
         };
 
-        event::emit(CreatePostEvent{userId: userId, communityId: communityId, postMetaDataId: object::id(&postMetaData)});
+        event::emit(CreatePostEvent{userId: authorId, communityId: communityId, postMetaDataId: object::id(&postMetaData)});
         transfer::share_object(
             postMetaData
         );
         transfer::transfer(
             post,
-            tx_context::sender(ctx)
+            authorAddress
         );
     }
 
-    /// Publication `reply` by `bot`
+    /// Publication `reply` by `bot`. If post owner bot, userAuthorId must be empty
     public entry fun createReplyByBot(
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         roles: &mut accessControlLib::UserRolesCollection,
         achievementCollection: &mut nftLib::AchievementCollection,
         time: &Clock,
-        user: &mut userLib::User,
+        bot: &mut userLib::User,
+        userAuthorId: ID,
+        userAuthorAddress: address,
         postMetaData: &mut PostMetaData,
         parentReplyMetaDataKey: u64,
         ipfsHash: vector<u8>,
@@ -462,14 +480,24 @@ module peeranha::postLib {
         handle: vector<u8>,
         ctx: &mut TxContext
     ) {
-        let userId = object::id(user);
-        accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
+        let botId = object::id(bot);
+        accessControlLib::checkHasRole(roles, botId, accessControlLib::get_action_role_bot(), commonLib::getZeroId());
+
+        let authorId = userAuthorId;
+        let authorAddress = userAuthorAddress;
+        if (authorId == commonLib::getZeroId()) {
+            authorId = commonLib::get_bot_id();
+            authorAddress = tx_context::sender(ctx);
+        } else {
+            assert!(authorAddress != @0x0, E_WRONG_BOT_ARGUMENT);
+        };
 
         createReplyPrivate(
             usersRatingCollection,
             achievementCollection,
             time,
-            commonLib::get_bot_id(),
+            authorId,
+            authorAddress,
             postMetaData,
             parentReplyMetaDataKey,
             ipfsHash,
@@ -514,6 +542,7 @@ module peeranha::postLib {
             achievementCollection,
             time,
             userId,
+            tx_context::sender(ctx),
             postMetaData,
             parentReplyMetaDataKey,
             ipfsHash,
@@ -529,7 +558,8 @@ module peeranha::postLib {
         usersRatingCollection: &mut userLib::UsersRatingCollection,
         achievementCollection: &mut nftLib::AchievementCollection,
         time: &Clock,
-        userId: ID,
+        authorId: ID,
+        authorAddress: address,
         postMetaData: &mut PostMetaData,
         parentReplyMetaDataKey: u64,
         ipfsHash: vector<u8>,
@@ -550,7 +580,7 @@ module peeranha::postLib {
             while (replyMetaDataKey <= countReplies) {
                 let replyContainer = getReplyMetaData(postMetaData, replyMetaDataKey);
                 assert!(
-                    (userId != replyContainer.author && userId != commonLib::get_bot_id()) ||
+                    (authorId != replyContainer.author && authorId != commonLib::get_bot_id()) ||
                     replyContainer.authorMetaData != authorMetaData ||
                     replyContainer.isDeleted,
                     E_USER_CAN_NOT_PUBLISH_2_REPLIES_FOR_POST
@@ -566,7 +596,7 @@ module peeranha::postLib {
             postMetaData.officialReplyMetaDataKey = countReplies + 1;
         };
 
-        if (postMetaData.author != userId) {
+        if (postMetaData.author != authorId) {
             let changeUserRating = i64Lib::zero();
             if (getActiveReplyCount(postMetaData) == 0) {
                 isFirstReply = true;
@@ -578,7 +608,7 @@ module peeranha::postLib {
             };
             userLib::updateRating(
                 usersRatingCollection,
-                userId,
+                authorId,
                 achievementCollection,
                 changeUserRating,
                 postMetaData.communityId,
@@ -595,7 +625,7 @@ module peeranha::postLib {
             id: object::new(ctx),
             replyId: object::id(&reply),
             postTime: timestamp,
-            author: userId,
+            author: authorId,
             authorMetaData: authorMetaData,
             rating: i64Lib::zero(),
             parentReplyMetaDataKey: parentReplyMetaDataKey,
@@ -611,11 +641,11 @@ module peeranha::postLib {
         };
 
         let replyMetaDataKey = countReplies + 1;
-        event::emit(CreateReplyEvent{userId: userId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyMetaDataKey, replyMetaDataKey: replyMetaDataKey});
+        event::emit(CreateReplyEvent{userId: authorId, postMetaDataId: object::id(postMetaData), parentReplyKey: parentReplyMetaDataKey, replyMetaDataKey: replyMetaDataKey});
         table::add(&mut postMetaData.replies, replyMetaDataKey, replyMetaData);
         transfer::transfer(
             reply,
-            tx_context::sender(ctx)
+            authorAddress
         );
     }
 
