@@ -23,11 +23,6 @@ module peeranha::accessControlLib_action_protacol_admin_test
     const USER2: address = @0xA2;
     const USER3: address = @0xA3;
 
-    const PROTOCOL_ADMIN_ROLE: vector<u8> = vector<u8>[2];
-    const COMMUNITY_ADMIN_ROLE: vector<u8> = vector<u8>[3];
-    const COMMUNITY_MODERATOR_ROLE: vector<u8> = vector<u8>[4];
-    const BOT_ROLE: vector<u8> = vector<u8>[5];
-    const DISPATCHER_ROLE: vector<u8> = vector<u8>[6];
 
     // ====== protocol admin action ======
 

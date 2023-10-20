@@ -45,12 +45,11 @@ module peeranha::postLib_change_community_rating_test
     const DOWNVOTED_COMMON_POST: u64 = 1;       // negative
 
     //tutorial 
-    const DOWNVOTE_TUTORIAL: u64 = 1;           // negative
+    // const DOWNVOTE_TUTORIAL: u64 = 1;           // negative
     const UPVOTED_TUTORIAL: u64 = 5;
     const DOWNVOTED_TUTORIAL: u64 = 2;
 
     const DELETE_OWN_REPLY: u64 = 1;            // negative
-    const DELETE_OWN_POST: u64 = 1;             // negative
     const MODERATOR_DELETE_REPLY: u64 = 2;      // negative
 
     const USER1: address = @0xA1;

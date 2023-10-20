@@ -983,7 +983,7 @@ module peeranha::postLib {
             &i64Lib::from(MODERATOR_DELETE_POST));
         userLib::updateRating(
             usersRatingCollection,
-            userId,
+            postMetaData.author,
             achievementCollection,
             changeUserRating,
             communityId,
@@ -1881,7 +1881,7 @@ module peeranha::postLib {
     const QUICK_COMMON_REPLY: u64 = 1;
     
     const DELETE_OWN_REPLY: u64 = 1;            // negative
-    const MODERATOR_DELETE_REPLY: u64 = 2;      // negative     // to do
+    const MODERATOR_DELETE_REPLY: u64 = 2;      // negative
 
 /////////////////////////////////////////////////////////////////////////////////
 

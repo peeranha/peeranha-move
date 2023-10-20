@@ -10,7 +10,6 @@ module peeranha::userLib_test
     // use std::debug;
 
     const USER1: address = @0xA1;
-    const USER2: address = @0xA2;
 
     #[test]
     fun test_create_user() {

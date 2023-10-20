@@ -9,10 +9,6 @@ module peeranha::postLib_best_reply_test
     // use std::debug;
     // debug::print(community);
 
-    const EXPERT_POST: u8 = 0;
-
-    const ENGLISH_LANGUAGE: u8 = 0;
-
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
 
