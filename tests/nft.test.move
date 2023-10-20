@@ -22,17 +22,6 @@ module peeranha::nft_test
     // use std::debug;
     // debug::print(community);
 
-    // TODO: add enum PostType      //export
-    const EXPERT_POST: u8 = 0;
-    const COMMON_POST: u8 = 1;
-    const TUTORIAL: u8 = 2;
-    const DOCUMENTATION: u8 = 3;
-
-    const ENGLISH_LANGUAGE: u8 = 0;
-    const CHINESE_LANGUAGE: u8 = 1;
-    const SPANISH_LANGUAGE: u8 = 2;
-    const VIETNAMESE_LANGUAGE: u8 = 3;
-
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
     const EXTERNAL_URL: vector<u8> = b"https://peeranha.io";
@@ -144,6 +133,7 @@ module peeranha::nft_test
         test_scenario::end(scenario_val);
     }
 
+    #[test]
     fun test_create_manual_achievement() {
         let scenario_val = test_scenario::begin(USER1);
         let time;

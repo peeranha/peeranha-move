@@ -29,7 +29,6 @@ module peeranha::accessControlLib {
     const COMMUNITY_ADMIN_ROLE: vector<u8> = vector<u8>[3];
     const COMMUNITY_MODERATOR_ROLE: vector<u8> = vector<u8>[4];
     const BOT_ROLE: vector<u8> = vector<u8>[5];
-    const DISPATCHER_ROLE: vector<u8> = vector<u8>[6];
 
     // ====== Enum ======
 

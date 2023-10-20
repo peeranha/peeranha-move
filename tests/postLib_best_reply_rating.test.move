@@ -17,8 +17,6 @@ module peeranha::postLib_best_reply_rating_test
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
 
-    const ENGLISH_LANGUAGE: u8 = 0;
-
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
     const USER3: address = @0xA3;
@@ -28,28 +26,27 @@ module peeranha::postLib_best_reply_rating_test
     // ====== Rating ======
 
     const DELETE_OWN_POST: u64 = 1;             // negative
-    const MODERATOR_DELETE_POST: u64 = 2;       // negative
+    // const MODERATOR_DELETE_POST: u64 = 2;       // negative
 
     //expert reply
-    const DOWNVOTE_EXPERT_REPLY: u64 = 1;       // negative
-    const UPVOTED_EXPERT_REPLY: u64 = 10;
-    const DOWNVOTED_EXPERT_REPLY: u64 = 2;      // negative
+    // const DOWNVOTE_EXPERT_REPLY: u64 = 1;       // negative
+    // const UPVOTED_EXPERT_REPLY: u64 = 10;
+    // const DOWNVOTED_EXPERT_REPLY: u64 = 2;      // negative
     const ACCEPTED_EXPERT_REPLY: u64 = 15;
     const ACCEPT_EXPERT_REPLY: u64 = 2;
     const FIRST_EXPERT_REPLY: u64 = 5;
     const QUICK_EXPERT_REPLY: u64 = 5;
 
     //common reply 
-    const DOWNVOTE_COMMON_REPLY: u64 = 1;       // negative
-    const UPVOTED_COMMON_REPLY: u64 = 1;
-    const DOWNVOTED_COMMON_REPLY: u64 = 1;      // negative
+    // const DOWNVOTE_COMMON_REPLY: u64 = 1;       // negative
+    // const UPVOTED_COMMON_REPLY: u64 = 1;
+    // const DOWNVOTED_COMMON_REPLY: u64 = 1;      // negative
     const ACCEPTED_COMMON_REPLY: u64 = 3;
     const ACCEPT_COMMON_REPLY: u64 = 1;
     const FIRST_COMMON_REPLY: u64 = 1;
     const QUICK_COMMON_REPLY: u64 = 1;
     
-    const DELETE_OWN_REPLY: u64 = 1;            // negative
-    const MODERATOR_DELETE_REPLY: u64 = 2;      // negative     // to do
+    const MODERATOR_DELETE_REPLY: u64 = 2;      // negative
 
     #[test]
     fun test_mark_best_reply_expert() {

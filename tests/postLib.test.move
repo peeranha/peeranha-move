@@ -18,14 +18,14 @@ module peeranha::postLib_test
 
     // TODO: add enum PostType      //export
     const EXPERT_POST: u8 = 0;
-    const COMMON_POST: u8 = 1;
-    const TUTORIAL: u8 = 2;
-    const DOCUMENTATION: u8 = 3;
+    // const COMMON_POST: u8 = 1;
+    // const TUTORIAL: u8 = 2;
+    // const DOCUMENTATION: u8 = 3;
 
     const ENGLISH_LANGUAGE: u8 = 0;
-    const CHINESE_LANGUAGE: u8 = 1;
-    const SPANISH_LANGUAGE: u8 = 2;
-    const VIETNAMESE_LANGUAGE: u8 = 3;
+    // const CHINESE_LANGUAGE: u8 = 1;
+    // const SPANISH_LANGUAGE: u8 = 2;
+    // const VIETNAMESE_LANGUAGE: u8 = 3;
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;

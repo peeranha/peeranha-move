@@ -12,8 +12,6 @@ module peeranha::postLib_language_test
     use sui::clock;
 
     const EXPERT_POST: u8 = 0;
-    const COMMON_POST: u8 = 1;
-    const TUTORIAL: u8 = 2;
 
     const ENGLISH_LANGUAGE: u8 = 0;
     const CHINESE_LANGUAGE: u8 = 1;

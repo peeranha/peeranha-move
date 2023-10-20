@@ -18,11 +18,6 @@ module peeranha::postLib_change_community_test
     const COMMON_POST: u8 = 1;
     const TUTORIAL: u8 = 2;
 
-    const UPVOTE_FLAG: bool = true;
-    const DOWNVOTE_FLAG: bool = false;
-
-    const START_USER_RATING: u64 = 10;
-
     const ENGLISH_LANGUAGE: u8 = 0;
 
     const USER1: address = @0xA1;
@@ -30,8 +25,6 @@ module peeranha::postLib_change_community_test
     const USER3: address = @0xA3;
     const USER4: address = @0xA4;
     const USER5: address = @0xA5;
-
-    const COMMUNITY_ADMIN_ROLE: vector<u8> = vector<u8>[3];
 
     
     #[test]

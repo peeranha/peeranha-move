@@ -37,7 +37,6 @@ module peeranha::postLib_first_quick_reply_rating_test
     const QUICK_COMMON_REPLY: u64 = 1;
 
     const DELETE_OWN_REPLY: u64 = 1;            // negative
-    const DELETE_OWN_POST: u64 = 1;             // negative
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
