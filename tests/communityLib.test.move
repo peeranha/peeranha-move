@@ -2,7 +2,7 @@
 module peeranha::communityLib_test
 {
     use peeranha::communityLib::{Self, Community};
-    use peeranha::userLib::{Self, User};
+    use peeranha::userLib::{Self, User, UsersRatingCollection};
     use std::vector;
     use peeranha::userLib_test;
     use peeranha::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
@@ -142,14 +142,13 @@ module peeranha::communityLib_test
 
         test_scenario::next_tx(scenario, USER1);
         {
+            update_common_documentation(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
             let community_val = test_scenario::take_shared<Community>(scenario);
             let community = &mut community_val;
-            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
-            let user_roles_collection = &mut user_roles_collection_val;
-            let user_val = test_scenario::take_from_sender<User>(scenario);
-            let user = &mut user_val;
-
-            communityLib::updateDocumentationTree(user_roles_collection, user, community, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83");
 
             let (ipfsDoc, documentation, isFrozen) = communityLib::getCommunityData(community);
             let tags = communityLib::getCommunityTags(community);
@@ -165,8 +164,48 @@ module peeranha::communityLib_test
             ), 5);
 
             test_scenario::return_shared(community_val);
-            test_scenario::return_to_sender(scenario, user_val);
-            test_scenario::return_shared(user_roles_collection_val);
+        };
+
+        test_scenario::end(scenario_val);        
+    }
+
+    #[test, expected_failure(abort_code = communityLib::E_COMMUNITY_IS_FROZEN)]
+    fun test_documentation_community_is_frozen() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        {
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            userLib_test::create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_protocol_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_community(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            grant_community_admin_role(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            freeze_common_community(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            update_common_documentation(scenario);
         };
 
         test_scenario::end(scenario_val);        
@@ -833,15 +872,18 @@ module peeranha::communityLib_test
 
     #[test_only]
     public fun update_common_documentation(scenario: &mut Scenario) {
+        let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
         let community_val = test_scenario::take_shared<Community>(scenario);
         let community = &mut community_val;
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let user_roles_collection = &mut user_roles_collection_val;
+        let user_rating_collection = &mut user_rating_collection_val;
         let user_val = test_scenario::take_from_sender<User>(scenario);
         let user = &mut user_val;
 
-        communityLib::updateDocumentationTree(user_roles_collection, user, community, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83");
+        communityLib::updateDocumentationTree(user_rating_collection, user_roles_collection, user, community, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83");
 
+        test_scenario::return_shared(user_rating_collection_val);
         test_scenario::return_shared(community_val);
         test_scenario::return_to_sender(scenario, user_val);
         test_scenario::return_shared(user_roles_collection_val);
