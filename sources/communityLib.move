@@ -171,14 +171,11 @@ module peeranha::communityLib {
     ) {
         let userId = object::id(user);
         let communityId = object::id(community);
-        userLib::checkActionRole(
-            usersRatingCollection,
+        accessControlLib::checkHasRole(
             userRolesCollection,
-            user,
             userId,
-            communityId,
-            userLib::get_action_none(),
-            accessControlLib::get_action_role_community_admin(),
+            accessControlLib::get_action_role_admin_or_community_admin_or_community_moderator(),
+            object::id(community)
         );
 
         onlyNotFrozenCommunity(community);

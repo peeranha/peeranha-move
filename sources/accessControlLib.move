@@ -22,6 +22,7 @@ module peeranha::accessControlLib {
     const E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR: u64 = 308;
     const E_SELF_REVOKE: u64 = 309;
     const E_EMPTY_ROLE: u64 = 310;                              // how test?  test_common_user_revoke_not_exist_role, test_common_user_grant_not_exist_role
+    const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN_OR_COMMUNITY_MODERATOR: u64 = 311;
 
     // ====== Constant ======
 
@@ -41,6 +42,7 @@ module peeranha::accessControlLib {
     const ACTION_ROLE_COMMUNITY_ADMIN: u8 = 6;
     const ACTION_ROLE_COMMUNITY_MODERATOR: u8 = 7;
     const ACTION_ROLE_MINT_NFT: u8 = 8;
+    const ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN_OR_COMMUNITY_MODERATOR: u8 = 9;
 
     struct UserRolesCollection has key {
         id: UID,
@@ -293,6 +295,8 @@ module peeranha::accessControlLib {
             errorType = E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN
         } else if (actionRole == ACTION_ROLE_COMMUNITY_MODERATOR && !isCommunityModerator) {
             errorType = E_NOT_ALLOWED_NOT_COMMUNITY_MODERATOR
+        } else if (actionRole == ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN_OR_COMMUNITY_MODERATOR && !(isAdmin || isCommunityAdmin || isCommunityModerator)) {
+            errorType = E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN_OR_COMMUNITY_MODERATOR
         } else {
             return
         };
@@ -338,6 +342,10 @@ module peeranha::accessControlLib {
 
     public fun get_action_role_mint_nft(): u8 {
         ACTION_ROLE_MINT_NFT
+    }
+
+    public fun get_action_role_admin_or_community_admin_or_community_moderator(): u8 {
+        ACTION_ROLE_ADMIN_OR_COMMUNITY_ADMIN_OR_COMMUNITY_MODERATOR
     }
 
     // ====== get role ======
