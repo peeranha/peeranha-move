@@ -163,7 +163,6 @@ module peeranha::communityLib {
 
     /// Update `documentation ipfs` tree
     public entry fun updateDocumentationTree(
-        usersRatingCollection: &userLib::UsersRatingCollection,
         userRolesCollection: &accessControlLib::UserRolesCollection,
         user: &userLib::User,
         community: &mut Community,
