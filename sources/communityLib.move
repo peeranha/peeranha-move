@@ -169,7 +169,6 @@ module peeranha::communityLib {
         ipfsHash: vector<u8>
     ) {
         let userId = object::id(user);
-        let communityId = object::id(community);
         accessControlLib::checkHasRole(
             userRolesCollection,
             userId,

@@ -2,7 +2,7 @@
 module peeranha::communityLib_test
 {
     use peeranha::communityLib::{Self, Community};
-    use peeranha::userLib::{Self, User, UsersRatingCollection};
+    use peeranha::userLib::{Self, User};
     use std::vector;
     use peeranha::userLib_test;
     use peeranha::accessControlLib::{Self, UserRolesCollection, DefaultAdminCap};
@@ -872,18 +872,15 @@ module peeranha::communityLib_test
 
     #[test_only]
     public fun update_common_documentation(scenario: &mut Scenario) {
-        let user_rating_collection_val = test_scenario::take_shared<UsersRatingCollection>(scenario);
         let community_val = test_scenario::take_shared<Community>(scenario);
         let community = &mut community_val;
         let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
         let user_roles_collection = &mut user_roles_collection_val;
-        let user_rating_collection = &mut user_rating_collection_val;
         let user_val = test_scenario::take_from_sender<User>(scenario);
         let user = &mut user_val;
 
-        communityLib::updateDocumentationTree(user_rating_collection, user_roles_collection, user, community, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83");
+        communityLib::updateDocumentationTree(user_roles_collection, user, community, x"701b615bbdfb9de65240bc28bd21bbc0d996645a3dd57e7b12bc2bdf6f192c83");
 
-        test_scenario::return_shared(user_rating_collection_val);
         test_scenario::return_shared(community_val);
         test_scenario::return_to_sender(scenario, user_val);
         test_scenario::return_shared(user_roles_collection_val);
