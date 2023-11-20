@@ -53,7 +53,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -423,7 +423,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -554,7 +554,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -608,7 +608,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -676,7 +676,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -744,7 +744,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         let anotherUser_val;
@@ -823,7 +823,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         let anotherUser_val;
@@ -880,7 +880,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -967,7 +967,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -990,7 +990,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1031,7 +1031,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -1171,7 +1171,7 @@ module peeranha::postLib_bot_test
     // ====== Support functions ======
 
     #[test_only]
-    public fun init_postLib_by_bot_test_and_create_post(scenario: &mut Scenario): clock::Clock {
+    public fun init_postLib_by_bot_test_and_create_post_by_bot(scenario: &mut Scenario): clock::Clock {
         let time = init_postLib_by_bot_test(scenario);
 
         test_scenario::next_tx(scenario, USER2);
