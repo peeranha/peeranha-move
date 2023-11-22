@@ -1281,7 +1281,7 @@ module peeranha::accessControlLib_action_community_moderator_test
         test_scenario::end(scenario_val);
     }
 
-    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN)]
+    #[test]
     fun test_community_moderator_update_documentation() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;

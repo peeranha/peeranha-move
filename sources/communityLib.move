@@ -162,10 +162,21 @@ module peeranha::communityLib {
     }
 
     /// Update `documentation ipfs` tree
-    public entry fun updateDocumentationTree(roles: &accessControlLib::UserRolesCollection, user: &userLib::User, community: &mut Community, ipfsHash: vector<u8>) {
+    public entry fun updateDocumentationTree(
+        userRolesCollection: &accessControlLib::UserRolesCollection,
+        user: &userLib::User,
+        community: &mut Community,
+        ipfsHash: vector<u8>
+    ) {
         let userId = object::id(user);
-        accessControlLib::checkHasRole(roles, userId, accessControlLib::get_action_role_community_admin(), object::id(community));
-        onlyNotFrozenCommunity(community);  // test
+        accessControlLib::checkHasRole(
+            userRolesCollection,
+            userId,
+            accessControlLib::get_action_role_admin_or_community_admin_or_community_moderator(),
+            object::id(community)
+        );
+
+        onlyNotFrozenCommunity(community);
 
         community.documentation = commonLib::getIpfsDoc(ipfsHash, vector::empty<u8>());
         event::emit(SetDocumentationTree {userId: userId, communityId: object::id(community)});
