@@ -21,8 +21,6 @@ module peeranha::postLib_changePostType_rating_test
     const UPVOTE_FLAG: bool = true;
     const DOWNVOTE_FLAG: bool = false;
 
-    const ENGLISH_LANGUAGE: u8 = 0;
-
     const START_USER_RATING: u64 = 10;
 
     //expert post
@@ -58,8 +56,7 @@ module peeranha::postLib_changePostType_rating_test
     const FIRST_COMMON_REPLY: u64 = 1;
     const QUICK_COMMON_REPLY: u64 = 1;
     
-    const DELETE_OWN_REPLY: u64 = 1;            // negative
-    const MODERATOR_DELETE_REPLY: u64 = 2;      // negative     // to do
+    const MODERATOR_DELETE_REPLY: u64 = 2;      // negative
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;

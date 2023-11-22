@@ -21,19 +21,14 @@ module peeranha::postLib_bot_test
     // debug::print(community);
 
     const EXPERT_POST: u8 = 0;
-    const COMMON_POST: u8 = 1;
-    const TUTORIAL: u8 = 2;
-    const DOCUMENTATION: u8 = 3;
 
     const ENGLISH_LANGUAGE: u8 = 0;
     const CHINESE_LANGUAGE: u8 = 1;
-    const SPANISH_LANGUAGE: u8 = 2;
-    const VIETNAMESE_LANGUAGE: u8 = 3;
 
-    const MESSENGER_TYPE_UNKNOWN: u8 = 0;
+    // const MESSENGER_TYPE_UNKNOWN: u8 = 0;
     const MESSENGER_TYPE_TELEGRAM: u8 = 1;
-    const MESSENGER_TYPE_DISCORD: u8 = 2;
-    const MESSENGER_TYPE_SLACK: u8 = 3;
+    // const MESSENGER_TYPE_DISCORD: u8 = 2;
+    // const MESSENGER_TYPE_SLACK: u8 = 3;
 
     const UPVOTE_FLAG: bool = true;
     const DOWNVOTE_FLAG: bool = false;

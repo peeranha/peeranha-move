@@ -8,18 +8,12 @@ module peeranha::postLib_first_quick_reply_test
 
     const EXPERT_POST: u8 = 0;
     const COMMON_POST: u8 = 1;
-    const TUTORIAL: u8 = 2;
-
-    const UPVOTE_FLAG: bool = true;
-    const DOWNVOTE_FLAG: bool = false;
-
-    const START_USER_RATING: u64 = 10;
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
     const USER3: address = @0xA3;
 
-    
+
     #[test]
     fun test_create_first_reply_to_expert_post() {     //  first/quick reply to expert post
         let scenario_val = test_scenario::begin(USER1);
