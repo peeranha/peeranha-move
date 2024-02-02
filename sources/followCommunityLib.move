@@ -7,7 +7,6 @@ module peeranha::followCommunityLib {
 
     // ====== Errors ======
 
-    const E_ALREADY_FOLLOWED: u64 = 11;
     const E_COMMUNITY_NOT_FOLOWED: u64 = 12;
 
     // ====== Events ======
@@ -33,12 +32,18 @@ module peeranha::followCommunityLib {
         let community_id = object::id(community);
         let userFolowedCommunities = userLib::getUserFollowedCommunities(user);
         let countFolowedCommunities = vector::length(userFolowedCommunities);
+        let isAlreadyFollowed = false;
         while(i < countFolowedCommunities) {
-            assert!(*vector::borrow(userFolowedCommunities, i) != community_id, E_ALREADY_FOLLOWED);
+            if (*vector::borrow(userFolowedCommunities, i) == community_id) {
+                isAlreadyFollowed = true;
+                break;
+            };
             i = i +1;
         };
 
-        userLib::followCommunity(user, community_id);
+        if (!isAlreadyFollowed)
+            userLib::followCommunity(user, community_id);
+
         event::emit(FollowCommunityEvent{userId: object::id(user), communityId: community_id});
     }
 
