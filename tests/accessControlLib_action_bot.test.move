@@ -331,6 +331,96 @@ module peeranha::accessControlLib_action_bot_test
         test_scenario::end(scenario_val);
     }
 
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN)]
+    fun test_community_admin_edit_own_official_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_bot(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            postLib_test::create_standart_post(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            postLib_test::create_standart_reply(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            postLib::moderatorEditReply(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                1,
+                true,
+                0
+            );
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN)]
+    fun test_community_admin_edit_not_own_official_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        let time;
+        {
+            time = init_accessControlLib_user2_is_bot(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            postLib_test::create_standart_post(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            postLib_test::create_standart_reply(&time, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            postLib::moderatorEditReply(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                1,
+                true,
+                0
+            );
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
     #[test]
     fun test_bot_edit_own_reply() {
         let scenario_val = test_scenario::begin(USER1);
@@ -473,7 +563,7 @@ module peeranha::accessControlLib_action_bot_test
         test_scenario::end(scenario_val);
     }
 
-    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_MODERATOR)]
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_COMMUNITY_ADMIN)]
     fun test_bot_edit_not_own_reply_meta_data() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;

@@ -889,7 +889,7 @@ module peeranha::postLib {
                 userLib::get_action_edit_item() else
                 userLib::get_action_none(),
             if (isOfficialReply || userId != replyMetaDataAuthor)
-                accessControlLib::get_action_role_admin_or_community_moderator() else
+                accessControlLib::get_action_role_community_admin()else
                 accessControlLib::get_action_role_none(),
         );
 
