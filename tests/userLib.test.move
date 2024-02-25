@@ -115,6 +115,60 @@ module peeranha::userLib_test
     }
 
     #[test]
+    fun test_double_follow_community() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        {
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_community(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            followCommunityLib::followCommunity(user, community);
+
+            let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
+            assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
+            assert!(followedCommunities == vector<ID>[object::id(community)], 5);
+            
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            followCommunityLib::followCommunity(user, community);
+
+            let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
+            assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
+            assert!(followedCommunities == vector<ID>[object::id(community)], 5);
+            
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
     fun test_unfollow_community() {
         let scenario_val = test_scenario::begin(USER1);
         let scenario = &mut scenario_val;
@@ -146,6 +200,41 @@ module peeranha::userLib_test
             let (ipfsDoc, followedCommunities) = userLib::getUserData(user);
             assert!(ipfsDoc == x"a267530f49f8280200edf313ee7af6b827f2a8bce2897751d06a843f644967b1", 1);
             assert!(followedCommunities == vector<ID>[], 5);
+
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(community_val);
+        };
+
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = followCommunityLib::E_COMMUNITY_NOT_FOLOWED)]
+    fun test_unfollow_from_not_followed_community() {
+        let scenario_val = test_scenario::begin(USER1);
+        let scenario = &mut scenario_val;
+        {
+            userLib::test_init(test_scenario::ctx(scenario));
+            accessControlLib::test_init(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_user(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            create_community(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+
+            followCommunityLib::unfollowCommunity(user, community);
 
             test_scenario::return_to_sender(scenario, user_val);
             test_scenario::return_shared(community_val);
