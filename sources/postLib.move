@@ -1048,9 +1048,6 @@ module peeranha::postLib {
             accessControlLib::get_action_role_none(),
         );
         
-        // admin can delete best reply
-        assert!(userId != replyMetaData.author || !isBestReplyMetaData, E_YOU_CAN_NOT_DELETE_THE_BEST_REPLY);
-
         let time: u64 = commonLib::getTimestamp(time);
         userLib::updateRating(
             usersRatingCollection,
