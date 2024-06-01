@@ -241,10 +241,8 @@ module peeranha::communityLib {
         event::emit(UnfreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
-
-
     /// Give community administrator permission by admin or community admin
-    public fun giveCommunityAdminPermission(
+    public entry fun giveCommunityAdminPermission(
         roles: &mut accessControlLib::UserRolesCollection,
         admin: &userLib::User,
         userId: ID,
@@ -257,7 +255,7 @@ module peeranha::communityLib {
     }
 
     /// Give community moderator permission by admin or community admin
-    public fun giveCommunityModeratorPermission(
+    public entry fun giveCommunityModeratorPermission(
         roles: &mut accessControlLib::UserRolesCollection,
         admin: &userLib::User,
         userId: ID,
@@ -270,7 +268,7 @@ module peeranha::communityLib {
     }
 
     /// Revoke community administrator permission by admin or community admin
-    public fun revokeCommunityAdminPermission(
+    public entry fun revokeCommunityAdminPermission(
         roles: &mut accessControlLib::UserRolesCollection,
         admin: &userLib::User,
         userId: ID,
@@ -282,7 +280,7 @@ module peeranha::communityLib {
     }
 
     /// Revoke community moderator permission by admin or community admin
-    public fun revokeCommunityModeratorPermission(
+    public entry fun revokeCommunityModeratorPermission(
         roles: &mut accessControlLib::UserRolesCollection,
         admin: &userLib::User,
         userId: ID,
