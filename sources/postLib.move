@@ -84,7 +84,11 @@ module peeranha::postLib {
     const CHINESE_LANGUAGE: u8 = 1;
     const SPANISH_LANGUAGE: u8 = 2;
     const VIETNAMESE_LANGUAGE: u8 = 3;
-    const LANGUAGE_LENGTH: u8 = 4; // Update after add new language
+    const RUSSIAN_LANGUAGE: u8 = 4;
+    const UKRAINIAN_LANGUAGE: u8 = 5;
+    const FRENCH_LANGUAGE: u8 = 6;
+    const GERMAN_LANGUAGE: u8 = 7;
+    const LANGUAGE_LENGTH: u8 = 8; // Update after add new language
 
     const DIRECTION_DOWNVOTE: u8 = 4;
     const DIRECTION_CANCEL_DOWNVOTE: u8 = 0;

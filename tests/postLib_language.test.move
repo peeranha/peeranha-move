@@ -17,7 +17,11 @@ module peeranha::postLib_language_test
     const CHINESE_LANGUAGE: u8 = 1;
     const SPANISH_LANGUAGE: u8 = 2;
     const VIETNAMESE_LANGUAGE: u8 = 3;
-    const INVALID_LANGUAGE: u8 = 4;
+    const RUSSIAN_LANGUAGE: u8 = 4;
+    const UKRAINIAN_LANGUAGE: u8 = 5;
+    const FRENCH_LANGUAGE: u8 = 6;
+    const GERMAN_LANGUAGE: u8 = 7;
+    const INVALID_LANGUAGE: u8 = 8;
 
     const USER1: address = @0xA1;
     const USER2: address = @0xA2;
@@ -106,6 +110,98 @@ module peeranha::postLib_language_test
             let post_meta_data = &mut post_meta_data_val;
 
             assert!(postLib::getPostLanguage(post_meta_data) == VIETNAMESE_LANGUAGE, 1);
+            
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_russian_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(RUSSIAN_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            assert!(postLib::getPostLanguage(post_meta_data) == RUSSIAN_LANGUAGE, 1);
+            
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_ukrainian_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(UKRAINIAN_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            assert!(postLib::getPostLanguage(post_meta_data) == UKRAINIAN_LANGUAGE, 1);
+            
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_french_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(FRENCH_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            assert!(postLib::getPostLanguage(post_meta_data) == FRENCH_LANGUAGE, 1);
+            
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_german_post() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(GERMAN_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+
+            assert!(postLib::getPostLanguage(post_meta_data) == GERMAN_LANGUAGE, 1);
             
             test_scenario::return_shared(post_meta_data_val);
         };
@@ -213,6 +309,102 @@ module peeranha::postLib_language_test
             );
 
             assert!(postLib::getPostLanguage(post_meta_data) == VIETNAMESE_LANGUAGE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_edit_russian_post_to_french() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(RUSSIAN_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let achievement_collection = &mut achievement_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                achievement_collection,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                EXPERT_POST,
+                vector<u64>[2, 3],
+                FRENCH_LANGUAGE,
+                test_scenario::ctx(scenario),
+            );
+
+            assert!(postLib::getPostLanguage(post_meta_data) == FRENCH_LANGUAGE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+    #[test]
+    fun test_edit_ukrainian_post_to_german() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(UKRAINIAN_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let achievement_collection = &mut achievement_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            postLib::authorEditPost(
+                user_rating_collection,
+                user_roles_collection,
+                achievement_collection,
+                user,
+                post,
+                post_meta_data,
+                community,
+                x"0000000000000000000000000000000000000000000000000000000000000005",
+                EXPERT_POST,
+                vector<u64>[2, 3],
+                GERMAN_LANGUAGE,
+                test_scenario::ctx(scenario),
+            );
+
+            assert!(postLib::getPostLanguage(post_meta_data) == GERMAN_LANGUAGE, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, post_val);
@@ -401,6 +593,138 @@ module peeranha::postLib_language_test
         test_scenario::end(scenario_val);
     }
 
+    #[test]
+    fun test_create_russian_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, RUSSIAN_LANGUAGE, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == RUSSIAN_LANGUAGE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_ukrainian_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, UKRAINIAN_LANGUAGE, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == UKRAINIAN_LANGUAGE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_french_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, FRENCH_LANGUAGE, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == FRENCH_LANGUAGE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_german_reply() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(VIETNAMESE_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, GERMAN_LANGUAGE, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == GERMAN_LANGUAGE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
     #[test, expected_failure(abort_code = postLib::E_INVALID_LANGUAGE)]
     fun test_create_invalid_language_reply() {
         let scenario_val = test_scenario::begin(USER1);
@@ -520,6 +844,112 @@ module peeranha::postLib_language_test
             );
 
             assert!(postLib::getReplyLanguage(post_meta_data, 1) == VIETNAMESE_LANGUAGE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, reply_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_edit_russian_reply_to_french() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(FRENCH_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, RUSSIAN_LANGUAGE, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
+
+            postLib::authorEditReply(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                reply,
+                1,
+                x"0000000000000000000000000000000000000000000000000000000000000004",
+                false,
+                FRENCH_LANGUAGE
+            );
+
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == FRENCH_LANGUAGE, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, reply_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_edit_ukrainian_reply_to_german() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_test(GERMAN_LANGUAGE, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            create_reply(post_meta_data, &time, UKRAINIAN_LANGUAGE, scenario);
+
+            test_scenario::return_shared(post_meta_data_val);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
+
+            postLib::authorEditReply(
+                user_rating_collection,
+                user_roles_collection,
+                user,
+                post_meta_data,
+                reply,
+                1,
+                x"0000000000000000000000000000000000000000000000000000000000000004",
+                false,
+                GERMAN_LANGUAGE
+            );
+
+            assert!(postLib::getReplyLanguage(post_meta_data, 1) == GERMAN_LANGUAGE, 1);
 
             test_scenario::return_shared(post_meta_data_val);
             test_scenario::return_to_sender(scenario, reply_val);
