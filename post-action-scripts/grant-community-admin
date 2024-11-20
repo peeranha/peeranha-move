@@ -1,4 +1,4 @@
 if [ -f .env ]; then
   export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
 fi
-sui client call --function grantRole --module userLib --package $PACKAGE --args $USER_ROLES_COLLECTION $USER "0x68312a6d86666c18f744753fd443e373d86e9b87f6b1623929e734752e609f28" "0x03933eedd6e0ebbbdc00a3c6d5a6da78f63b92bd4cd0a50eba02042ec8d5cf05a9" --gas-budget 20000000
+sui client call --function giveCommunityAdminPermission --module communityLib --package $PACKAGE --args $USER_ROLES_COLLECTION $USER $USER2 $COMMUNITY --gas-budget 20000000
