@@ -241,6 +241,25 @@ module peeranha::communityLib {
         event::emit(UnfreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
+    public entry fun initPermistions(   // make universal?
+        roles: &mut accessControlLib::UserRolesCollection,
+        admin: &userLib::User,
+        communities: vector<ID>
+    ) {
+        let adminId = object::id(admin);
+
+        let i = 0;
+        while(i < vector::length(&mut communities)) {
+            let communityId = *vector::borrow(&communities, i);
+            accessControlLib::setRoleAdminPublic(roles, adminId, accessControlLib::get_community_ban_role(), accessControlLib::get_community_moderator_role());
+
+            i = i + 1;
+        };
+
+        accessControlLib::setRoleAdminPublic(roles, adminId, accessControlLib::get_ban_role(), accessControlLib::get_protocol_admin_role());
+        accessControlLib::setRoleAdminPublic(roles, adminId, accessControlLib::get_verified_role(), accessControlLib::get_verifier_role());
+    }
+
 
 
     /// Give community administrator permission by admin or community admin
