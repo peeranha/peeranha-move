@@ -258,6 +258,7 @@ module peeranha::communityLib {
 
         accessControlLib::setRoleAdminPublic(roles, adminId, accessControlLib::get_ban_role(), accessControlLib::get_protocol_admin_role());
         accessControlLib::setRoleAdminPublic(roles, adminId, accessControlLib::get_verified_role(), accessControlLib::get_verifier_role());
+        accessControlLib::setRoleAdminPublic(roles, adminId, accessControlLib::get_verifier_role(), accessControlLib::get_protocol_admin_role());
     }
 
 
