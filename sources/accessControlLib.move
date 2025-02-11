@@ -23,6 +23,8 @@ module peeranha::accessControlLib {
     const E_SELF_REVOKE: u64 = 309;
     const E_EMPTY_ROLE: u64 = 310;                              // how test?  test_common_user_revoke_not_exist_role, test_common_user_grant_not_exist_role
     const E_NOT_ALLOWED_ADMIN_OR_COMMUNITY_ADMIN_OR_COMMUNITY_MODERATOR: u64 = 311;
+    const E_USER_BANNED: u64 = 312;
+    const E_USER_NOT_VERIFIED: u64 = 313;
 
     // ====== Constant ======
 
@@ -30,6 +32,10 @@ module peeranha::accessControlLib {
     const COMMUNITY_ADMIN_ROLE: vector<u8> = vector<u8>[3];
     const COMMUNITY_MODERATOR_ROLE: vector<u8> = vector<u8>[4];
     const BOT_ROLE: vector<u8> = vector<u8>[5];
+    const COMMUNITY_BAN_ROLE: vector<u8> = vector<u8>[6];
+    const BAN_ROLE: vector<u8> = vector<u8>[7];
+    const VERIFIER_ROLE: vector<u8> = vector<u8>[8];
+    const VERIFIED_ROLE: vector<u8> = vector<u8>[9];
 
     // ====== Enum ======
 
@@ -162,6 +168,13 @@ module peeranha::accessControlLib {
         revokeRole_(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
     }
 
+    public(friend) fun setRoleAdminPublic(userRolesCollection: &mut UserRolesCollection, adminId: ID, role: vector<u8>, adminRole: vector<u8>) {
+        let isAdmin = hasRole(userRolesCollection, PROTOCOL_ADMIN_ROLE, adminId);
+        assert!(isAdmin, E_NOT_ALLOWED_NOT_ADMIN); // test
+
+        setRoleAdmin(userRolesCollection, role, adminRole);
+    }
+    
     /// Sets `adminRole` as ``role``'s admin role.
     fun setRoleAdmin(userRolesCollection: &mut UserRolesCollection, role: vector<u8>, adminRole: vector<u8>) {
         let previousAdminRole = getRoleAdmin(userRolesCollection, role);
@@ -234,9 +247,11 @@ module peeranha::accessControlLib {
     public(friend) fun setCommunityPermission(userRolesCollection: &mut UserRolesCollection, communityId: ID, userId: ID) {
         let communityAdminRole = getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId);
         let communityModeratorRole = getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId);
+        let communityBanRole = getCommunityRole(COMMUNITY_BAN_ROLE, communityId);
 
         setRoleAdmin(userRolesCollection, communityModeratorRole, communityAdminRole);
         setRoleAdmin(userRolesCollection, communityAdminRole, PROTOCOL_ADMIN_ROLE);
+        setRoleAdmin(userRolesCollection, communityBanRole, communityModeratorRole);
 
         grantRole_(userRolesCollection, communityAdminRole, userId);
         grantRole_(userRolesCollection, communityModeratorRole, userId);
@@ -271,9 +286,25 @@ module peeranha::accessControlLib {
         revokeRole_(userRolesCollection, communityModeratorRole, userId);
     }
 
+    // abort if user is banned
+    fun checkUserNotBanned(userRolesCollection: &UserRolesCollection, userId: ID, communityId: ID) {
+        let isBanned = hasRole(userRolesCollection, getCommunityRole(COMMUNITY_BAN_ROLE, communityId), userId);
+        let isCommunityBanned = hasRole(userRolesCollection, COMMUNITY_BAN_ROLE, userId);
+        assert!(!isBanned || !isCommunityBanned, E_USER_BANNED);
+    }
+
+    // abort if user is not verified
+    fun checkUserVerified(userRolesCollection: &UserRolesCollection, userId: ID) {
+        let isVerified = hasRole(userRolesCollection, VERIFIED_ROLE, userId);
+        assert!(isVerified, E_USER_NOT_VERIFIED);
+    }
+    
     /// Abort if `user object id` is missing `actionRole`.
     public fun checkHasRole(userRolesCollection: &UserRolesCollection, userId: ID, actionRole: u8, communityId: ID) {
         // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
+        checkUserNotBanned(userRolesCollection, userId, communityId);
+        checkUserVerified(userRolesCollection, userId);
+
         let isAdmin = hasRole(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
         let isCommunityAdmin = hasRole(userRolesCollection, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userId);
         let isCommunityModerator = hasRole(userRolesCollection, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userId);
@@ -359,6 +390,22 @@ module peeranha::accessControlLib {
 
     public fun get_community_moderator_role(): vector<u8> {
         COMMUNITY_MODERATOR_ROLE
+    }
+
+    public fun get_community_ban_role(): vector<u8> {
+        COMMUNITY_BAN_ROLE
+    }
+
+    public fun get_ban_role(): vector<u8> {
+        BAN_ROLE
+    }
+
+    public fun get_verifier_role(): vector<u8> {
+        VERIFIER_ROLE
+    }
+
+    public fun get_verified_role(): vector<u8> {
+        VERIFIED_ROLE
     }
 
     // --- Testing functions ---
