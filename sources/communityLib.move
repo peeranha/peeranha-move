@@ -241,7 +241,7 @@ module peeranha::communityLib {
         event::emit(UnfreezeCommunityEvent {userId: userId, communityId: communityId});
     }
 
-    public entry fun initPermistions(   // make universal?
+    public entry fun initPermistions(
         roles: &mut accessControlLib::UserRolesCollection,
         admin: &userLib::User,
         communities: vector<ID>
@@ -251,8 +251,9 @@ module peeranha::communityLib {
         let i = 0;
         while(i < vector::length(&mut communities)) {
             let communityId = *vector::borrow(&communities, i);
-            accessControlLib::setRoleAdminPublic(roles, adminId, accessControlLib::get_community_ban_role(), accessControlLib::get_community_moderator_role());
-
+            let communityBanRole = accessControlLib::getCommunityRole(accessControlLib::get_community_ban_role(), communityId);
+            let communityModeratorRole = accessControlLib::getCommunityRole(accessControlLib::get_community_moderator_role(), communityId);
+            accessControlLib::setRoleAdminPublic(roles, adminId, communityBanRole, communityModeratorRole);
             i = i + 1;
         };
 

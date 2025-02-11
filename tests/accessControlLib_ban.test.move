@@ -1,16 +1,14 @@
 #[test_only]
-module peeranha::postLib_ban
+module peeranha::accessControlLib_ban
 {
     use peeranha::postLib::{Self, PostMetaData, Reply};
     use peeranha::accessControlLib::{Self, UserRolesCollection};
-    use peeranha::communityLib::{Community};
+    use peeranha::communityLib::{Self, Community};
+    use peeranha::userLib::{Self, User};
     use peeranha::accessControlLib_common_role_test;
     use std::vector;
-
-
-    use peeranha::userLib::{Self, User};
     use peeranha::postLib_test;
-    use sui::object;
+    use sui::object::{Self, ID};
     use peeranha::postLib_change_post_type_test;
     use sui::test_scenario;
     use sui::clock;
@@ -160,4 +158,59 @@ module peeranha::postLib_ban
         clock::destroy_for_testing(time);
         test_scenario::end(scenario_val);  
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+
+    #[test]
+    fun test_community_initPermistions() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = postLib_change_post_type_test::init_postLib_test(EXPERT_POST, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user_val = test_scenario::take_from_sender<User>(scenario);
+            let user = &mut user_val;
+
+            communityLib::initPermistions(user_roles_collection, user, vector<ID>[object::id(community)]);
+
+            test_scenario::return_to_sender(scenario, user_val);
+            test_scenario::return_shared(user_roles_collection_val);
+            test_scenario::return_shared(community_val);
+        };
+        
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let community_val = test_scenario::take_shared<Community>(scenario);
+            let community = &mut community_val;
+            let user_roles_collection_val = test_scenario::take_shared<UserRolesCollection>(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+
+            let roleTemplate = COMMUNITY_BAN_ROLE;
+            vector::append<u8>(&mut roleTemplate, object::id_to_bytes(&object::id(community)));
+            let verifyRole = accessControlLib::getRoleAdmin(user_roles_collection, roleTemplate);
+            
+            let moderatorRoleTemplate = COMMUNITY_MODERATOR_ROLE;
+            vector::append<u8>(&mut moderatorRoleTemplate, object::id_to_bytes(&object::id(community)));
+            assert!(moderatorRoleTemplate == verifyRole, 1);
+
+            test_scenario::return_shared(user_roles_collection_val);     
+            test_scenario::return_shared(community_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);  
+    }
+
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    
 }

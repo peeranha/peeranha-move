@@ -286,24 +286,24 @@ module peeranha::accessControlLib {
         revokeRole_(userRolesCollection, communityModeratorRole, userId);
     }
 
-    //
-    fun isBannedUser(userRolesCollection: &UserRolesCollection, userId: ID, communityId: ID) {
+    // abort if user is banned
+    fun checkUserNotBanned(userRolesCollection: &UserRolesCollection, userId: ID, communityId: ID) {
         let isBanned = hasRole(userRolesCollection, getCommunityRole(COMMUNITY_BAN_ROLE, communityId), userId);
         let isCommunityBanned = hasRole(userRolesCollection, COMMUNITY_BAN_ROLE, userId);
-        // let isCommunityModerator = hasRole(userRolesCollection, getCommunityRole(COMMUNITY_MODERATOR_ROLE, communityId), userId);
         assert!(!isBanned || !isCommunityBanned, E_USER_BANNED);
     }
 
-    fun isVerifiedUser(userRolesCollection: &UserRolesCollection, userId: ID) {
+    // abort if user is not verified
+    fun checkUserVerified(userRolesCollection: &UserRolesCollection, userId: ID) {
         let isVerified = hasRole(userRolesCollection, VERIFIED_ROLE, userId);
-        assert!(!isVerified, E_USER_NOT_VERIFIED);
+        assert!(isVerified, E_USER_NOT_VERIFIED);
     }
     
     /// Abort if `user object id` is missing `actionRole`.
     public fun checkHasRole(userRolesCollection: &UserRolesCollection, userId: ID, actionRole: u8, communityId: ID) {
         // TODO: fix error messages. If checkActionRole() call checkHasRole() admin and comModerator can do actions. But about they are not mentioned in error message.
-        isBannedUser(userRolesCollection, userId, communityId);
-        isVerifiedUser(userRolesCollection, userId);
+        checkUserNotBanned(userRolesCollection, userId, communityId);
+        checkUserVerified(userRolesCollection, userId);
 
         let isAdmin = hasRole(userRolesCollection, PROTOCOL_ADMIN_ROLE, userId);
         let isCommunityAdmin = hasRole(userRolesCollection, getCommunityRole(COMMUNITY_ADMIN_ROLE, communityId), userId);
