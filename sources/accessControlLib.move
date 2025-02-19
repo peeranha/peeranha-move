@@ -288,9 +288,9 @@ module peeranha::accessControlLib {
 
     // abort if user is banned
     fun checkUserNotBanned(userRolesCollection: &UserRolesCollection, userId: ID, communityId: ID) {
-        let isBanned = hasRole(userRolesCollection, getCommunityRole(COMMUNITY_BAN_ROLE, communityId), userId);
-        let isCommunityBanned = hasRole(userRolesCollection, COMMUNITY_BAN_ROLE, userId);
-        assert!(!isBanned || !isCommunityBanned, E_USER_BANNED);
+        let isBanned = hasRole(userRolesCollection, BAN_ROLE, userId);
+        let isCommunityBanned = hasRole(userRolesCollection, getCommunityRole(COMMUNITY_BAN_ROLE, communityId), userId);
+        assert!(!isBanned && !isCommunityBanned, E_USER_BANNED);
     }
 
     // abort if user is not verified
