@@ -1,0 +1,4 @@
+if [ -f .env ]; then
+  export $(echo $(cat .env | sed 's/#.*//g'| xargs) | envsubst)
+fi
+sui client call --function initPermistions --module communityLib --package $PACKAGE --args $USER_ROLES_COLLECTION $USER [0x305c327da8558d51395b3381509b6a03c8f4ce691feb3fa1579826f6f0e12803,0x45370791376075ddc9446384d980ce40b33992b651fc5eb9d3f98f7a4184549c,0xaa7d3d2432c9091bde02f898fba1a33dd15863f45bd42ee157c6c7dca1c9e166,0xcfc2c2d2ce8b9d8cc0c0ea3913868e195546e9b1d27126eac882e856cacfb26d,0xe66bc845ba5eae038b496c776ec2dd1ccccff2ce5a7560e90da7858f8e8ec99a,0xf42cfbc0ed7ec07d652d04dc5c5a4c3f053fa0cb83dc0edc9f371dd9abaf972b] --gas-budget 400000000
