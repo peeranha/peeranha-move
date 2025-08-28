@@ -14,6 +14,7 @@ module peeranha::postLib_bot_test
     use peeranha::userLib::{Self, User, UsersRatingCollection};
     use peeranha::accessControlLib::{Self, UserRolesCollection};
     use sui::test_scenario::{Self, Scenario};
+    use sui::tx_context::{Self};
     use sui::object;
     use sui::clock;
 
@@ -47,7 +48,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -119,6 +120,8 @@ module peeranha::postLib_bot_test
                 user_roles_collection,
                 &time,
                 user,
+                commonLib::get_bot_id(),
+                tx_context::sender(test_scenario::ctx(scenario)),
                 community,
                 x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
                 EXPERT_POST,
@@ -147,12 +150,275 @@ module peeranha::postLib_bot_test
     }
 
     #[test]
+    fun test_create_post_by_bot_empty_address() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+
+            postLib::createPostByBot(
+                user_roles_collection,
+                &time,
+                user,
+                commonLib::getZeroId(),
+                @0x0,
+                community,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                EXPERT_POST,
+                vector<u64>[1, 2],
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            let (
+                _ipfsDoc3,
+                _postId3,
+                _postType,
+                _author,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                _deletedRepliesCount,
+                _isDeleted,
+                _tags,
+                _historyVotes
+            ) = postLib::getPostData(post_meta_data, post);
+
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_WRONG_BOT_ARGUMENT)]
+    fun test_create_post_by_bot_empty_address_userid_not_empty() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+
+            postLib::createPostByBot(
+                user_roles_collection,
+                &time,
+                user,
+                commonLib::get_bot_id(),
+                @0x0,
+                community,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                EXPERT_POST,
+                vector<u64>[1, 2],
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            let (
+                _ipfsDoc3,
+                _postId3,
+                _postType,
+                _author,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                _deletedRepliesCount,
+                _isDeleted,
+                _tags,
+                _historyVotes
+            ) = postLib::getPostData(post_meta_data, post);
+
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_post_by_bot_another_user_data() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test(scenario);
+        };
+
+        let anotherUser_val;
+        let anotherUserAddress;
+        test_scenario::next_tx(scenario, USER1);
+        {
+            anotherUser_val = test_scenario::take_from_sender<User>(scenario);
+            anotherUserAddress = tx_context::sender(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+
+            postLib::createPostByBot(
+                user_roles_collection,
+                &time,
+                user,
+                object::id(&anotherUser_val),
+                anotherUserAddress,
+                community,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                EXPERT_POST,
+                vector<u64>[1, 2],
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let post_val = test_scenario::take_from_sender<Post>(scenario);
+            let post = &mut post_val;
+
+            let (
+                _ipfsDoc3,
+                _postId3,
+                _postType,
+                author,
+                _rating,
+                _communityId,
+                _language,
+                _officialReplyMetaDataKey,
+                _bestReplyMetaDataKey,
+                _deletedRepliesCount,
+                _isDeleted,
+                _tags,
+                _historyVotes
+            ) = postLib::getPostData(post_meta_data, post);
+
+            assert!(author == object::id(&anotherUser_val), 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, post_val);
+            test_scenario::return_to_sender(scenario, anotherUser_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_BOT_ROLE)]
+    fun test_another_user_create_bot_post_send_bot_argument() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test(scenario);
+        };
+
+        let anotherUser_val;
+        let anotherUserAddress;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            anotherUser_val = test_scenario::take_from_sender<User>(scenario);
+            anotherUserAddress = tx_context::sender(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let community = &mut community_val;
+
+            postLib::createPostByBot(
+                user_roles_collection,
+                &time,
+                user,
+                object::id(&anotherUser_val),
+                anotherUserAddress,
+                community,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                EXPERT_POST,
+                vector<u64>[1, 2],
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, anotherUser_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
     fun test_create_reply_by_bot_to_post_from_bot() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -283,7 +549,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -302,6 +568,8 @@ module peeranha::postLib_bot_test
                 achievement_collection,
                 &time,
                 user,
+                commonLib::get_bot_id(),
+                tx_context::sender(test_scenario::ctx(scenario)),
                 post_meta_data,
                 0,
                 x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
@@ -330,12 +598,284 @@ module peeranha::postLib_bot_test
     }
 
     #[test]
+    fun test_create_reply_by_bot_empty_address() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let achievement_collection = &mut achievement_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            postLib::createReplyByBot(
+                user_rating_collection,
+                user_roles_collection,
+                achievement_collection,
+                &time,
+                user,
+                commonLib::getZeroId(),
+                @0x0,
+                post_meta_data,
+                0,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
+
+            let (
+                _ipfsDoc,
+                _replyId,
+                _author,
+                _rating,
+                _parentReplyMetaDataKey,
+                _language,
+                _isFirstReply,
+                _isQuickReply,
+                _isDeleted,
+                _historyVotes
+            ) = postLib::getReplyData(post_meta_data, reply, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, reply_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = postLib::E_WRONG_BOT_ARGUMENT)]
+    fun test_create_reply_by_bot_empty_address_userid_not_empty() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let achievement_collection = &mut achievement_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            postLib::createReplyByBot(
+                user_rating_collection,
+                user_roles_collection,
+                achievement_collection,
+                &time,
+                user,
+                commonLib::get_bot_id(),
+                @0x0,
+                post_meta_data,
+                0,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
+
+            let (
+                _ipfsDoc,
+                _replyId,
+                _author,
+                _rating,
+                _parentReplyMetaDataKey,
+                _language,
+                _isFirstReply,
+                _isQuickReply,
+                _isDeleted,
+                _historyVotes
+            ) = postLib::getReplyData(post_meta_data, reply, 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, reply_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
+    fun test_create_reply_by_bot_another_user_data() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
+        };
+
+        let anotherUser_val;
+        let anotherUserAddress;
+        test_scenario::next_tx(scenario, USER1);
+        {
+            anotherUser_val = test_scenario::take_from_sender<User>(scenario);
+            anotherUserAddress = tx_context::sender(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let achievement_collection = &mut achievement_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            postLib::createReplyByBot(
+                user_rating_collection,
+                user_roles_collection,
+                achievement_collection,
+                &time,
+                user,
+                object::id(&anotherUser_val),
+                anotherUserAddress,
+                post_meta_data,
+                0,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            let reply_val = test_scenario::take_from_sender<Reply>(scenario);
+            let reply = &mut reply_val;
+
+            let (
+                _ipfsDoc,
+                _replyId,
+                author,
+                _rating,
+                _parentReplyMetaDataKey,
+                _language,
+                _isFirstReply,
+                _isQuickReply,
+                _isDeleted,
+                _historyVotes
+            ) = postLib::getReplyData(post_meta_data, reply, 1);
+
+            assert!(author == object::id(&anotherUser_val), 1);
+
+            test_scenario::return_shared(post_meta_data_val);
+            test_scenario::return_to_sender(scenario, reply_val);
+            test_scenario::return_to_sender(scenario, anotherUser_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test, expected_failure(abort_code = accessControlLib::E_NOT_ALLOWED_NOT_BOT_ROLE)]
+    fun test_another_user_create_bot_reply_send_bot_argument() {
+        let scenario_val = test_scenario::begin(USER1);
+        let time;
+        let scenario = &mut scenario_val;
+        {
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
+        };
+
+        let anotherUser_val;
+        let anotherUserAddress;
+        test_scenario::next_tx(scenario, USER2);
+        {
+            anotherUser_val = test_scenario::take_from_sender<User>(scenario);
+            anotherUserAddress = tx_context::sender(test_scenario::ctx(scenario));
+        };
+
+        test_scenario::next_tx(scenario, USER1);
+        {
+            let (user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val) = postLib_test::init_all_shared(scenario);
+            let user_rating_collection = &mut user_rating_collection_val;
+            let achievement_collection = &mut achievement_collection_val;
+            let user_roles_collection = &mut user_roles_collection_val;
+            let user = &mut user_val;
+            let post_meta_data_val = test_scenario::take_shared<PostMetaData>(scenario);
+            let post_meta_data = &mut post_meta_data_val;
+            
+            postLib::createReplyByBot(
+                user_rating_collection,
+                user_roles_collection,
+                achievement_collection,
+                &time,
+                user,
+                object::id(&anotherUser_val),
+                anotherUserAddress,
+                post_meta_data,
+                0,
+                x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
+                CHINESE_LANGUAGE,
+                MESSENGER_TYPE_TELEGRAM,
+                HANDLE1,
+                test_scenario::ctx(scenario)
+            );
+
+            test_scenario::return_shared(post_meta_data_val);
+            postLib_test::return_all_shared(user_rating_collection_val, user_roles_collection_val, user_val, community_val, achievement_collection_val, scenario);
+        };
+
+        test_scenario::next_tx(scenario, USER2);
+        {
+            test_scenario::return_to_sender(scenario, anotherUser_val);
+        };
+
+        clock::destroy_for_testing(time);
+        test_scenario::end(scenario_val);
+    }
+
+    #[test]
     fun test_create_2_different_replies_by_bot() {
         let scenario_val = test_scenario::begin(USER1);
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -422,7 +962,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER2);
@@ -445,7 +985,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -486,7 +1026,7 @@ module peeranha::postLib_bot_test
         let time;
         let scenario = &mut scenario_val;
         {
-            time = init_postLib_by_bot_test_and_create_post(scenario);
+            time = init_postLib_by_bot_test_and_create_post_by_bot(scenario);
         };
 
         test_scenario::next_tx(scenario, USER1);
@@ -626,7 +1166,7 @@ module peeranha::postLib_bot_test
     // ====== Support functions ======
 
     #[test_only]
-    public fun init_postLib_by_bot_test_and_create_post(scenario: &mut Scenario): clock::Clock {
+    public fun init_postLib_by_bot_test_and_create_post_by_bot(scenario: &mut Scenario): clock::Clock {
         let time = init_postLib_by_bot_test(scenario);
 
         test_scenario::next_tx(scenario, USER2);
@@ -734,6 +1274,8 @@ module peeranha::postLib_bot_test
             user_roles_collection,
             time,
             user,
+            commonLib::get_bot_id(),
+            tx_context::sender(test_scenario::ctx(scenario)),
             community,
             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",
             EXPERT_POST,
@@ -763,6 +1305,8 @@ module peeranha::postLib_bot_test
             achievement_collection,
             time,
             user,
+            commonLib::get_bot_id(),
+            tx_context::sender(test_scenario::ctx(scenario)),
             post_meta_data,
             0,
             x"7c852118294e51e653712a81e05800f419141751be58f605c371e15141b007a6",

@@ -106,10 +106,6 @@ module peeranha::nftLib {
         };
         transfer::share_object(achievementCollection);
 
-        //
-        // Comment for unit tests start
-        //
-
         let keys = vector[
             utf8(b"name"),
             utf8(b"image_url"),
@@ -135,12 +131,8 @@ module peeranha::nftLib {
         // Commit first version of `Display` to apply changes.
         display::update_version(&mut display);
 
-        transfer::public_transfer(publisher, tx_context::sender(ctx));  // test error
+        transfer::public_transfer(publisher, tx_context::sender(ctx));
         transfer::public_transfer(display, tx_context::sender(ctx));
-
-        //
-        // Comment for unit tests end
-        //
     }
 
     public(friend) fun configureAchievement(
@@ -148,13 +140,13 @@ module peeranha::nftLib {
         communityId: ID,
         maxCount: u32,
         lowerBound: u64,
-        name:  string::String,
+        name: string::String,
         description:  string::String,
         url: vector<u8>,
         achievementType: u8,
         externalUrl: vector<u8>,
-        attributesKeys:  vector<string::String>,
-        attributesValues:  vector<string::String>,
+        attributesKeys: vector<string::String>,
+        attributesValues: vector<string::String>,
         ctx: &mut TxContext
     ) {
         assert!(maxCount < POOL_NFT, E_MAX_NFT_COUNT);  // TEST
