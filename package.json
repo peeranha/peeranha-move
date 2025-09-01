@@ -7,7 +7,7 @@
     "build": "sui move build",
     "test": "sui move test --ignore_compile_warnings",
     "test2": "sui move test --statistics --ignore_compile_warnings",
-    "deploy": "sui client publish ./ --gas-budget 900000000 --with-upgrade",
+    "deploy": "sui client publish ./ --gas-budget 900000000",
     "deploy2": "sui client publish ./ --gas-budget 900000000 --skip-dependency-verification",
     "version": "sui --version"
   },

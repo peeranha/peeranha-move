@@ -570,6 +570,8 @@ module peeranha::postLib {
             postMetaData.officialReplyMetaDataKey = countReplies + 1;
         };
 
+        // turned off first and quick reply
+        /*
         if (postMetaData.author != userId) {
             let changeUserRating = i64Lib::zero();
             if (getActiveReplyCount(postMetaData) == 0) {
@@ -589,6 +591,7 @@ module peeranha::postLib {
                 ctx,
             );
         };
+        */
 
         let reply = Reply {
             id: object::new(ctx),
