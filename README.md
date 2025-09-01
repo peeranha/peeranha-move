@@ -1,3 +1,6 @@
+last helped
+cargo install --locked --git https://github.com/MystenLabs/sui.git --branch testnet sui --features tracing
+
 - run commands from https://docs.sui.io/devnet/build/install (Install Sui -> Linux prerequisites + Install Sui binaries):
     - sudo apt-get update
     - curl --version
